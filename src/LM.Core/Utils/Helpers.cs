@@ -23,8 +23,8 @@ namespace LM.Core.Utils
         public static string Sha256File(string path)
         {
             using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            var sha = SHA256.Create().ComputeHash(fs);
-            return Convert.ToHexString(sha).ToLowerInvariant();
+            var hash = SHA256.HashData(fs);
+            return Convert.ToHexString(hash).ToLowerInvariant();
         }
         public static string Sha1(string input)
         {
