@@ -93,6 +93,9 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("article")]
         public string? Article { get; init; }            // "hooks/article.json"
 
+        [JsonPropertyName("lit_search")]
+        public string? LitSearch { get; init; }          // "litsearch/litsearch.json"
+
         [JsonPropertyName("trial")]
         public string? Trial { get; init; }              // "hooks/trial.json"
 

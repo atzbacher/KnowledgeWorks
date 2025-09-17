@@ -25,23 +25,57 @@ namespace LM.Infrastructure.Pubmed
             var list = new List<SearchHit>();
             foreach (var s in doc.RootElement.GetProperty("studies").EnumerateArray())
             {
-                string? nct = s.GetProperty("protocolSection").GetProperty("identificationModule").GetProperty("nctId").GetString();
-                string? title = s.GetProperty("protocolSection").GetProperty("identificationModule").GetProperty("briefTitle").GetString();
-                string? status = s.GetProperty("protocolSection").GetProperty("statusModule").GetProperty("overallStatus").GetString();
+                var protocol = s.GetProperty("protocolSection");
+                var identification = protocol.GetProperty("identificationModule");
+                var statusModule = protocol.GetProperty("statusModule");
+
+                string? nct = identification.GetProperty("nctId").GetString();
+                string? title = identification.GetProperty("briefTitle").GetString();
+                string? status = statusModule.TryGetProperty("overallStatus", out var statusElement)
+                    ? statusElement.GetString()
+                    : null;
+
+                var authorNames = new List<string>();
+                if (protocol.TryGetProperty("contactsLocationsModule", out var contacts)
+                    && contacts.TryGetProperty("overallOfficials", out var officials)
+                    && officials.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var official in officials.EnumerateArray())
+                    {
+                        string? name = official.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : null;
+                        string? role = official.TryGetProperty("role", out var roleElement) ? roleElement.GetString() : null;
+                        if (!string.IsNullOrWhiteSpace(name))
+                            authorNames.Add(string.IsNullOrWhiteSpace(role) ? name! : $"{name} ({role})");
+                    }
+                }
+
+                if (authorNames.Count == 0
+                    && protocol.TryGetProperty("sponsorsCollaboratorsModule", out var sponsors)
+                    && sponsors.TryGetProperty("leadSponsor", out var lead)
+                    && lead.TryGetProperty("name", out var leadName))
+                {
+                    var sponsorName = leadName.GetString();
+                    if (!string.IsNullOrWhiteSpace(sponsorName))
+                        authorNames.Add(sponsorName!);
+                }
+
                 int? year = null;
-                if (s.GetProperty("protocolSection").GetProperty("statusModule").TryGetProperty("startDateStruct", out var sd))
+                if (statusModule.TryGetProperty("startDateStruct", out var sd))
                 {
                     var d = sd.GetProperty("date").GetString();
                     if (d != null && d.Length >= 4 && int.TryParse(d[..4], out var y)) year = y;
                 }
+
+                var authors = authorNames.Count == 0 ? string.Empty : string.Join("; ", authorNames);
+                var source = string.IsNullOrWhiteSpace(status) ? "ClinicalTrials.gov" : $"ClinicalTrials.gov ({status})";
 
                 list.Add(new SearchHit
                 {
                     Source = SearchDatabase.ClinicalTrialsGov,
                     ExternalId = nct ?? "",
                     Title = title ?? "",
-                    Authors = status ?? "",
-                    JournalOrSource = "ClinicalTrials.gov",
+                    Authors = authors,
+                    JournalOrSource = source,
                     Year = year,
                     Url = nct != null ? $"https://clinicaltrials.gov/study/{nct}" : null
                 });

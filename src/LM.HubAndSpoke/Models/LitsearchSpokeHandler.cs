@@ -49,10 +49,12 @@ namespace LM.HubSpoke.Spokes
         public SpokeIndexContribution BuildIndex(EntryHub hub, object? hookObj, string? extractedFullText)
         {
             var hook = hookObj as LitSearchHook;
+            var abstractText = string.Join(Environment.NewLine,
+                new[] { hook?.Query, hook?.Notes }.Where(s => !string.IsNullOrWhiteSpace(s)));
             var keywords = hook?.Keywords ?? Array.Empty<string>();
             return new SpokeIndexContribution(
                 Title: hook?.Title ?? hub.DisplayTitle,
-                Abstract: hook?.Query,
+                Abstract: string.IsNullOrWhiteSpace(abstractText) ? null : abstractText,
                 Authors: Array.Empty<string>(),
                 Keywords: keywords,
                 Journal: null,
@@ -74,7 +76,9 @@ namespace LM.HubSpoke.Spokes
                 Title = hook?.Title ?? hub.DisplayTitle,
                 DisplayName = hook?.Title ?? hub.DisplayTitle,
                 Source = "LitSearch",
-                AddedOnUtc = hub.CreatedUtc
+                AddedOnUtc = hook?.CreatedUtc ?? hub.CreatedUtc,
+                AddedBy = hook?.CreatedBy,
+                Notes = hook?.Notes
             };
         }
 

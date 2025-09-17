@@ -103,12 +103,14 @@ namespace LM.HubSpoke.Entries
 
             // 2) Hub
             var isPublication = entry.Type == EntryType.Publication;
+            var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
             var hub = new EntryHub
             {
                 EntryId = entryId,
                 DisplayTitle = entry.Title ?? entry.DisplayName ?? string.Empty,
                 CreatedUtc = entry.AddedOnUtc == default ? now : entry.AddedOnUtc,
                 UpdatedUtc = now,
+                CreationMethod = isLitSearch ? CreationMethod.Search : CreationMethod.Manual,
                 Origin = entry.IsInternal ? EntryOrigin.Internal : EntryOrigin.External,
                 PrimaryPurpose = isPublication ? EntryPurpose.Manuscript : EntryPurpose.Document,
                 PrimaryPurposeSource = PurposeSource.Inferred,
@@ -116,7 +118,8 @@ namespace LM.HubSpoke.Entries
                 Hooks = new EntryHooks
                 {
                     Article = isPublication ? "hooks/article.json" : null,
-                    Document = !isPublication ? "hooks/document.json" : null
+                    Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
+                    LitSearch = isLitSearch ? "litsearch/litsearch.json" : null
                 }
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);

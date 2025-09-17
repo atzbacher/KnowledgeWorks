@@ -100,6 +100,8 @@ LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.In
 LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
 LM.App.Wpf.ViewModels.SearchDatabaseOption
