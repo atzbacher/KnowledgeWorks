@@ -351,14 +351,14 @@ LM.HubSpoke.Models.JournalIssue.PubDate.init -> void
 LM.HubSpoke.Models.JournalIssue.Volume.get -> string?
 LM.HubSpoke.Models.JournalIssue.Volume.init -> void
 LM.HubSpoke.Models.JsonStd
-LM.HubSpoke.Models.LitSearchSpokeHandler
-LM.HubSpoke.Models.LitSearchSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
-LM.HubSpoke.Models.LitSearchSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? extractedFullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
-LM.HubSpoke.Models.LitSearchSpokeHandler.Handles.get -> LM.Core.Models.EntryType
-LM.HubSpoke.Models.LitSearchSpokeHandler.HookPath.get -> string!
-LM.HubSpoke.Models.LitSearchSpokeHandler.LitSearchSpokeHandler() -> void
-LM.HubSpoke.Models.LitSearchSpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
-LM.HubSpoke.Models.LitSearchSpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hookObj) -> LM.Core.Models.Entry!
+LM.HubSpoke.Spokes.LitSearchSpokeHandler
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? extractedFullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.Handles.get -> LM.Core.Models.EntryType
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.HookPath.get -> string!
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.LitSearchSpokeHandler() -> void
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.LitSearchSpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hookObj) -> LM.Core.Models.Entry!
 LM.HubSpoke.Models.MedlineInfo
 LM.HubSpoke.Models.MedlineInfo.CitationSubset.get -> string?
 LM.HubSpoke.Models.MedlineInfo.CitationSubset.init -> void

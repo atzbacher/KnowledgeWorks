@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LM.HubSpoke.Models
+namespace LM.HubSpoke.Spokes
 {
     public sealed class LitSearchSpokeHandler : ISpokeHandler
     {
@@ -35,7 +35,7 @@ namespace LM.HubSpoke.Models
             try
             {
                 var json = await File.ReadAllTextAsync(Absolute(abs), ct);
-                return JsonSerializer.Deserialize<LitSearchHook>(json, KW.Core.Models.JsonStd.Options);
+                return JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
             }
             catch
             {
