@@ -3,7 +3,8 @@
 	<!-- Step 1: clear once at the beginning of the whole solution build -->
 	<Target Name="InitCombinedPublicApi" BeforeTargets="Build" Condition="'$(BuildingSolutionFile)' == 'true'">
 		<PropertyGroup>
-			<CombinedFile>$(SolutionDir)CombinedPublicAPI.txt</CombinedFile>
+			<!-- Use a deterministic, writable path regardless of working directory -->
+			<CombinedFile>$(MSBuildThisFileDirectory)CombinedPublicAPI.txt</CombinedFile>
 		</PropertyGroup>
 		<WriteLinesToFile
 			File="$(CombinedFile)"
@@ -14,7 +15,8 @@
 	<!-- Step 2: each project appends its own API files -->
 	<Target Name="AppendCombinedPublicApi" AfterTargets="Build">
 		<PropertyGroup>
-			<CombinedFile>$(SolutionDir)CombinedPublicAPI.txt</CombinedFile>
+			<!-- Match the init target's location to avoid path/permission issues -->
+			<CombinedFile>$(MSBuildThisFileDirectory)CombinedPublicAPI.txt</CombinedFile>
 		</PropertyGroup>
 
 		<!-- Only if this project actually has API files -->
