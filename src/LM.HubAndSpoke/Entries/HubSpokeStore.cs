@@ -119,7 +119,7 @@ namespace LM.HubSpoke.Entries
                 {
                     Article = isPublication ? "hooks/article.json" : null,
                     Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
-                    LitSearch = isLitSearch ? "litsearch/litsearch.json" : null
+                    LitSearch = isLitSearch ? "spokes/litsearch/litsearch.json" : null
                 }
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);

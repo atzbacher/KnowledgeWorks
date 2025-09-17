@@ -54,6 +54,7 @@ LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool include
 LM.Infrastructure.Search.PubMedSearchProvider
 LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
 LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.Search.PubMedSearchProvider.FetchFullRecordXmlAsync(string! pubmedId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
 LM.Infrastructure.Storage.FileStorageService
 LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Storage.FileStorageService.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
