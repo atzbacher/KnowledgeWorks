@@ -85,6 +85,7 @@ LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
 LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void
 LM.App.Wpf.ViewModels.SearchItemViewModel.Vm.get -> LM.App.Wpf.ViewModels.LibraryViewModel!
 LM.App.Wpf.ViewModels.SearchViewModel
+LM.App.Wpf.ViewModels.SearchViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
 LM.App.Wpf.ViewModels.SearchViewModel.ExportSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
@@ -101,6 +102,10 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.Sea
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
+LM.App.Wpf.ViewModels.SearchDatabaseOption
+LM.App.Wpf.ViewModels.SearchDatabaseOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.SearchDatabaseOption.SearchDatabaseOption(LM.Core.Models.SearchDatabase value, string! displayName) -> void
+LM.App.Wpf.ViewModels.SearchDatabaseOption.Value.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.StagingItem
 LM.App.Wpf.ViewModels.StagingItem.ArticleHook.get -> LM.HubSpoke.Models.ArticleHook?
 LM.App.Wpf.ViewModels.StagingItem.ArticleHook.set -> void

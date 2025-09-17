@@ -50,9 +50,47 @@ namespace LM.App.Wpf.ViewModels
                 RaiseCanExec();
             }
         }
-        public SearchDatabase SelectedDatabase { get; set; } = SearchDatabase.PubMed;
-        public DateTime? From { get; set; }
-        public DateTime? To { get; set; }
+
+        public IReadOnlyList<SearchDatabaseOption> Databases { get; } = new[]
+        {
+            new SearchDatabaseOption(SearchDatabase.PubMed, "PubMed"),
+            new SearchDatabaseOption(SearchDatabase.ClinicalTrialsGov, "ClinicalTrials.gov"),
+        };
+
+        private SearchDatabase _selectedDatabase = SearchDatabase.PubMed;
+        public SearchDatabase SelectedDatabase
+        {
+            get => _selectedDatabase;
+            set
+            {
+                if (_selectedDatabase == value) return;
+                _selectedDatabase = value;
+                OnPropertyChanged();
+            }
+        }
+        private DateTime? _from;
+        public DateTime? From
+        {
+            get => _from;
+            set
+            {
+                if (_from == value) return;
+                _from = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private DateTime? _to;
+        public DateTime? To
+        {
+            get => _to;
+            set
+            {
+                if (_to == value) return;
+                _to = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<SearchHit> Results { get; } = new();
         public ObservableCollection<LitSearchRun> PreviousRuns { get; } = new();
@@ -246,11 +284,6 @@ namespace LM.App.Wpf.ViewModels
             From = hook.To;
             To = null;
             SelectedDatabase = hook.Provider.Equals("pubmed", StringComparison.OrdinalIgnoreCase) ? SearchDatabase.PubMed : SearchDatabase.ClinicalTrialsGov;
-
-            OnPropertyChanged(nameof(Query));
-            OnPropertyChanged(nameof(From));
-            OnPropertyChanged(nameof(To));
-            OnPropertyChanged(nameof(SelectedDatabase));
         }
 
         private async Task ExportSearchAsync()
@@ -278,4 +311,6 @@ namespace LM.App.Wpf.ViewModels
             return name.Length > 120 ? name[..120] : name;
         }
     }
+
+    public sealed record SearchDatabaseOption(SearchDatabase Value, string DisplayName);
 }
