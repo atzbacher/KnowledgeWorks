@@ -96,6 +96,9 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("checkedAttachments")]
         public List<string> CheckedAttachments { get; init; } = new();
 
+        [JsonPropertyName("checkedEntryIdsPath")]
+        public string? CheckedEntryIdsPath { get; set; }
+
         [JsonPropertyName("importedEntryIds")]
         public List<string> ImportedEntryIds { get; init; } = new();
     }

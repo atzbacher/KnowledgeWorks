@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -358,6 +359,9 @@ namespace LM.App.Wpf.ViewModels
                     }).ToList()
                 };
 
+                var checkedEntryIds = BuildCheckedEntryIds(selectedHits);
+                run.CheckedEntryIdsPath = await PersistRunCheckedEntriesAsync(litEntry.Id, run, checkedEntryIds, now);
+
                 var tmpChecked = Path.Combine(Path.GetTempPath(), $"search_checked_{run.RunId}.json");
                 await File.WriteAllTextAsync(tmpChecked, JsonSerializer.Serialize(checkedSnapshot, JsonStd.Options), Encoding.UTF8);
                 var checkedRel = await _storage.SaveNewAsync(tmpChecked, "litsearch/checked", preferredFileName: $"checked_{run.RunId}.json");
@@ -478,6 +482,7 @@ namespace LM.App.Wpf.ViewModels
                         run.IsFavorite,
                         run.RawAttachments,
                         run.CheckedAttachments,
+                        run.CheckedEntryIdsPath,
                         run.ImportedEntryIds
                     }
                 };
@@ -714,6 +719,22 @@ namespace LM.App.Wpf.ViewModels
             return normalized.TrimEnd();
         }
 
+        private sealed record CheckedEntryIdsSidecar
+        {
+            [JsonPropertyName("schemaVersion")]
+            public string SchemaVersion { get; init; } = "1.0";
+
+            [JsonPropertyName("runId")]
+            public string RunId { get; init; } = string.Empty;
+
+            [JsonPropertyName("savedUtc")]
+            [JsonConverter(typeof(UtcDateTimeConverter))]
+            public DateTime SavedUtc { get; init; }
+
+            [JsonPropertyName("entryIds")]
+            public List<string> EntryIds { get; init; } = new();
+        }
+
         private sealed record CheckedItemsSnapshot
         {
             public string RunId { get; init; } = string.Empty;
@@ -779,6 +800,47 @@ namespace LM.App.Wpf.ViewModels
             entry.Relations.Add(new Relation { Type = "derived_from", TargetEntryId = targetEntryId });
         }
 
+        private async Task<string?> PersistRunCheckedEntriesAsync(string? entryId, LitSearchRun run, IReadOnlyCollection<string> checkedEntryIds, DateTime savedUtc)
+        {
+            if (string.IsNullOrWhiteSpace(entryId) || string.IsNullOrWhiteSpace(run.RunId))
+                return null;
+
+            var root = _ws.GetWorkspaceRoot();
+            var runDir = Path.Combine(root, "entries", entryId, "litsearch", "runs", run.RunId);
+            Directory.CreateDirectory(runDir);
+
+            var sidecar = new CheckedEntryIdsSidecar
+            {
+                RunId = run.RunId,
+                SavedUtc = savedUtc,
+                EntryIds = checkedEntryIds?.ToList() ?? new List<string>()
+            };
+
+            var absPath = Path.Combine(runDir, "checked-entries.json");
+            await File.WriteAllTextAsync(absPath, JsonSerializer.Serialize(sidecar, JsonStd.Options), Encoding.UTF8);
+
+            var relPath = Path.GetRelativePath(root, absPath);
+            return relPath.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+        }
+
+        private static List<string> BuildCheckedEntryIds(IEnumerable<SearchHit> hits)
+        {
+            var ordered = new List<string>();
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var hit in hits)
+            {
+                var id = hit.ExistingEntryId;
+                if (string.IsNullOrWhiteSpace(id))
+                    continue;
+
+                if (seen.Add(id))
+                    ordered.Add(id);
+            }
+
+            return ordered;
+        }
+
         private async Task PersistHookAsync(PreviousSearchContext context, CancellationToken ct = default)
         {
             try
@@ -806,6 +868,7 @@ namespace LM.App.Wpf.ViewModels
                 ExecutedBy = source.ExecutedBy,
                 RawAttachments = source.RawAttachments is null ? new List<string>() : new List<string>(source.RawAttachments),
                 CheckedAttachments = source.CheckedAttachments is null ? new List<string>() : new List<string>(source.CheckedAttachments),
+                CheckedEntryIdsPath = source.CheckedEntryIdsPath,
                 ImportedEntryIds = source.ImportedEntryIds is null ? new List<string>() : new List<string>(source.ImportedEntryIds),
                 DisplayName = displayName,
                 IsFavorite = isFavorite

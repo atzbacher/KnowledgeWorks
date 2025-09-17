@@ -391,6 +391,8 @@ LM.HubSpoke.Models.LitSearchRun.RawAttachments.get -> System.Collections.Generic
 LM.HubSpoke.Models.LitSearchRun.RawAttachments.init -> void
 LM.HubSpoke.Models.LitSearchRun.CheckedAttachments.get -> System.Collections.Generic.List<string!>!
 LM.HubSpoke.Models.LitSearchRun.CheckedAttachments.init -> void
+LM.HubSpoke.Models.LitSearchRun.CheckedEntryIdsPath.get -> string?
+LM.HubSpoke.Models.LitSearchRun.CheckedEntryIdsPath.set -> void
 LM.HubSpoke.Models.LitSearchRun.RunId.get -> string!
 LM.HubSpoke.Models.LitSearchRun.RunId.init -> void
 LM.HubSpoke.Models.LitSearchRun.RunUtc.get -> System.DateTime
