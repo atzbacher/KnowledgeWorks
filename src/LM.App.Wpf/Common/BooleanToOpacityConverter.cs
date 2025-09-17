@@ -17,15 +17,10 @@ namespace LM.App.Wpf.Common
                 return b ? TrueOpacity : FalseOpacity;
             }
 
-            if (value is bool? nullableBool)
-            {
-                return nullableBool.GetValueOrDefault() ? TrueOpacity : FalseOpacity;
-            }
-
             return FalseOpacity;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-            => Binding.DoNothing;
+            => System.Windows.Data.Binding.DoNothing;
     }
 }
