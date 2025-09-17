@@ -379,6 +379,8 @@ namespace LM.App.Wpf.ViewModels
 
             items.Sort((a, b) => DateTime.Compare(b.run.RunUtc, a.run.RunUtc));
 
+            var previouslySelectedId = SelectedPreviousRun?.RunId;
+
             PreviousRuns.Clear();
             foreach (var (run, _) in items)
                 PreviousRuns.Add(run);
@@ -387,9 +389,20 @@ namespace LM.App.Wpf.ViewModels
             {
                 SelectedPreviousRun = null;
             }
-            else if (SelectedPreviousRun is null || !_runIndex.ContainsKey(SelectedPreviousRun.RunId))
+            else
             {
-                SelectedPreviousRun = PreviousRuns[0];
+                var match = previouslySelectedId is null
+                    ? null
+                    : PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, previouslySelectedId, StringComparison.Ordinal));
+
+                if (match is not null)
+                {
+                    SelectedPreviousRun = match;
+                }
+                else if (SelectedPreviousRun is null || !_runIndex.ContainsKey(SelectedPreviousRun.RunId))
+                {
+                    SelectedPreviousRun = PreviousRuns[0];
+                }
             }
 
             RaiseCanExec();
