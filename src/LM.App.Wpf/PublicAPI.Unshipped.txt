@@ -90,7 +90,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.LoadSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LitSearchRun!>!
+LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.HubSpoke.Models.LitSearchRun!>!
 LM.App.Wpf.ViewModels.SearchViewModel.Query.get -> string!
 LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!

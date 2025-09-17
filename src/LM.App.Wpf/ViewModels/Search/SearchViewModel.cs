@@ -1,11 +1,13 @@
-﻿#nullable enable               // LitSearchHook, LitSearchRun
+﻿#nullable enable
 using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayCommand
 using LM.Core.Abstractions;
 using LM.HubSpoke.Models;
 using LM.Core.Models;
+using LM.HubSpoke.Models;            // LitSearchHook, LitSearchRun, JsonStd
 using LM.Infrastructure.Pubmed;
 using LM.Infrastructure.Search;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -77,7 +79,12 @@ namespace LM.App.Wpf.ViewModels
                 };
 
                 // Mark what's already in DB (by DOI/PMID/NCT, else near-match title+year)
-                var all = await _store.EnumerateAsync().ToListAsync(ct); // small sets expected
+                var all = new List<Entry>();
+                await foreach (var entry in _store.EnumerateAsync(ct))
+                {
+                    all.Add(entry);
+                }
+                // small sets expected
                 foreach (var h in hits)
                 {
                     bool inDb = all.Any(e =>
@@ -142,7 +149,7 @@ namespace LM.App.Wpf.ViewModels
 
                 // 2) Persist litsearch.json as the "primary file" of the LitSearch entry
                 var tmpHook = Path.Combine(Path.GetTempPath(), $"litsearch_{run.RunId}.json");
-                await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, KW.Core.Models.JsonStd.Options), Encoding.UTF8);
+                await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
                 var relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
 
                 var litEntry = new Entry
@@ -195,7 +202,7 @@ namespace LM.App.Wpf.ViewModels
 
                 // 4) Update (append) run info in the litsearch hook and re-save the entry
                 // Re-write the hook (now with ImportedEntryIds filled)
-                await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, KW.Core.Models.JsonStd.Options), Encoding.UTF8);
+                await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
                 relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}_updated.json");
                 litEntry.MainFilePath = relHook;
                 litEntry.OriginalFileName = Path.GetFileName(relHook);
@@ -210,14 +217,18 @@ namespace LM.App.Wpf.ViewModels
         private async Task LoadSearchAsync()
         {
             // Minimal: load the last LitSearch entry to pre-fill From/To/Query.
-            var all = await _store.EnumerateAsync().ToListAsync(CancellationToken.None);
+            var all = new List<Entry>();
+            await foreach (var entry in _store.EnumerateAsync(CancellationToken.None))
+            {
+                all.Add(entry);
+            }
             var last = all.Where(e => string.Equals(e.Source, "LitSearch", StringComparison.OrdinalIgnoreCase))
                           .OrderByDescending(e => e.AddedOnUtc).FirstOrDefault();
             if (last?.MainFilePath is null) return;
 
             var abs = _ws.GetAbsolutePath(last.MainFilePath);
             var json = await File.ReadAllTextAsync(abs);
-            var hook = JsonSerializer.Deserialize<LitSearchHook>(json, KW.Core.Models.JsonStd.Options);
+            var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
             if (hook is null) return;
 
             Query = hook.Query;
