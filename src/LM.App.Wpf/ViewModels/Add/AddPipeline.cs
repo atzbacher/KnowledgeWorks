@@ -538,6 +538,10 @@ namespace LM.App.Wpf.ViewModels
 
         private static void PopulateFromRecordOrMeta(StagingItem item, PublicationRecord? rec, ExtractedMeta meta)
         {
+            if (rec is not null && item.Type == EntryType.Publication)
+            {
+                item.ArticleHook = ArticleHookFactory.CreateFromPublication(rec);
+            }
 
             if (rec?.Keywords is { Count: > 0 })
                 item.TagsCsv = LM.Infrastructure.Utils.TagMerger.Merge(item.TagsCsv, rec.Keywords);
