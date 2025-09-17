@@ -28,6 +28,19 @@ namespace LM.Core.Models
             }
         }
 
+        private string? _existingEntryId;
+        public string? ExistingEntryId
+        {
+            get => _existingEntryId;
+            set
+            {
+                if (string.Equals(_existingEntryId, value, StringComparison.Ordinal))
+                    return;
+                _existingEntryId = value;
+                OnPropertyChanged(nameof(ExistingEntryId));
+            }
+        }
+
         private bool _selected = true;
         public bool Selected
         {
