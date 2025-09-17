@@ -13,7 +13,7 @@
                         <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 		<!-- Controls -->
-		<StackPanel Orientation="Horizontal" Grid.Row="0" Spacing="8">
+		<StackPanel Orientation="Horizontal" Grid.Row="0">
 			<TextBox Width="420" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" />
 			<ComboBox Width="160" SelectedItem="{Binding SelectedDatabase}">
 				<ComboBoxItem Content="PubMed" Tag="PubMed"/>

@@ -13,7 +13,7 @@
         <views:AddView x:Name="AddViewControl"/>
       </TabItem>
             <TabItem Header="Search">
-                <views:SearchVieww x:Name="SearchViewControl" />
+                <views:SearchView x:Name="SearchViewControl" />
             </TabItem>
         </TabControl>
   </Grid>
