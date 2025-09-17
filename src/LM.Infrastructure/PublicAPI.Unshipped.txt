@@ -1,0 +1,81 @@
+#nullable enable
+LM.Infrastructure.Content.CompositeContentExtractor
+LM.Infrastructure.Content.CompositeContentExtractor.CompositeContentExtractor() -> void
+LM.Infrastructure.Content.CompositeContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.OpenXmlContentExtractor
+LM.Infrastructure.Content.OpenXmlContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.OpenXmlContentExtractor.OpenXmlContentExtractor() -> void
+LM.Infrastructure.Content.PdfPigContentExtractor
+LM.Infrastructure.Content.PdfPigContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.PdfPigContentExtractor.PdfPigContentExtractor() -> void
+LM.Infrastructure.Content.PlainTextContentExtractor
+LM.Infrastructure.Content.PlainTextContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.PlainTextContentExtractor.PlainTextContentExtractor() -> void
+LM.Infrastructure.Entries.JsonEntryStore
+LM.Infrastructure.Entries.JsonEntryStore.EnumerateAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.Entry!>!
+LM.Infrastructure.Entries.JsonEntryStore.FindByHashAsync(string! sha256, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.FindByIdsAsync(string? doi, string? pmid, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.FindSimilarByNameYearAsync(string! title, int? year, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Infrastructure.Entries.JsonEntryStore.GetByIdAsync(string! id, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Entries.JsonEntryStore.JsonEntryStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IDoiNormalizer? doiNormalizer = null, LM.Core.Abstractions.IPmidNormalizer? pmidNormalizer = null) -> void
+LM.Infrastructure.Entries.JsonEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! f, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Infrastructure.Export.MetadataDebugSlideExporter
+LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void
+LM.Infrastructure.FileSystem.WorkspaceService
+LM.Infrastructure.FileSystem.WorkspaceService.EnsureWorkspaceAsync(string! absoluteWorkspacePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.FileSystem.WorkspaceService.GetAbsolutePath(string! relativePath) -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.GetLocalDbPath() -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.GetWorkspaceRoot() -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.WorkspacePath.get -> string?
+LM.Infrastructure.FileSystem.WorkspaceService.WorkspaceService() -> void
+LM.Infrastructure.Hooks.ArticleHookFactory
+LM.Infrastructure.Hooks.HookContext
+LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
+LM.Infrastructure.Hooks.HookContext.Article.init -> void
+LM.Infrastructure.Hooks.HookContext.HookContext() -> void
+LM.Infrastructure.Hooks.HookOrchestrator
+LM.Infrastructure.Hooks.HookOrchestrator.HookOrchestrator(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Hooks.HookOrchestrator.ProcessAsync(string! entryId, LM.Infrastructure.Hooks.HookContext! ctx, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Hooks.HookPersister
+LM.Infrastructure.Hooks.HookPersister.HookPersister(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Hooks.HookPersister.SaveArticleIfAnyAsync(string! entryId, LM.HubSpoke.Models.ArticleHook? hook, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Metadata.CompositeMetadataExtractor
+LM.Infrastructure.Metadata.CompositeMetadataExtractor.CompositeMetadataExtractor(LM.Core.Abstractions.IContentExtractor! content) -> void
+LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.FileMetadata!>!
+LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider
+LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
+LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.PubMed.PubMedClient
+LM.Infrastructure.PubMed.PubMedClient.PubMedClient() -> void
+LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
+LM.Infrastructure.Search.PubMedSearchProvider
+LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
+LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.Storage.FileStorageService
+LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Storage.FileStorageService.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Text.DoiNormalizer
+LM.Infrastructure.Text.DoiNormalizer.DoiNormalizer() -> void
+LM.Infrastructure.Text.DoiNormalizer.Normalize(string? raw) -> string?
+LM.Infrastructure.Text.PmidNormalizer
+LM.Infrastructure.Text.PmidNormalizer.Normalize(string? raw) -> string?
+LM.Infrastructure.Text.PmidNormalizer.PmidNormalizer() -> void
+LM.Infrastructure.Utils.BibliographyHelper
+LM.Infrastructure.Utils.ContentAwareSimilarityService
+LM.Infrastructure.Utils.ContentAwareSimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
+LM.Infrastructure.Utils.ContentAwareSimilarityService.ContentAwareSimilarityService(LM.Core.Abstractions.IContentExtractor! extractor) -> void
+LM.Infrastructure.Utils.HashingService
+LM.Infrastructure.Utils.HashingService.ComputeSha256Async(string! filePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Utils.HashingService.HashingService() -> void
+LM.Infrastructure.Utils.SimilarityService
+LM.Infrastructure.Utils.SimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
+LM.Infrastructure.Utils.SimilarityService.SimilarityService() -> void
+LM.Infrastructure.Utils.TagMerger
+LM.Infrastructure.Utils.TagNormalizer
+static LM.Infrastructure.Hooks.ArticleHookFactory.CreateFromPublication(LM.Core.Models.PublicationRecord! r) -> LM.HubSpoke.Models.ArticleHook!
+static LM.Infrastructure.Utils.BibliographyHelper.GenerateShortTitle(string? title, System.Collections.Generic.IEnumerable<string!>! authors, string? source, int? year) -> string!
+static LM.Infrastructure.Utils.TagMerger.Merge(string? existingCsv, System.Collections.Generic.IEnumerable<string!>? add) -> string?
+static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!

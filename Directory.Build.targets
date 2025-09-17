@@ -1,0 +1,49 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<!-- Step 1: clear once at the beginning of the whole solution build -->
+	<Target Name="InitCombinedPublicApi" BeforeTargets="Build" Condition="'$(BuildingSolutionFile)' == 'true'">
+		<PropertyGroup>
+			<CombinedFile>$(SolutionDir)CombinedPublicAPI.txt</CombinedFile>
+		</PropertyGroup>
+		<WriteLinesToFile
+			File="$(CombinedFile)"
+			Lines="=== Combined Public API for $(SolutionName) ==="
+			Overwrite="true" />
+	</Target>
+
+	<!-- Step 2: each project appends its own API files -->
+	<Target Name="AppendCombinedPublicApi" AfterTargets="Build">
+		<PropertyGroup>
+			<CombinedFile>$(SolutionDir)CombinedPublicAPI.txt</CombinedFile>
+		</PropertyGroup>
+
+		<!-- Only if this project actually has API files -->
+		<ItemGroup>
+			<ApiFiles Include="$(MSBuildProjectDirectory)\PublicAPI.Shipped.txt"
+					  Condition="Exists('$(MSBuildProjectDirectory)\PublicAPI.Shipped.txt')" />
+			<ApiFiles Include="$(MSBuildProjectDirectory)\PublicAPI.Unshipped.txt"
+					  Condition="Exists('$(MSBuildProjectDirectory)\PublicAPI.Unshipped.txt')" />
+		</ItemGroup>
+
+		<Message Importance="High" Text="Appending API from $(MSBuildProjectName)" Condition="@(ApiFiles) != ''" />
+
+		<!-- Project header -->
+		<WriteLinesToFile
+			File="$(CombinedFile)"
+			Lines="---------- $(MSBuildProjectName) ----------"
+			Overwrite="false"
+			Condition="@(ApiFiles) != ''" />
+
+		<!-- File contents -->
+		<ReadLinesFromFile File="%(ApiFiles.FullPath)" Condition="@(ApiFiles) != ''">
+			<Output TaskParameter="Lines" ItemName="ApiLines"/>
+		</ReadLinesFromFile>
+
+		<WriteLinesToFile
+			File="$(CombinedFile)"
+			Lines="@(ApiLines)"
+			Overwrite="false"
+			Condition="@(ApiFiles) != ''" />
+	</Target>
+
+</Project>

@@ -1,0 +1,51 @@
+# Build artifacts
+bin/
+obj/
+out/
+artifacts/
+
+# VS / Rider / user-specific
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs / temp
+*.log
+*.tlog
+*.cache
+*.tmp
+*.temp
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Rider/VS Code
+.vscode/
+*.code-workspace
+
+# Resharper
+_ReSharper.Caches/
+_ReSharper.*
+
+# MSBuild binary logs
+*.binlog
+
+# Local data
+*.db
+*.sqlite
+*.sqlite3
+
+# Publish
+publish/

@@ -1,0 +1,59 @@
+<UserControl x:Class="LM.App.Wpf.Views.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+	<Grid Margin="12" RowDefinitions="Auto,8,*,8,Auto">
+		<!-- Controls -->
+		<StackPanel Orientation="Horizontal" Grid.Row="0" Spacing="8">
+			<TextBox Width="420" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+			<ComboBox Width="160" SelectedItem="{Binding SelectedDatabase}">
+				<ComboBoxItem Content="PubMed" Tag="PubMed"/>
+				<ComboBoxItem Content="ClinicalTrials.gov" Tag="ClinicalTrialsGov"/>
+			</ComboBox>
+			<DatePicker Width="140" SelectedDate="{Binding From}"/>
+			<DatePicker Width="140" SelectedDate="{Binding To}"/>
+			<Button Content="Run search" Command="{Binding RunSearchCommand}"/>
+			<Button Content="Save Search" Command="{Binding SaveSearchCommand}"/>
+			<Button Content="Load Search" Command="{Binding LoadSearchCommand}"/>
+			<Button Content="Export Search" Command="{Binding ExportSearchCommand}"/>
+		</StackPanel>
+
+		<!-- Results -->
+		<DataGrid Grid.Row="2" ItemsSource="{Binding Results}" AutoGenerateColumns="False" IsReadOnly="True">
+			<DataGrid.Columns>
+				<DataGridCheckBoxColumn Header="" Binding="{Binding Selected}" Width="40"/>
+				<DataGridTemplateColumn Header="DB" Width="40">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Center"
+									   Opacity="{Binding AlreadyInDb, Converter={StaticResource BooleanToOpacityConverter}}"
+									   ToolTip="Already in DB"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="60"/>
+				<DataGridTextColumn Header="Authors" Binding="{Binding Authors}" Width="260"/>
+				<DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*"/>
+				<DataGridTextColumn Header="Source" Binding="{Binding JournalOrSource}" Width="200"/>
+				<DataGridTextColumn Header="DOI/ID" Binding="{Binding Doi}" Width="140"/>
+				<DataGridHyperlinkColumn Header="Link" Binding="{Binding Url}" Width="140"/>
+				<DataGridTextColumn Header="DB" Binding="{Binding AlreadyInDb}" Visibility="Collapsed"/>
+			</DataGrid.Columns>
+		</DataGrid>
+
+		<!-- Previous runs (simple) -->
+		<GroupBox Grid.Row="4" Header="Previous runs">
+			<DataGrid ItemsSource="{Binding PreviousRuns}" AutoGenerateColumns="False" IsReadOnly="True">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="When" Binding="{Binding RunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}" Width="160"/>
+					<DataGridTextColumn Header="Provider" Binding="{Binding Provider}" Width="100"/>
+					<DataGridTextColumn Header="From" Binding="{Binding From, StringFormat=\{0:yyyy-MM-dd\}}" Width="120"/>
+					<DataGridTextColumn Header="To" Binding="{Binding To, StringFormat=\{0:yyyy-MM-dd\}}" Width="120"/>
+					<DataGridTextColumn Header="Total" Binding="{Binding TotalHits}" Width="80"/>
+				</DataGrid.Columns>
+			</DataGrid>
+		</GroupBox>
+	</Grid>
+</UserControl>

@@ -1,0 +1,471 @@
+#nullable enable
+LM.HubSpoke.Abstractions.CasResult
+LM.HubSpoke.Abstractions.CasResult.Bytes.get -> long
+LM.HubSpoke.Abstractions.CasResult.Bytes.init -> void
+LM.HubSpoke.Abstractions.CasResult.CasResult() -> void
+LM.HubSpoke.Abstractions.CasResult.CasResult(string? RelPath, string? Sha, long Bytes, string? Mime, string? Original) -> void
+LM.HubSpoke.Abstractions.CasResult.Mime.get -> string?
+LM.HubSpoke.Abstractions.CasResult.Mime.init -> void
+LM.HubSpoke.Abstractions.CasResult.Original.get -> string?
+LM.HubSpoke.Abstractions.CasResult.Original.init -> void
+LM.HubSpoke.Abstractions.CasResult.RelPath.get -> string?
+LM.HubSpoke.Abstractions.CasResult.RelPath.init -> void
+LM.HubSpoke.Abstractions.CasResult.Sha.get -> string?
+LM.HubSpoke.Abstractions.CasResult.Sha.init -> void
+LM.HubSpoke.Abstractions.ISimilarityLog
+LM.HubSpoke.Abstractions.ISimilarityLog.LogAsync(string! sessionId, string! stagedPath, string! candidateEntryId, double score, string! method, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.HubSpoke.Abstractions.ISimilarityLog.NewSessionId() -> string!
+LM.HubSpoke.Abstractions.ISpokeHandler
+LM.HubSpoke.Abstractions.ISpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Abstractions.ISpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hook, string? extractedFullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Abstractions.ISpokeHandler.Handles.get -> LM.Core.Models.EntryType
+LM.HubSpoke.Abstractions.ISpokeHandler.HookPath.get -> string!
+LM.HubSpoke.Abstractions.ISpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Abstractions.ISpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hook) -> LM.Core.Models.Entry!
+LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Abstract.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Abstract.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.AssetHashes.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Abstractions.SpokeIndexContribution.AssetHashes.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Authors.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Authors.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Doi.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Doi.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.FullText.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.FullText.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Journal.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Journal.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Keywords.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Keywords.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Pmid.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Pmid.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.SpokeIndexContribution() -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.SpokeIndexContribution(string? Title, string? Abstract, System.Collections.Generic.IReadOnlyList<string!>! Authors, System.Collections.Generic.IReadOnlyList<string!>! Keywords, string? Journal, string? Doi, string? Pmid, int? Year, System.Collections.Generic.IReadOnlyList<string!>! AssetHashes, string? FullText) -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Title.get -> string?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Title.init -> void
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Year.get -> int?
+LM.HubSpoke.Abstractions.SpokeIndexContribution.Year.init -> void
+LM.HubSpoke.Entries.HubSpokeStore
+LM.HubSpoke.Entries.HubSpokeStore.EnumerateAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.Entry!>!
+LM.HubSpoke.Entries.HubSpokeStore.FindByHashAsync(string! sha256, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.HubSpoke.Entries.HubSpokeStore.FindByIdsAsync(string? doi, string? pmid, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.HubSpoke.Entries.HubSpokeStore.FindSimilarByNameYearAsync(string! title, int? year, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.HubSpoke.Entries.HubSpokeStore.GetByIdAsync(string! id, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.HubSpoke.Entries.HubSpokeStore.HubSpokeStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IHasher! hasher, System.Collections.Generic.IEnumerable<LM.HubSpoke.Abstractions.ISpokeHandler!>! handlers, LM.Core.Abstractions.IContentExtractor? contentExtractor = null) -> void
+LM.HubSpoke.Entries.HubSpokeStore.HubSpokeStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IHasher! hasher, System.Collections.Generic.IEnumerable<LM.HubSpoke.Abstractions.ISpokeHandler!>! handlers, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.Core.Abstractions.IContentExtractor? contentExtractor = null) -> void
+LM.HubSpoke.Entries.HubSpokeStore.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.HubSpoke.Entries.HubSpokeStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.HubSpoke.Entries.HubSpokeStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! filter, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.HubSpoke.Indexing.SimilarityLog
+LM.HubSpoke.Indexing.SimilarityLog.LogAsync(string! sessionId, string! stagedPath, string! candidateEntryId, double score, string! method, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.HubSpoke.Indexing.SimilarityLog.NewSessionId() -> string!
+LM.HubSpoke.Indexing.SimilarityLog.SimilarityLog(LM.Core.Abstractions.IWorkSpaceService! ws) -> void
+LM.HubSpoke.Models.AbstractSection
+LM.HubSpoke.Models.AbstractSection.AbstractSection() -> void
+LM.HubSpoke.Models.AbstractSection.Label.get -> string?
+LM.HubSpoke.Models.AbstractSection.Label.init -> void
+LM.HubSpoke.Models.AbstractSection.Text.get -> string!
+LM.HubSpoke.Models.AbstractSection.Text.init -> void
+LM.HubSpoke.Models.Affiliation
+LM.HubSpoke.Models.Affiliation.Affiliation() -> void
+LM.HubSpoke.Models.Affiliation.Email.get -> string?
+LM.HubSpoke.Models.Affiliation.Email.init -> void
+LM.HubSpoke.Models.Affiliation.Text.get -> string!
+LM.HubSpoke.Models.Affiliation.Text.init -> void
+LM.HubSpoke.Models.ArticleAbstract
+LM.HubSpoke.Models.ArticleAbstract.ArticleAbstract() -> void
+LM.HubSpoke.Models.ArticleAbstract.Sections.get -> System.Collections.Generic.List<LM.HubSpoke.Models.AbstractSection!>!
+LM.HubSpoke.Models.ArticleAbstract.Sections.init -> void
+LM.HubSpoke.Models.ArticleAbstract.Text.get -> string?
+LM.HubSpoke.Models.ArticleAbstract.Text.init -> void
+LM.HubSpoke.Models.ArticleAsset
+LM.HubSpoke.Models.ArticleAsset.ArticleAsset() -> void
+LM.HubSpoke.Models.ArticleAsset.Bytes.get -> long
+LM.HubSpoke.Models.ArticleAsset.Bytes.init -> void
+LM.HubSpoke.Models.ArticleAsset.ContentType.get -> string!
+LM.HubSpoke.Models.ArticleAsset.ContentType.init -> void
+LM.HubSpoke.Models.ArticleAsset.Hash.get -> string!
+LM.HubSpoke.Models.ArticleAsset.Hash.init -> void
+LM.HubSpoke.Models.ArticleAsset.OriginalFilename.get -> string?
+LM.HubSpoke.Models.ArticleAsset.OriginalFilename.init -> void
+LM.HubSpoke.Models.ArticleAsset.OriginalFolderPath.get -> string?
+LM.HubSpoke.Models.ArticleAsset.OriginalFolderPath.init -> void
+LM.HubSpoke.Models.ArticleAsset.Purpose.get -> LM.HubSpoke.Models.ArticleAssetPurpose
+LM.HubSpoke.Models.ArticleAsset.Purpose.init -> void
+LM.HubSpoke.Models.ArticleAsset.StoragePath.get -> string!
+LM.HubSpoke.Models.ArticleAsset.StoragePath.init -> void
+LM.HubSpoke.Models.ArticleAsset.Title.get -> string!
+LM.HubSpoke.Models.ArticleAsset.Title.init -> void
+LM.HubSpoke.Models.ArticleAssetPurpose
+LM.HubSpoke.Models.ArticleAssetPurpose.Manuscript = 0 -> LM.HubSpoke.Models.ArticleAssetPurpose
+LM.HubSpoke.Models.ArticleAssetPurpose.Supplement = 1 -> LM.HubSpoke.Models.ArticleAssetPurpose
+LM.HubSpoke.Models.ArticleDates
+LM.HubSpoke.Models.ArticleDates.Accepted.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.ArticleDates.Accepted.init -> void
+LM.HubSpoke.Models.ArticleDates.ArticleDates() -> void
+LM.HubSpoke.Models.ArticleDates.Electronic.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.ArticleDates.Electronic.init -> void
+LM.HubSpoke.Models.ArticleDates.Print.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.ArticleDates.Print.init -> void
+LM.HubSpoke.Models.ArticleDates.Received.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.ArticleDates.Received.init -> void
+LM.HubSpoke.Models.ArticleDates.Revised.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.ArticleDates.Revised.init -> void
+LM.HubSpoke.Models.ArticleDetails
+LM.HubSpoke.Models.ArticleDetails.ArticleDetails() -> void
+LM.HubSpoke.Models.ArticleDetails.Dates.get -> LM.HubSpoke.Models.ArticleDates!
+LM.HubSpoke.Models.ArticleDetails.Dates.init -> void
+LM.HubSpoke.Models.ArticleDetails.Language.get -> string?
+LM.HubSpoke.Models.ArticleDetails.Language.init -> void
+LM.HubSpoke.Models.ArticleDetails.Pagination.get -> LM.HubSpoke.Models.Pagination!
+LM.HubSpoke.Models.ArticleDetails.Pagination.init -> void
+LM.HubSpoke.Models.ArticleDetails.PublicationTypes.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.ArticleDetails.PublicationTypes.init -> void
+LM.HubSpoke.Models.ArticleDetails.Status.get -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.ArticleDetails.Status.init -> void
+LM.HubSpoke.Models.ArticleDetails.Title.get -> string!
+LM.HubSpoke.Models.ArticleDetails.Title.init -> void
+LM.HubSpoke.Models.ArticleHook
+LM.HubSpoke.Models.ArticleHook.Abstract.get -> LM.HubSpoke.Models.ArticleAbstract?
+LM.HubSpoke.Models.ArticleHook.Abstract.init -> void
+LM.HubSpoke.Models.ArticleHook.Article.get -> LM.HubSpoke.Models.ArticleDetails!
+LM.HubSpoke.Models.ArticleHook.Article.init -> void
+LM.HubSpoke.Models.ArticleHook.ArticleHook() -> void
+LM.HubSpoke.Models.ArticleHook.Assets.get -> System.Collections.Generic.List<LM.HubSpoke.Models.ArticleAsset!>!
+LM.HubSpoke.Models.ArticleHook.Assets.init -> void
+LM.HubSpoke.Models.ArticleHook.Authors.get -> System.Collections.Generic.List<LM.HubSpoke.Models.Author!>!
+LM.HubSpoke.Models.ArticleHook.Authors.init -> void
+LM.HubSpoke.Models.ArticleHook.Chemicals.get -> System.Collections.Generic.List<LM.HubSpoke.Models.Chemical!>!
+LM.HubSpoke.Models.ArticleHook.Chemicals.init -> void
+LM.HubSpoke.Models.ArticleHook.ConflictOfInterest.get -> string?
+LM.HubSpoke.Models.ArticleHook.ConflictOfInterest.init -> void
+LM.HubSpoke.Models.ArticleHook.Copyright.get -> string?
+LM.HubSpoke.Models.ArticleHook.Copyright.init -> void
+LM.HubSpoke.Models.ArticleHook.Grants.get -> System.Collections.Generic.List<LM.HubSpoke.Models.Grant!>!
+LM.HubSpoke.Models.ArticleHook.Grants.init -> void
+LM.HubSpoke.Models.ArticleHook.History.get -> LM.HubSpoke.Models.PublicationHistory!
+LM.HubSpoke.Models.ArticleHook.History.init -> void
+LM.HubSpoke.Models.ArticleHook.Identifier.get -> LM.HubSpoke.Models.ArticleIdentifier!
+LM.HubSpoke.Models.ArticleHook.Identifier.init -> void
+LM.HubSpoke.Models.ArticleHook.Journal.get -> LM.HubSpoke.Models.JournalInfo!
+LM.HubSpoke.Models.ArticleHook.Journal.init -> void
+LM.HubSpoke.Models.ArticleHook.Keywords.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.ArticleHook.Keywords.init -> void
+LM.HubSpoke.Models.ArticleHook.Medline.get -> LM.HubSpoke.Models.MedlineInfo!
+LM.HubSpoke.Models.ArticleHook.Medline.init -> void
+LM.HubSpoke.Models.ArticleHook.MeshHeadings.get -> System.Collections.Generic.List<LM.HubSpoke.Models.MeshHeading!>!
+LM.HubSpoke.Models.ArticleHook.MeshHeadings.init -> void
+LM.HubSpoke.Models.ArticleHook.References.get -> System.Collections.Generic.List<LM.HubSpoke.Models.Citation!>!
+LM.HubSpoke.Models.ArticleHook.References.init -> void
+LM.HubSpoke.Models.ArticleHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.ArticleHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.ArticleIdentifier
+LM.HubSpoke.Models.ArticleIdentifier.ArticleIdentifier() -> void
+LM.HubSpoke.Models.ArticleIdentifier.DOI.get -> string?
+LM.HubSpoke.Models.ArticleIdentifier.DOI.init -> void
+LM.HubSpoke.Models.ArticleIdentifier.OtherIds.get -> System.Collections.Generic.Dictionary<string!, string!>!
+LM.HubSpoke.Models.ArticleIdentifier.OtherIds.init -> void
+LM.HubSpoke.Models.ArticleIdentifier.PII.get -> string?
+LM.HubSpoke.Models.ArticleIdentifier.PII.init -> void
+LM.HubSpoke.Models.ArticleIdentifier.PMCID.get -> string?
+LM.HubSpoke.Models.ArticleIdentifier.PMCID.init -> void
+LM.HubSpoke.Models.ArticleIdentifier.PMID.get -> string!
+LM.HubSpoke.Models.ArticleIdentifier.PMID.init -> void
+LM.HubSpoke.Models.AssetRef
+LM.HubSpoke.Models.AssetRef.AssetRef() -> void
+LM.HubSpoke.Models.AssetRef.Bytes.get -> long
+LM.HubSpoke.Models.AssetRef.Bytes.init -> void
+LM.HubSpoke.Models.AssetRef.ContentType.get -> string!
+LM.HubSpoke.Models.AssetRef.ContentType.init -> void
+LM.HubSpoke.Models.AssetRef.Hash.get -> string!
+LM.HubSpoke.Models.AssetRef.Hash.init -> void
+LM.HubSpoke.Models.AssetRef.OriginalFilename.get -> string?
+LM.HubSpoke.Models.AssetRef.OriginalFilename.init -> void
+LM.HubSpoke.Models.AssetRef.Role.get -> string!
+LM.HubSpoke.Models.AssetRef.Role.init -> void
+LM.HubSpoke.Models.AssetRef.StoragePath.get -> string!
+LM.HubSpoke.Models.AssetRef.StoragePath.init -> void
+LM.HubSpoke.Models.Author
+LM.HubSpoke.Models.Author.Affiliations.get -> System.Collections.Generic.List<LM.HubSpoke.Models.Affiliation!>!
+LM.HubSpoke.Models.Author.Affiliations.init -> void
+LM.HubSpoke.Models.Author.Author() -> void
+LM.HubSpoke.Models.Author.ForeName.get -> string?
+LM.HubSpoke.Models.Author.ForeName.init -> void
+LM.HubSpoke.Models.Author.Initials.get -> string?
+LM.HubSpoke.Models.Author.Initials.init -> void
+LM.HubSpoke.Models.Author.LastName.get -> string?
+LM.HubSpoke.Models.Author.LastName.init -> void
+LM.HubSpoke.Models.Author.ORCID.get -> string?
+LM.HubSpoke.Models.Author.ORCID.init -> void
+LM.HubSpoke.Models.Chemical
+LM.HubSpoke.Models.Chemical.Chemical() -> void
+LM.HubSpoke.Models.Chemical.Name.get -> string!
+LM.HubSpoke.Models.Chemical.Name.init -> void
+LM.HubSpoke.Models.Chemical.RegistryNumber.get -> string?
+LM.HubSpoke.Models.Chemical.RegistryNumber.init -> void
+LM.HubSpoke.Models.Citation
+LM.HubSpoke.Models.Citation.Citation() -> void
+LM.HubSpoke.Models.Citation.DOI.get -> string?
+LM.HubSpoke.Models.Citation.DOI.init -> void
+LM.HubSpoke.Models.Citation.PMID.get -> string?
+LM.HubSpoke.Models.Citation.PMID.init -> void
+LM.HubSpoke.Models.Citation.Text.get -> string!
+LM.HubSpoke.Models.Citation.Text.init -> void
+LM.HubSpoke.Models.CreationMethod
+LM.HubSpoke.Models.CreationMethod.Manual = 0 -> LM.HubSpoke.Models.CreationMethod
+LM.HubSpoke.Models.CreationMethod.Search = 1 -> LM.HubSpoke.Models.CreationMethod
+LM.HubSpoke.Models.DocumentHook
+LM.HubSpoke.Models.DocumentHook.Assets.get -> System.Collections.Generic.IReadOnlyList<LM.HubSpoke.Models.AssetRef!>!
+LM.HubSpoke.Models.DocumentHook.Assets.init -> void
+LM.HubSpoke.Models.DocumentHook.Description.get -> string?
+LM.HubSpoke.Models.DocumentHook.Description.init -> void
+LM.HubSpoke.Models.DocumentHook.DocumentHook() -> void
+LM.HubSpoke.Models.DocumentHook.DocumentType.get -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentHook.DocumentType.init -> void
+LM.HubSpoke.Models.DocumentHook.EffectiveUtc.get -> System.DateTime?
+LM.HubSpoke.Models.DocumentHook.EffectiveUtc.init -> void
+LM.HubSpoke.Models.DocumentHook.ExpiresUtc.get -> System.DateTime?
+LM.HubSpoke.Models.DocumentHook.ExpiresUtc.init -> void
+LM.HubSpoke.Models.DocumentHook.Owner.get -> string?
+LM.HubSpoke.Models.DocumentHook.Owner.init -> void
+LM.HubSpoke.Models.DocumentHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.DocumentHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.DocumentHook.Title.get -> string?
+LM.HubSpoke.Models.DocumentHook.Title.init -> void
+LM.HubSpoke.Models.DocumentHook.Version.get -> string?
+LM.HubSpoke.Models.DocumentHook.Version.init -> void
+LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.MarketingMaterial = 1 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.Other = 6 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.Poster = 5 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.Presentation = 0 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.Report = 2 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.StandardOperatingProcedure = 3 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.DocumentType.Whitepaper = 4 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.EntryHooks
+LM.HubSpoke.Models.EntryHooks.Article.get -> string?
+LM.HubSpoke.Models.EntryHooks.Article.init -> void
+LM.HubSpoke.Models.EntryHooks.DataExtraction.get -> string?
+LM.HubSpoke.Models.EntryHooks.DataExtraction.init -> void
+LM.HubSpoke.Models.EntryHooks.Document.get -> string?
+LM.HubSpoke.Models.EntryHooks.Document.init -> void
+LM.HubSpoke.Models.EntryHooks.EntryHooks() -> void
+LM.HubSpoke.Models.EntryHooks.History.get -> string?
+LM.HubSpoke.Models.EntryHooks.History.init -> void
+LM.HubSpoke.Models.EntryHooks.Notes.get -> string?
+LM.HubSpoke.Models.EntryHooks.Notes.init -> void
+LM.HubSpoke.Models.EntryHooks.Provenance.get -> string?
+LM.HubSpoke.Models.EntryHooks.Provenance.init -> void
+LM.HubSpoke.Models.EntryHooks.Relations.get -> string?
+LM.HubSpoke.Models.EntryHooks.Relations.init -> void
+LM.HubSpoke.Models.EntryHooks.SearchHits.get -> string?
+LM.HubSpoke.Models.EntryHooks.SearchHits.init -> void
+LM.HubSpoke.Models.EntryHooks.Trial.get -> string?
+LM.HubSpoke.Models.EntryHooks.Trial.init -> void
+LM.HubSpoke.Models.EntryHub
+LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.get -> string!
+LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.init -> void
+LM.HubSpoke.Models.EntryHub.CreatedBy.get -> LM.HubSpoke.Models.PersonRef
+LM.HubSpoke.Models.EntryHub.CreatedBy.init -> void
+LM.HubSpoke.Models.EntryHub.CreatedUtc.get -> System.DateTime
+LM.HubSpoke.Models.EntryHub.CreatedUtc.init -> void
+LM.HubSpoke.Models.EntryHub.CreationMethod.get -> LM.HubSpoke.Models.CreationMethod
+LM.HubSpoke.Models.EntryHub.CreationMethod.init -> void
+LM.HubSpoke.Models.EntryHub.DisplayTitle.get -> string!
+LM.HubSpoke.Models.EntryHub.DisplayTitle.init -> void
+LM.HubSpoke.Models.EntryHub.EntryHub() -> void
+LM.HubSpoke.Models.EntryHub.EntryId.get -> string!
+LM.HubSpoke.Models.EntryHub.EntryId.init -> void
+LM.HubSpoke.Models.EntryHub.Flags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Models.EntryHub.Flags.init -> void
+LM.HubSpoke.Models.EntryHub.Hooks.get -> LM.HubSpoke.Models.EntryHooks!
+LM.HubSpoke.Models.EntryHub.Hooks.init -> void
+LM.HubSpoke.Models.EntryHub.LastActivityUtc.get -> System.DateTime?
+LM.HubSpoke.Models.EntryHub.LastActivityUtc.init -> void
+LM.HubSpoke.Models.EntryHub.Origin.get -> LM.HubSpoke.Models.EntryOrigin
+LM.HubSpoke.Models.EntryHub.Origin.init -> void
+LM.HubSpoke.Models.EntryHub.PrimaryPurpose.get -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryHub.PrimaryPurpose.init -> void
+LM.HubSpoke.Models.EntryHub.PrimaryPurposeSource.get -> LM.HubSpoke.Models.PurposeSource
+LM.HubSpoke.Models.EntryHub.PrimaryPurposeSource.init -> void
+LM.HubSpoke.Models.EntryHub.RelationsSummary.get -> LM.HubSpoke.Models.EntryRelationsSummary?
+LM.HubSpoke.Models.EntryHub.RelationsSummary.init -> void
+LM.HubSpoke.Models.EntryHub.SchemaVersion.get -> string!
+LM.HubSpoke.Models.EntryHub.SchemaVersion.init -> void
+LM.HubSpoke.Models.EntryHub.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Models.EntryHub.Tags.init -> void
+LM.HubSpoke.Models.EntryHub.UpdatedBy.get -> LM.HubSpoke.Models.PersonRef
+LM.HubSpoke.Models.EntryHub.UpdatedBy.init -> void
+LM.HubSpoke.Models.EntryHub.UpdatedUtc.get -> System.DateTime
+LM.HubSpoke.Models.EntryHub.UpdatedUtc.init -> void
+LM.HubSpoke.Models.EntryOrigin
+LM.HubSpoke.Models.EntryOrigin.External = 0 -> LM.HubSpoke.Models.EntryOrigin
+LM.HubSpoke.Models.EntryOrigin.Internal = 1 -> LM.HubSpoke.Models.EntryOrigin
+LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Code = 5 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Dataset = 4 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Document = 3 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Manuscript = 1 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Trial = 2 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryPurpose.Unknown = 0 -> LM.HubSpoke.Models.EntryPurpose
+LM.HubSpoke.Models.EntryRelationsSummary
+LM.HubSpoke.Models.EntryRelationsSummary.EntryRelationsSummary() -> void
+LM.HubSpoke.Models.EntryRelationsSummary.RelatedCount.get -> int
+LM.HubSpoke.Models.EntryRelationsSummary.RelatedCount.init -> void
+LM.HubSpoke.Models.EntryRelationsSummary.RelationsUpdatedUtc.get -> System.DateTime?
+LM.HubSpoke.Models.EntryRelationsSummary.RelationsUpdatedUtc.init -> void
+LM.HubSpoke.Models.EntryRelationsSummary.VariantOfCount.get -> int
+LM.HubSpoke.Models.EntryRelationsSummary.VariantOfCount.init -> void
+LM.HubSpoke.Models.Grant
+LM.HubSpoke.Models.Grant.Agency.get -> string?
+LM.HubSpoke.Models.Grant.Agency.init -> void
+LM.HubSpoke.Models.Grant.Country.get -> string?
+LM.HubSpoke.Models.Grant.Country.init -> void
+LM.HubSpoke.Models.Grant.Grant() -> void
+LM.HubSpoke.Models.Grant.GrantId.get -> string?
+LM.HubSpoke.Models.Grant.GrantId.init -> void
+LM.HubSpoke.Models.JournalInfo
+LM.HubSpoke.Models.JournalInfo.Country.get -> string?
+LM.HubSpoke.Models.JournalInfo.Country.init -> void
+LM.HubSpoke.Models.JournalInfo.ISOAbbreviation.get -> string?
+LM.HubSpoke.Models.JournalInfo.ISOAbbreviation.init -> void
+LM.HubSpoke.Models.JournalInfo.ISSN.get -> string?
+LM.HubSpoke.Models.JournalInfo.ISSN.init -> void
+LM.HubSpoke.Models.JournalInfo.ISSNElectronic.get -> string?
+LM.HubSpoke.Models.JournalInfo.ISSNElectronic.init -> void
+LM.HubSpoke.Models.JournalInfo.ISSNPrint.get -> string?
+LM.HubSpoke.Models.JournalInfo.ISSNPrint.init -> void
+LM.HubSpoke.Models.JournalInfo.Issue.get -> LM.HubSpoke.Models.JournalIssue!
+LM.HubSpoke.Models.JournalInfo.Issue.init -> void
+LM.HubSpoke.Models.JournalInfo.JournalInfo() -> void
+LM.HubSpoke.Models.JournalInfo.NlmUniqueId.get -> string?
+LM.HubSpoke.Models.JournalInfo.NlmUniqueId.init -> void
+LM.HubSpoke.Models.JournalInfo.Title.get -> string!
+LM.HubSpoke.Models.JournalInfo.Title.init -> void
+LM.HubSpoke.Models.JournalIssue
+LM.HubSpoke.Models.JournalIssue.JournalIssue() -> void
+LM.HubSpoke.Models.JournalIssue.Number.get -> string?
+LM.HubSpoke.Models.JournalIssue.Number.init -> void
+LM.HubSpoke.Models.JournalIssue.PubDate.get -> LM.HubSpoke.Models.PartialDate?
+LM.HubSpoke.Models.JournalIssue.PubDate.init -> void
+LM.HubSpoke.Models.JournalIssue.Volume.get -> string?
+LM.HubSpoke.Models.JournalIssue.Volume.init -> void
+LM.HubSpoke.Models.JsonStd
+LM.HubSpoke.Models.LitSearchSpokeHandler
+LM.HubSpoke.Models.LitSearchSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Models.LitSearchSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? extractedFullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Models.LitSearchSpokeHandler.Handles.get -> LM.Core.Models.EntryType
+LM.HubSpoke.Models.LitSearchSpokeHandler.HookPath.get -> string!
+LM.HubSpoke.Models.LitSearchSpokeHandler.LitSearchSpokeHandler() -> void
+LM.HubSpoke.Models.LitSearchSpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Models.LitSearchSpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hookObj) -> LM.Core.Models.Entry!
+LM.HubSpoke.Models.MedlineInfo
+LM.HubSpoke.Models.MedlineInfo.CitationSubset.get -> string?
+LM.HubSpoke.Models.MedlineInfo.CitationSubset.init -> void
+LM.HubSpoke.Models.MedlineInfo.MedlineInfo() -> void
+LM.HubSpoke.Models.MedlineInfo.PublicationStatusRaw.get -> string?
+LM.HubSpoke.Models.MedlineInfo.PublicationStatusRaw.init -> void
+LM.HubSpoke.Models.MeshHeading
+LM.HubSpoke.Models.MeshHeading.Descriptor.get -> string!
+LM.HubSpoke.Models.MeshHeading.Descriptor.init -> void
+LM.HubSpoke.Models.MeshHeading.MajorTopic.get -> bool
+LM.HubSpoke.Models.MeshHeading.MajorTopic.init -> void
+LM.HubSpoke.Models.MeshHeading.MeshHeading() -> void
+LM.HubSpoke.Models.MeshHeading.Qualifiers.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.MeshHeading.Qualifiers.init -> void
+LM.HubSpoke.Models.NullableUtcDateTimeConverter
+LM.HubSpoke.Models.NullableUtcDateTimeConverter.NullableUtcDateTimeConverter() -> void
+LM.HubSpoke.Models.Pagination
+LM.HubSpoke.Models.Pagination.ArticleNumber.get -> string?
+LM.HubSpoke.Models.Pagination.ArticleNumber.init -> void
+LM.HubSpoke.Models.Pagination.EndPage.get -> string?
+LM.HubSpoke.Models.Pagination.EndPage.init -> void
+LM.HubSpoke.Models.Pagination.Pagination() -> void
+LM.HubSpoke.Models.Pagination.StartPage.get -> string?
+LM.HubSpoke.Models.Pagination.StartPage.init -> void
+LM.HubSpoke.Models.PartialDate
+LM.HubSpoke.Models.PartialDate.Day.get -> int?
+LM.HubSpoke.Models.PartialDate.Day.init -> void
+LM.HubSpoke.Models.PartialDate.Month.get -> int?
+LM.HubSpoke.Models.PartialDate.Month.init -> void
+LM.HubSpoke.Models.PartialDate.PartialDate() -> void
+LM.HubSpoke.Models.PartialDate.ToDateTimeOrNull() -> System.DateTime?
+LM.HubSpoke.Models.PartialDate.Year.get -> int
+LM.HubSpoke.Models.PartialDate.Year.init -> void
+LM.HubSpoke.Models.PersonRef
+LM.HubSpoke.Models.PersonRef.DisplayName.get -> string?
+LM.HubSpoke.Models.PersonRef.DisplayName.init -> void
+LM.HubSpoke.Models.PersonRef.Id.get -> string!
+LM.HubSpoke.Models.PersonRef.Id.init -> void
+LM.HubSpoke.Models.PersonRef.PersonRef() -> void
+LM.HubSpoke.Models.PersonRef.PersonRef(string! Id, string? DisplayName) -> void
+LM.HubSpoke.Models.PublicationHistory
+LM.HubSpoke.Models.PublicationHistory.Accepted.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.Accepted.init -> void
+LM.HubSpoke.Models.PublicationHistory.Entrez.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.Entrez.init -> void
+LM.HubSpoke.Models.PublicationHistory.Medline.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.Medline.init -> void
+LM.HubSpoke.Models.PublicationHistory.PublicationHistory() -> void
+LM.HubSpoke.Models.PublicationHistory.PubMed.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.PubMed.init -> void
+LM.HubSpoke.Models.PublicationHistory.Received.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.Received.init -> void
+LM.HubSpoke.Models.PublicationHistory.Revised.get -> System.DateTimeOffset?
+LM.HubSpoke.Models.PublicationHistory.Revised.init -> void
+LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.AheadOfPrint = 1 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.EPublish = 2 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.Medline = 4 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.PPublish = 3 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.PubMedNotMedline = 5 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PubStatus.Unknown = 0 -> LM.HubSpoke.Models.PubStatus
+LM.HubSpoke.Models.PurposeSource
+LM.HubSpoke.Models.PurposeSource.Inferred = 0 -> LM.HubSpoke.Models.PurposeSource
+LM.HubSpoke.Models.PurposeSource.Manual = 1 -> LM.HubSpoke.Models.PurposeSource
+LM.HubSpoke.Models.SearchHit
+LM.HubSpoke.Models.SearchHit.AlreadyInDb.get -> bool
+LM.HubSpoke.Models.SearchHit.AlreadyInDb.set -> void
+LM.HubSpoke.Models.SearchHit.Authors.get -> string!
+LM.HubSpoke.Models.SearchHit.Authors.init -> void
+LM.HubSpoke.Models.SearchHit.Doi.get -> string?
+LM.HubSpoke.Models.SearchHit.Doi.init -> void
+LM.HubSpoke.Models.SearchHit.ExternalId.get -> string!
+LM.HubSpoke.Models.SearchHit.ExternalId.init -> void
+LM.HubSpoke.Models.SearchHit.JournalOrSource.get -> string?
+LM.HubSpoke.Models.SearchHit.JournalOrSource.init -> void
+LM.HubSpoke.Models.SearchHit.SearchHit() -> void
+LM.HubSpoke.Models.SearchHit.Selected.get -> bool
+LM.HubSpoke.Models.SearchHit.Selected.set -> void
+LM.HubSpoke.Models.SearchHit.Source.get -> LM.Core.Models.SearchDatabase
+LM.HubSpoke.Models.SearchHit.Source.init -> void
+LM.HubSpoke.Models.SearchHit.Title.get -> string!
+LM.HubSpoke.Models.SearchHit.Title.init -> void
+LM.HubSpoke.Models.SearchHit.Url.get -> string?
+LM.HubSpoke.Models.SearchHit.Url.init -> void
+LM.HubSpoke.Models.SearchHit.Year.get -> int?
+LM.HubSpoke.Models.SearchHit.Year.init -> void
+LM.HubSpoke.Models.UtcDateTimeConverter
+LM.HubSpoke.Models.UtcDateTimeConverter.UtcDateTimeConverter() -> void
+LM.HubSpoke.Spokes.ArticleSpokeHandler
+LM.HubSpoke.Spokes.ArticleSpokeHandler.ArticleSpokeHandler() -> void
+LM.HubSpoke.Spokes.ArticleSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.ArticleSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? fullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Spokes.ArticleSpokeHandler.Handles.get -> LM.Core.Models.EntryType
+LM.HubSpoke.Spokes.ArticleSpokeHandler.HookPath.get -> string!
+LM.HubSpoke.Spokes.ArticleSpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.ArticleSpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hookObj) -> LM.Core.Models.Entry!
+LM.HubSpoke.Spokes.DocumentSpokeHandler
+LM.HubSpoke.Spokes.DocumentSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.DocumentSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? fullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
+LM.HubSpoke.Spokes.DocumentSpokeHandler.DocumentSpokeHandler() -> void
+LM.HubSpoke.Spokes.DocumentSpokeHandler.Handles.get -> LM.Core.Models.EntryType
+LM.HubSpoke.Spokes.DocumentSpokeHandler.HookPath.get -> string!
+LM.HubSpoke.Spokes.DocumentSpokeHandler.LoadHookAsync(LM.Core.Abstractions.IWorkSpaceService! ws, string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
+LM.HubSpoke.Spokes.DocumentSpokeHandler.MapToEntry(LM.HubSpoke.Models.EntryHub! hub, object? hookObj) -> LM.Core.Models.Entry!
+override LM.HubSpoke.Models.NullableUtcDateTimeConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> System.DateTime?
+override LM.HubSpoke.Models.NullableUtcDateTimeConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.DateTime? value, System.Text.Json.JsonSerializerOptions! options) -> void
+override LM.HubSpoke.Models.UtcDateTimeConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> System.DateTime
+override LM.HubSpoke.Models.UtcDateTimeConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.DateTime value, System.Text.Json.JsonSerializerOptions! options) -> void
+static LM.HubSpoke.Models.PersonRef.Unknown.get -> LM.HubSpoke.Models.PersonRef
+static readonly LM.HubSpoke.Models.JsonStd.Options -> System.Text.Json.JsonSerializerOptions!
