@@ -8,6 +8,8 @@ using LM.Infrastructure.Search;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -45,8 +47,11 @@ namespace LM.App.Wpf.ViewModels
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
             StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is LitSearchRun);
             ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is LitSearchRun);
+            ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is LitSearchRun);
 
             _ = RefreshPreviousRunsAsync();
+
+            PreviousRuns.CollectionChanged += OnPreviousRunsCollectionChanged;
         }
 
         private string _query = string.Empty;
@@ -106,6 +111,8 @@ namespace LM.App.Wpf.ViewModels
         public ObservableCollection<SearchHit> Results { get; } = new();
         public ObservableCollection<LitSearchRun> PreviousRuns { get; } = new();
 
+        public int PreviousRunsCount => PreviousRuns.Count;
+
         private LitSearchRun? _selectedPreviousRun;
         public LitSearchRun? SelectedPreviousRun
         {
@@ -128,6 +135,7 @@ namespace LM.App.Wpf.ViewModels
         public ICommand ExportSearchCommand { get; }
         public ICommand StartPreviousRunCommand { get; }
         public ICommand ToggleFavoriteCommand { get; }
+        public ICommand ShowRunDetailsCommand { get; }
 
         private void RaiseCanExec()
         {
@@ -137,6 +145,7 @@ namespace LM.App.Wpf.ViewModels
             (ExportSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (StartPreviousRunCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ToggleFavoriteCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
+            (ShowRunDetailsCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
         }
 
         private async Task RunSearchAsync()
@@ -399,6 +408,70 @@ namespace LM.App.Wpf.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private void OnPreviousRunsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+            => OnPropertyChanged(nameof(PreviousRunsCount));
+
+        private async Task ShowRunDetailsAsync(object? parameter)
+        {
+            if (parameter is not LitSearchRun run)
+                return;
+
+            if (!_runIndex.TryGetValue(run.RunId, out var context))
+                return;
+
+            try
+            {
+                var details = new
+                {
+                    entryId = context.EntryId,
+                    hook = new
+                    {
+                        context.Hook.Title,
+                        context.Hook.Query,
+                        context.Hook.Provider,
+                        context.Hook.From,
+                        context.Hook.To,
+                        context.Hook.CreatedBy,
+                        context.Hook.CreatedUtc,
+                        context.Hook.DerivedFromEntryId,
+                        context.Hook.Keywords,
+                        context.Hook.Notes,
+                        runCount = context.Hook.Runs.Count
+                    },
+                    run = new
+                    {
+                        run.RunId,
+                        run.Provider,
+                        run.Query,
+                        run.From,
+                        run.To,
+                        run.RunUtc,
+                        run.TotalHits,
+                        run.ExecutedBy,
+                        run.DisplayName,
+                        run.IsFavorite,
+                        run.RawAttachments,
+                        run.ImportedEntryIds
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(details, JsonStd.Options);
+                var tmpPath = Path.Combine(Path.GetTempPath(), $"litsearch_run_{run.RunId}.json");
+                await File.WriteAllTextAsync(tmpPath, json, Encoding.UTF8);
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = tmpPath,
+                    UseShellExecute = true
+                };
+                Process.Start(startInfo);
+            }
+            catch
+            {
+                // ignore errors when trying to surface diagnostics; best-effort feature
             }
         }
 

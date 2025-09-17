@@ -106,6 +106,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.LoadSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.HubSpoke.Models.LitSearchRun!>!
+LM.App.Wpf.ViewModels.SearchViewModel.PreviousRunsCount.get -> int
 LM.App.Wpf.ViewModels.SearchViewModel.Query.get -> string!
 LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
@@ -117,6 +118,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ShowRunDetailsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
