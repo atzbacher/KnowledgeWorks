@@ -14,6 +14,13 @@ namespace LM.HubSpoke.Spokes
 {
     public sealed class LitSearchSpokeHandler : ISpokeHandler
     {
+        private readonly IWorkSpaceService _ws;
+
+        public LitSearchSpokeHandler(IWorkSpaceService workspace)
+        {
+            _ws = workspace ?? throw new ArgumentNullException(nameof(workspace));
+        }
+
         public EntryType Handles => EntryType.Other;
         public string HookPath => "litsearch/litsearch.json";
 
@@ -29,21 +36,18 @@ namespace LM.HubSpoke.Spokes
                 return new LitSearchHook { Title = entry.Title ?? entry.DisplayName ?? "Search" };
 
             var wsJson = primary.RelPath!;
-            var abs = wsJson; // store already uses relative paths; no need to move
+            var abs = Path.IsPathRooted(wsJson) ? wsJson : _ws.GetAbsolutePath(wsJson);
 
             // Load and return the LitSearchHook object so the store can persist it at HookPath
             try
             {
-                var json = await File.ReadAllTextAsync(Absolute(abs), ct);
+                var json = await File.ReadAllTextAsync(abs, ct);
                 return JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
             }
             catch
             {
                 return new LitSearchHook { Title = entry.Title ?? entry.DisplayName ?? "Search" };
             }
-
-            static string Absolute(string relOrAbs)
-                => Path.IsPathRooted(relOrAbs) ? relOrAbs : relOrAbs;
         }
 
         public SpokeIndexContribution BuildIndex(EntryHub hub, object? hookObj, string? extractedFullText)
