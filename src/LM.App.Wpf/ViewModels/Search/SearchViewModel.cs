@@ -1,6 +1,7 @@
 ﻿#nullable enable               // LitSearchHook, LitSearchRun
 using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayCommand
 using LM.Core.Abstractions;
+using LM.HubSpoke.Models;
 using LM.Core.Models;
 using LM.Infrastructure.Pubmed;
 using LM.Infrastructure.Search;
