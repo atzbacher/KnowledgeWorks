@@ -38,7 +38,18 @@ namespace LM.App.Wpf.ViewModels
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
         }
 
-        public string Query { get; set; } = "";
+        private string _query = string.Empty;
+        public string Query
+        {
+            get => _query;
+            set
+            {
+                if (_query == value) return;
+                _query = value;
+                OnPropertyChanged();
+                RaiseCanExec();
+            }
+        }
         public SearchDatabase SelectedDatabase { get; set; } = SearchDatabase.PubMed;
         public DateTime? From { get; set; }
         public DateTime? To { get; set; }
