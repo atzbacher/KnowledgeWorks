@@ -54,7 +54,12 @@ namespace LM.App.Wpf.Composition
             var pubmed = new PubMedClient();
 
             // Spoke handlers
-            ISpokeHandler[] handlers = new ISpokeHandler[] { new ArticleSpokeHandler(), new DocumentSpokeHandler() };
+            ISpokeHandler[] handlers = new ISpokeHandler[]
+            {
+                new ArticleSpokeHandler(),
+                new DocumentSpokeHandler(),
+                new LitSearchSpokeHandler(ws)
+            };
 
             // Store uses the preferred ctor with normalizers
             var store = new HubSpokeStore(ws, hasher, handlers, doiNorm, pmidNorm, content);

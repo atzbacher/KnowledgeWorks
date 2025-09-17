@@ -271,6 +271,8 @@ namespace LM.HubSpoke.Entries
                 return art;
             if (!string.IsNullOrWhiteSpace(hub.Hooks?.Document) && _handlers.TryGetValue(EntryType.Report, out var doc))
                 return doc;
+            if (!string.IsNullOrWhiteSpace(hub.Hooks?.LitSearch) && _handlers.TryGetValue(EntryType.Other, out var lit))
+                return lit;
             return _handlers.Values.First();
         }
 
