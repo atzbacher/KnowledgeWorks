@@ -2,8 +2,7 @@
 using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayCommand
 using LM.Core.Abstractions;
 using LM.HubSpoke.Models;
-using LM.Core.Models;
-using LM.HubSpoke.Models;            // LitSearchHook, LitSearchRun, JsonStd
+using LM.Core.Models;            // LitSearchHook, LitSearchRun, JsonStd
 using LM.Infrastructure.Pubmed;
 using LM.Infrastructure.Search;
 using System;
