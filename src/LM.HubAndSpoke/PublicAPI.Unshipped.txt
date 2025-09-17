@@ -351,6 +351,48 @@ LM.HubSpoke.Models.JournalIssue.PubDate.init -> void
 LM.HubSpoke.Models.JournalIssue.Volume.get -> string?
 LM.HubSpoke.Models.JournalIssue.Volume.init -> void
 LM.HubSpoke.Models.JsonStd
+LM.HubSpoke.Models.LitSearchHook
+LM.HubSpoke.Models.LitSearchHook.CreatedBy.get -> string?
+LM.HubSpoke.Models.LitSearchHook.CreatedBy.init -> void
+LM.HubSpoke.Models.LitSearchHook.CreatedUtc.get -> System.DateTime
+LM.HubSpoke.Models.LitSearchHook.CreatedUtc.init -> void
+LM.HubSpoke.Models.LitSearchHook.From.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchHook.From.init -> void
+LM.HubSpoke.Models.LitSearchHook.Keywords.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.HubSpoke.Models.LitSearchHook.Keywords.init -> void
+LM.HubSpoke.Models.LitSearchHook.LitSearchHook() -> void
+LM.HubSpoke.Models.LitSearchHook.Provider.get -> string!
+LM.HubSpoke.Models.LitSearchHook.Provider.init -> void
+LM.HubSpoke.Models.LitSearchHook.Query.get -> string!
+LM.HubSpoke.Models.LitSearchHook.Query.init -> void
+LM.HubSpoke.Models.LitSearchHook.Runs.get -> System.Collections.Generic.List<LM.HubSpoke.Models.LitSearchRun!>!
+LM.HubSpoke.Models.LitSearchHook.Runs.init -> void
+LM.HubSpoke.Models.LitSearchHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.LitSearchHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.LitSearchHook.Title.get -> string!
+LM.HubSpoke.Models.LitSearchHook.Title.init -> void
+LM.HubSpoke.Models.LitSearchHook.To.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchHook.To.init -> void
+LM.HubSpoke.Models.LitSearchRun
+LM.HubSpoke.Models.LitSearchRun.ImportedEntryIds.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.LitSearchRun.ImportedEntryIds.init -> void
+LM.HubSpoke.Models.LitSearchRun.LitSearchRun() -> void
+LM.HubSpoke.Models.LitSearchRun.Provider.get -> string!
+LM.HubSpoke.Models.LitSearchRun.Provider.init -> void
+LM.HubSpoke.Models.LitSearchRun.Query.get -> string!
+LM.HubSpoke.Models.LitSearchRun.Query.init -> void
+LM.HubSpoke.Models.LitSearchRun.RawAttachments.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.LitSearchRun.RawAttachments.init -> void
+LM.HubSpoke.Models.LitSearchRun.RunId.get -> string!
+LM.HubSpoke.Models.LitSearchRun.RunId.init -> void
+LM.HubSpoke.Models.LitSearchRun.RunUtc.get -> System.DateTime
+LM.HubSpoke.Models.LitSearchRun.RunUtc.init -> void
+LM.HubSpoke.Models.LitSearchRun.From.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchRun.From.init -> void
+LM.HubSpoke.Models.LitSearchRun.To.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchRun.To.init -> void
+LM.HubSpoke.Models.LitSearchRun.TotalHits.get -> int
+LM.HubSpoke.Models.LitSearchRun.TotalHits.init -> void
 LM.HubSpoke.Models.LitSearchSpokeHandler
 LM.HubSpoke.Models.LitSearchSpokeHandler.BuildHookAsync(LM.Core.Models.Entry! entry, LM.HubSpoke.Abstractions.CasResult primary, System.Collections.Generic.IEnumerable<string!>! attachmentRelPaths, System.Func<string!, System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.HubSpoke.Abstractions.CasResult>!>! moveToCas, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<object?>!
 LM.HubSpoke.Models.LitSearchSpokeHandler.BuildIndex(LM.HubSpoke.Models.EntryHub! hub, object? hookObj, string? extractedFullText) -> LM.HubSpoke.Abstractions.SpokeIndexContribution
@@ -423,28 +465,6 @@ LM.HubSpoke.Models.PubStatus.Unknown = 0 -> LM.HubSpoke.Models.PubStatus
 LM.HubSpoke.Models.PurposeSource
 LM.HubSpoke.Models.PurposeSource.Inferred = 0 -> LM.HubSpoke.Models.PurposeSource
 LM.HubSpoke.Models.PurposeSource.Manual = 1 -> LM.HubSpoke.Models.PurposeSource
-LM.HubSpoke.Models.SearchHit
-LM.HubSpoke.Models.SearchHit.AlreadyInDb.get -> bool
-LM.HubSpoke.Models.SearchHit.AlreadyInDb.set -> void
-LM.HubSpoke.Models.SearchHit.Authors.get -> string!
-LM.HubSpoke.Models.SearchHit.Authors.init -> void
-LM.HubSpoke.Models.SearchHit.Doi.get -> string?
-LM.HubSpoke.Models.SearchHit.Doi.init -> void
-LM.HubSpoke.Models.SearchHit.ExternalId.get -> string!
-LM.HubSpoke.Models.SearchHit.ExternalId.init -> void
-LM.HubSpoke.Models.SearchHit.JournalOrSource.get -> string?
-LM.HubSpoke.Models.SearchHit.JournalOrSource.init -> void
-LM.HubSpoke.Models.SearchHit.SearchHit() -> void
-LM.HubSpoke.Models.SearchHit.Selected.get -> bool
-LM.HubSpoke.Models.SearchHit.Selected.set -> void
-LM.HubSpoke.Models.SearchHit.Source.get -> LM.Core.Models.SearchDatabase
-LM.HubSpoke.Models.SearchHit.Source.init -> void
-LM.HubSpoke.Models.SearchHit.Title.get -> string!
-LM.HubSpoke.Models.SearchHit.Title.init -> void
-LM.HubSpoke.Models.SearchHit.Url.get -> string?
-LM.HubSpoke.Models.SearchHit.Url.init -> void
-LM.HubSpoke.Models.SearchHit.Year.get -> int?
-LM.HubSpoke.Models.SearchHit.Year.init -> void
 LM.HubSpoke.Models.UtcDateTimeConverter
 LM.HubSpoke.Models.UtcDateTimeConverter.UtcDateTimeConverter() -> void
 LM.HubSpoke.Spokes.ArticleSpokeHandler
