@@ -56,6 +56,11 @@ public sealed class TagsPropagationE2ETests
         var staged = await pipeline.StagePathsAsync(new[] { pdfPath }, CancellationToken.None);
         var item = Assert.Single(staged);
 
+        Assert.NotNull(item.ArticleHook);
+        Assert.Equal("Paper from PubMed", item.ArticleHook!.Article.Title);
+        Assert.Equal("10.9999/e2e", item.ArticleHook.Identifier.DOI);
+        Assert.Contains("term1", item.ArticleHook.Keywords, StringComparer.OrdinalIgnoreCase);
+
         // Assert (staging): the PubMed keywords are merged into TagsCsv
         Assert.False(string.IsNullOrWhiteSpace(item.TagsCsv));
         var stagedTags = item.TagsCsv!
@@ -75,20 +80,19 @@ public sealed class TagsPropagationE2ETests
         Assert.Contains("term1", saved!.Tags, StringComparer.OrdinalIgnoreCase);
         Assert.Contains("term2", saved.Tags, StringComparer.OrdinalIgnoreCase);
 
-        // Optional: if article.json exists, ensure hook carries keywords as well.
-        // (The pipeline writes hooks only when ArticleHook is set; we don't require it here.)
         var hookPath = ws.GetAbsolutePath(Path.Combine("entries", saved.Id, "hooks", "article.json"));
-        if (File.Exists(hookPath))
-        {
-            var json = await File.ReadAllTextAsync(hookPath);
-            using var doc = JsonDocument.Parse(json);
-            var hookKeywords = doc.RootElement.GetProperty("keywords")
-                .EnumerateArray().Select(e => e.GetString()).Where(s => !string.IsNullOrWhiteSpace(s))
-                .ToArray();
+        Assert.True(File.Exists(hookPath));
 
-            Assert.Contains("term1", hookKeywords, StringComparer.OrdinalIgnoreCase);
-            Assert.Contains("term2", hookKeywords, StringComparer.OrdinalIgnoreCase);
-        }
+        var json = await File.ReadAllTextAsync(hookPath);
+        using var doc = JsonDocument.Parse(json);
+        var hookKeywords = doc.RootElement.GetProperty("keywords")
+            .EnumerateArray().Select(e => e.GetString()).Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToArray();
+
+        Assert.Contains("term1", hookKeywords, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains("term2", hookKeywords, StringComparer.OrdinalIgnoreCase);
+        Assert.Equal("Paper from PubMed", doc.RootElement.GetProperty("article").GetProperty("title").GetString());
+        Assert.Equal("10.9999/e2e", doc.RootElement.GetProperty("identifier").GetProperty("doi").GetString());
     }
 
     // ---- Test fakes ---------------------------------------------------------
