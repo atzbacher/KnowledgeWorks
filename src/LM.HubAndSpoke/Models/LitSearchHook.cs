@@ -42,6 +42,12 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("keywords")]
         public IReadOnlyList<string> Keywords { get; init; } = Array.Empty<string>();
 
+        [JsonPropertyName("notes")]
+        public string? Notes { get; init; }
+
+        [JsonPropertyName("derivedFromEntryId")]
+        public string? DerivedFromEntryId { get; init; }
+
         [JsonPropertyName("runs")]
         public List<LitSearchRun> Runs { get; init; } = new();
     }
@@ -74,6 +80,9 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("totalHits")]
         public int TotalHits { get; init; }
+
+        [JsonPropertyName("executedBy")]
+        public string? ExecutedBy { get; init; }
 
         [JsonPropertyName("rawAttachments")]
         public List<string> RawAttachments { get; init; } = new();

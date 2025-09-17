@@ -8,6 +8,7 @@ using LM.Infrastructure.Search;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,11 @@ namespace LM.App.Wpf.ViewModels
         private readonly IEntryStore _store;
         private readonly IFileStorageRepository _storage;
         private readonly IWorkSpaceService _ws;
+        private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
+
+        private string? _loadedEntryId;
+        private string? _loadedRunId;
+        private LitSearchHook? _loadedHook;
 
         public SearchViewModel(IEntryStore store, IFileStorageRepository storage, IWorkSpaceService ws)
         {
@@ -34,8 +40,10 @@ namespace LM.App.Wpf.ViewModels
 
             RunSearchCommand = new AsyncRelayCommand(RunSearchAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Query));
             SaveSearchCommand = new AsyncRelayCommand(SaveSearchAsync, () => !IsBusy && Results.Any());
-            LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy);
+            LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy && SelectedPreviousRun is not null);
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
+
+            _ = RefreshPreviousRunsAsync();
         }
 
         private string _query = string.Empty;
@@ -95,6 +103,19 @@ namespace LM.App.Wpf.ViewModels
         public ObservableCollection<SearchHit> Results { get; } = new();
         public ObservableCollection<LitSearchRun> PreviousRuns { get; } = new();
 
+        private LitSearchRun? _selectedPreviousRun;
+        public LitSearchRun? SelectedPreviousRun
+        {
+            get => _selectedPreviousRun;
+            set
+            {
+                if (ReferenceEquals(_selectedPreviousRun, value)) return;
+                _selectedPreviousRun = value;
+                OnPropertyChanged();
+                RaiseCanExec();
+            }
+        }
+
         private bool _isBusy;
         public bool IsBusy { get => _isBusy; private set { _isBusy = value; OnPropertyChanged(); RaiseCanExec(); } }
 
@@ -145,15 +166,6 @@ namespace LM.App.Wpf.ViewModels
                     Results.Add(h);
                 }
 
-                // Update "previous runs" view with in-memory run
-                PreviousRuns.Insert(0, new LitSearchRun
-                {
-                    Provider = SelectedDatabase == SearchDatabase.PubMed ? "pubmed" : "ctgov",
-                    Query = Query,
-                    From = From,
-                    To = To,
-                    TotalHits = Results.Count
-                });
             }
             finally { IsBusy = false; }
         }
@@ -166,25 +178,19 @@ namespace LM.App.Wpf.ViewModels
             IsBusy = true;
             try
             {
-                // 1) Create litsearch hook payload (definition + this run)
-                var hook = new LitSearchHook
-                {
-                    Title = Query.Length > 80 ? Query[..80] + "…" : Query,
-                    Query = Query,
-                    Provider = SelectedDatabase == SearchDatabase.PubMed ? "pubmed" : "ctgov",
-                    From = From,
-                    To = To,
-                    CreatedBy = Environment.UserName,
-                    CreatedUtc = DateTime.UtcNow
-                };
+                var now = DateTime.UtcNow;
+                var provider = SelectedDatabase == SearchDatabase.PubMed ? "pubmed" : "ctgov";
+                var user = Environment.UserName;
+
                 var run = new LitSearchRun
                 {
-                    Provider = hook.Provider,
-                    Query = hook.Query,
-                    From = hook.From,
-                    To = hook.To,
-                    RunUtc = DateTime.UtcNow,
-                    TotalHits = Results.Count
+                    Provider = provider,
+                    Query = Query,
+                    From = From,
+                    To = To,
+                    RunUtc = now,
+                    TotalHits = Results.Count,
+                    ExecutedBy = user
                 };
 
                 // Save raw provider return (debug): serialize normalized hits as JSON
@@ -193,31 +199,64 @@ namespace LM.App.Wpf.ViewModels
                 var rawRel = await _storage.SaveNewAsync(tmpRaw, "litsearch/raw", preferredFileName: $"raw_{run.RunId}.json");
                 run.RawAttachments.Add(rawRel);
 
-                hook.Runs.Add(run);
+                var continueExisting = _loadedHook is not null && _loadedEntryId is not null
+                    && string.Equals(_loadedHook.Query, Query, StringComparison.Ordinal);
 
-                // 2) Persist litsearch.json as the "primary file" of the LitSearch entry
+                var createdUtc = continueExisting ? _loadedHook!.CreatedUtc : now;
+                var createdBy = continueExisting ? _loadedHook!.CreatedBy : user;
+                var derivedFrom = continueExisting ? _loadedHook!.DerivedFromEntryId : _loadedEntryId;
+
+                var runs = continueExisting ? _loadedHook!.Runs.ToList() : new List<LitSearchRun>();
+                runs.Add(run);
+
+                var note = ComposeSearchNote(Query, provider, createdUtc, createdBy, runs.Count, run, derivedFrom);
+
+                var hook = new LitSearchHook
+                {
+                    Title = BuildTitle(Query, _loadedHook, continueExisting),
+                    Query = Query,
+                    Provider = provider,
+                    From = From,
+                    To = To,
+                    CreatedBy = createdBy,
+                    CreatedUtc = createdUtc,
+                    Keywords = _loadedHook?.Keywords ?? Array.Empty<string>(),
+                    Notes = note,
+                    DerivedFromEntryId = derivedFrom,
+                    Runs = runs
+                };
+
+                // Persist litsearch.json as the "primary file" of the LitSearch entry
                 var tmpHook = Path.Combine(Path.GetTempPath(), $"litsearch_{run.RunId}.json");
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
                 var relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
 
-                var litEntry = new Entry
-                {
-                    Id = LM.Core.Utils.IdGen.NewId(),
-                    Type = EntryType.Other,
-                    Title = hook.Title,
-                    DisplayName = hook.Title,
-                    Source = "LitSearch",
-                    AddedOnUtc = DateTime.UtcNow,
-                    MainFilePath = relHook,                 // primary (will be used by LitSearchSpokeHandler)
-                    OriginalFileName = Path.GetFileName(relHook),
-                    Links = new() { },
-                    Tags = new(),
-                    Authors = new()
-                };
+                var litEntry = continueExisting && _loadedEntryId is not null
+                    ? await _store.GetByIdAsync(_loadedEntryId) ?? new Entry { Id = _loadedEntryId }
+                    : new Entry { Id = LM.Core.Utils.IdGen.NewId() };
 
-                await _store.SaveAsync(litEntry);          // hub+spoke save (our spoke reads the primary JSON) :contentReference[oaicite:5]{index=5}
+                litEntry.Type = EntryType.Other;
+                litEntry.Title = hook.Title;
+                litEntry.DisplayName = hook.Title;
+                litEntry.Source = "LitSearch";
+                litEntry.AddedOnUtc = createdUtc;
+                litEntry.AddedBy = createdBy;
+                litEntry.Notes = note;
+                litEntry.MainFilePath = relHook;                 // primary (will be used by LitSearchSpokeHandler)
+                litEntry.OriginalFileName = Path.GetFileName(relHook);
+                litEntry.Links ??= new List<string>();
+                litEntry.Tags ??= new List<string>();
+                litEntry.Authors ??= new List<string>();
+                litEntry.Relations ??= new List<Relation>();
 
-                // 3) Commit selected hits not in DB as unique entries (no files)
+                if (!continueExisting && derivedFrom is not null)
+                    EnsureRelation(litEntry, derivedFrom);
+                else if (continueExisting && hook.DerivedFromEntryId is not null)
+                    EnsureRelation(litEntry, hook.DerivedFromEntryId);
+
+                await _store.SaveAsync(litEntry);          // hub+spoke save (our spoke reads the primary JSON)
+
+                // Commit selected hits not in DB as unique entries (no files)
                 foreach (var h in Results.Where(r => r.Selected && !r.AlreadyInDb))
                 {
                     var url = h.Url ?? (h.Doi != null ? $"https://doi.org/{h.Doi}" : null);
@@ -237,18 +276,17 @@ namespace LM.App.Wpf.ViewModels
                         Pmid = h.Source == SearchDatabase.PubMed ? h.ExternalId : null,
                         Nct = h.Source == SearchDatabase.ClinicalTrialsGov ? h.ExternalId : null,
                         Authors = LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(h.Authors).ToList(),
-                        Links = url is null ? new() : new() { url },
+                        Links = url is null ? new List<string>() : new List<string> { url },
                         Source = h.Source == SearchDatabase.PubMed ? "PubMed" : "ClinicalTrials.gov",
                         AddedOnUtc = DateTime.UtcNow,
                         MainFilePath = rel,
                         OriginalFileName = Path.GetFileName(rel)
                     };
-                    await _store.SaveAsync(entry);          // store it (Article/Document spokes handle indexing) :contentReference[oaicite:6]{index=6}
+                    await _store.SaveAsync(entry);          // store it (Article/Document spokes handle indexing)
 
                     run.ImportedEntryIds.Add(entry.Id);
                 }
 
-                // 4) Update (append) run info in the litsearch hook and re-save the entry
                 // Re-write the hook (now with ImportedEntryIds filled)
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
                 relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}_updated.json");
@@ -256,34 +294,105 @@ namespace LM.App.Wpf.ViewModels
                 litEntry.OriginalFileName = Path.GetFileName(relHook);
                 await _store.SaveAsync(litEntry);
 
-                // Show in "Previous runs"
-                PreviousRuns.Insert(0, run);
+                _loadedEntryId = litEntry.Id;
+                _loadedHook = hook;
+                _loadedRunId = run.RunId;
+
+                await RefreshPreviousRunsAsync();
+                SelectedPreviousRun = PreviousRuns.FirstOrDefault(r => r.RunId == run.RunId) ?? SelectedPreviousRun;
             }
             finally { IsBusy = false; }
         }
 
         private async Task LoadSearchAsync()
         {
-            // Minimal: load the last LitSearch entry to pre-fill From/To/Query.
-            var all = new List<Entry>();
-            await foreach (var entry in _store.EnumerateAsync(CancellationToken.None))
-            {
-                all.Add(entry);
-            }
-            var last = all.Where(e => string.Equals(e.Source, "LitSearch", StringComparison.OrdinalIgnoreCase))
-                          .OrderByDescending(e => e.AddedOnUtc).FirstOrDefault();
-            if (last?.MainFilePath is null) return;
+            await RefreshPreviousRunsAsync();
 
-            var abs = _ws.GetAbsolutePath(last.MainFilePath);
-            var json = await File.ReadAllTextAsync(abs);
-            var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
-            if (hook is null) return;
+            var run = SelectedPreviousRun ?? PreviousRuns.FirstOrDefault();
+            if (run is null) return;
 
-            Query = hook.Query;
-            // "When loading old searches, the end date of a previous search will be the start date of the new"
-            From = hook.To;
+            if (!_runIndex.TryGetValue(run.RunId, out var context))
+                return;
+
+            SelectedPreviousRun = run;
+
+            Query = run.Query;
+            From = run.To ?? context.Hook.To ?? context.Hook.From ?? run.From;
             To = null;
-            SelectedDatabase = hook.Provider.Equals("pubmed", StringComparison.OrdinalIgnoreCase) ? SearchDatabase.PubMed : SearchDatabase.ClinicalTrialsGov;
+            SelectedDatabase = run.Provider.Equals("pubmed", StringComparison.OrdinalIgnoreCase)
+                ? SearchDatabase.PubMed
+                : SearchDatabase.ClinicalTrialsGov;
+
+            _loadedEntryId = context.EntryId;
+            _loadedHook = context.Hook;
+            _loadedRunId = run.RunId;
+
+            Results.Clear();
+        }
+
+        private async Task RefreshPreviousRunsAsync(CancellationToken ct = default)
+        {
+            var items = new List<(LitSearchRun run, PreviousSearchContext context)>();
+            _runIndex.Clear();
+
+            try
+            {
+                var root = _ws.GetWorkspaceRoot();
+                await foreach (var entry in _store.EnumerateAsync(ct))
+                {
+                    if (ct.IsCancellationRequested)
+                        break;
+
+                    if (!string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (string.IsNullOrWhiteSpace(entry.Id))
+                        continue;
+
+                    var hookPath = Path.Combine(root, "entries", entry.Id, "litsearch", "litsearch.json");
+                    if (!File.Exists(hookPath))
+                        continue;
+
+                    try
+                    {
+                        var json = await File.ReadAllTextAsync(hookPath, ct);
+                        var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
+                        if (hook is null)
+                            continue;
+
+                        var context = new PreviousSearchContext(entry.Id, hook);
+                        foreach (var run in hook.Runs.OrderByDescending(r => r.RunUtc))
+                        {
+                            items.Add((run, context));
+                            _runIndex[run.RunId] = context;
+                        }
+                    }
+                    catch
+                    {
+                        // ignore malformed entries
+                    }
+                }
+            }
+            catch
+            {
+                // workspace not yet initialized
+            }
+
+            items.Sort((a, b) => Nullable.Compare(b.run.RunUtc, a.run.RunUtc));
+
+            PreviousRuns.Clear();
+            foreach (var (run, _) in items)
+                PreviousRuns.Add(run);
+
+            if (PreviousRuns.Count == 0)
+            {
+                SelectedPreviousRun = null;
+            }
+            else if (SelectedPreviousRun is null || !_runIndex.ContainsKey(SelectedPreviousRun.RunId))
+            {
+                SelectedPreviousRun = PreviousRuns[0];
+            }
+
+            RaiseCanExec();
         }
 
         private async Task ExportSearchAsync()
@@ -304,6 +413,55 @@ namespace LM.App.Wpf.ViewModels
             }
             await File.WriteAllTextAsync(path, sb.ToString(), Encoding.UTF8);
         }
+
+        private static string BuildTitle(string query, LitSearchHook? existing, bool reuseExisting)
+        {
+            if (reuseExisting && !string.IsNullOrWhiteSpace(existing?.Title))
+                return existing!.Title;
+
+            var trimmed = (query ?? string.Empty).Trim();
+            return trimmed.Length > 80 ? trimmed[..80] + "…" : trimmed;
+        }
+
+        private static string ComposeSearchNote(string query, string provider, DateTime createdUtc, string? createdBy, int runCount, LitSearchRun latestRun, string? derivedFrom)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"Query: {query}");
+            sb.AppendLine($"Provider: {provider}");
+            sb.AppendLine($"Created by {createdBy ?? "unknown"} on {createdUtc:u}.");
+            sb.AppendLine($"Run count: {runCount}");
+            sb.AppendLine($"Latest run executed by {latestRun.ExecutedBy ?? createdBy ?? "unknown"} on {latestRun.RunUtc:u} (hits: {latestRun.TotalHits}).");
+            if (latestRun.From.HasValue || latestRun.To.HasValue)
+            {
+                var fromText = latestRun.From?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "–";
+                var toText = latestRun.To?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "–";
+                sb.AppendLine($"Range: {fromText} → {toText}");
+            }
+            if (!string.IsNullOrWhiteSpace(derivedFrom))
+            {
+                sb.AppendLine($"Derived from entry {derivedFrom}.");
+            }
+            return sb.ToString().Trim();
+        }
+
+        private static void EnsureRelation(Entry entry, string targetEntryId)
+        {
+            if (string.IsNullOrWhiteSpace(targetEntryId))
+                return;
+
+            entry.Relations ??= new List<Relation>();
+
+            if (entry.Relations.Any(r =>
+                    string.Equals(r.Type, "derived_from", StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(r.TargetEntryId, targetEntryId, StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            entry.Relations.Add(new Relation { Type = "derived_from", TargetEntryId = targetEntryId });
+        }
+
+        private sealed record PreviousSearchContext(string EntryId, LitSearchHook Hook);
 
         private static string Sanitize(string name)
         {

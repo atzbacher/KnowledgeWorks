@@ -245,6 +245,8 @@ LM.HubSpoke.Models.DocumentType.Whitepaper = 4 -> LM.HubSpoke.Models.DocumentTyp
 LM.HubSpoke.Models.EntryHooks
 LM.HubSpoke.Models.EntryHooks.Article.get -> string?
 LM.HubSpoke.Models.EntryHooks.Article.init -> void
+LM.HubSpoke.Models.EntryHooks.LitSearch.get -> string?
+LM.HubSpoke.Models.EntryHooks.LitSearch.init -> void
 LM.HubSpoke.Models.EntryHooks.DataExtraction.get -> string?
 LM.HubSpoke.Models.EntryHooks.DataExtraction.init -> void
 LM.HubSpoke.Models.EntryHooks.Document.get -> string?
@@ -360,11 +362,15 @@ LM.HubSpoke.Models.LitSearchHook.From.get -> System.DateTime?
 LM.HubSpoke.Models.LitSearchHook.From.init -> void
 LM.HubSpoke.Models.LitSearchHook.Keywords.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.HubSpoke.Models.LitSearchHook.Keywords.init -> void
+LM.HubSpoke.Models.LitSearchHook.DerivedFromEntryId.get -> string?
+LM.HubSpoke.Models.LitSearchHook.DerivedFromEntryId.init -> void
 LM.HubSpoke.Models.LitSearchHook.LitSearchHook() -> void
 LM.HubSpoke.Models.LitSearchHook.Provider.get -> string!
 LM.HubSpoke.Models.LitSearchHook.Provider.init -> void
 LM.HubSpoke.Models.LitSearchHook.Query.get -> string!
 LM.HubSpoke.Models.LitSearchHook.Query.init -> void
+LM.HubSpoke.Models.LitSearchHook.Notes.get -> string?
+LM.HubSpoke.Models.LitSearchHook.Notes.init -> void
 LM.HubSpoke.Models.LitSearchHook.Runs.get -> System.Collections.Generic.List<LM.HubSpoke.Models.LitSearchRun!>!
 LM.HubSpoke.Models.LitSearchHook.Runs.init -> void
 LM.HubSpoke.Models.LitSearchHook.SchemaVersion.get -> string!
@@ -387,6 +393,8 @@ LM.HubSpoke.Models.LitSearchRun.RunId.get -> string!
 LM.HubSpoke.Models.LitSearchRun.RunId.init -> void
 LM.HubSpoke.Models.LitSearchRun.RunUtc.get -> System.DateTime
 LM.HubSpoke.Models.LitSearchRun.RunUtc.init -> void
+LM.HubSpoke.Models.LitSearchRun.ExecutedBy.get -> string?
+LM.HubSpoke.Models.LitSearchRun.ExecutedBy.init -> void
 LM.HubSpoke.Models.LitSearchRun.From.get -> System.DateTime?
 LM.HubSpoke.Models.LitSearchRun.From.init -> void
 LM.HubSpoke.Models.LitSearchRun.To.get -> System.DateTime?
