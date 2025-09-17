@@ -26,26 +26,24 @@ namespace LM.App.Wpf.ViewModels
         private readonly IEntryStore _store;
         private readonly IFileStorageRepository _storage;
         private readonly IWorkSpaceService _ws;
+        private readonly ISearchSavePrompt _savePrompt;
         private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
-        private readonly SemaphoreSlim _metadataUpdateLock = new(1, 1);
 
         private string? _loadedEntryId;
-        private string? _loadedRunId;
         private LitSearchHook? _loadedHook;
-        private bool _suppressSelectedRunMetadataUpdate;
-        private string _selectedRunDisplayName = string.Empty;
-        private bool _selectedRunIsFavorite;
 
-        public SearchViewModel(IEntryStore store, IFileStorageRepository storage, IWorkSpaceService ws)
+        public SearchViewModel(IEntryStore store, IFileStorageRepository storage, IWorkSpaceService ws, ISearchSavePrompt savePrompt)
         {
             _store = store;
             _storage = storage;
             _ws = ws;
+            _savePrompt = savePrompt ?? throw new ArgumentNullException(nameof(savePrompt));
 
             RunSearchCommand = new AsyncRelayCommand(RunSearchAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Query));
             SaveSearchCommand = new AsyncRelayCommand(SaveSearchAsync, () => !IsBusy && Results.Any());
             LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy && SelectedPreviousRun is not null);
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
+            StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is LitSearchRun);
 
             _ = RefreshPreviousRunsAsync();
         }
@@ -116,76 +114,18 @@ namespace LM.App.Wpf.ViewModels
                 if (ReferenceEquals(_selectedPreviousRun, value)) return;
                 _selectedPreviousRun = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(HasSelectedRun));
-                UpdateSelectedRunMetadataBindings();
                 RaiseCanExec();
-            }
-        }
-
-        public bool HasSelectedRun => SelectedPreviousRun is not null;
-
-        public string SelectedRunDisplayName
-        {
-            get => _selectedRunDisplayName;
-            set
-            {
-                value ??= string.Empty;
-                if (string.Equals(_selectedRunDisplayName, value, StringComparison.Ordinal))
-                    return;
-                _selectedRunDisplayName = value;
-                OnPropertyChanged();
-                if (!_suppressSelectedRunMetadataUpdate)
-                {
-                    _ = UpdateSelectedRunMetadataAsync();
-                }
-            }
-        }
-
-        public bool SelectedRunIsFavorite
-        {
-            get => _selectedRunIsFavorite;
-            set
-            {
-                if (_selectedRunIsFavorite == value)
-                    return;
-                _selectedRunIsFavorite = value;
-                OnPropertyChanged();
-                if (!_suppressSelectedRunMetadataUpdate)
-                {
-                    _ = UpdateSelectedRunMetadataAsync();
-                }
             }
         }
 
         private bool _isBusy;
         public bool IsBusy { get => _isBusy; private set { _isBusy = value; OnPropertyChanged(); RaiseCanExec(); } }
 
-        private void UpdateSelectedRunMetadataBindings()
-        {
-            _suppressSelectedRunMetadataUpdate = true;
-            try
-            {
-                if (_selectedPreviousRun is null)
-                {
-                    SelectedRunDisplayName = string.Empty;
-                    SelectedRunIsFavorite = false;
-                }
-                else
-                {
-                    SelectedRunDisplayName = _selectedPreviousRun.DisplayName ?? string.Empty;
-                    SelectedRunIsFavorite = _selectedPreviousRun.IsFavorite;
-                }
-            }
-            finally
-            {
-                _suppressSelectedRunMetadataUpdate = false;
-            }
-        }
-
         public ICommand RunSearchCommand { get; }
         public ICommand SaveSearchCommand { get; }
         public ICommand LoadSearchCommand { get; }
         public ICommand ExportSearchCommand { get; }
+        public ICommand StartPreviousRunCommand { get; }
 
         private void RaiseCanExec()
         {
@@ -193,6 +133,7 @@ namespace LM.App.Wpf.ViewModels
             (SaveSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (LoadSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ExportSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
+            (StartPreviousRunCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
         }
 
         private async Task RunSearchAsync()
@@ -238,6 +179,44 @@ namespace LM.App.Wpf.ViewModels
         /// </summary>
         private async Task SaveSearchAsync()
         {
+            var continueExisting = _loadedHook is not null && _loadedEntryId is not null
+                && string.Equals(_loadedHook.Query, Query, StringComparison.Ordinal);
+
+            var fallbackTitle = BuildTitle(Query, _loadedHook, continueExisting);
+            var defaultName = _loadedHook?.Title;
+            if (string.IsNullOrWhiteSpace(defaultName))
+            {
+                defaultName = SelectedPreviousRun?.DisplayName;
+            }
+            if (string.IsNullOrWhiteSpace(defaultName))
+            {
+                defaultName = fallbackTitle;
+            }
+
+            var defaultNotes = _loadedHook?.Notes ?? string.Empty;
+
+            var promptResult = await _savePrompt.RequestAsync(new SearchSavePromptContext(
+                Query,
+                SelectedDatabase,
+                From,
+                To,
+                defaultName ?? string.Empty,
+                defaultNotes ?? string.Empty));
+
+            if (promptResult is null)
+            {
+                return;
+            }
+
+            var trimmedName = string.IsNullOrWhiteSpace(promptResult.Name)
+                ? null
+                : promptResult.Name.Trim();
+            var trimmedNotes = string.IsNullOrWhiteSpace(promptResult.Notes)
+                ? null
+                : promptResult.Notes.Trim();
+
+            var effectiveTitle = string.IsNullOrWhiteSpace(trimmedName) ? fallbackTitle : trimmedName;
+
             IsBusy = true;
             try
             {
@@ -253,7 +232,8 @@ namespace LM.App.Wpf.ViewModels
                     To = To,
                     RunUtc = now,
                     TotalHits = Results.Count,
-                    ExecutedBy = user
+                    ExecutedBy = user,
+                    DisplayName = effectiveTitle
                 };
 
                 // Save raw provider return (debug): serialize normalized hits as JSON
@@ -262,9 +242,6 @@ namespace LM.App.Wpf.ViewModels
                 var rawRel = await _storage.SaveNewAsync(tmpRaw, "litsearch/raw", preferredFileName: $"raw_{run.RunId}.json");
                 run.RawAttachments.Add(rawRel);
 
-                var continueExisting = _loadedHook is not null && _loadedEntryId is not null
-                    && string.Equals(_loadedHook.Query, Query, StringComparison.Ordinal);
-
                 var createdUtc = continueExisting ? _loadedHook!.CreatedUtc : now;
                 var createdBy = continueExisting ? _loadedHook!.CreatedBy : user;
                 var derivedFrom = continueExisting ? _loadedHook!.DerivedFromEntryId : _loadedEntryId;
@@ -272,11 +249,11 @@ namespace LM.App.Wpf.ViewModels
                 var runs = continueExisting ? _loadedHook!.Runs.ToList() : new List<LitSearchRun>();
                 runs.Add(run);
 
-                var note = ComposeSearchNote(Query, provider, createdUtc, createdBy, runs.Count, run, derivedFrom);
+                var note = ComposeSearchNote(Query, provider, createdUtc, createdBy, runs.Count, run, derivedFrom, trimmedNotes);
 
                 var hook = new LitSearchHook
                 {
-                    Title = BuildTitle(Query, _loadedHook, continueExisting),
+                    Title = effectiveTitle,
                     Query = Query,
                     Provider = provider,
                     From = From,
@@ -284,7 +261,7 @@ namespace LM.App.Wpf.ViewModels
                     CreatedBy = createdBy,
                     CreatedUtc = createdUtc,
                     Keywords = _loadedHook?.Keywords ?? Array.Empty<string>(),
-                    Notes = note,
+                    Notes = trimmedNotes,
                     DerivedFromEntryId = derivedFrom,
                     Runs = runs
                 };
@@ -299,8 +276,8 @@ namespace LM.App.Wpf.ViewModels
                     : new Entry { Id = LM.Core.Utils.IdGen.NewId() };
 
                 litEntry.Type = EntryType.Other;
-                litEntry.Title = hook.Title;
-                litEntry.DisplayName = hook.Title;
+                litEntry.Title = effectiveTitle;
+                litEntry.DisplayName = effectiveTitle;
                 litEntry.Source = "LitSearch";
                 litEntry.AddedOnUtc = createdUtc;
                 litEntry.AddedBy = createdBy;
@@ -348,6 +325,7 @@ namespace LM.App.Wpf.ViewModels
                     await _store.SaveAsync(entry);          // store it (Article/Document spokes handle indexing)
 
                     run.ImportedEntryIds.Add(entry.Id);
+                    h.AlreadyInDb = true;
                 }
 
                 // Re-write the hook (now with ImportedEntryIds filled)
@@ -359,7 +337,6 @@ namespace LM.App.Wpf.ViewModels
 
                 _loadedEntryId = litEntry.Id;
                 _loadedHook = hook;
-                _loadedRunId = run.RunId;
 
                 await RefreshPreviousRunsAsync();
                 SelectedPreviousRun = PreviousRuns.FirstOrDefault(r => r.RunId == run.RunId) ?? SelectedPreviousRun;
@@ -372,10 +349,32 @@ namespace LM.App.Wpf.ViewModels
             await RefreshPreviousRunsAsync();
 
             var run = SelectedPreviousRun ?? PreviousRuns.FirstOrDefault();
-            if (run is null) return;
-
-            if (!_runIndex.TryGetValue(run.RunId, out var context))
+            if (run is null)
                 return;
+
+            _ = TryLoadRun(run);
+        }
+
+        private async Task StartPreviousRunAsync(object? parameter)
+        {
+            if (parameter is not LitSearchRun requestedRun)
+                return;
+
+            await RefreshPreviousRunsAsync();
+
+            var run = PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, requestedRun.RunId, StringComparison.Ordinal))
+                      ?? requestedRun;
+
+            if (!TryLoadRun(run))
+                return;
+
+            await RunSearchAsync();
+        }
+
+        private bool TryLoadRun(LitSearchRun run)
+        {
+            if (!_runIndex.TryGetValue(run.RunId, out var context))
+                return false;
 
             SelectedPreviousRun = run;
 
@@ -388,9 +387,9 @@ namespace LM.App.Wpf.ViewModels
 
             _loadedEntryId = context.EntryId;
             _loadedHook = context.Hook;
-            _loadedRunId = run.RunId;
 
             Results.Clear();
+            return true;
         }
 
         private async Task RefreshPreviousRunsAsync(CancellationToken ct = default)
@@ -531,9 +530,14 @@ namespace LM.App.Wpf.ViewModels
             return trimmed.Length > 80 ? trimmed[..80] + "…" : trimmed;
         }
 
-        private static string ComposeSearchNote(string query, string provider, DateTime createdUtc, string? createdBy, int runCount, LitSearchRun latestRun, string? derivedFrom)
+        private static string ComposeSearchNote(string query, string provider, DateTime createdUtc, string? createdBy, int runCount, LitSearchRun latestRun, string? derivedFrom, string? userNotes)
         {
             var sb = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(userNotes))
+            {
+                sb.AppendLine(userNotes.Trim());
+                sb.AppendLine();
+            }
             sb.AppendLine($"Query: {query}");
             sb.AppendLine($"Provider: {provider}");
             sb.AppendLine($"Created by {createdBy ?? "unknown"} on {createdUtc:u}.");
@@ -550,85 +554,6 @@ namespace LM.App.Wpf.ViewModels
                 sb.AppendLine($"Derived from entry {derivedFrom}.");
             }
             return sb.ToString().Trim();
-        }
-
-        private async Task UpdateSelectedRunMetadataAsync()
-        {
-            if (_suppressSelectedRunMetadataUpdate)
-                return;
-
-            var run = SelectedPreviousRun;
-            if (run is null)
-                return;
-
-            if (!_runIndex.TryGetValue(run.RunId, out var context))
-                return;
-
-            string? desiredName = string.IsNullOrWhiteSpace(SelectedRunDisplayName)
-                ? null
-                : SelectedRunDisplayName.Trim();
-            var desiredFavorite = SelectedRunIsFavorite;
-            var updatedRun = false;
-
-            try
-            {
-                await _metadataUpdateLock.WaitAsync();
-                try
-                {
-                    var existing = context.Hook.Runs.FirstOrDefault(r =>
-                        string.Equals(r.RunId, run.RunId, StringComparison.Ordinal));
-
-                    if (existing is null)
-                    {
-                        existing = context.Hook.Runs.FirstOrDefault(r =>
-                            r.RunUtc == run.RunUtc &&
-                            string.Equals(r.Provider, run.Provider, StringComparison.OrdinalIgnoreCase) &&
-                            string.Equals(r.Query, run.Query, StringComparison.Ordinal));
-                        if (existing is null)
-                            return;
-                    }
-
-                    if (string.Equals(existing.DisplayName, desiredName, StringComparison.Ordinal)
-                        && existing.IsFavorite == desiredFavorite)
-                    {
-                        return;
-                    }
-
-                    var replacement = CloneRunWithMetadata(existing, existing.RunId, desiredName, desiredFavorite);
-                    var index = context.Hook.Runs.IndexOf(existing);
-                    if (index < 0)
-                        return;
-
-                    context.Hook.Runs[index] = replacement;
-                    updatedRun = true;
-
-                    await PersistHookAsync(context);
-                }
-                finally
-                {
-                    _metadataUpdateLock.Release();
-                }
-            }
-            catch
-            {
-                // best-effort persistence; ignore errors
-            }
-
-            if (!updatedRun)
-                return;
-
-            _suppressSelectedRunMetadataUpdate = true;
-            try
-            {
-                SelectedRunDisplayName = desiredName ?? string.Empty;
-                SelectedRunIsFavorite = desiredFavorite;
-            }
-            finally
-            {
-                _suppressSelectedRunMetadataUpdate = false;
-            }
-
-            await RefreshPreviousRunsAsync();
         }
 
         private static void EnsureRelation(Entry entry, string targetEntryId)

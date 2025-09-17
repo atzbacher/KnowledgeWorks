@@ -11,6 +11,20 @@ LM.App.Wpf.Common.AsyncRelayCommand.CanExecute(object? parameter) -> bool
 LM.App.Wpf.Common.AsyncRelayCommand.CanExecuteChanged -> System.EventHandler?
 LM.App.Wpf.Common.AsyncRelayCommand.Execute(object? parameter) -> void
 LM.App.Wpf.Common.AsyncRelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.ISearchSavePrompt
+LM.App.Wpf.Common.ISearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
+LM.App.Wpf.Common.SearchSavePromptContext
+LM.App.Wpf.Common.SearchSavePromptContext.SearchSavePromptContext(string! Query, LM.Core.Models.SearchDatabase Database, System.DateTime? From, System.DateTime? To, string! DefaultName, string! DefaultNotes) -> void
+LM.App.Wpf.Common.SearchSavePromptContext.Database.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultName.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultNotes.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.From.get -> System.DateTime?
+LM.App.Wpf.Common.SearchSavePromptContext.Query.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.To.get -> System.DateTime?
+LM.App.Wpf.Common.SearchSavePromptResult
+LM.App.Wpf.Common.SearchSavePromptResult.SearchSavePromptResult(string! Name, string! Notes) -> void
+LM.App.Wpf.Common.SearchSavePromptResult.Name.get -> string!
+LM.App.Wpf.Common.SearchSavePromptResult.Notes.get -> string!
 LM.App.Wpf.Common.RelayCommand
 LM.App.Wpf.Common.RelayCommand.CanExecute(object? parameter) -> bool
 LM.App.Wpf.Common.RelayCommand.CanExecuteChanged -> System.EventHandler?
@@ -87,7 +101,6 @@ LM.App.Wpf.ViewModels.SearchItemViewModel.Vm.get -> LM.App.Wpf.ViewModels.Librar
 LM.App.Wpf.ViewModels.SearchViewModel
 LM.App.Wpf.ViewModels.SearchViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
 LM.App.Wpf.ViewModels.SearchViewModel.ExportSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.HasSelectedRun.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
@@ -98,15 +111,12 @@ LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
 LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws) -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
-LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunDisplayName.get -> string!
-LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunDisplayName.set -> void
-LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunIsFavorite.get -> bool
-LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunIsFavorite.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
 LM.App.Wpf.ViewModels.SearchDatabaseOption
@@ -171,6 +181,9 @@ LM.App.Wpf.Views.AddView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void
+LM.App.Wpf.Views.SearchSavePrompt
+LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
+LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt() -> void
 LM.App.Wpf.Views.SearchView
 LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
 LM.App.Wpf.Views.SearchView.SearchView() -> void

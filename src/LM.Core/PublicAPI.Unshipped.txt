@@ -286,6 +286,7 @@ LM.Core.Models.SearchHit.Url.get -> string?
 LM.Core.Models.SearchHit.Url.init -> void
 LM.Core.Models.SearchHit.Year.get -> int?
 LM.Core.Models.SearchHit.Year.init -> void
+LM.Core.Models.SearchHit.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 LM.Core.Utils.Hashes
 LM.Core.Utils.IdGen
 LM.Core.Utils.JsonEx
