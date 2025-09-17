@@ -4,7 +4,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-	<Grid Margin="12" RowDefinitions="Auto,8,*,8,Auto">
+        <Grid Margin="12">
+                <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="8" />
+                        <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 		<!-- Controls -->
 		<StackPanel Orientation="Horizontal" Grid.Row="0" Spacing="8">
 			<TextBox Width="420" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" />
