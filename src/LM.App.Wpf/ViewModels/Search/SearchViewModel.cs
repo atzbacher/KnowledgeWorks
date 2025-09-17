@@ -44,6 +44,7 @@ namespace LM.App.Wpf.ViewModels
             LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy && SelectedPreviousRun is not null);
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
             StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is LitSearchRun);
+            ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is LitSearchRun);
 
             _ = RefreshPreviousRunsAsync();
         }
@@ -126,6 +127,7 @@ namespace LM.App.Wpf.ViewModels
         public ICommand LoadSearchCommand { get; }
         public ICommand ExportSearchCommand { get; }
         public ICommand StartPreviousRunCommand { get; }
+        public ICommand ToggleFavoriteCommand { get; }
 
         private void RaiseCanExec()
         {
@@ -134,6 +136,7 @@ namespace LM.App.Wpf.ViewModels
             (LoadSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ExportSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (StartPreviousRunCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
+            (ToggleFavoriteCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
         }
 
         private async Task RunSearchAsync()
@@ -369,6 +372,34 @@ namespace LM.App.Wpf.ViewModels
                 return;
 
             await RunSearchAsync();
+        }
+
+        private async Task ToggleFavoriteAsync(object? parameter)
+        {
+            if (parameter is not LitSearchRun run)
+                return;
+
+            if (!_runIndex.TryGetValue(run.RunId, out var context))
+                return;
+
+            IsBusy = true;
+            try
+            {
+                var runs = context.Hook.Runs;
+                var index = runs.FindIndex(r => string.Equals(r.RunId, run.RunId, StringComparison.Ordinal));
+                if (index < 0)
+                    return;
+
+                var updated = CloneRunWithMetadata(run, run.RunId, run.DisplayName, !run.IsFavorite);
+                runs[index] = updated;
+
+                await PersistHookAsync(context);
+                await RefreshPreviousRunsAsync();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private bool TryLoadRun(LitSearchRun run)

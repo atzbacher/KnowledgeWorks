@@ -117,6 +117,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
 LM.App.Wpf.ViewModels.SearchDatabaseOption
