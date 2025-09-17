@@ -273,6 +273,8 @@ LM.Core.Models.SearchHit.Doi.get -> string?
 LM.Core.Models.SearchHit.Doi.init -> void
 LM.Core.Models.SearchHit.ExternalId.get -> string!
 LM.Core.Models.SearchHit.ExternalId.init -> void
+LM.Core.Models.SearchHit.ExistingEntryId.get -> string?
+LM.Core.Models.SearchHit.ExistingEntryId.set -> void
 LM.Core.Models.SearchHit.JournalOrSource.get -> string?
 LM.Core.Models.SearchHit.JournalOrSource.init -> void
 LM.Core.Models.SearchHit.SearchHit() -> void

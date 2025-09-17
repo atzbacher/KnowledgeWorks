@@ -172,13 +172,9 @@ namespace LM.App.Wpf.ViewModels
                 // small sets expected
                 foreach (var h in hits)
                 {
-                    bool inDb = all.Any(e =>
-                           (!string.IsNullOrWhiteSpace(h.Doi) && string.Equals(e.Doi, h.Doi, StringComparison.OrdinalIgnoreCase))
-                        || (!string.IsNullOrWhiteSpace(h.ExternalId) && (
-                               string.Equals(e.Pmid, h.ExternalId, StringComparison.OrdinalIgnoreCase)
-                            || string.Equals(e.Nct, h.ExternalId, StringComparison.OrdinalIgnoreCase)))
-                        || (string.Equals(e.Title, h.Title, StringComparison.OrdinalIgnoreCase) && e.Year == h.Year));
-                    h.AlreadyInDb = inDb;
+                    var match = FindExistingEntry(all, h);
+                    h.AlreadyInDb = match is not null;
+                    h.ExistingEntryId = match?.Id;
                     Results.Add(h);
                 }
 
@@ -191,8 +187,7 @@ namespace LM.App.Wpf.ViewModels
         /// </summary>
         private async Task SaveSearchAsync()
         {
-            var continueExisting = _loadedHook is not null && _loadedEntryId is not null
-                && string.Equals(_loadedHook.Query, Query, StringComparison.Ordinal);
+            var continueExisting = ShouldContinueExisting(_loadedHook, _loadedEntryId, Query);
 
             var fallbackTitle = BuildTitle(Query, _loadedHook, continueExisting);
             var defaultName = _loadedHook?.Title;
@@ -309,7 +304,8 @@ namespace LM.App.Wpf.ViewModels
                 await _store.SaveAsync(litEntry);          // hub+spoke save (our spoke reads the primary JSON)
 
                 // Commit selected hits not in DB as unique entries (no files)
-                foreach (var h in Results.Where(r => r.Selected && !r.AlreadyInDb))
+                var selectedHits = Results.Where(r => r.Selected).ToList();
+                foreach (var h in selectedHits.Where(r => !r.AlreadyInDb))
                 {
                     var url = h.Url ?? (h.Doi != null ? $"https://doi.org/{h.Doi}" : null);
                     // create a tiny .url file so MainFilePath is valid
@@ -338,7 +334,34 @@ namespace LM.App.Wpf.ViewModels
 
                     run.ImportedEntryIds.Add(entry.Id);
                     h.AlreadyInDb = true;
+                    h.ExistingEntryId = entry.Id;
                 }
+
+                var importedIds = new HashSet<string>(run.ImportedEntryIds, StringComparer.Ordinal);
+                var checkedSnapshot = new CheckedItemsSnapshot
+                {
+                    RunId = run.RunId,
+                    SavedUtc = now,
+                    Items = selectedHits.Select(hit => new CheckedItemRecord
+                    {
+                        Source = hit.Source.ToString(),
+                        ExternalId = string.IsNullOrWhiteSpace(hit.ExternalId) ? null : hit.ExternalId,
+                        Doi = hit.Doi,
+                        Title = hit.Title,
+                        Authors = hit.Authors,
+                        JournalOrSource = hit.JournalOrSource,
+                        Year = hit.Year,
+                        Url = hit.Url,
+                        EntryId = string.IsNullOrWhiteSpace(hit.ExistingEntryId) ? null : hit.ExistingEntryId,
+                        AlreadyInDatabase = hit.AlreadyInDb,
+                        ImportedThisRun = hit.ExistingEntryId is not null && importedIds.Contains(hit.ExistingEntryId)
+                    }).ToList()
+                };
+
+                var tmpChecked = Path.Combine(Path.GetTempPath(), $"search_checked_{run.RunId}.json");
+                await File.WriteAllTextAsync(tmpChecked, JsonSerializer.Serialize(checkedSnapshot, JsonStd.Options), Encoding.UTF8);
+                var checkedRel = await _storage.SaveNewAsync(tmpChecked, "litsearch/checked", preferredFileName: $"checked_{run.RunId}.json");
+                run.CheckedAttachments.Add(checkedRel);
 
                 // Re-write the hook (now with ImportedEntryIds filled)
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
@@ -454,6 +477,7 @@ namespace LM.App.Wpf.ViewModels
                         run.DisplayName,
                         run.IsFavorite,
                         run.RawAttachments,
+                        run.CheckedAttachments,
                         run.ImportedEntryIds
                     }
                 };
@@ -634,6 +658,84 @@ namespace LM.App.Wpf.ViewModels
             return trimmed.Length > 80 ? trimmed[..80] + "…" : trimmed;
         }
 
+        private static Entry? FindExistingEntry(IReadOnlyList<Entry> entries, SearchHit hit)
+        {
+            if (entries.Count == 0)
+                return null;
+
+            if (!string.IsNullOrWhiteSpace(hit.Doi))
+            {
+                var doiMatch = entries.FirstOrDefault(e =>
+                    !string.IsNullOrWhiteSpace(e.Doi) &&
+                    string.Equals(e.Doi, hit.Doi, StringComparison.OrdinalIgnoreCase));
+                if (doiMatch is not null)
+                    return doiMatch;
+            }
+
+            if (!string.IsNullOrWhiteSpace(hit.ExternalId))
+            {
+                var idMatch = entries.FirstOrDefault(e =>
+                    (!string.IsNullOrWhiteSpace(e.Pmid) && string.Equals(e.Pmid, hit.ExternalId, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrWhiteSpace(e.Nct) && string.Equals(e.Nct, hit.ExternalId, StringComparison.OrdinalIgnoreCase)));
+                if (idMatch is not null)
+                    return idMatch;
+            }
+
+            if (!string.IsNullOrWhiteSpace(hit.Title))
+            {
+                var titleMatch = entries.FirstOrDefault(e =>
+                    !string.IsNullOrWhiteSpace(e.Title) &&
+                    string.Equals(e.Title, hit.Title, StringComparison.OrdinalIgnoreCase) &&
+                    e.Year == hit.Year);
+                if (titleMatch is not null)
+                    return titleMatch;
+            }
+
+            return null;
+        }
+
+        private static bool ShouldContinueExisting(LitSearchHook? hook, string? entryId, string currentQuery)
+        {
+            if (hook is null || string.IsNullOrWhiteSpace(entryId))
+                return false;
+
+            return string.Equals(
+                NormalizeQueryForComparison(hook.Query),
+                NormalizeQueryForComparison(currentQuery),
+                StringComparison.Ordinal);
+        }
+
+        private static string NormalizeQueryForComparison(string? query)
+        {
+            if (string.IsNullOrEmpty(query))
+                return string.Empty;
+
+            var normalized = query.Replace("\r\n", "\n").Replace('\r', '\n');
+            return normalized.TrimEnd();
+        }
+
+        private sealed record CheckedItemsSnapshot
+        {
+            public string RunId { get; init; } = string.Empty;
+            public DateTime SavedUtc { get; init; }
+            public List<CheckedItemRecord> Items { get; init; } = new();
+        }
+
+        private sealed record CheckedItemRecord
+        {
+            public string Source { get; init; } = string.Empty;
+            public string? ExternalId { get; init; }
+            public string? Doi { get; init; }
+            public string Title { get; init; } = string.Empty;
+            public string Authors { get; init; } = string.Empty;
+            public string? JournalOrSource { get; init; }
+            public int? Year { get; init; }
+            public string? Url { get; init; }
+            public string? EntryId { get; init; }
+            public bool AlreadyInDatabase { get; init; }
+            public bool ImportedThisRun { get; init; }
+        }
+
         private static string ComposeSearchNote(string query, string provider, DateTime createdUtc, string? createdBy, int runCount, LitSearchRun latestRun, string? derivedFrom, string? userNotes)
         {
             var sb = new StringBuilder();
@@ -703,6 +805,7 @@ namespace LM.App.Wpf.ViewModels
                 TotalHits = source.TotalHits,
                 ExecutedBy = source.ExecutedBy,
                 RawAttachments = source.RawAttachments is null ? new List<string>() : new List<string>(source.RawAttachments),
+                CheckedAttachments = source.CheckedAttachments is null ? new List<string>() : new List<string>(source.CheckedAttachments),
                 ImportedEntryIds = source.ImportedEntryIds is null ? new List<string>() : new List<string>(source.ImportedEntryIds),
                 DisplayName = displayName,
                 IsFavorite = isFavorite
