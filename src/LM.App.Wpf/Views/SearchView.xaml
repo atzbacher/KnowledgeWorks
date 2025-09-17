@@ -92,18 +92,28 @@
           <DataGridTemplateColumn Header="★" Width="40">
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>
-                <TextBlock Text="★" HorizontalAlignment="Center" Foreground="Goldenrod">
-                  <TextBlock.Style>
-                    <Style TargetType="TextBlock">
-                      <Setter Property="Opacity" Value="0.2" />
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                          <Setter Property="Opacity" Value="1" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </TextBlock.Style>
-                </TextBlock>
+                <Button Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}"
+                        HorizontalAlignment="Center"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderBrush="{x:Null}"
+                        BorderThickness="0"
+                        Focusable="False"
+                        ToolTip="Toggle favorite">
+                  <TextBlock Text="★" Foreground="Goldenrod">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Opacity" Value="0.2" />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                            <Setter Property="Opacity" Value="1" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </Button>
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
