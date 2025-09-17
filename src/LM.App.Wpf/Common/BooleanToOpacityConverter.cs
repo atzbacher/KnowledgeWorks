@@ -12,12 +12,17 @@ namespace LM.App.Wpf.Common
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return value switch
+            if (value is bool b)
             {
-                bool b => b ? TrueOpacity : FalseOpacity,
-                bool? nb => nb.GetValueOrDefault() ? TrueOpacity : FalseOpacity,
-                _ => FalseOpacity,
-            };
+                return b ? TrueOpacity : FalseOpacity;
+            }
+
+            if (value is bool? nullableBool)
+            {
+                return nullableBool.GetValueOrDefault() ? TrueOpacity : FalseOpacity;
+            }
+
+            return FalseOpacity;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
