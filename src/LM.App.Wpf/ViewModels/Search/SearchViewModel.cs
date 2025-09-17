@@ -377,7 +377,7 @@ namespace LM.App.Wpf.ViewModels
                 // workspace not yet initialized
             }
 
-            items.Sort((a, b) => Nullable.Compare(b.run.RunUtc, a.run.RunUtc));
+            items.Sort((a, b) => DateTime.Compare(b.run.RunUtc, a.run.RunUtc));
 
             PreviousRuns.Clear();
             foreach (var (run, _) in items)
