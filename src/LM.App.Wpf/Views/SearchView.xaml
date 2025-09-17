@@ -71,24 +71,29 @@
     </DataGrid>
 
     <!-- Previous runs (simple) -->
-    <GroupBox Grid.Row="4" Header="Previous runs">
+    <GroupBox Grid.Row="4">
+      <GroupBox.Header>
+        <TextBlock Text="{Binding PreviousRunsCount, StringFormat=Previous runs ({0})}" />
+      </GroupBox.Header>
       <DataGrid ItemsSource="{Binding PreviousRuns}"
                 AutoGenerateColumns="False"
                 IsReadOnly="True"
                 SelectionMode="Single"
                 SelectedItem="{Binding SelectedPreviousRun, Mode=TwoWay}">
+        <DataGrid.Resources>
+          <Style TargetType="DataGridRow">
+            <Setter Property="ContextMenu">
+              <Setter.Value>
+                <ContextMenu>
+                  <MenuItem Header="Show details"
+                            Command="{Binding DataContext.ShowRunDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}" />
+                </ContextMenu>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </DataGrid.Resources>
         <DataGrid.Columns>
-          <DataGridTemplateColumn Header="Start" Width="80">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <Button Content="Start"
-                        Padding="8,2"
-                        HorizontalAlignment="Center"
-                        Command="{Binding DataContext.StartPreviousRunCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding}" />
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
           <DataGridTemplateColumn Header="★" Width="40">
             <DataGridTemplateColumn.CellTemplate>
               <DataTemplate>
