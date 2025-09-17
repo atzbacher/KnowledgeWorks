@@ -81,6 +81,12 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("totalHits")]
         public int TotalHits { get; init; }
 
+        [JsonPropertyName("displayName")]
+        public string? DisplayName { get; init; }
+
+        [JsonPropertyName("isFavorite")]
+        public bool IsFavorite { get; init; }
+
         [JsonPropertyName("executedBy")]
         public string? ExecutedBy { get; init; }
 

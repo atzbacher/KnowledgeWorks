@@ -87,6 +87,7 @@ LM.App.Wpf.ViewModels.SearchItemViewModel.Vm.get -> LM.App.Wpf.ViewModels.Librar
 LM.App.Wpf.ViewModels.SearchViewModel
 LM.App.Wpf.ViewModels.SearchViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
 LM.App.Wpf.ViewModels.SearchViewModel.ExportSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.HasSelectedRun.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
@@ -102,6 +103,10 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.Sea
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunDisplayName.get -> string!
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunDisplayName.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunIsFavorite.get -> bool
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedRunIsFavorite.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
 LM.App.Wpf.ViewModels.SearchDatabaseOption

@@ -27,10 +27,14 @@ namespace LM.App.Wpf.ViewModels
         private readonly IFileStorageRepository _storage;
         private readonly IWorkSpaceService _ws;
         private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
+        private readonly SemaphoreSlim _metadataUpdateLock = new(1, 1);
 
         private string? _loadedEntryId;
         private string? _loadedRunId;
         private LitSearchHook? _loadedHook;
+        private bool _suppressSelectedRunMetadataUpdate;
+        private string _selectedRunDisplayName = string.Empty;
+        private bool _selectedRunIsFavorite;
 
         public SearchViewModel(IEntryStore store, IFileStorageRepository storage, IWorkSpaceService ws)
         {
@@ -112,12 +116,71 @@ namespace LM.App.Wpf.ViewModels
                 if (ReferenceEquals(_selectedPreviousRun, value)) return;
                 _selectedPreviousRun = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(HasSelectedRun));
+                UpdateSelectedRunMetadataBindings();
                 RaiseCanExec();
+            }
+        }
+
+        public bool HasSelectedRun => SelectedPreviousRun is not null;
+
+        public string SelectedRunDisplayName
+        {
+            get => _selectedRunDisplayName;
+            set
+            {
+                value ??= string.Empty;
+                if (string.Equals(_selectedRunDisplayName, value, StringComparison.Ordinal))
+                    return;
+                _selectedRunDisplayName = value;
+                OnPropertyChanged();
+                if (!_suppressSelectedRunMetadataUpdate)
+                {
+                    _ = UpdateSelectedRunMetadataAsync();
+                }
+            }
+        }
+
+        public bool SelectedRunIsFavorite
+        {
+            get => _selectedRunIsFavorite;
+            set
+            {
+                if (_selectedRunIsFavorite == value)
+                    return;
+                _selectedRunIsFavorite = value;
+                OnPropertyChanged();
+                if (!_suppressSelectedRunMetadataUpdate)
+                {
+                    _ = UpdateSelectedRunMetadataAsync();
+                }
             }
         }
 
         private bool _isBusy;
         public bool IsBusy { get => _isBusy; private set { _isBusy = value; OnPropertyChanged(); RaiseCanExec(); } }
+
+        private void UpdateSelectedRunMetadataBindings()
+        {
+            _suppressSelectedRunMetadataUpdate = true;
+            try
+            {
+                if (_selectedPreviousRun is null)
+                {
+                    SelectedRunDisplayName = string.Empty;
+                    SelectedRunIsFavorite = false;
+                }
+                else
+                {
+                    SelectedRunDisplayName = _selectedPreviousRun.DisplayName ?? string.Empty;
+                    SelectedRunIsFavorite = _selectedPreviousRun.IsFavorite;
+                }
+            }
+            finally
+            {
+                _suppressSelectedRunMetadataUpdate = false;
+            }
+        }
 
         public ICommand RunSearchCommand { get; }
         public ICommand SaveSearchCommand { get; }
@@ -359,11 +422,28 @@ namespace LM.App.Wpf.ViewModels
                         if (hook is null)
                             continue;
 
-                        var context = new PreviousSearchContext(entry.Id, hook);
-                        foreach (var run in hook.Runs.OrderByDescending(r => r.RunUtc))
+                        var context = new PreviousSearchContext(entry.Id, hookPath, hook);
+                        var runs = hook.Runs;
+                        var hookUpdated = false;
+
+                        for (var i = 0; i < runs.Count; i++)
                         {
+                            var run = runs[i];
+                            if (string.IsNullOrWhiteSpace(run.RunId))
+                            {
+                                var generatedId = LM.Core.Utils.IdGen.NewId();
+                                run = CloneRunWithMetadata(run, generatedId, run.DisplayName, run.IsFavorite);
+                                runs[i] = run;
+                                hookUpdated = true;
+                            }
+
                             items.Add((run, context));
                             _runIndex[run.RunId] = context;
+                        }
+
+                        if (hookUpdated)
+                        {
+                            await PersistHookAsync(context, ct);
                         }
                     }
                     catch
@@ -377,9 +457,16 @@ namespace LM.App.Wpf.ViewModels
                 // workspace not yet initialized
             }
 
-            items.Sort((a, b) => DateTime.Compare(b.run.RunUtc, a.run.RunUtc));
+            items.Sort((a, b) =>
+            {
+                var favoriteCompare = b.run.IsFavorite.CompareTo(a.run.IsFavorite);
+                if (favoriteCompare != 0)
+                    return favoriteCompare;
+                return DateTime.Compare(b.run.RunUtc, a.run.RunUtc);
+            });
 
-            var previouslySelectedId = SelectedPreviousRun?.RunId;
+            var previouslySelected = SelectedPreviousRun;
+            var previouslySelectedId = previouslySelected?.RunId;
 
             PreviousRuns.Clear();
             foreach (var (run, _) in items)
@@ -394,6 +481,14 @@ namespace LM.App.Wpf.ViewModels
                 var match = previouslySelectedId is null
                     ? null
                     : PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, previouslySelectedId, StringComparison.Ordinal));
+
+                if (match is null && previouslySelected is not null)
+                {
+                    match = PreviousRuns.FirstOrDefault(r =>
+                        r.RunUtc == previouslySelected.RunUtc &&
+                        string.Equals(r.Provider, previouslySelected.Provider, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(r.Query, previouslySelected.Query, StringComparison.Ordinal));
+                }
 
                 if (match is not null)
                 {
@@ -457,6 +552,85 @@ namespace LM.App.Wpf.ViewModels
             return sb.ToString().Trim();
         }
 
+        private async Task UpdateSelectedRunMetadataAsync()
+        {
+            if (_suppressSelectedRunMetadataUpdate)
+                return;
+
+            var run = SelectedPreviousRun;
+            if (run is null)
+                return;
+
+            if (!_runIndex.TryGetValue(run.RunId, out var context))
+                return;
+
+            string? desiredName = string.IsNullOrWhiteSpace(SelectedRunDisplayName)
+                ? null
+                : SelectedRunDisplayName.Trim();
+            var desiredFavorite = SelectedRunIsFavorite;
+            var updatedRun = false;
+
+            try
+            {
+                await _metadataUpdateLock.WaitAsync();
+                try
+                {
+                    var existing = context.Hook.Runs.FirstOrDefault(r =>
+                        string.Equals(r.RunId, run.RunId, StringComparison.Ordinal));
+
+                    if (existing is null)
+                    {
+                        existing = context.Hook.Runs.FirstOrDefault(r =>
+                            r.RunUtc == run.RunUtc &&
+                            string.Equals(r.Provider, run.Provider, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(r.Query, run.Query, StringComparison.Ordinal));
+                        if (existing is null)
+                            return;
+                    }
+
+                    if (string.Equals(existing.DisplayName, desiredName, StringComparison.Ordinal)
+                        && existing.IsFavorite == desiredFavorite)
+                    {
+                        return;
+                    }
+
+                    var replacement = CloneRunWithMetadata(existing, existing.RunId, desiredName, desiredFavorite);
+                    var index = context.Hook.Runs.IndexOf(existing);
+                    if (index < 0)
+                        return;
+
+                    context.Hook.Runs[index] = replacement;
+                    updatedRun = true;
+
+                    await PersistHookAsync(context);
+                }
+                finally
+                {
+                    _metadataUpdateLock.Release();
+                }
+            }
+            catch
+            {
+                // best-effort persistence; ignore errors
+            }
+
+            if (!updatedRun)
+                return;
+
+            _suppressSelectedRunMetadataUpdate = true;
+            try
+            {
+                SelectedRunDisplayName = desiredName ?? string.Empty;
+                SelectedRunIsFavorite = desiredFavorite;
+            }
+            finally
+            {
+                _suppressSelectedRunMetadataUpdate = false;
+            }
+
+            await RefreshPreviousRunsAsync();
+        }
+
         private static void EnsureRelation(Entry entry, string targetEntryId)
         {
             if (string.IsNullOrWhiteSpace(targetEntryId))
@@ -474,7 +648,39 @@ namespace LM.App.Wpf.ViewModels
             entry.Relations.Add(new Relation { Type = "derived_from", TargetEntryId = targetEntryId });
         }
 
-        private sealed record PreviousSearchContext(string EntryId, LitSearchHook Hook);
+        private async Task PersistHookAsync(PreviousSearchContext context, CancellationToken ct = default)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(context.Hook, JsonStd.Options);
+                await File.WriteAllTextAsync(context.HookPath, json, Encoding.UTF8, ct);
+            }
+            catch
+            {
+                // ignore persistence errors
+            }
+        }
+
+        private static LitSearchRun CloneRunWithMetadata(LitSearchRun source, string runId, string? displayName, bool isFavorite)
+        {
+            return new LitSearchRun
+            {
+                RunId = runId,
+                Provider = source.Provider,
+                Query = source.Query,
+                From = source.From,
+                To = source.To,
+                RunUtc = source.RunUtc,
+                TotalHits = source.TotalHits,
+                ExecutedBy = source.ExecutedBy,
+                RawAttachments = source.RawAttachments is null ? new List<string>() : new List<string>(source.RawAttachments),
+                ImportedEntryIds = source.ImportedEntryIds is null ? new List<string>() : new List<string>(source.ImportedEntryIds),
+                DisplayName = displayName,
+                IsFavorite = isFavorite
+            };
+        }
+
+        private sealed record PreviousSearchContext(string EntryId, string HookPath, LitSearchHook Hook);
 
         private static string Sanitize(string name)
         {
