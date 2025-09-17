@@ -70,7 +70,8 @@ namespace LM.App.Wpf
             // ViewModels
             var libraryVm = new LibraryViewModel(services.Store, ws);
             var addVm = new AddViewModel(services.Pipeline);
-            var searchVm = new SearchViewModel(services.Store, services.Storage, ws);
+            var searchPrompt = new SearchSavePrompt();
+            var searchVm = new SearchViewModel(services.Store, services.Storage, ws, searchPrompt);
 
             // Bind
             if (shell.LibraryViewControl != null) shell.LibraryViewControl.DataContext = libraryVm;

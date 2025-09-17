@@ -50,7 +50,7 @@
         <DataGridTemplateColumn Header="DB" Width="40">
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
-              <TextBlock Text=""
+              <TextBlock Text="&#xE105;"
                          FontFamily="Segoe MDL2 Assets"
                          HorizontalAlignment="Center"
                          Opacity="{Binding AlreadyInDb, Converter={StaticResource AlreadyInDbOpacityConverter}}"
@@ -72,76 +72,64 @@
 
     <!-- Previous runs (simple) -->
     <GroupBox Grid.Row="4" Header="Previous runs">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="*" />
-          <RowDefinition Height="8" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <DataGrid Grid.Row="0"
-                  ItemsSource="{Binding PreviousRuns}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  SelectionMode="Single"
-                  SelectedItem="{Binding SelectedPreviousRun, Mode=TwoWay}">
-          <DataGrid.Columns>
-            <DataGridTemplateColumn Header="★" Width="40">
-              <DataGridTemplateColumn.CellTemplate>
-                <DataTemplate>
-                  <TextBlock Text="★" HorizontalAlignment="Center" Foreground="Goldenrod">
-                    <TextBlock.Style>
-                      <Style TargetType="TextBlock">
-                        <Setter Property="Opacity" Value="0.2" />
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                            <Setter Property="Opacity" Value="1" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </TextBlock.Style>
-                  </TextBlock>
-                </DataTemplate>
-              </DataGridTemplateColumn.CellTemplate>
-            </DataGridTemplateColumn>
-            <DataGridTextColumn Header="When"
-                                 Binding="{Binding RunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
-                                 Width="160" />
-            <DataGridTextColumn Header="Provider"
-                                 Binding="{Binding Provider}"
-                                 Width="100" />
-            <DataGridTextColumn Header="Name"
-                                 Binding="{Binding DisplayName}"
-                                 Width="200" />
-            <DataGridTextColumn Header="Query"
-                                 Binding="{Binding Query}"
-                                 Width="*" />
-            <DataGridTextColumn Header="From"
-                                 Binding="{Binding From, StringFormat=\{0:yyyy-MM-dd\}}"
-                                 Width="120" />
-            <DataGridTextColumn Header="To"
-                                 Binding="{Binding To, StringFormat=\{0:yyyy-MM-dd\}}"
-                                 Width="120" />
-            <DataGridTextColumn Header="Total"
-                                 Binding="{Binding TotalHits}"
-                                 Width="80" />
-          </DataGrid.Columns>
-        </DataGrid>
-
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center">
-          <TextBlock Text="Custom name:" VerticalAlignment="Center" />
-          <TextBox Width="240"
-                   Margin="8,0,0,0"
-                   IsEnabled="{Binding HasSelectedRun}"
-                   Text="{Binding SelectedRunDisplayName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-          <CheckBox Content="Favorite"
-                    Margin="12,0,0,0"
-                    IsEnabled="{Binding HasSelectedRun}"
-                    IsChecked="{Binding SelectedRunIsFavorite}" />
-        </StackPanel>
-      </Grid>
+      <DataGrid ItemsSource="{Binding PreviousRuns}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedPreviousRun, Mode=TwoWay}">
+        <DataGrid.Columns>
+          <DataGridTemplateColumn Header="Start" Width="80">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <Button Content="Start"
+                        Padding="8,2"
+                        HorizontalAlignment="Center"
+                        Command="{Binding DataContext.StartPreviousRunCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTemplateColumn Header="★" Width="40">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock Text="★" HorizontalAlignment="Center" Foreground="Goldenrod">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Opacity" Value="0.2" />
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                          <Setter Property="Opacity" Value="1" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTextColumn Header="When"
+                               Binding="{Binding RunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
+                               Width="160" />
+          <DataGridTextColumn Header="Provider"
+                               Binding="{Binding Provider}"
+                               Width="100" />
+          <DataGridTextColumn Header="Name"
+                               Binding="{Binding DisplayName}"
+                               Width="200" />
+          <DataGridTextColumn Header="Query"
+                               Binding="{Binding Query}"
+                               Width="*" />
+          <DataGridTextColumn Header="From"
+                               Binding="{Binding From, StringFormat=\{0:yyyy-MM-dd\}}"
+                               Width="120" />
+          <DataGridTextColumn Header="To"
+                               Binding="{Binding To, StringFormat=\{0:yyyy-MM-dd\}}"
+                               Width="120" />
+          <DataGridTextColumn Header="Total"
+                               Binding="{Binding TotalHits}"
+                               Width="80" />
+        </DataGrid.Columns>
+      </DataGrid>
     </GroupBox>
   </Grid>
 </UserControl>
