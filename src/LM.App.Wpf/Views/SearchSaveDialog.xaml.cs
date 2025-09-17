@@ -42,7 +42,7 @@ namespace LM.App.Wpf.Views
         {
             if (string.IsNullOrWhiteSpace(NameBox.Text))
             {
-                MessageBox.Show(this, "Please enter a name for the search.", "Save search", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show(this, "Please enter a name for the search.", "Save search", MessageBoxButton.OK, MessageBoxImage.Warning);
                 NameBox.Focus();
                 return;
             }

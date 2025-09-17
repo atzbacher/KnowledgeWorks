@@ -9,7 +9,7 @@ namespace LM.App.Wpf.Views
     {
         public Task<SearchSavePromptResult?> RequestAsync(SearchSavePromptContext context)
         {
-            var app = Application.Current;
+            var app = System.Windows.Application.Current;
             if (app is null)
             {
                 return Task.FromResult<SearchSavePromptResult?>(null);
@@ -26,7 +26,7 @@ namespace LM.App.Wpf.Views
         private static SearchSavePromptResult? ShowDialog(SearchSavePromptContext context)
         {
             var dialog = new SearchSaveDialog(context);
-            if (Application.Current?.MainWindow is Window owner && owner.IsVisible)
+            if (System.Windows.Application.Current?.MainWindow is Window owner && owner.IsVisible)
             {
                 dialog.Owner = owner;
             }
