@@ -25,7 +25,7 @@ namespace LM.HubSpoke.Storage
             var ext = Path.GetExtension(abs);
             var a = sha.Substring(0, 2);
             var b = sha.Substring(2, 2);
-            var relDir = Path.Combine("storage", a, b).Replace('\\', '/');
+            var relDir = Path.Combine("library", a, b).Replace('\\', '/');
             var relPath = Path.Combine(relDir, $"{sha}{ext}").Replace('\\', '/');
             var absTarget = _ws.GetAbsolutePath(relPath);
             Directory.CreateDirectory(Path.GetDirectoryName(absTarget)!);

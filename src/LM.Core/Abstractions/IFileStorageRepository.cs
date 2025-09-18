@@ -9,7 +9,7 @@ namespace LM.Core.Abstractions
     public interface IFileStorageRepository
     {
         /// <summary>
-        /// Save a file into the shared storage under a relative directory.
+        /// Save a file into the shared library using a content-addressed layout.
         /// Returns the relative path that was written.
         /// </summary>
         Task<string> SaveNewAsync(string sourcePath, string relativeTargetDir, string? preferredFileName = null, CancellationToken ct = default);

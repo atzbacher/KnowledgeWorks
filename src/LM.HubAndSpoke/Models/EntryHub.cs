@@ -94,7 +94,7 @@ namespace LM.HubSpoke.Models
         public string? Article { get; init; }            // "hooks/article.json"
 
         [JsonPropertyName("lit_search")]
-        public string? LitSearch { get; init; }          // "spokes/litsearch/litsearch.json"
+        public string? LitSearch { get; init; }          // "hooks/litsearch.json"
 
         [JsonPropertyName("trial")]
         public string? Trial { get; init; }              // "hooks/trial.json"
@@ -218,7 +218,7 @@ namespace LM.HubSpoke.Models
         public string Hash { get; init; } = string.Empty; // "sha256-<64hex>"
 
         [JsonPropertyName("storage_path")]
-        public string StoragePath { get; init; } = string.Empty; // "storage/ab/cd/<hash>.<ext>"
+        public string StoragePath { get; init; } = string.Empty; // "library/ab/cd/<hash>.<ext>"
 
         [JsonPropertyName("content_type")]
         public string ContentType { get; init; } = string.Empty;
