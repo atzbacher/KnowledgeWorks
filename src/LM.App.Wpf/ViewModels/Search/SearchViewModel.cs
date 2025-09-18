@@ -34,6 +34,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly IWorkSpaceService _ws;
         private readonly ISearchSavePrompt _savePrompt;
         private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, PreviousSearchContext> _entryIndex = new(StringComparer.Ordinal);
 
         private string? _loadedEntryId;
         private LitSearchHook? _loadedHook;
@@ -49,9 +50,9 @@ namespace LM.App.Wpf.ViewModels
             SaveSearchCommand = new AsyncRelayCommand(SaveSearchAsync, () => !IsBusy && Results.Any());
             LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy && SelectedPreviousRun is not null);
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
-            StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is LitSearchRun);
-            ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is LitSearchRun);
-            ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is LitSearchRun);
+            StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is PreviousSearchSummary);
+            ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is PreviousSearchSummary);
+            ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is PreviousSearchSummary);
 
             _ = RefreshPreviousRunsAsync();
 
@@ -113,12 +114,12 @@ namespace LM.App.Wpf.ViewModels
         }
 
         public ObservableCollection<SearchHit> Results { get; } = new();
-        public ObservableCollection<LitSearchRun> PreviousRuns { get; } = new();
+        public ObservableCollection<PreviousSearchSummary> PreviousRuns { get; } = new();
 
         public int PreviousRunsCount => PreviousRuns.Count;
 
-        private LitSearchRun? _selectedPreviousRun;
-        public LitSearchRun? SelectedPreviousRun
+        private PreviousSearchSummary? _selectedPreviousRun;
+        public PreviousSearchSummary? SelectedPreviousRun
         {
             get => _selectedPreviousRun;
             set
@@ -194,12 +195,16 @@ namespace LM.App.Wpf.ViewModels
             var continueExisting = ShouldContinueExisting(_loadedHook, _loadedEntryId, Query);
 
             var fallbackTitle = BuildTitle(Query, _loadedHook, continueExisting);
-            var defaultName = _loadedHook?.Title;
-            if (string.IsNullOrWhiteSpace(defaultName))
+            string defaultName;
+            if (continueExisting)
             {
-                defaultName = SelectedPreviousRun?.DisplayName;
+                defaultName = _loadedHook?.Title ?? SelectedPreviousRun?.DisplayName ?? fallbackTitle;
             }
-            if (string.IsNullOrWhiteSpace(defaultName))
+            else if (_loadedHook is not null)
+            {
+                defaultName = string.Empty;
+            }
+            else
             {
                 defaultName = fallbackTitle;
             }
@@ -246,12 +251,6 @@ namespace LM.App.Wpf.ViewModels
                     ExecutedBy = user,
                     DisplayName = effectiveTitle
                 };
-
-                // Save raw provider return (debug): serialize normalized hits as JSON
-                var tmpRaw = Path.Combine(Path.GetTempPath(), $"search_raw_{run.RunId}.json");
-                await File.WriteAllTextAsync(tmpRaw, JsonSerializer.Serialize(Results, LM.Core.Utils.JsonEx.Options));
-                var rawRel = await _storage.SaveNewAsync(tmpRaw, string.Empty, preferredFileName: $"raw_{run.RunId}.json");
-                run.RawAttachments.Add(rawRel);
 
                 var createdUtc = continueExisting ? _loadedHook!.CreatedUtc : now;
                 var createdBy = continueExisting ? _loadedHook!.CreatedBy : user;
@@ -350,7 +349,7 @@ namespace LM.App.Wpf.ViewModels
                     string? xmlPath = null;
                     if (h.Source == SearchDatabase.PubMed && !string.IsNullOrWhiteSpace(h.ExternalId))
                     {
-                        xmlPath = await TrySavePubMedXmlAsync(entry.Id!, run.RunId, h.ExternalId);
+                        xmlPath = await TrySavePubMedXmlAsync(litEntryId, entry.Id!, run.RunId, h.ExternalId);
                     }
 
                     importantEntries.Add(new ImportantEntryRecord
@@ -362,34 +361,8 @@ namespace LM.App.Wpf.ViewModels
                     });
                 }
 
-                var importedIds = new HashSet<string>(run.ImportedEntryIds, StringComparer.Ordinal);
-                var checkedSnapshot = new CheckedItemsSnapshot
-                {
-                    RunId = run.RunId,
-                    SavedUtc = now,
-                    Items = selectedHits.Select(hit => new CheckedItemRecord
-                    {
-                        Source = hit.Source.ToString(),
-                        ExternalId = string.IsNullOrWhiteSpace(hit.ExternalId) ? null : hit.ExternalId,
-                        Doi = hit.Doi,
-                        Title = hit.Title,
-                        Authors = hit.Authors,
-                        JournalOrSource = hit.JournalOrSource,
-                        Year = hit.Year,
-                        Url = hit.Url,
-                        EntryId = string.IsNullOrWhiteSpace(hit.ExistingEntryId) ? null : hit.ExistingEntryId,
-                        AlreadyInDatabase = hit.AlreadyInDb,
-                        ImportedThisRun = hit.ExistingEntryId is not null && importedIds.Contains(hit.ExistingEntryId)
-                    }).ToList()
-                };
-
                 var checkedEntryIds = BuildCheckedEntryIds(selectedHits);
                 run.CheckedEntryIdsPath = await PersistRunCheckedEntriesAsync(runContext, run, checkedEntryIds, importantEntries, now);
-
-                var tmpChecked = Path.Combine(Path.GetTempPath(), $"search_checked_{run.RunId}.json");
-                await File.WriteAllTextAsync(tmpChecked, JsonSerializer.Serialize(checkedSnapshot, JsonStd.Options), Encoding.UTF8);
-                var checkedRel = await _storage.SaveNewAsync(tmpChecked, string.Empty, preferredFileName: $"checked_{run.RunId}.json");
-                run.CheckedAttachments.Add(checkedRel);
 
                 // Re-write the hook (now with ImportedEntryIds filled)
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
@@ -411,24 +384,25 @@ namespace LM.App.Wpf.ViewModels
         {
             await RefreshPreviousRunsAsync();
 
-            var run = SelectedPreviousRun ?? PreviousRuns.FirstOrDefault();
-            if (run is null)
+            var summary = SelectedPreviousRun ?? PreviousRuns.FirstOrDefault();
+            if (summary is null)
                 return;
 
-            _ = TryLoadRun(run);
+            _ = TryLoadSearch(summary);
         }
 
         private async Task StartPreviousRunAsync(object? parameter)
         {
-            if (parameter is not LitSearchRun requestedRun)
+            if (parameter is not PreviousSearchSummary requestedSummary)
                 return;
 
             await RefreshPreviousRunsAsync();
 
-            var run = PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, requestedRun.RunId, StringComparison.Ordinal))
-                      ?? requestedRun;
+            var summary = PreviousRuns.FirstOrDefault(r => string.Equals(r.EntryId, requestedSummary.EntryId, StringComparison.Ordinal))
+                          ?? PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, requestedSummary.RunId, StringComparison.Ordinal))
+                          ?? requestedSummary;
 
-            if (!TryLoadRun(run))
+            if (!TryLoadSearch(summary))
                 return;
 
             await RunSearchAsync();
@@ -436,22 +410,44 @@ namespace LM.App.Wpf.ViewModels
 
         private async Task ToggleFavoriteAsync(object? parameter)
         {
-            if (parameter is not LitSearchRun run)
+            if (parameter is not PreviousSearchSummary summary)
                 return;
 
-            if (!_runIndex.TryGetValue(run.RunId, out var context))
-                return;
+            if (!_entryIndex.TryGetValue(summary.EntryId, out var context))
+            {
+                if (!_runIndex.TryGetValue(summary.RunId, out context))
+                    return;
+            }
 
             IsBusy = true;
             try
             {
                 var runs = context.Hook.Runs;
-                var index = runs.FindIndex(r => string.Equals(r.RunId, run.RunId, StringComparison.Ordinal));
-                if (index < 0)
+                if (runs.Count == 0)
                     return;
 
-                var updated = CloneRunWithMetadata(run, run.RunId, run.DisplayName, !run.IsFavorite);
-                runs[index] = updated;
+                var makeFavorite = !summary.IsFavorite;
+                var targetId = summary.RunId;
+                var index = runs.FindIndex(r => string.Equals(r.RunId, targetId, StringComparison.Ordinal));
+
+                if (index < 0 && summary.FavoriteRunId is not null)
+                    index = runs.FindIndex(r => string.Equals(r.RunId, summary.FavoriteRunId, StringComparison.Ordinal));
+
+                if (index < 0)
+                    index = runs.FindIndex(r => r.RunUtc == summary.LastRunUtc);
+
+                if (index < 0)
+                    index = runs.Count - 1;
+
+                for (var i = 0; i < runs.Count; i++)
+                {
+                    var source = runs[i];
+                    var isFavorite = makeFavorite && i == index;
+                    var display = string.IsNullOrWhiteSpace(source.DisplayName)
+                        ? (context.Hook.Title ?? summary.DisplayName)
+                        : source.DisplayName;
+                    runs[i] = CloneRunWithMetadata(source, source.RunId, display, isFavorite);
+                }
 
                 await PersistHookAsync(context);
                 await RefreshPreviousRunsAsync();
@@ -467,14 +463,21 @@ namespace LM.App.Wpf.ViewModels
 
         private async Task ShowRunDetailsAsync(object? parameter)
         {
-            if (parameter is not LitSearchRun run)
+            if (parameter is not PreviousSearchSummary summary)
                 return;
 
-            if (!_runIndex.TryGetValue(run.RunId, out var context))
-                return;
+            if (!_entryIndex.TryGetValue(summary.EntryId, out var context))
+            {
+                if (!_runIndex.TryGetValue(summary.RunId, out context))
+                    return;
+            }
 
             try
             {
+                var runs = context.Hook.Runs ?? new List<LitSearchRun>();
+                var latest = runs.FirstOrDefault(r => string.Equals(r.RunId, summary.RunId, StringComparison.Ordinal))
+                             ?? runs.OrderByDescending(r => r.RunUtc).FirstOrDefault();
+
                 var details = new
                 {
                     entryId = context.EntryId,
@@ -490,29 +493,48 @@ namespace LM.App.Wpf.ViewModels
                         context.Hook.DerivedFromEntryId,
                         context.Hook.Keywords,
                         context.Hook.Notes,
-                        runCount = context.Hook.Runs.Count
+                        runCount = runs.Count
                     },
-                    run = new
+                    latestRun = latest is null
+                        ? null
+                        : new
+                        {
+                            latest.RunId,
+                            latest.Provider,
+                            latest.Query,
+                            latest.From,
+                            latest.To,
+                            latest.RunUtc,
+                            latest.TotalHits,
+                            latest.ExecutedBy,
+                            latest.DisplayName,
+                            latest.IsFavorite,
+                            latest.RawAttachments,
+                            latest.CheckedAttachments,
+                            latest.CheckedEntryIdsPath,
+                            latest.ImportedEntryIds
+                        },
+                    runs = runs.Select(r => new
                     {
-                        run.RunId,
-                        run.Provider,
-                        run.Query,
-                        run.From,
-                        run.To,
-                        run.RunUtc,
-                        run.TotalHits,
-                        run.ExecutedBy,
-                        run.DisplayName,
-                        run.IsFavorite,
-                        run.RawAttachments,
-                        run.CheckedAttachments,
-                        run.CheckedEntryIdsPath,
-                        run.ImportedEntryIds
-                    }
+                        r.RunId,
+                        r.Provider,
+                        r.Query,
+                        r.From,
+                        r.To,
+                        r.RunUtc,
+                        r.TotalHits,
+                        r.ExecutedBy,
+                        r.DisplayName,
+                        r.IsFavorite,
+                        r.RawAttachments,
+                        r.CheckedAttachments,
+                        r.CheckedEntryIdsPath,
+                        r.ImportedEntryIds
+                    }).ToList()
                 };
 
                 var json = JsonSerializer.Serialize(details, JsonStd.Options);
-                var tmpPath = Path.Combine(Path.GetTempPath(), $"litsearch_run_{run.RunId}.json");
+                var tmpPath = Path.Combine(Path.GetTempPath(), $"litsearch_run_{summary.RunId}.json");
                 await File.WriteAllTextAsync(tmpPath, json, Encoding.UTF8);
 
                 var startInfo = new ProcessStartInfo
@@ -528,17 +550,23 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        private bool TryLoadRun(LitSearchRun run)
+        private bool TryLoadSearch(PreviousSearchSummary summary)
         {
-            if (!_runIndex.TryGetValue(run.RunId, out var context))
+            if (summary is null)
                 return false;
 
-            SelectedPreviousRun = run;
+            if (!_entryIndex.TryGetValue(summary.EntryId, out var context))
+            {
+                if (!_runIndex.TryGetValue(summary.RunId, out context))
+                    return false;
+            }
 
-            Query = run.Query;
-            From = run.To ?? context.Hook.To ?? context.Hook.From ?? run.From;
+            SelectedPreviousRun = summary;
+
+            Query = summary.Query;
+            From = summary.LastTo ?? context.Hook.To ?? context.Hook.From ?? summary.LastFrom;
             To = null;
-            SelectedDatabase = run.Provider.Equals("pubmed", StringComparison.OrdinalIgnoreCase)
+            SelectedDatabase = summary.Provider.Equals("pubmed", StringComparison.OrdinalIgnoreCase)
                 ? SearchDatabase.PubMed
                 : SearchDatabase.ClinicalTrialsGov;
 
@@ -551,8 +579,9 @@ namespace LM.App.Wpf.ViewModels
 
         private async Task RefreshPreviousRunsAsync(CancellationToken ct = default)
         {
-            var items = new List<(LitSearchRun run, PreviousSearchContext context)>();
+            var items = new List<PreviousSearchSummary>();
             _runIndex.Clear();
+            _entryIndex.Clear();
 
             try
             {
@@ -589,8 +618,11 @@ namespace LM.App.Wpf.ViewModels
                             continue;
 
                         var context = new PreviousSearchContext(entry.Id, hookPath, hook);
+                        _entryIndex[context.EntryId] = context;
+
                         var runs = hook.Runs;
                         var hookUpdated = false;
+                        LitSearchRun? latest = null;
 
                         for (var i = 0; i < runs.Count; i++)
                         {
@@ -603,8 +635,15 @@ namespace LM.App.Wpf.ViewModels
                                 hookUpdated = true;
                             }
 
-                            items.Add((run, context));
                             _runIndex[run.RunId] = context;
+
+                            if (latest is null || run.RunUtc > latest.RunUtc)
+                                latest = run;
+                        }
+
+                        if (latest is not null)
+                        {
+                            items.Add(PreviousSearchSummary.Create(context.EntryId, context.Hook, latest));
                         }
 
                         if (hookUpdated)
@@ -625,18 +664,19 @@ namespace LM.App.Wpf.ViewModels
 
             items.Sort((a, b) =>
             {
-                var favoriteCompare = b.run.IsFavorite.CompareTo(a.run.IsFavorite);
+                var favoriteCompare = b.IsFavorite.CompareTo(a.IsFavorite);
                 if (favoriteCompare != 0)
                     return favoriteCompare;
-                return DateTime.Compare(b.run.RunUtc, a.run.RunUtc);
+                return DateTime.Compare(b.LastRunUtc, a.LastRunUtc);
             });
 
             var previouslySelected = SelectedPreviousRun;
-            var previouslySelectedId = previouslySelected?.RunId;
+            var previouslySelectedRunId = previouslySelected?.RunId;
+            var previouslySelectedEntryId = previouslySelected?.EntryId;
 
             PreviousRuns.Clear();
-            foreach (var (run, _) in items)
-                PreviousRuns.Add(run);
+            foreach (var summary in items)
+                PreviousRuns.Add(summary);
 
             if (PreviousRuns.Count == 0)
             {
@@ -644,14 +684,19 @@ namespace LM.App.Wpf.ViewModels
             }
             else
             {
-                var match = previouslySelectedId is null
+                var match = previouslySelectedRunId is null
                     ? null
-                    : PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, previouslySelectedId, StringComparison.Ordinal));
+                    : PreviousRuns.FirstOrDefault(r => string.Equals(r.RunId, previouslySelectedRunId, StringComparison.Ordinal));
+
+                if (match is null && previouslySelectedEntryId is not null)
+                {
+                    match = PreviousRuns.FirstOrDefault(r => string.Equals(r.EntryId, previouslySelectedEntryId, StringComparison.Ordinal));
+                }
 
                 if (match is null && previouslySelected is not null)
                 {
                     match = PreviousRuns.FirstOrDefault(r =>
-                        r.RunUtc == previouslySelected.RunUtc &&
+                        r.LastRunUtc == previouslySelected.LastRunUtc &&
                         string.Equals(r.Provider, previouslySelected.Provider, StringComparison.OrdinalIgnoreCase) &&
                         string.Equals(r.Query, previouslySelected.Query, StringComparison.Ordinal));
                 }
@@ -660,7 +705,7 @@ namespace LM.App.Wpf.ViewModels
                 {
                     SelectedPreviousRun = match;
                 }
-                else if (SelectedPreviousRun is null || !_runIndex.ContainsKey(SelectedPreviousRun.RunId))
+                else if (SelectedPreviousRun is null || !_entryIndex.ContainsKey(SelectedPreviousRun.EntryId))
                 {
                     SelectedPreviousRun = PreviousRuns[0];
                 }
@@ -799,28 +844,6 @@ namespace LM.App.Wpf.ViewModels
             public string? DataPath { get; init; }
         }
 
-        private sealed record CheckedItemsSnapshot
-        {
-            public string RunId { get; init; } = string.Empty;
-            public DateTime SavedUtc { get; init; }
-            public List<CheckedItemRecord> Items { get; init; } = new();
-        }
-
-        private sealed record CheckedItemRecord
-        {
-            public string Source { get; init; } = string.Empty;
-            public string? ExternalId { get; init; }
-            public string? Doi { get; init; }
-            public string Title { get; init; } = string.Empty;
-            public string Authors { get; init; } = string.Empty;
-            public string? JournalOrSource { get; init; }
-            public int? Year { get; init; }
-            public string? Url { get; init; }
-            public string? EntryId { get; init; }
-            public bool AlreadyInDatabase { get; init; }
-            public bool ImportedThisRun { get; init; }
-        }
-
         private static string ComposeSearchNote(string query, string provider, DateTime createdUtc, string? createdBy, int runCount, LitSearchRun latestRun, string? derivedFrom, string? userNotes)
         {
             var sb = new StringBuilder();
@@ -936,7 +959,7 @@ namespace LM.App.Wpf.ViewModels
         private static string NormalizeWorkspacePath(string path)
             => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
-        private async Task<string?> TrySavePubMedXmlAsync(string entryId, string runId, string pubmedId)
+        private async Task<string?> TrySavePubMedXmlAsync(string litEntryId, string importedEntryId, string runId, string pubmedId)
         {
             try
             {
@@ -944,8 +967,8 @@ namespace LM.App.Wpf.ViewModels
                 if (string.IsNullOrWhiteSpace(xml))
                     return null;
 
-                var libraryFile = EnsureLitSearchRunLibraryFile(entryId, runId);
-                var document = LoadOrCreateRunXml(libraryFile.AbsolutePath, entryId, runId);
+                var libraryFile = EnsureLitSearchRunLibraryFile(litEntryId, runId);
+                var document = LoadOrCreateRunXml(libraryFile.AbsolutePath, litEntryId, runId);
 
                 var root = document.Root;
                 if (root is null)
@@ -954,7 +977,8 @@ namespace LM.App.Wpf.ViewModels
                     document.Add(root);
                 }
 
-                root.SetAttributeValue("entryId", entryId);
+                root.SetAttributeValue("entryId", litEntryId);
+                root.SetAttributeValue("searchEntryId", litEntryId);
                 root.SetAttributeValue("runId", runId);
                 root.SetAttributeValue("updatedUtc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
 
@@ -967,7 +991,7 @@ namespace LM.App.Wpf.ViewModels
                 var record = new XElement("record",
                     new XAttribute("provider", provider),
                     new XAttribute("externalId", pubmedId),
-                    new XAttribute("entryId", entryId),
+                    new XAttribute("importedEntryId", importedEntryId),
                     new XCData(xml));
 
                 root.Add(record);
@@ -1061,6 +1085,103 @@ namespace LM.App.Wpf.ViewModels
         {
             foreach (var c in Path.GetInvalidFileNameChars()) name = name.Replace(c, '-');
             return name.Length > 120 ? name[..120] : name;
+        }
+    }
+
+    public sealed class PreviousSearchSummary
+    {
+        private PreviousSearchSummary(
+            string entryId,
+            string runId,
+            string provider,
+            string displayName,
+            string query,
+            DateTime? lastFrom,
+            DateTime? lastTo,
+            DateTime lastRunUtc,
+            int totalHits,
+            int runCount,
+            bool isFavorite,
+            string? favoriteRunId)
+        {
+            EntryId = entryId;
+            RunId = runId;
+            Provider = provider;
+            DisplayName = displayName;
+            Query = query;
+            LastFrom = lastFrom;
+            LastTo = lastTo;
+            LastRunUtc = lastRunUtc;
+            TotalHits = totalHits;
+            RunCount = runCount;
+            IsFavorite = isFavorite;
+            FavoriteRunId = favoriteRunId;
+        }
+
+        public string EntryId { get; }
+
+        public string RunId { get; }
+
+        public string Provider { get; }
+
+        public string DisplayName { get; }
+
+        public string Query { get; }
+
+        public DateTime? LastFrom { get; }
+
+        public DateTime? LastTo { get; }
+
+        public DateTime LastRunUtc { get; }
+
+        public int TotalHits { get; }
+
+        public int RunCount { get; }
+
+        public bool IsFavorite { get; }
+
+        public string? FavoriteRunId { get; }
+
+        internal static PreviousSearchSummary Create(string entryId, LitSearchHook hook, LitSearchRun latestRun)
+        {
+            if (hook is null)
+                throw new ArgumentNullException(nameof(hook));
+            if (latestRun is null)
+                throw new ArgumentNullException(nameof(latestRun));
+
+            var runs = hook.Runs ?? new List<LitSearchRun>();
+            var provider = !string.IsNullOrWhiteSpace(latestRun.Provider)
+                ? latestRun.Provider
+                : hook.Provider ?? string.Empty;
+            var display = latestRun.DisplayName;
+            if (string.IsNullOrWhiteSpace(display))
+                display = hook.Title;
+            if (string.IsNullOrWhiteSpace(display))
+                display = latestRun.Query;
+            if (string.IsNullOrWhiteSpace(display))
+                display = hook.Query;
+            display ??= string.Empty;
+
+            var query = !string.IsNullOrWhiteSpace(hook.Query)
+                ? hook.Query!
+                : latestRun.Query ?? string.Empty;
+
+            var favoriteRun = runs.FirstOrDefault(r => r.IsFavorite);
+            var runCount = runs.Count == 0 ? 1 : runs.Count;
+
+            return new PreviousSearchSummary(
+                entryId,
+                latestRun.RunId,
+                provider ?? string.Empty,
+                display,
+                query,
+                latestRun.From ?? hook.From,
+                latestRun.To ?? hook.To,
+                latestRun.RunUtc,
+                latestRun.TotalHits,
+                runCount,
+                favoriteRun is not null,
+                favoriteRun?.RunId);
         }
     }
 
