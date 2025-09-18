@@ -122,8 +122,8 @@
               </DataTemplate>
             </DataGridTemplateColumn.CellTemplate>
           </DataGridTemplateColumn>
-          <DataGridTextColumn Header="When"
-                               Binding="{Binding RunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
+          <DataGridTextColumn Header="Last search"
+                               Binding="{Binding LastRunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
                                Width="160" />
           <DataGridTextColumn Header="Provider"
                                Binding="{Binding Provider}"
@@ -135,13 +135,16 @@
                                Binding="{Binding Query}"
                                Width="*" />
           <DataGridTextColumn Header="From"
-                               Binding="{Binding From, StringFormat=\{0:yyyy-MM-dd\}}"
+                               Binding="{Binding LastFrom, StringFormat=\{0:yyyy-MM-dd\}}"
                                Width="120" />
           <DataGridTextColumn Header="To"
-                               Binding="{Binding To, StringFormat=\{0:yyyy-MM-dd\}}"
+                               Binding="{Binding LastTo, StringFormat=\{0:yyyy-MM-dd\}}"
                                Width="120" />
           <DataGridTextColumn Header="Total"
                                Binding="{Binding TotalHits}"
+                               Width="80" />
+          <DataGridTextColumn Header="Runs"
+                               Binding="{Binding RunCount}"
                                Width="80" />
         </DataGrid.Columns>
       </DataGrid>

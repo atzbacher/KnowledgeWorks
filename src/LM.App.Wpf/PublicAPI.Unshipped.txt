@@ -121,7 +121,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.LoadSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.HubSpoke.Models.LitSearchRun!>!
+LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.PreviousSearchSummary!>!
 LM.App.Wpf.ViewModels.SearchViewModel.PreviousRunsCount.get -> int
 LM.App.Wpf.ViewModels.SearchViewModel.Query.get -> string!
 LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
@@ -131,13 +131,26 @@ LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.In
 LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
-LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.HubSpoke.Models.LitSearchRun?
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.App.Wpf.ViewModels.PreviousSearchSummary?
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.ShowRunDetailsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
+LM.App.Wpf.ViewModels.PreviousSearchSummary
+LM.App.Wpf.ViewModels.PreviousSearchSummary.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.EntryId.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.FavoriteRunId.get -> string?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.IsFavorite.get -> bool
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastFrom.get -> System.DateTime?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastRunUtc.get -> System.DateTime
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastTo.get -> System.DateTime?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.Provider.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.Query.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.RunCount.get -> int
+LM.App.Wpf.ViewModels.PreviousSearchSummary.RunId.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.TotalHits.get -> int
 LM.App.Wpf.ViewModels.SearchDatabaseOption
 LM.App.Wpf.ViewModels.SearchDatabaseOption.DisplayName.get -> string!
 LM.App.Wpf.ViewModels.SearchDatabaseOption.SearchDatabaseOption(LM.Core.Models.SearchDatabase value, string! displayName) -> void
