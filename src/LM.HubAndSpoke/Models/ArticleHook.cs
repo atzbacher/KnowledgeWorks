@@ -78,7 +78,7 @@ namespace LM.HubSpoke.Models
         public string? OriginalFolderPath { get; init; }
 
         [JsonPropertyName("storage_path")]
-        public string StoragePath { get; init; } = string.Empty; // "storage/ab/cd/<hash>.<ext>"
+        public string StoragePath { get; init; } = string.Empty; // "library/ab/cd/<hash>.<ext>"
 
         [JsonPropertyName("hash")]
         public string Hash { get; init; } = string.Empty;

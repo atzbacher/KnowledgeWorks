@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,15 +26,24 @@ namespace LM.Infrastructure.Storage
         public async Task<string> SaveNewAsync(string sourcePath, string relativeTargetDir, string? preferredFileName = null, CancellationToken ct = default)
         {
             var root = _ws.GetWorkspaceRoot(); // throws if not set
-            var fileName = preferredFileName ?? Path.GetFileName(sourcePath);
-            var safeName = string.Join("_", fileName.Split(Path.GetInvalidFileNameChars()));
+            _ = relativeTargetDir; // legacy parameter retained for compatibility; path now determined by hash.
+            var hash = await ComputeFileHashAsync(sourcePath, ct);
 
-            var relDir = (relativeTargetDir ?? "").Trim().TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var relDir = Path.Combine("library", hash[..2], hash[2..4]);
             var absDir = Path.Combine(root, relDir);
             Directory.CreateDirectory(absDir);
 
-            var targetPath = Path.Combine(absDir, safeName);
-            targetPath = EnsureUniquePath(targetPath);
+            var extension = Path.GetExtension(preferredFileName);
+            if (string.IsNullOrWhiteSpace(extension))
+                extension = Path.GetExtension(sourcePath);
+            var storedName = string.IsNullOrWhiteSpace(extension) ? hash : $"{hash}{extension}";
+
+            var targetPath = Path.Combine(absDir, storedName);
+            if (File.Exists(targetPath))
+            {
+                var existingRel = Path.Combine(relDir, storedName);
+                return existingRel.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
 
             var lockPath = targetPath + ".lock.json";
             using var lockFs = new FileStream(lockPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
@@ -53,21 +63,16 @@ namespace LM.Infrastructure.Storage
             }
 
             // Return workspace-relative path
-            var rel = Path.GetRelativePath(root, targetPath);
+            var rel = Path.Combine(relDir, storedName);
             return rel.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
         }
 
-        private static string EnsureUniquePath(string path)
+        private static async Task<string> ComputeFileHashAsync(string path, CancellationToken ct)
         {
-            if (!File.Exists(path)) return path;
-            var dir = Path.GetDirectoryName(path)!;
-            var name = Path.GetFileNameWithoutExtension(path);
-            var ext = Path.GetExtension(path);
-            for (int i = 1; ; i++)
-            {
-                var candidate = Path.Combine(dir, $"{name} ({i}){ext}");
-                if (!File.Exists(candidate)) return candidate;
-            }
+            await using var stream = File.OpenRead(path);
+            using var sha = SHA256.Create();
+            var bytes = await sha.ComputeHashAsync(stream, ct);
+            return Convert.ToHexString(bytes).ToLowerInvariant();
         }
     }
 }

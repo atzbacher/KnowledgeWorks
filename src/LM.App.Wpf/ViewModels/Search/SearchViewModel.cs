@@ -19,6 +19,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using System.Windows.Input;
 
 namespace LM.App.Wpf.ViewModels
@@ -248,7 +250,7 @@ namespace LM.App.Wpf.ViewModels
                 // Save raw provider return (debug): serialize normalized hits as JSON
                 var tmpRaw = Path.Combine(Path.GetTempPath(), $"search_raw_{run.RunId}.json");
                 await File.WriteAllTextAsync(tmpRaw, JsonSerializer.Serialize(Results, LM.Core.Utils.JsonEx.Options));
-                var rawRel = await _storage.SaveNewAsync(tmpRaw, "litsearch/raw", preferredFileName: $"raw_{run.RunId}.json");
+                var rawRel = await _storage.SaveNewAsync(tmpRaw, string.Empty, preferredFileName: $"raw_{run.RunId}.json");
                 run.RawAttachments.Add(rawRel);
 
                 var createdUtc = continueExisting ? _loadedHook!.CreatedUtc : now;
@@ -278,7 +280,7 @@ namespace LM.App.Wpf.ViewModels
                 // Persist litsearch.json as the "primary file" of the LitSearch entry
                 var tmpHook = Path.Combine(Path.GetTempPath(), $"litsearch_{run.RunId}.json");
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
-                var relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
+                var relHook = await _storage.SaveNewAsync(tmpHook, string.Empty, preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json");
 
                 var litEntry = continueExisting && _loadedEntryId is not null
                     ? await _store.GetByIdAsync(_loadedEntryId) ?? new Entry { Id = _loadedEntryId }
@@ -309,7 +311,7 @@ namespace LM.App.Wpf.ViewModels
                 if (string.IsNullOrWhiteSpace(litEntryId))
                     throw new InvalidOperationException("LitSearch entry must have an identifier after save.");
 
-                var runDirectory = EnsureLitSearchRunDirectory(litEntryId, run.RunId);
+                var runContext = EnsureLitSearchRunContext(litEntryId, run.RunId);
                 var importantEntries = new List<ImportantEntryRecord>();
 
                 // Commit selected hits not in DB as unique entries (no files)
@@ -321,7 +323,7 @@ namespace LM.App.Wpf.ViewModels
                     var tmpUrl = Path.Combine(Path.GetTempPath(), $"{Sanitize(h.Title)}.url");
                     await File.WriteAllTextAsync(tmpUrl, $"[InternetShortcut]{Environment.NewLine}URL={(url ?? "about:blank")}");
 
-                    var rel = await _storage.SaveNewAsync(tmpUrl, "external");
+                    var rel = await _storage.SaveNewAsync(tmpUrl, string.Empty);
                     var entry = new Entry
                     {
                         Id = LM.Core.Utils.IdGen.NewId(),
@@ -348,7 +350,7 @@ namespace LM.App.Wpf.ViewModels
                     string? xmlPath = null;
                     if (h.Source == SearchDatabase.PubMed && !string.IsNullOrWhiteSpace(h.ExternalId))
                     {
-                        xmlPath = await TrySavePubMedXmlAsync(runDirectory, h.ExternalId, entry.Id!, run.RunId);
+                        xmlPath = await TrySavePubMedXmlAsync(entry.Id!, run.RunId, h.ExternalId);
                     }
 
                     importantEntries.Add(new ImportantEntryRecord
@@ -382,16 +384,16 @@ namespace LM.App.Wpf.ViewModels
                 };
 
                 var checkedEntryIds = BuildCheckedEntryIds(selectedHits);
-                run.CheckedEntryIdsPath = await PersistRunCheckedEntriesAsync(litEntryId, run, checkedEntryIds, importantEntries, now);
+                run.CheckedEntryIdsPath = await PersistRunCheckedEntriesAsync(runContext, run, checkedEntryIds, importantEntries, now);
 
                 var tmpChecked = Path.Combine(Path.GetTempPath(), $"search_checked_{run.RunId}.json");
                 await File.WriteAllTextAsync(tmpChecked, JsonSerializer.Serialize(checkedSnapshot, JsonStd.Options), Encoding.UTF8);
-                var checkedRel = await _storage.SaveNewAsync(tmpChecked, "litsearch/checked", preferredFileName: $"checked_{run.RunId}.json");
+                var checkedRel = await _storage.SaveNewAsync(tmpChecked, string.Empty, preferredFileName: $"checked_{run.RunId}.json");
                 run.CheckedAttachments.Add(checkedRel);
 
                 // Re-write the hook (now with ImportedEntryIds filled)
                 await File.WriteAllTextAsync(tmpHook, JsonSerializer.Serialize(hook, JsonStd.Options), Encoding.UTF8);
-                relHook = await _storage.SaveNewAsync(tmpHook, "litsearch", preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}_updated.json");
+                relHook = await _storage.SaveNewAsync(tmpHook, string.Empty, preferredFileName: $"litsearch_{DateTime.UtcNow:yyyyMMdd_HHmmss}_updated.json");
                 litEntry.MainFilePath = relHook;
                 litEntry.OriginalFileName = Path.GetFileName(relHook);
                 await _store.SaveAsync(litEntry);
@@ -565,13 +567,18 @@ namespace LM.App.Wpf.ViewModels
                     if (string.IsNullOrWhiteSpace(entry.Id))
                         continue;
 
-                    var hookPath = Path.Combine(root, "entries", entry.Id, "spokes", "litsearch", "litsearch.json");
+                    var hookPath = Path.Combine(root, "entries", entry.Id, "hooks", "litsearch.json");
                     if (!File.Exists(hookPath))
                     {
-                        var legacyPath = Path.Combine(root, "entries", entry.Id, "litsearch", "litsearch.json");
-                        if (!File.Exists(legacyPath))
+                        var legacyPaths = new[]
+                        {
+                            Path.Combine(root, "entries", entry.Id, "spokes", "litsearch", "litsearch.json"),
+                            Path.Combine(root, "entries", entry.Id, "litsearch", "litsearch.json")
+                        };
+
+                        hookPath = legacyPaths.FirstOrDefault(File.Exists);
+                        if (hookPath is null)
                             continue;
-                        hookPath = legacyPath;
                     }
 
                     try
@@ -858,16 +865,14 @@ namespace LM.App.Wpf.ViewModels
         }
 
         private async Task<string?> PersistRunCheckedEntriesAsync(
-            string? entryId,
+            LitSearchRunContext runContext,
             LitSearchRun run,
             IReadOnlyCollection<string> checkedEntryIds,
             IReadOnlyCollection<ImportantEntryRecord> importantEntries,
             DateTime savedUtc)
         {
-            if (string.IsNullOrWhiteSpace(entryId) || string.IsNullOrWhiteSpace(run.RunId))
+            if (runContext is null || string.IsNullOrWhiteSpace(run.RunId))
                 return null;
-
-            var runDir = EnsureLitSearchRunDirectory(entryId!, run.RunId);
 
             var sidecar = new CheckedEntryIdsSidecar
             {
@@ -883,43 +888,55 @@ namespace LM.App.Wpf.ViewModels
                 }
             };
 
-            var fileName = $"{run.RunId}.json";
-            var absPath = Path.Combine(runDir.AbsolutePath, fileName);
+            var fileName = $"{runContext.FilePrefix}_checked.json";
+            var absPath = Path.Combine(runContext.HooksAbsolutePath, fileName);
             await File.WriteAllTextAsync(absPath, JsonSerializer.Serialize(sidecar, JsonStd.Options), Encoding.UTF8);
 
-            var relPath = Path.Combine(runDir.RelativePath, fileName);
+            var relPath = Path.Combine(runContext.HooksRelativePath, fileName);
             return NormalizeWorkspacePath(relPath);
         }
 
-        private sealed record LitSearchRunDirectory(string AbsolutePath, string RelativePath);
+        private sealed record LitSearchRunContext(string HooksAbsolutePath, string HooksRelativePath, string FilePrefix);
+        private sealed record LitSearchRunLibraryFile(string AbsolutePath, string RelativePath);
 
-        private LitSearchRunDirectory EnsureLitSearchRunDirectory(string entryId, string runId)
+        private LitSearchRunContext EnsureLitSearchRunContext(string entryId, string runId)
         {
-            var directory = GetLitSearchRunDirectory(entryId, runId);
-            Directory.CreateDirectory(directory.AbsolutePath);
-            return directory;
+            var context = GetLitSearchRunContext(entryId, runId);
+            Directory.CreateDirectory(context.HooksAbsolutePath);
+            return context;
         }
 
-        private LitSearchRunDirectory GetLitSearchRunDirectory(string entryId, string runId)
+        private LitSearchRunContext GetLitSearchRunContext(string entryId, string runId)
         {
             var root = _ws.GetWorkspaceRoot();
-            var hash = ComputeRunHash(runId);
-            var relative = Path.Combine("entries", entryId, "spokes", "litsearch", "runs", hash[..2], hash[2..4]);
+            var relative = Path.Combine("entries", entryId, "hooks");
             var absolute = Path.Combine(root, relative);
-            return new LitSearchRunDirectory(absolute, relative);
+            var prefix = $"litsearch_run_{runId}";
+            return new LitSearchRunContext(absolute, relative, prefix);
         }
 
-        private static string ComputeRunHash(string runId)
+        private LitSearchRunLibraryFile EnsureLitSearchRunLibraryFile(string entryId, string runId)
+        {
+            var hash = ComputeStableHash($"{entryId}:{runId}:records");
+            var relativeDir = Path.Combine("library", hash[..2], hash[2..4]);
+            var fileName = $"litsearch_{runId}_records.xml";
+            var absolute = Path.Combine(_ws.GetWorkspaceRoot(), relativeDir, fileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(absolute)!);
+            var relative = Path.Combine(relativeDir, fileName);
+            return new LitSearchRunLibraryFile(absolute, NormalizeWorkspacePath(relative));
+        }
+
+        private static string ComputeStableHash(string value)
         {
             using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(runId));
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(value));
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
 
         private static string NormalizeWorkspacePath(string path)
             => path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 
-        private async Task<string?> TrySavePubMedXmlAsync(LitSearchRunDirectory runDirectory, string pubmedId, string entryId, string runId)
+        private async Task<string?> TrySavePubMedXmlAsync(string entryId, string runId, string pubmedId)
         {
             try
             {
@@ -927,17 +944,62 @@ namespace LM.App.Wpf.ViewModels
                 if (string.IsNullOrWhiteSpace(xml))
                     return null;
 
-                var fileName = $"{Sanitize($"pubmed_{pubmedId}_{entryId}_{runId}")}.xml";
-                var absPath = Path.Combine(runDirectory.AbsolutePath, fileName);
-                await File.WriteAllTextAsync(absPath, xml, Encoding.UTF8);
+                var libraryFile = EnsureLitSearchRunLibraryFile(entryId, runId);
+                var document = LoadOrCreateRunXml(libraryFile.AbsolutePath, entryId, runId);
 
-                var relPath = Path.Combine(runDirectory.RelativePath, fileName);
-                return NormalizeWorkspacePath(relPath);
+                var root = document.Root;
+                if (root is null)
+                {
+                    root = new XElement("litSearchRunData");
+                    document.Add(root);
+                }
+
+                root.SetAttributeValue("entryId", entryId);
+                root.SetAttributeValue("runId", runId);
+                root.SetAttributeValue("updatedUtc", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+
+                var provider = "PubMed";
+                var existing = root.Elements("record").FirstOrDefault(e =>
+                    string.Equals((string?)e.Attribute("provider"), provider, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals((string?)e.Attribute("externalId"), pubmedId, StringComparison.OrdinalIgnoreCase));
+                existing?.Remove();
+
+                var record = new XElement("record",
+                    new XAttribute("provider", provider),
+                    new XAttribute("externalId", pubmedId),
+                    new XAttribute("entryId", entryId),
+                    new XCData(xml));
+
+                root.Add(record);
+                SaveRunXml(document, libraryFile.AbsolutePath);
+
+                return libraryFile.RelativePath;
             }
             catch
             {
                 return null;
             }
+        }
+
+        private static XDocument LoadOrCreateRunXml(string absolutePath, string entryId, string runId)
+        {
+            if (File.Exists(absolutePath))
+            {
+                using var stream = File.OpenRead(absolutePath);
+                return XDocument.Load(stream);
+            }
+
+            var root = new XElement("litSearchRunData",
+                new XAttribute("entryId", entryId),
+                new XAttribute("runId", runId));
+            return new XDocument(root);
+        }
+
+        private static void SaveRunXml(XDocument document, string absolutePath)
+        {
+            var settings = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
+            using var writer = XmlWriter.Create(absolutePath, settings);
+            document.Save(writer);
         }
 
         private static List<string> BuildCheckedEntryIds(IEnumerable<SearchHit> hits)
@@ -963,6 +1025,7 @@ namespace LM.App.Wpf.ViewModels
             try
             {
                 var json = JsonSerializer.Serialize(context.Hook, JsonStd.Options);
+                Directory.CreateDirectory(Path.GetDirectoryName(context.HookPath)!);
                 await File.WriteAllTextAsync(context.HookPath, json, Encoding.UTF8, ct);
             }
             catch

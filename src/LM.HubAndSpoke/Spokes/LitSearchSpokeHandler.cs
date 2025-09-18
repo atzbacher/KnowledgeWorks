@@ -22,7 +22,7 @@ namespace LM.HubSpoke.Spokes
         }
 
         public EntryType Handles => EntryType.Other;
-        public string HookPath => "spokes/litsearch/litsearch.json";
+        public string HookPath => "hooks/litsearch.json";
 
         public async Task<object?> BuildHookAsync(
             Entry entry,
