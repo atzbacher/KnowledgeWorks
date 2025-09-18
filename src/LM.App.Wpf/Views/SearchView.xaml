@@ -131,6 +131,9 @@
           <DataGridTextColumn Header="Name"
                                Binding="{Binding DisplayName}"
                                Width="200" />
+          <DataGridTextColumn Header="Tags"
+                               Binding="{Binding TagsDisplay}"
+                               Width="200" />
           <DataGridTextColumn Header="Query"
                                Binding="{Binding Query}"
                                Width="*" />

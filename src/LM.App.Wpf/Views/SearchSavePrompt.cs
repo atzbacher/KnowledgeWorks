@@ -34,7 +34,7 @@ namespace LM.App.Wpf.Views
             var ok = dialog.ShowDialog();
             if (ok == true)
             {
-                return new SearchSavePromptResult(dialog.ResultName, dialog.ResultNotes);
+                return new SearchSavePromptResult(dialog.ResultName, dialog.ResultNotes, dialog.ResultTagsRaw);
             }
 
             return null;
