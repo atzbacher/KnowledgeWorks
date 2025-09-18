@@ -104,12 +104,15 @@ namespace LM.HubSpoke.Entries
             // 2) Hub
             var isPublication = entry.Type == EntryType.Publication;
             var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
+            var createdBy = BuildPersonRef(entry.AddedBy);
             var hub = new EntryHub
             {
                 EntryId = entryId,
                 DisplayTitle = entry.Title ?? entry.DisplayName ?? string.Empty,
                 CreatedUtc = entry.AddedOnUtc == default ? now : entry.AddedOnUtc,
                 UpdatedUtc = now,
+                CreatedBy = createdBy,
+                UpdatedBy = createdBy,
                 CreationMethod = isLitSearch ? CreationMethod.Search : CreationMethod.Manual,
                 Origin = entry.IsInternal ? EntryOrigin.Internal : EntryOrigin.External,
                 PrimaryPurpose = isPublication ? EntryPurpose.Manuscript : EntryPurpose.Document,
@@ -167,6 +170,15 @@ namespace LM.HubSpoke.Entries
 
             // update in-memory ID index
             _idIndex.AddOrUpdate(entry.Doi, entry.Pmid, entryId);
+        }
+
+        private static PersonRef BuildPersonRef(string? user)
+        {
+            if (string.IsNullOrWhiteSpace(user))
+                return PersonRef.Unknown;
+
+            var trimmed = user.Trim();
+            return new PersonRef(trimmed, trimmed);
         }
 
         public async Task<Entry?> FindByIdsAsync(string? doi, string? pmid, CancellationToken ct = default)

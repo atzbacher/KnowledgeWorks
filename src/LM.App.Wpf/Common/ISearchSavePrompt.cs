@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using LM.Core.Models;
 
@@ -16,7 +17,8 @@ namespace LM.App.Wpf.Common
         DateTime? From,
         DateTime? To,
         string DefaultName,
-        string DefaultNotes);
+        string DefaultNotes,
+        IReadOnlyList<string> DefaultTags);
 
-    public sealed record SearchSavePromptResult(string Name, string Notes);
+    public sealed record SearchSavePromptResult(string Name, string Notes, string Tags);
 }

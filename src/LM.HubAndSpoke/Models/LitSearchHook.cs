@@ -60,12 +60,6 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("runId")]
         public string RunId { get; init; } = IdGen.NewId();
 
-        [JsonPropertyName("provider")]
-        public string Provider { get; init; } = string.Empty;
-
-        [JsonPropertyName("query")]
-        public string Query { get; init; } = string.Empty;
-
         [JsonPropertyName("from")]
         [JsonConverter(typeof(NullableUtcDateTimeConverter))]
         public DateTime? From { get; init; }
@@ -81,9 +75,6 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("totalHits")]
         public int TotalHits { get; init; }
 
-        [JsonPropertyName("displayName")]
-        public string? DisplayName { get; init; }
-
         [JsonPropertyName("isFavorite")]
         public bool IsFavorite { get; init; }
 
@@ -93,13 +84,7 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("rawAttachments")]
         public List<string> RawAttachments { get; init; } = new();
 
-        [JsonPropertyName("checkedAttachments")]
-        public List<string> CheckedAttachments { get; init; } = new();
-
         [JsonPropertyName("checkedEntryIdsPath")]
         public string? CheckedEntryIdsPath { get; set; }
-
-        [JsonPropertyName("importedEntryIds")]
-        public List<string> ImportedEntryIds { get; init; } = new();
     }
 }

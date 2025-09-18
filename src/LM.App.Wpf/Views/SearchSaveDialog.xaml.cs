@@ -11,6 +11,7 @@ namespace LM.App.Wpf.Views
     {
         public string ResultName { get; private set; } = string.Empty;
         public string ResultNotes { get; private set; } = string.Empty;
+        public string ResultTagsRaw { get; private set; } = string.Empty;
 
         public SearchSaveDialog(SearchSavePromptContext context)
         {
@@ -21,6 +22,9 @@ namespace LM.App.Wpf.Views
             RangeText.Text = FormatRange(context.From, context.To);
             NameBox.Text = context.DefaultName ?? string.Empty;
             NotesBox.Text = context.DefaultNotes ?? string.Empty;
+            TagsBox.Text = context.DefaultTags is null || context.DefaultTags.Count == 0
+                ? string.Empty
+                : string.Join(", ", context.DefaultTags);
 
             Loaded += (_, _) =>
             {
@@ -49,6 +53,7 @@ namespace LM.App.Wpf.Views
 
             ResultName = NameBox.Text.Trim();
             ResultNotes = NotesBox.Text.Trim();
+            ResultTagsRaw = TagsBox.Text?.Trim() ?? string.Empty;
             DialogResult = true;
         }
 

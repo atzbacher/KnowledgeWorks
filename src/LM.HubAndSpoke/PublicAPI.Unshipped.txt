@@ -380,21 +380,11 @@ LM.HubSpoke.Models.LitSearchHook.Title.init -> void
 LM.HubSpoke.Models.LitSearchHook.To.get -> System.DateTime?
 LM.HubSpoke.Models.LitSearchHook.To.init -> void
 LM.HubSpoke.Models.LitSearchRun
-LM.HubSpoke.Models.LitSearchRun.DisplayName.get -> string?
-LM.HubSpoke.Models.LitSearchRun.DisplayName.init -> void
-LM.HubSpoke.Models.LitSearchRun.ImportedEntryIds.get -> System.Collections.Generic.List<string!>!
-LM.HubSpoke.Models.LitSearchRun.ImportedEntryIds.init -> void
 LM.HubSpoke.Models.LitSearchRun.IsFavorite.get -> bool
 LM.HubSpoke.Models.LitSearchRun.IsFavorite.init -> void
 LM.HubSpoke.Models.LitSearchRun.LitSearchRun() -> void
-LM.HubSpoke.Models.LitSearchRun.Provider.get -> string!
-LM.HubSpoke.Models.LitSearchRun.Provider.init -> void
-LM.HubSpoke.Models.LitSearchRun.Query.get -> string!
-LM.HubSpoke.Models.LitSearchRun.Query.init -> void
 LM.HubSpoke.Models.LitSearchRun.RawAttachments.get -> System.Collections.Generic.List<string!>!
 LM.HubSpoke.Models.LitSearchRun.RawAttachments.init -> void
-LM.HubSpoke.Models.LitSearchRun.CheckedAttachments.get -> System.Collections.Generic.List<string!>!
-LM.HubSpoke.Models.LitSearchRun.CheckedAttachments.init -> void
 LM.HubSpoke.Models.LitSearchRun.CheckedEntryIdsPath.get -> string?
 LM.HubSpoke.Models.LitSearchRun.CheckedEntryIdsPath.set -> void
 LM.HubSpoke.Models.LitSearchRun.RunId.get -> string!
