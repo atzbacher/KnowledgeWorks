@@ -79,5 +79,18 @@ namespace LM.Infrastructure.Search
                 return null;
             }
         }
+
+        public async Task<string?> FetchFullRecordXmlAsync(string pubmedId, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(pubmedId))
+                return null;
+
+            var url = $"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id={Uri.EscapeDataString(pubmedId)}";
+            using var resp = await _http.GetAsync(url, ct);
+            if (!resp.IsSuccessStatusCode)
+                return null;
+
+            return await resp.Content.ReadAsStringAsync(ct);
+        }
     }
 }
