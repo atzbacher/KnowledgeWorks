@@ -11,9 +11,22 @@ LM.App.Wpf.Common.AsyncRelayCommand.CanExecute(object? parameter) -> bool
 LM.App.Wpf.Common.AsyncRelayCommand.CanExecuteChanged -> System.EventHandler?
 LM.App.Wpf.Common.AsyncRelayCommand.Execute(object? parameter) -> void
 LM.App.Wpf.Common.AsyncRelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter
+LM.App.Wpf.Common.BooleanToOpacityConverter.BooleanToOpacityConverter() -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Common.BooleanToOpacityConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
+LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
+LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
 LM.App.Wpf.Common.ISearchSavePrompt
 LM.App.Wpf.Common.ISearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
 LM.App.Wpf.Common.SearchSavePromptContext
+LM.App.Wpf.Common.SearchSavePromptContext.Database.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultName.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultNotes.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.From.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.Query.init -> void
 LM.App.Wpf.Common.SearchSavePromptContext.SearchSavePromptContext(string! Query, LM.Core.Models.SearchDatabase Database, System.DateTime? From, System.DateTime? To, string! DefaultName, string! DefaultNotes) -> void
 LM.App.Wpf.Common.SearchSavePromptContext.Database.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.Common.SearchSavePromptContext.DefaultName.get -> string!
@@ -21,7 +34,10 @@ LM.App.Wpf.Common.SearchSavePromptContext.DefaultNotes.get -> string!
 LM.App.Wpf.Common.SearchSavePromptContext.From.get -> System.DateTime?
 LM.App.Wpf.Common.SearchSavePromptContext.Query.get -> string!
 LM.App.Wpf.Common.SearchSavePromptContext.To.get -> System.DateTime?
+LM.App.Wpf.Common.SearchSavePromptContext.To.init -> void
 LM.App.Wpf.Common.SearchSavePromptResult
+LM.App.Wpf.Common.SearchSavePromptResult.Name.init -> void
+LM.App.Wpf.Common.SearchSavePromptResult.Notes.init -> void
 LM.App.Wpf.Common.SearchSavePromptResult.SearchSavePromptResult(string! Name, string! Notes) -> void
 LM.App.Wpf.Common.SearchSavePromptResult.Name.get -> string!
 LM.App.Wpf.Common.SearchSavePromptResult.Notes.get -> string!
