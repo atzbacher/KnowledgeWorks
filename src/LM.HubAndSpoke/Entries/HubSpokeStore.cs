@@ -105,7 +105,7 @@ namespace LM.HubSpoke.Entries
             var isPublication = entry.Type == EntryType.Publication;
             var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
             var createdBy = BuildPersonRef(entry.AddedBy);
-            var hasNotes = !string.IsNullOrWhiteSpace(entry.Notes);
+            var hasNotes = !string.IsNullOrWhiteSpace(entry.Notes) || !string.IsNullOrWhiteSpace(entry.UserNotes);
 
             var hub = new EntryHub
             {
@@ -125,16 +125,23 @@ namespace LM.HubSpoke.Entries
                     Article = isPublication ? "hooks/article.json" : null,
                     Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
                     LitSearch = isLitSearch ? "hooks/litsearch.json" : null,
-                    Notes = hasNotes ? "notes.md" : null
+                    Notes = hasNotes ? "hooks/notes.json" : null
                 }
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);
 
             var entryDir = WorkspaceLayout.EntryDir(_ws, entryId);
-            var notesPath = Path.Combine(entryDir, "notes.md");
+            var notesPath = WorkspaceLayout.NotesHookPath(_ws, entryId);
             if (hasNotes)
             {
-                await File.WriteAllTextAsync(notesPath, entry.Notes!, ct);
+                Directory.CreateDirectory(Path.GetDirectoryName(notesPath)!);
+                var notesHook = new EntryNotesHook
+                {
+                    Summary = entry.Notes,
+                    UserNotes = entry.UserNotes,
+                    UpdatedUtc = now
+                };
+                await File.WriteAllTextAsync(notesPath, JsonSerializer.Serialize(notesHook, JsonStd.Options), ct);
             }
             else if (File.Exists(notesPath))
             {

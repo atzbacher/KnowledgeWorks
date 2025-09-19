@@ -209,7 +209,7 @@ namespace LM.App.Wpf.ViewModels
                 defaultName = fallbackTitle;
             }
 
-            var defaultNotes = _loadedHook?.Notes ?? string.Empty;
+            var defaultNotes = _loadedHook?.UserNotes ?? string.Empty;
 
             Entry? existingEntry = null;
             var defaultTags = new List<string>();
@@ -324,7 +324,8 @@ namespace LM.App.Wpf.ViewModels
                     CreatedBy = createdBy,
                     CreatedUtc = createdUtc,
                     Keywords = _loadedHook?.Keywords ?? Array.Empty<string>(),
-                    Notes = trimmedNotes,
+                    UserNotes = trimmedNotes,
+                    NotesSummary = string.IsNullOrWhiteSpace(trimmedNotes) ? null : note,
                     DerivedFromEntryId = derivedFrom,
                     Runs = runs
                 };
@@ -345,6 +346,7 @@ namespace LM.App.Wpf.ViewModels
                 litEntry.AddedOnUtc = createdUtc;
                 litEntry.AddedBy = createdBy;
                 litEntry.Notes = string.IsNullOrWhiteSpace(trimmedNotes) ? null : note;
+                litEntry.UserNotes = trimmedNotes;
                 litEntry.MainFilePath = relHook;                 // primary (will be used by LitSearchSpokeHandler)
                 litEntry.OriginalFileName = Path.GetFileName(relHook);
                 litEntry.Links ??= new List<string>();
@@ -543,7 +545,7 @@ namespace LM.App.Wpf.ViewModels
                         context.Hook.CreatedUtc,
                         context.Hook.DerivedFromEntryId,
                         context.Hook.Keywords,
-                        context.Hook.Notes,
+                        context.Hook.UserNotes,
                         runCount = runs.Count
                     },
                     latestRun = latest is null
@@ -657,6 +659,8 @@ namespace LM.App.Wpf.ViewModels
                         var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
                         if (hook is null)
                             continue;
+
+                        await HydrateHookNotesAsync(entry.Id!, entry, hook, root, ct);
 
                         var context = new PreviousSearchContext(entry.Id, hookPath, hook, entry);
                         _entryIndex[context.EntryId] = context;
@@ -1074,6 +1078,53 @@ namespace LM.App.Wpf.ViewModels
             {
                 // ignore persistence errors
             }
+        }
+
+        private static async Task HydrateHookNotesAsync(string entryId, Entry entry, LitSearchHook hook, string workspaceRoot, CancellationToken ct)
+        {
+            if (hook is null || string.IsNullOrWhiteSpace(entryId))
+                return;
+
+            try
+            {
+                var notesPath = Path.Combine(workspaceRoot, "entries", entryId, "hooks", "notes.json");
+                if (File.Exists(notesPath))
+                {
+                    var json = await File.ReadAllTextAsync(notesPath, ct);
+                    var notesHook = JsonSerializer.Deserialize<EntryNotesHook>(json, JsonStd.Options);
+                    if (notesHook is not null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(notesHook.UserNotes))
+                            hook.UserNotes = notesHook.UserNotes;
+                        if (!string.IsNullOrWhiteSpace(notesHook.Summary))
+                            hook.NotesSummary = notesHook.Summary;
+
+                        entry.UserNotes = hook.UserNotes;
+                        entry.Notes = hook.NotesSummary;
+                        return;
+                    }
+                }
+
+                var legacyNotesPath = Path.Combine(workspaceRoot, "entries", entryId, "notes.md");
+                if (File.Exists(legacyNotesPath))
+                {
+                    var text = await File.ReadAllTextAsync(legacyNotesPath, ct);
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        hook.NotesSummary = text;
+                        hook.UserNotes ??= text;
+                        entry.UserNotes = hook.UserNotes;
+                        entry.Notes = hook.NotesSummary;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore hydration issues and continue with hook-only data
+            }
+
+            entry.UserNotes ??= hook.UserNotes;
+            entry.Notes ??= hook.NotesSummary;
         }
 
         private static LitSearchRun CloneRunWithMetadata(LitSearchRun source, string runId, bool isFavorite)

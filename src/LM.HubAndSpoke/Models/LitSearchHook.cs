@@ -43,7 +43,21 @@ namespace LM.HubSpoke.Models
         public IReadOnlyList<string> Keywords { get; init; } = Array.Empty<string>();
 
         [JsonPropertyName("notes")]
-        public string? Notes { get; init; }
+        public string? LegacyNotes
+        {
+            get => null;
+            init
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                    UserNotes = value;
+            }
+        }
+
+        [JsonIgnore]
+        public string? UserNotes { get; set; }
+
+        [JsonIgnore]
+        public string? NotesSummary { get; set; }
 
         [JsonPropertyName("derivedFromEntryId")]
         public string? DerivedFromEntryId { get; init; }

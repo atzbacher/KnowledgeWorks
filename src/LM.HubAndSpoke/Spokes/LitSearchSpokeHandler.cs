@@ -2,6 +2,7 @@
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.HubSpoke.Abstractions;
+using LM.HubSpoke.FileSystem;
 using LM.HubSpoke.Models;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,14 @@ namespace LM.HubSpoke.Spokes
         {
             // primary.RelPath points to the litsearch json we created in the Search tab
             if (string.IsNullOrWhiteSpace(primary.RelPath))
-                return new LitSearchHook { Title = entry.Title ?? entry.DisplayName ?? "Search" };
+            {
+                return new LitSearchHook
+                {
+                    Title = entry.Title ?? entry.DisplayName ?? "Search",
+                    UserNotes = entry.UserNotes,
+                    NotesSummary = entry.Notes
+                };
+            }
 
             var wsJson = primary.RelPath!;
             var abs = Path.IsPathRooted(wsJson) ? wsJson : _ws.GetAbsolutePath(wsJson);
@@ -43,11 +51,20 @@ namespace LM.HubSpoke.Spokes
             try
             {
                 var json = await File.ReadAllTextAsync(abs, ct);
-                return JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
+                var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options)
+                           ?? new LitSearchHook { Title = entry.Title ?? entry.DisplayName ?? "Search" };
+                hook.UserNotes ??= entry.UserNotes;
+                hook.NotesSummary ??= entry.Notes;
+                return hook;
             }
             catch
             {
-                return new LitSearchHook { Title = entry.Title ?? entry.DisplayName ?? "Search" };
+                return new LitSearchHook
+                {
+                    Title = entry.Title ?? entry.DisplayName ?? "Search",
+                    UserNotes = entry.UserNotes,
+                    NotesSummary = entry.Notes
+                };
             }
         }
 
@@ -55,7 +72,7 @@ namespace LM.HubSpoke.Spokes
         {
             var hook = hookObj as LitSearchHook;
             var abstractText = string.Join(Environment.NewLine,
-                new[] { hook?.Query, hook?.Notes }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                new[] { hook?.Query, hook?.UserNotes }.Where(s => !string.IsNullOrWhiteSpace(s)));
             var keywords = hook?.Keywords ?? Array.Empty<string>();
             return new SpokeIndexContribution(
                 Title: hook?.Title ?? hub.DisplayTitle,
@@ -83,15 +100,69 @@ namespace LM.HubSpoke.Spokes
                 Source = "LitSearch",
                 AddedOnUtc = hook?.CreatedUtc ?? hub.CreatedUtc,
                 AddedBy = hook?.CreatedBy,
-                Notes = hook?.Notes,
+                Notes = hook?.NotesSummary,
+                UserNotes = hook?.UserNotes,
                 Tags = hub.Tags?.ToList() ?? new List<string>()
             };
         }
 
-        public Task<object?> LoadHookAsync(IWorkSpaceService ws, string entryId, CancellationToken ct)
+        public async Task<object?> LoadHookAsync(IWorkSpaceService ws, string entryId, CancellationToken ct)
         {
-            // store already loads hooks from HookPath; no custom load logic needed
-            return Task.FromResult<object?>(null);
+            var path = WorkspaceLayout.LitSearchHookPath(ws, entryId);
+            if (!File.Exists(path))
+                return null;
+
+            try
+            {
+                var json = await File.ReadAllTextAsync(path, ct);
+                var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
+                if (hook is null)
+                    return null;
+
+                await HydrateNotesAsync(ws, entryId, hook, ct);
+                return hook;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static async Task HydrateNotesAsync(IWorkSpaceService ws, string entryId, LitSearchHook hook, CancellationToken ct)
+        {
+            try
+            {
+                var notesPath = WorkspaceLayout.NotesHookPath(ws, entryId);
+                if (File.Exists(notesPath))
+                {
+                    var json = await File.ReadAllTextAsync(notesPath, ct);
+                    var notesHook = JsonSerializer.Deserialize<EntryNotesHook>(json, JsonStd.Options);
+                    if (notesHook is not null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(notesHook.UserNotes))
+                            hook.UserNotes = notesHook.UserNotes;
+                        if (!string.IsNullOrWhiteSpace(notesHook.Summary))
+                            hook.NotesSummary = notesHook.Summary;
+                        return;
+                    }
+                }
+
+                // Legacy fallback to notes.md if hooks/notes.json is missing
+                var legacyNotes = Path.Combine(WorkspaceLayout.EntryDir(ws, entryId), "notes.md");
+                if (File.Exists(legacyNotes))
+                {
+                    var text = await File.ReadAllTextAsync(legacyNotes, ct);
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        hook.NotesSummary = text;
+                        hook.UserNotes ??= text;
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore hydration errors so callers can continue with hook-only data
+            }
         }
     }
 }

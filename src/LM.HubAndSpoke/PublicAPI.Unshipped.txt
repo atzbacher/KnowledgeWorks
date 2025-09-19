@@ -300,6 +300,16 @@ LM.HubSpoke.Models.EntryHub.UpdatedBy.get -> LM.HubSpoke.Models.PersonRef
 LM.HubSpoke.Models.EntryHub.UpdatedBy.init -> void
 LM.HubSpoke.Models.EntryHub.UpdatedUtc.get -> System.DateTime
 LM.HubSpoke.Models.EntryHub.UpdatedUtc.init -> void
+LM.HubSpoke.Models.EntryNotesHook
+LM.HubSpoke.Models.EntryNotesHook.EntryNotesHook() -> void
+LM.HubSpoke.Models.EntryNotesHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.EntryNotesHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.EntryNotesHook.Summary.get -> string?
+LM.HubSpoke.Models.EntryNotesHook.Summary.init -> void
+LM.HubSpoke.Models.EntryNotesHook.UpdatedUtc.get -> System.DateTime
+LM.HubSpoke.Models.EntryNotesHook.UpdatedUtc.init -> void
+LM.HubSpoke.Models.EntryNotesHook.UserNotes.get -> string?
+LM.HubSpoke.Models.EntryNotesHook.UserNotes.init -> void
 LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.External = 0 -> LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.Internal = 1 -> LM.HubSpoke.Models.EntryOrigin
@@ -369,8 +379,12 @@ LM.HubSpoke.Models.LitSearchHook.Provider.get -> string!
 LM.HubSpoke.Models.LitSearchHook.Provider.init -> void
 LM.HubSpoke.Models.LitSearchHook.Query.get -> string!
 LM.HubSpoke.Models.LitSearchHook.Query.init -> void
-LM.HubSpoke.Models.LitSearchHook.Notes.get -> string?
-LM.HubSpoke.Models.LitSearchHook.Notes.init -> void
+LM.HubSpoke.Models.LitSearchHook.LegacyNotes.get -> string?
+LM.HubSpoke.Models.LitSearchHook.LegacyNotes.init -> void
+LM.HubSpoke.Models.LitSearchHook.NotesSummary.get -> string?
+LM.HubSpoke.Models.LitSearchHook.NotesSummary.set -> void
+LM.HubSpoke.Models.LitSearchHook.UserNotes.get -> string?
+LM.HubSpoke.Models.LitSearchHook.UserNotes.set -> void
 LM.HubSpoke.Models.LitSearchHook.Runs.get -> System.Collections.Generic.List<LM.HubSpoke.Models.LitSearchRun!>!
 LM.HubSpoke.Models.LitSearchHook.Runs.init -> void
 LM.HubSpoke.Models.LitSearchHook.SchemaVersion.get -> string!

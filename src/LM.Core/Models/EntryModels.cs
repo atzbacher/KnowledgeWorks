@@ -55,6 +55,9 @@ namespace LM.Core.Models
         // Notes
         public string? Notes { get; set; }
 
+        // Optional free-form notes captured from the UI (unstructured)
+        public string? UserNotes { get; set; }
+
         // Attachments & relations
         public List<Attachment> Attachments { get; set; } = new();
         public List<Relation> Relations { get; set; } = new();
