@@ -178,14 +178,28 @@ LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.get -> bool
 LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.set -> void
 LM.App.Wpf.ViewModels.WatchedFolder.LastScanDisplay.get -> string!
 LM.App.Wpf.ViewModels.WatchedFolder.LastScanUtc.get -> System.DateTimeOffset?
-LM.App.Wpf.ViewModels.WatchedFolder.MarkScanned(System.DateTimeOffset whenUtc) -> void
+LM.App.Wpf.ViewModels.WatchedFolder.LastScanWasUnchanged.get -> bool?
 LM.App.Wpf.ViewModels.WatchedFolder.Path.get -> string!
 LM.App.Wpf.ViewModels.WatchedFolder.Path.set -> void
 LM.App.Wpf.ViewModels.WatchedFolder.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.WatchedFolder.ResetScanState() -> void
+LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusLabel.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusToolTip.get -> string!
 LM.App.Wpf.ViewModels.WatchedFolder.WatchedFolder() -> void
+LM.App.Wpf.ViewModels.WatchedFolderState
+LM.App.Wpf.ViewModels.WatchedFolderState.AggregatedHash.get -> string?
+LM.App.Wpf.ViewModels.WatchedFolderState.LastScanUtc.get -> System.DateTimeOffset?
+LM.App.Wpf.ViewModels.WatchedFolderState.LastScanWasUnchanged.get -> bool
+LM.App.Wpf.ViewModels.WatchedFolderState.Path.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolderState.WatchedFolderState(string path, System.DateTimeOffset? lastScanUtc, string? aggregatedHash, bool lastScanWasUnchanged) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig
+LM.App.Wpf.ViewModels.WatchedFolderConfig.ApplyState(LM.App.Wpf.ViewModels.WatchedFolder folder) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.ClearState(LM.App.Wpf.ViewModels.WatchedFolder folder) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(string path) -> LM.App.Wpf.ViewModels.WatchedFolderState?
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(LM.App.Wpf.ViewModels.WatchedFolder folder) -> LM.App.Wpf.ViewModels.WatchedFolderState?
 LM.App.Wpf.ViewModels.WatchedFolderConfig.SaveAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.StoreState(LM.App.Wpf.ViewModels.WatchedFolder folder, LM.App.Wpf.ViewModels.WatchedFolderState state) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.WatchedFolderConfig() -> void
 LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs
 LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs.Folder.get -> LM.App.Wpf.ViewModels.WatchedFolder!
@@ -195,7 +209,7 @@ LM.App.Wpf.ViewModels.WatchedFolderScanner
 LM.App.Wpf.ViewModels.WatchedFolderScanner.Attach(LM.App.Wpf.ViewModels.WatchedFolderConfig! config) -> void
 LM.App.Wpf.ViewModels.WatchedFolderScanner.Dispose() -> void
 LM.App.Wpf.ViewModels.WatchedFolderScanner.ItemsStaged -> System.EventHandler<LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs!>?
-LM.App.Wpf.ViewModels.WatchedFolderScanner.ScanAsync(LM.App.Wpf.ViewModels.WatchedFolder? folder, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.WatchedFolderScanner.ScanAsync(LM.App.Wpf.ViewModels.WatchedFolder? folder, System.Threading.CancellationToken ct, bool force = false) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.WatchedFolderScanner.WatchedFolderScanner(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
 LM.App.Wpf.ViewModels.IAddPipeline
 LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!

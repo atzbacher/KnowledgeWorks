@@ -60,6 +60,39 @@
                   </DataTemplate>
                 </GridViewColumn.CellTemplate>
               </GridViewColumn>
+              <GridViewColumn Width="140" Header="Status">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <Border Padding="4,2"
+                            CornerRadius="4"
+                            BorderThickness="1"
+                            ToolTip="{Binding ScanStatusToolTip}">
+                      <Border.Style>
+                        <Style TargetType="Border">
+                          <Setter Property="Background" Value="#FFEDEDED"/>
+                          <Setter Property="BorderBrush" Value="#FFBDBDBD"/>
+                          <Setter Property="HorizontalAlignment" Value="Center"/>
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding LastScanWasUnchanged}" Value="True">
+                              <Setter Property="Background" Value="#FFE6F4EA"/>
+                              <Setter Property="BorderBrush" Value="#FF4CAF50"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding LastScanWasUnchanged}" Value="False">
+                              <Setter Property="Background" Value="#FFFDECEA"/>
+                              <Setter Property="BorderBrush" Value="#FFF44336"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding LastScanWasUnchanged}" Value="{x:Null}">
+                              <Setter Property="Background" Value="#FFEDEDED"/>
+                              <Setter Property="BorderBrush" Value="#FFBDBDBD"/>
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </Border.Style>
+                      <TextBlock Text="{Binding ScanStatusLabel}" HorizontalAlignment="Center" Margin="4,0"/>
+                    </Border>
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
               <GridViewColumn Width="200">
                 <GridViewColumn.CellTemplate>
                   <DataTemplate>
