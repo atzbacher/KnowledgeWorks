@@ -20,12 +20,6 @@ namespace LM.App.Wpf.Views
             QueryText.Text = context.Query;
             DatabaseText.Text = context.Database == SearchDatabase.PubMed ? "PubMed" : "ClinicalTrials.gov";
             RangeText.Text = FormatRange(context.From, context.To);
-            NameBox.Text = context.DefaultName ?? string.Empty;
-            NotesBox.Text = context.DefaultNotes ?? string.Empty;
-            TagsBox.Text = context.DefaultTags is null || context.DefaultTags.Count == 0
-                ? string.Empty
-                : string.Join(", ", context.DefaultTags);
-
             Loaded += (_, _) =>
             {
                 NameBox.Focus();

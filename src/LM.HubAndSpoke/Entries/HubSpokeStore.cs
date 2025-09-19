@@ -105,6 +105,8 @@ namespace LM.HubSpoke.Entries
             var isPublication = entry.Type == EntryType.Publication;
             var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
             var createdBy = BuildPersonRef(entry.AddedBy);
+            var hasNotes = !string.IsNullOrWhiteSpace(entry.Notes);
+
             var hub = new EntryHub
             {
                 EntryId = entryId,
@@ -122,10 +124,22 @@ namespace LM.HubSpoke.Entries
                 {
                     Article = isPublication ? "hooks/article.json" : null,
                     Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
-                    LitSearch = isLitSearch ? "hooks/litsearch.json" : null
+                    LitSearch = isLitSearch ? "hooks/litsearch.json" : null,
+                    Notes = hasNotes ? "notes.md" : null
                 }
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);
+
+            var entryDir = WorkspaceLayout.EntryDir(_ws, entryId);
+            var notesPath = Path.Combine(entryDir, "notes.md");
+            if (hasNotes)
+            {
+                await File.WriteAllTextAsync(notesPath, entry.Notes!, ct);
+            }
+            else if (File.Exists(notesPath))
+            {
+                File.Delete(notesPath);
+            }
 
             // 3) Spoke
             if (!_handlers.TryGetValue(entry.Type, out var handler))

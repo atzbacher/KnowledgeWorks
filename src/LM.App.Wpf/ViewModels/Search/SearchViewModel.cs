@@ -224,30 +224,68 @@ namespace LM.App.Wpf.ViewModels
                 defaultTags = new List<string>(SelectedPreviousRun.Tags);
             }
 
-            var promptResult = await _savePrompt.RequestAsync(new SearchSavePromptContext(
-                Query,
-                SelectedDatabase,
-                From,
-                To,
-                defaultName ?? string.Empty,
-                defaultNotes ?? string.Empty,
-                defaultTags));
+            var skipPrompt = continueExisting;
 
-            if (promptResult is null)
+            SearchSavePromptResult? promptResult = null;
+            if (!skipPrompt)
             {
-                return;
+                promptResult = await _savePrompt.RequestAsync(new SearchSavePromptContext(
+                    Query,
+                    SelectedDatabase,
+                    From,
+                    To,
+                    defaultName ?? string.Empty,
+                    defaultNotes ?? string.Empty,
+                    defaultTags));
+
+                if (promptResult is null)
+                {
+                    return;
+                }
             }
 
-            var trimmedName = string.IsNullOrWhiteSpace(promptResult.Name)
-                ? null
-                : promptResult.Name.Trim();
-            var trimmedNotes = string.IsNullOrWhiteSpace(promptResult.Notes)
-                ? null
-                : promptResult.Notes.Trim();
+            string? trimmedName;
+            string? trimmedNotes;
+            List<string> normalizedTags;
 
-            var normalizedTags = LM.Infrastructure.Utils.TagNormalizer
-                .SplitAndNormalize(promptResult.Tags ?? string.Empty)
-                .ToList();
+            if (skipPrompt)
+            {
+                trimmedName = string.IsNullOrWhiteSpace(defaultName)
+                    ? null
+                    : defaultName.Trim();
+
+                trimmedNotes = string.IsNullOrWhiteSpace(defaultNotes)
+                    ? null
+                    : defaultNotes.Trim();
+
+                normalizedTags = new List<string>();
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var tag in defaultTags)
+                {
+                    if (string.IsNullOrWhiteSpace(tag))
+                        continue;
+
+                    var trimmedTag = tag.Trim();
+                    if (trimmedTag.Length == 0)
+                        continue;
+
+                    if (seen.Add(trimmedTag))
+                        normalizedTags.Add(trimmedTag);
+                }
+            }
+            else
+            {
+                trimmedName = string.IsNullOrWhiteSpace(promptResult!.Name)
+                    ? null
+                    : promptResult.Name.Trim();
+                trimmedNotes = string.IsNullOrWhiteSpace(promptResult.Notes)
+                    ? null
+                    : promptResult.Notes.Trim();
+
+                normalizedTags = LM.Infrastructure.Utils.TagNormalizer
+                    .SplitAndNormalize(promptResult.Tags ?? string.Empty)
+                    .ToList();
+            }
 
             var effectiveTitle = string.IsNullOrWhiteSpace(trimmedName) ? fallbackTitle : trimmedName;
 
@@ -306,7 +344,7 @@ namespace LM.App.Wpf.ViewModels
                 litEntry.Source = "LitSearch";
                 litEntry.AddedOnUtc = createdUtc;
                 litEntry.AddedBy = createdBy;
-                litEntry.Notes = note;
+                litEntry.Notes = string.IsNullOrWhiteSpace(trimmedNotes) ? null : note;
                 litEntry.MainFilePath = relHook;                 // primary (will be used by LitSearchSpokeHandler)
                 litEntry.OriginalFileName = Path.GetFileName(relHook);
                 litEntry.Links ??= new List<string>();
