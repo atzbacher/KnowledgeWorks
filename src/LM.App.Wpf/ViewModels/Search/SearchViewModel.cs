@@ -936,7 +936,7 @@ namespace LM.App.Wpf.ViewModels
         {
             if (string.IsNullOrWhiteSpace(path))
                 return path;
-            return path.Replace('\', '/');
+            return path.Replace('\\', '/');
         }
 
         private async Task<string?> TrySavePubMedXmlAsync(string litEntryId, string importedEntryId, string runId, string pubmedId)
