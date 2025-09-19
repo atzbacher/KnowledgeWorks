@@ -185,6 +185,9 @@ LM.App.Wpf.ViewModels.WatchedFolder.PropertyChanged -> System.ComponentModel.Pro
 LM.App.Wpf.ViewModels.WatchedFolder.WatchedFolder() -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig
 LM.App.Wpf.ViewModels.WatchedFolderConfig.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.LoadAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.App.Wpf.ViewModels.WatchedFolderConfig!>!
+
+
 LM.App.Wpf.ViewModels.WatchedFolderConfig.SaveAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.WatchedFolderConfig.WatchedFolderConfig() -> void
 LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs
