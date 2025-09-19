@@ -313,8 +313,6 @@ LM.HubSpoke.Models.EntryNotesHook.UserNotes.get -> string?
 LM.HubSpoke.Models.EntryNotesHook.UserNotes.init -> void
 LM.HubSpoke.Models.EntryNotesSummary
 LM.HubSpoke.Models.EntryNotesSummary.EntryNotesSummary() -> void
-LM.HubSpoke.Models.EntryNotesSummary.FromLitSearch(LM.HubSpoke.Models.LitSearchNoteSummary! summary, string? renderedText) -> LM.HubSpoke.Models.EntryNotesSummary!
-LM.HubSpoke.Models.EntryNotesSummary.FromRawText(string! text) -> LM.HubSpoke.Models.EntryNotesSummary!
 LM.HubSpoke.Models.EntryNotesSummary.GetRenderedText() -> string?
 LM.HubSpoke.Models.EntryNotesSummary.LitSearch.get -> LM.HubSpoke.Models.LitSearchNoteSummary?
 LM.HubSpoke.Models.EntryNotesSummary.LitSearch.init -> void
@@ -554,5 +552,7 @@ override LM.HubSpoke.Models.NullableUtcDateTimeConverter.Read(ref System.Text.Js
 override LM.HubSpoke.Models.NullableUtcDateTimeConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.DateTime? value, System.Text.Json.JsonSerializerOptions! options) -> void
 override LM.HubSpoke.Models.UtcDateTimeConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> System.DateTime
 override LM.HubSpoke.Models.UtcDateTimeConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.DateTime value, System.Text.Json.JsonSerializerOptions! options) -> void
+static LM.HubSpoke.Models.EntryNotesSummary.FromLitSearch(LM.HubSpoke.Models.LitSearchNoteSummary! summary, string? renderedText) -> LM.HubSpoke.Models.EntryNotesSummary!
+static LM.HubSpoke.Models.EntryNotesSummary.FromRawText(string! text) -> LM.HubSpoke.Models.EntryNotesSummary!
 static LM.HubSpoke.Models.PersonRef.Unknown.get -> LM.HubSpoke.Models.PersonRef
 static readonly LM.HubSpoke.Models.JsonStd.Options -> System.Text.Json.JsonSerializerOptions!

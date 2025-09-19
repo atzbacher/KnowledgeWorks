@@ -82,17 +82,33 @@ LM.App.Wpf.ViewModels.IAddPipeline
 LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.IAddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.LibraryViewModel
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedByContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedByContains.set -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedOnFrom.get -> System.DateTime?
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedOnFrom.set -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedOnTo.get -> System.DateTime?
+LM.App.Wpf.ViewModels.LibraryViewModel.AddedOnTo.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.AuthorContains.get -> string?
 LM.App.Wpf.ViewModels.LibraryViewModel.AuthorContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.DoiContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.DoiContains.set -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.InternalIdContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.InternalIdContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.get -> bool?
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IWorkSpaceService! ws) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.NctContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.NctContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.PmidContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.PmidContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.Entry!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.SearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.Selected.get -> LM.Core.Models.Entry?
 LM.App.Wpf.ViewModels.LibraryViewModel.Selected.set -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.SourceContains.get -> string?
+LM.App.Wpf.ViewModels.LibraryViewModel.SourceContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.TagsCsv.get -> string?
 LM.App.Wpf.ViewModels.LibraryViewModel.TagsCsv.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.TitleContains.get -> string?
