@@ -10,7 +10,8 @@ namespace LM.Core.Models
         WhitePaper,
         SlideDeck,
         Report,
-        Other
+        Other,
+        LitSearch
     }
 
     /// <summary>

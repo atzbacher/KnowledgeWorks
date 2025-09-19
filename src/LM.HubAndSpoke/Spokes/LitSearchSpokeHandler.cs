@@ -23,7 +23,7 @@ namespace LM.HubSpoke.Spokes
             _ws = workspace ?? throw new ArgumentNullException(nameof(workspace));
         }
 
-        public EntryType Handles => EntryType.Other;
+        public EntryType Handles => EntryType.LitSearch;
         public string HookPath => "hooks/litsearch.json";
 
         public async Task<object?> BuildHookAsync(
@@ -94,10 +94,10 @@ namespace LM.HubSpoke.Spokes
             return new Entry
             {
                 Id = hub.EntryId,
-                Type = EntryType.Other,
+                Type = EntryType.LitSearch,
                 Title = hook?.Title ?? hub.DisplayTitle,
                 DisplayName = hook?.Title ?? hub.DisplayTitle,
-                Source = "LitSearch",
+                Source = null,
                 AddedOnUtc = hook?.CreatedUtc ?? hub.CreatedUtc,
                 AddedBy = hook?.CreatedBy,
                 Notes = hook?.NotesSummary,
