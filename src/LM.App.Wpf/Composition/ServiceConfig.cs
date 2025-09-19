@@ -34,6 +34,7 @@ namespace LM.App.Wpf.Composition
             public required HookOrchestrator Hooks { get; init; }
             public required ISimilarityLog SimLog { get; init; }
             public required IAddPipeline Pipeline { get; init; }
+            public required WatchedFolderScanner Scanner { get; init; }
         }
 
         /// <summary>
@@ -78,6 +79,8 @@ namespace LM.App.Wpf.Composition
                 pmidNorm,          // <-- insert here
                 simlog);
 
+            var scanner = new WatchedFolderScanner(pipeline);
+
             return new AppServices
             {
                 Workspaces = ws,
@@ -92,7 +95,8 @@ namespace LM.App.Wpf.Composition
                 Store = store,
                 Hooks = orchestrator,
                 SimLog = simlog,
-                Pipeline = pipeline
+                Pipeline = pipeline,
+                Scanner = scanner
             };
         }
     }
