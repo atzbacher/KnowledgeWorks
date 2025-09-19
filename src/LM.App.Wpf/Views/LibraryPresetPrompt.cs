@@ -8,7 +8,7 @@ namespace LM.App.Wpf.Views
     {
         public Task<LibraryPresetSaveResult?> RequestSaveAsync(LibraryPresetSaveContext context)
         {
-            var app = Application.Current;
+            var app = System.Windows.Application.Current;
             if (app is null)
                 return Task.FromResult<LibraryPresetSaveResult?>(null);
 
@@ -22,7 +22,7 @@ namespace LM.App.Wpf.Views
 
         public Task<LibraryPresetSelectionResult?> RequestSelectionAsync(LibraryPresetSelectionContext context)
         {
-            var app = Application.Current;
+            var app = System.Windows.Application.Current;
             if (app is null)
                 return Task.FromResult<LibraryPresetSelectionResult?>(null);
 
@@ -37,7 +37,7 @@ namespace LM.App.Wpf.Views
         private static LibraryPresetSaveResult? ShowSaveDialog(LibraryPresetSaveContext context)
         {
             var dialog = new LibraryPresetSaveDialog(context);
-            if (Application.Current?.MainWindow is Window owner && owner.IsVisible)
+            if (System.Windows.Application.Current?.MainWindow is Window owner && owner.IsVisible)
             {
                 dialog.Owner = owner;
             }
@@ -52,7 +52,7 @@ namespace LM.App.Wpf.Views
                 return null;
 
             var dialog = new LibraryPresetPickerDialog(context);
-            if (Application.Current?.MainWindow is Window owner && owner.IsVisible)
+            if (System.Windows.Application.Current?.MainWindow is Window owner && owner.IsVisible)
             {
                 dialog.Owner = owner;
             }

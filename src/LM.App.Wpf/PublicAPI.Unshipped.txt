@@ -97,11 +97,11 @@ LM.App.Wpf.Library.LibraryFilterPreset.SavedUtc.set -> void
 LM.App.Wpf.Library.LibraryFilterPreset.State.get -> LM.App.Wpf.Library.LibraryFilterState!
 LM.App.Wpf.Library.LibraryFilterPreset.State.set -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore
-LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string? name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.LibraryFilterPresetStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.LibraryFilterPreset!>!>!
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string? name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
+LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterState
 LM.App.Wpf.Library.LibraryFilterState.AddedByContains.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.AddedByContains.set -> void
@@ -324,6 +324,15 @@ LM.App.Wpf.ViewModels.StagingItem.Year.set -> void
 LM.App.Wpf.Views.AddView
 LM.App.Wpf.Views.AddView.AddView() -> void
 LM.App.Wpf.Views.AddView.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog
+LM.App.Wpf.Views.LibraryPresetPickerDialog.DeletedPresetNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Views.LibraryPresetPickerDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog.SelectedPresetName.get -> string?
+LM.App.Wpf.Views.LibraryPresetSaveDialog
+LM.App.Wpf.Views.LibraryPresetSaveDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog.ResultName.get -> string!
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void

@@ -8,7 +8,7 @@ using LM.App.Wpf.Common;
 
 namespace LM.App.Wpf.Views
 {
-    internal partial class LibraryPresetPickerDialog : Window
+    public partial class LibraryPresetPickerDialog : Window
     {
         private readonly ObservableCollection<LibraryPresetSummary> _presets;
         private readonly bool _allowLoad;
@@ -56,7 +56,7 @@ namespace LM.App.Wpf.Views
 
             if (PresetList.SelectedItem is not LibraryPresetSummary summary)
             {
-                MessageBox.Show(this, "Select a preset to load.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(this, "Select a preset to load.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -68,11 +68,11 @@ namespace LM.App.Wpf.Views
         {
             if (PresetList.SelectedItem is not LibraryPresetSummary summary)
             {
-                MessageBox.Show(this, "Select a preset to delete.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(this, "Select a preset to delete.", Title, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            var confirm = MessageBox.Show(this, $"Delete preset \"{summary.Name}\"?", Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var confirm = System.Windows.MessageBox.Show(this, $"Delete preset \"{summary.Name}\"?", Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes)
                 return;
 

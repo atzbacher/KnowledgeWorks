@@ -4,7 +4,7 @@ using LM.App.Wpf.Common;
 
 namespace LM.App.Wpf.Views
 {
-    internal partial class LibraryPresetSaveDialog : Window
+    public partial class LibraryPresetSaveDialog : Window
     {
         public string ResultName { get; private set; } = string.Empty;
 
@@ -25,7 +25,7 @@ namespace LM.App.Wpf.Views
             var name = NameBox.Text?.Trim();
             if (string.IsNullOrWhiteSpace(name))
             {
-                MessageBox.Show(this, "Please provide a name for the preset.", "Save Library Preset", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(this, "Please provide a name for the preset.", "Save Library Preset", MessageBoxButton.OK, MessageBoxImage.Information);
                 NameBox.Focus();
                 return;
             }
