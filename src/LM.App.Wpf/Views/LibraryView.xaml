@@ -3,8 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:common="clr-namespace:LM.App.Wpf.Common"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
+  <UserControl.Resources>
+    <common:StringJoinConverter x:Key="StringJoinConverter" />
+  </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="310"/>
@@ -118,8 +122,16 @@
           <DataGridTextColumn Header="DOI" Binding="{Binding Doi}" Width="2*"/>
           <DataGridTextColumn Header="PMID" Binding="{Binding Pmid}" Width="1.5*"/>
           <DataGridTextColumn Header="NCT" Binding="{Binding Nct}" Width="1.5*"/>
-          <DataGridTextColumn Header="Authors" Binding="{Binding Authors}" Width="2*"/>
-          <DataGridTextColumn Header="Tags" Binding="{Binding Tags}" Width="2*"/>
+          <DataGridTextColumn Header="Authors" Width="2*">
+            <DataGridTextColumn.Binding>
+              <Binding Path="Authors" Converter="{StaticResource StringJoinConverter}" />
+            </DataGridTextColumn.Binding>
+          </DataGridTextColumn>
+          <DataGridTextColumn Header="Tags" Width="2*">
+            <DataGridTextColumn.Binding>
+              <Binding Path="Tags" Converter="{StaticResource StringJoinConverter}" />
+            </DataGridTextColumn.Binding>
+          </DataGridTextColumn>
           <DataGridTextColumn Header="Internal" Binding="{Binding IsInternal}" Width="0.8*"/>
         </DataGrid.Columns>
       </DataGrid>

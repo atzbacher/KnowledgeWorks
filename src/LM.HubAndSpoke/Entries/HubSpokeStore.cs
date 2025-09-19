@@ -103,7 +103,8 @@ namespace LM.HubSpoke.Entries
 
             // 2) Hub
             var isPublication = entry.Type == EntryType.Publication;
-            var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
+            var isLitSearch = entry.Type == EntryType.LitSearch
+                || string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
             var createdUtc = entry.AddedOnUtc == default ? now : entry.AddedOnUtc;
             var createdBy = BuildPersonRef(entry.AddedBy, createdUtc);
             var updatedBy = BuildPersonRef(entry.AddedBy, now);
@@ -376,8 +377,13 @@ namespace LM.HubSpoke.Entries
                 return art;
             if (!string.IsNullOrWhiteSpace(hub.Hooks?.Document) && _handlers.TryGetValue(EntryType.Report, out var doc))
                 return doc;
-            if (!string.IsNullOrWhiteSpace(hub.Hooks?.LitSearch) && _handlers.TryGetValue(EntryType.Other, out var lit))
-                return lit;
+            if (!string.IsNullOrWhiteSpace(hub.Hooks?.LitSearch))
+            {
+                if (_handlers.TryGetValue(EntryType.LitSearch, out var lit))
+                    return lit;
+                if (_handlers.TryGetValue(EntryType.Other, out var legacy))
+                    return legacy;
+            }
             return _handlers.Values.First();
         }
 
