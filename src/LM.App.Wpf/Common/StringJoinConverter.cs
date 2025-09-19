@@ -38,6 +38,6 @@ namespace LM.App.Wpf.Common
         }
 
         public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-            => Binding.DoNothing;
+            => System.Windows.Data.Binding.DoNothing;
     }
 }
