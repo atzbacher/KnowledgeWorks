@@ -348,7 +348,7 @@ namespace LM.App.Wpf.ViewModels
             }
 
             // 4) Content similarity
-            var best = await ComputeBestContentSimilarityAsync(sessionId, path, ct);
+            var best = await ComputeBestContentSimilarityAsync(sessionId, path, meta, ct);
             var item = BuildItem(path, meta, best.Score, best.EntryId, best.Title, best.Kind);
             PopulateFromRecordOrMeta(item, rec, meta);
             return item;
@@ -420,36 +420,86 @@ namespace LM.App.Wpf.ViewModels
         }
 
 
-        private async Task<Match> ComputeBestContentSimilarityAsync(string sessionId, string path, CancellationToken ct)
+        private async Task<Match> ComputeBestContentSimilarityAsync(string sessionId, string path, ExtractedMeta meta, CancellationToken ct)
         {
             double bestScore = 0.0;
             string? bestId = null;
             string? bestTitle = null;
+            var compared = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            await foreach (var e in _store.EnumerateAsync(ct))
+            async Task EvaluateAsync(Entry entry)
             {
-                if (string.IsNullOrWhiteSpace(e.MainFilePath)) continue;
-                var abs = _workspace.GetAbsolutePath(e.MainFilePath);
-                if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs)) continue;
+                if (string.IsNullOrWhiteSpace(entry.MainFilePath))
+                    return;
 
-                double score = 0.0;
+                var abs = _workspace.GetAbsolutePath(entry.MainFilePath);
+                if (string.IsNullOrWhiteSpace(abs) || !File.Exists(abs))
+                    return;
+
+                double score;
                 try
                 {
-                    score = await _similarity.ComputeFileSimilarityAsync(path, abs, ct);
+                    score = await _similarity.ComputeFileSimilarityAsync(path, abs, ct).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine($"[AddPipeline] Content sim failed for '{e.Id}': {ex.Message}");
+                    Trace.WriteLine($"[AddPipeline] Content sim failed for '{entry.Id}': {ex.Message}");
+                    return;
                 }
 
-                await _simLog.Maybe(sessionId, path, e.Id, score, "content", ct);
+                await _simLog.Maybe(sessionId, path, entry.Id, score, "content", ct).ConfigureAwait(false);
 
                 if (score > bestScore)
                 {
                     bestScore = score;
-                    bestId = e.Id;
-                    bestTitle = e.Title ?? e.DisplayName;
+                    bestId = entry.Id;
+                    bestTitle = entry.Title ?? entry.DisplayName;
                 }
+            }
+
+            IReadOnlyList<Entry>? candidates = null;
+            if (!string.IsNullOrWhiteSpace(meta.Title))
+            {
+                try
+                {
+                    candidates = await _store.FindSimilarByNameYearAsync(meta.Title!, meta.Year, ct).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[AddPipeline] FindSimilarByNameYearAsync failed: {ex.Message}");
+                }
+            }
+
+            if (candidates is not null && candidates.Count > 0)
+            {
+                foreach (var entry in candidates)
+                {
+                    if (!string.IsNullOrEmpty(entry.Id))
+                        compared.Add(entry.Id);
+
+                    await EvaluateAsync(entry).ConfigureAwait(false);
+
+                    if (bestScore >= StagingItem.DuplicateThreshold)
+                        return new Match(bestId, bestTitle, bestScore, MatchKind.Content);
+                }
+
+                if (bestScore >= StagingItem.NearThreshold)
+                    return new Match(bestId, bestTitle, bestScore, MatchKind.Content);
+            }
+
+            await foreach (var entry in _store.EnumerateAsync(ct).ConfigureAwait(false))
+            {
+                if (!string.IsNullOrEmpty(entry.Id) && compared.Contains(entry.Id))
+                    continue;
+
+                await EvaluateAsync(entry).ConfigureAwait(false);
+
+                if (bestScore >= StagingItem.DuplicateThreshold)
+                    break;
             }
 
             return new Match(bestId, bestTitle, bestScore, MatchKind.Content);
