@@ -73,10 +73,16 @@ namespace LM.App.Wpf
             var searchPrompt = new SearchSavePrompt();
             var searchVm = new SearchViewModel(services.Store, services.Storage, ws, searchPrompt);
 
-            // Bind
-            if (shell.LibraryViewControl != null) shell.LibraryViewControl.DataContext = libraryVm;
-            if (shell.AddViewControl != null) shell.AddViewControl.DataContext = addVm;
-            if (shell.SearchViewControl != null) shell.SearchViewControl.DataContext = searchVm;
+            // Bind – resolve the views by name because the generated fields are not
+            // available when building from the command line (designer-only feature).
+            if (shell.FindName("LibraryViewControl") is LibraryView libraryView)
+                libraryView.DataContext = libraryVm;
+
+            if (shell.FindName("AddViewControl") is AddView addView)
+                addView.DataContext = addVm;
+
+            if (shell.FindName("SearchViewControl") is SearchView searchView)
+                searchView.DataContext = searchVm;
 
         }
     }
