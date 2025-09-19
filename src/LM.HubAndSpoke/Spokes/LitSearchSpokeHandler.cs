@@ -4,6 +4,7 @@ using LM.Core.Models;
 using LM.HubSpoke.Abstractions;
 using LM.HubSpoke.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -82,7 +83,8 @@ namespace LM.HubSpoke.Spokes
                 Source = "LitSearch",
                 AddedOnUtc = hook?.CreatedUtc ?? hub.CreatedUtc,
                 AddedBy = hook?.CreatedBy,
-                Notes = hook?.Notes
+                Notes = hook?.Notes,
+                Tags = hub.Tags?.ToList() ?? new List<string>()
             };
         }
 
