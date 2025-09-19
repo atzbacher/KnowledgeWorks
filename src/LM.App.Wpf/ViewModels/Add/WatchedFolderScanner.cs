@@ -233,6 +233,7 @@ namespace LM.App.Wpf.ViewModels
 
 
                 _timer = new System.Threading.Timer(OnTimer, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            }
 
 
             public void Dispose()
