@@ -110,6 +110,7 @@ namespace LM.HubSpoke.Spokes
                 Title = hook?.Article?.Title ?? hub.DisplayTitle,
                 DisplayName = hub.DisplayTitle,
                 AddedOnUtc = hub.CreatedUtc,
+                AddedBy = hub.CreatedBy.ToDisplayString(),
                 IsInternal = hub.Origin == EntryOrigin.Internal,
                 Doi = hook?.Identifier?.DOI,
                 Pmid = hook?.Identifier?.PMID,

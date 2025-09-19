@@ -76,6 +76,7 @@ namespace LM.HubSpoke.Spokes
                 Title = hook?.Title ?? hub.DisplayTitle,
                 DisplayName = hub.DisplayTitle,
                 AddedOnUtc = hub.CreatedUtc,
+                AddedBy = hub.CreatedBy.ToDisplayString(),
                 IsInternal = hub.Origin == EntryOrigin.Internal,
                 Source = null,
                 Tags = hub.Tags?.ToList() ?? new List<string>(),
