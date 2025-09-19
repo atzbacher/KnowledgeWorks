@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
@@ -68,7 +69,9 @@ namespace LM.App.Wpf
             await services.Store.InitializeAsync();
 
             // ViewModels
-            var libraryVm = new LibraryViewModel(services.Store, ws);
+            var presetStore = new LibraryFilterPresetStore(ws);
+            var presetPrompt = new LibraryPresetPrompt();
+            var libraryVm = new LibraryViewModel(services.Store, ws, presetStore, presetPrompt);
             var addVm = new AddViewModel(services.Pipeline);
             var searchPrompt = new SearchSavePrompt();
             var searchVm = new SearchViewModel(services.Store, services.Storage, ws, searchPrompt);

@@ -1,0 +1,61 @@
+<Window x:Class="LM.App.Wpf.Views.LibraryPresetPickerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:common="clr-namespace:LM.App.Wpf.Common"
+        Title="Library Presets"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner"
+        MinWidth="420"
+        MinHeight="320">
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="8" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="12" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <TextBlock x:Name="HeaderText"
+               Grid.Row="0"
+               FontWeight="SemiBold" />
+
+    <Border Grid.Row="2"
+            BorderBrush="#33000000"
+            BorderThickness="1"
+            CornerRadius="4">
+      <ListBox x:Name="PresetList"
+               MinWidth="360"
+               HorizontalContentAlignment="Stretch"
+               DisplayMemberPath="Name">
+        <ListBox.ItemTemplate>
+          <DataTemplate DataType="{x:Type common:LibraryPresetSummary}">
+            <StackPanel Orientation="Vertical" Margin="4">
+              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding SavedUtc, StringFormat='Saved {0:yyyy-MM-dd HH:mm}'}" FontSize="12" Opacity="0.7" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Border>
+
+    <StackPanel Grid.Row="4"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+      <Button x:Name="DeleteButton"
+              Content="Delete"
+              Width="80"
+              Margin="0,0,8,0"
+              Click="OnDelete" />
+      <Button x:Name="LoadButton"
+              Content="Load"
+              Width="80"
+              Margin="0,0,8,0"
+              Click="OnLoad" />
+      <Button Content="Close"
+              Width="80"
+              IsCancel="True"
+              Click="OnClose" />
+    </StackPanel>
+  </Grid>
+</Window>

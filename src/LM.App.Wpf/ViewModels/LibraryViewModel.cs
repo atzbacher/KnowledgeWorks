@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Library;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
@@ -28,15 +29,22 @@ namespace LM.App.Wpf.ViewModels
         private string? _addedByContains;
         private DateTime? _addedOnFrom;
         private DateTime? _addedOnTo;
+        private readonly LibraryFilterPresetStore _presetStore;
+        private readonly ILibraryPresetPrompt _presetPrompt;
 
-        public LibraryViewModel(IEntryStore store, IWorkSpaceService ws)
+        public LibraryViewModel(IEntryStore store, IWorkSpaceService ws, LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
         {
             _store = store;
             _ws = ws;
+            _presetStore = presetStore ?? throw new ArgumentNullException(nameof(presetStore));
+            _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
 
             SearchCommand = new AsyncRelayCommand(SearchAsync);
             ClearCommand  = new RelayCommand(_ => ClearFilters());
             OpenCommand   = new RelayCommand(_ => OpenSelected(), _ => Selected is not null);
+            SavePresetCommand = new AsyncRelayCommand(SavePresetAsync);
+            LoadPresetCommand = new AsyncRelayCommand(LoadPresetAsync);
+            ManagePresetsCommand = new AsyncRelayCommand(ManagePresetsAsync);
 
             Types = Enum.GetValues(typeof(EntryType)).Cast<EntryType>().ToArray();
         }
@@ -164,6 +172,9 @@ namespace LM.App.Wpf.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand OpenCommand { get; }
+        public ICommand SavePresetCommand { get; }
+        public ICommand LoadPresetCommand { get; }
+        public ICommand ManagePresetsCommand { get; }
 
         private EntryType[] BuildTypeFilter()
         {
@@ -276,6 +287,224 @@ namespace LM.App.Wpf.ViewModels
             AddedOnFrom = null;
             AddedOnTo = null;
             TypePublication = TypePresentation = TypeWhitePaper = TypeSlideDeck = TypeReport = TypeOther = true;
+            NotifyFiltersChanged();
+        }
+
+        private void OpenSelected()
+        {
+            if (Selected is null) return;
+            try
+            {
+                var abs = _ws.GetAbsolutePath(Selected.MainFilePath);
+                Process.Start(new ProcessStartInfo { FileName = abs, UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to open file:\n{ex.Message}", "Open Error",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async Task SavePresetAsync()
+        {
+            try
+            {
+                var existing = await _presetStore.ListPresetsAsync();
+                var defaultName = BuildDefaultPresetName(existing);
+                var context = new LibraryPresetSaveContext(defaultName, existing.Select(p => p.Name).ToArray());
+                var prompt = await _presetPrompt.RequestSaveAsync(context);
+                if (prompt is null)
+                    return;
+
+                var name = prompt.Name.Trim();
+                if (string.IsNullOrWhiteSpace(name))
+                    return;
+
+                if (existing.Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var confirm = System.Windows.MessageBox.Show(
+                        $"Preset \"{name}\" already exists. Overwrite?",
+                        "Save Library Preset",
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Question);
+                    if (confirm != System.Windows.MessageBoxResult.Yes)
+                        return;
+                }
+
+                var preset = new LibraryFilterPreset
+                {
+                    Name = name,
+                    State = CaptureState()
+                };
+
+                await _presetStore.SavePresetAsync(preset);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to save preset:\n{ex.Message}",
+                    "Save Library Preset",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async Task LoadPresetAsync()
+        {
+            try
+            {
+                var presets = await _presetStore.ListPresetsAsync();
+                if (presets.Count == 0)
+                {
+                    System.Windows.MessageBox.Show(
+                        "No presets saved yet.",
+                        "Load Library Preset",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                    return;
+                }
+
+                var summaries = presets
+                    .Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc))
+                    .ToArray();
+
+                var result = await _presetPrompt.RequestSelectionAsync(
+                    new LibraryPresetSelectionContext(summaries, AllowLoad: true, "Load Library Preset"));
+
+                if (result is null)
+                    return;
+
+                await DeletePresetsAsync(result.DeletedPresetNames);
+
+                if (string.IsNullOrWhiteSpace(result.SelectedPresetName))
+                    return;
+
+                var preset = await _presetStore.TryGetPresetAsync(result.SelectedPresetName!);
+                if (preset is null)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Preset \"{result.SelectedPresetName}\" could not be found.",
+                        "Load Library Preset",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                ApplyPreset(preset.State);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to load preset:\n{ex.Message}",
+                    "Load Library Preset",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async Task ManagePresetsAsync()
+        {
+            try
+            {
+                var presets = await _presetStore.ListPresetsAsync();
+                if (presets.Count == 0)
+                {
+                    System.Windows.MessageBox.Show(
+                        "No presets saved yet.",
+                        "Manage Library Presets",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Information);
+                    return;
+                }
+
+                var summaries = presets
+                    .Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc))
+                    .ToArray();
+
+                var result = await _presetPrompt.RequestSelectionAsync(
+                    new LibraryPresetSelectionContext(summaries, AllowLoad: false, "Manage Library Presets"));
+
+                if (result is null)
+                    return;
+
+                await DeletePresetsAsync(result.DeletedPresetNames);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to manage presets:\n{ex.Message}",
+                    "Manage Library Presets",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async Task DeletePresetsAsync(IReadOnlyList<string> names)
+        {
+            if (names is null || names.Count == 0)
+                return;
+
+            foreach (var name in names)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                await _presetStore.DeletePresetAsync(name);
+            }
+        }
+
+        private LibraryFilterState CaptureState()
+            => new()
+            {
+                TitleContains = TitleContains,
+                AuthorContains = AuthorContains,
+                TagsCsv = TagsCsv,
+                IsInternal = IsInternal,
+                YearFrom = YearFrom,
+                YearTo = YearTo,
+                SourceContains = SourceContains,
+                InternalIdContains = InternalIdContains,
+                DoiContains = DoiContains,
+                PmidContains = PmidContains,
+                NctContains = NctContains,
+                AddedByContains = AddedByContains,
+                AddedOnFrom = AddedOnFrom,
+                AddedOnTo = AddedOnTo,
+                TypePublication = TypePublication,
+                TypePresentation = TypePresentation,
+                TypeWhitePaper = TypeWhitePaper,
+                TypeSlideDeck = TypeSlideDeck,
+                TypeReport = TypeReport,
+                TypeOther = TypeOther
+            };
+
+        private void ApplyPreset(LibraryFilterState state)
+        {
+            TitleContains = state.TitleContains;
+            AuthorContains = state.AuthorContains;
+            TagsCsv = state.TagsCsv;
+            IsInternal = state.IsInternal;
+            YearFrom = state.YearFrom;
+            YearTo = state.YearTo;
+            SourceContains = state.SourceContains;
+            InternalIdContains = state.InternalIdContains;
+            DoiContains = state.DoiContains;
+            PmidContains = state.PmidContains;
+            NctContains = state.NctContains;
+            AddedByContains = state.AddedByContains;
+            AddedOnFrom = state.AddedOnFrom;
+            AddedOnTo = state.AddedOnTo;
+            TypePublication = state.TypePublication;
+            TypePresentation = state.TypePresentation;
+            TypeWhitePaper = state.TypeWhitePaper;
+            TypeSlideDeck = state.TypeSlideDeck;
+            TypeReport = state.TypeReport;
+            TypeOther = state.TypeOther;
+            NotifyFiltersChanged();
+        }
+
+        private void NotifyFiltersChanged()
+        {
             OnPropertyChanged(nameof(TitleContains));
             OnPropertyChanged(nameof(AuthorContains));
             OnPropertyChanged(nameof(TagsCsv));
@@ -298,19 +527,37 @@ namespace LM.App.Wpf.ViewModels
             OnPropertyChanged(nameof(TypeOther));
         }
 
-        private void OpenSelected()
+        private string BuildDefaultPresetName(IReadOnlyList<LibraryFilterPreset> existing)
         {
-            if (Selected is null) return;
-            try
+            static string? Trimmed(string? value)
             {
-                var abs = _ws.GetAbsolutePath(Selected.MainFilePath);
-                Process.Start(new ProcessStartInfo { FileName = abs, UseShellExecute = true });
+                if (string.IsNullOrWhiteSpace(value))
+                    return null;
+                var trimmed = value.Trim();
+                return trimmed.Length > 40 ? trimmed[..40] : trimmed;
             }
-            catch (Exception ex)
+
+            var candidates = new[]
             {
-                System.Windows.MessageBox.Show($"Failed to open file:\n{ex.Message}", "Open Error",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+                Trimmed(TitleContains),
+                Trimmed(AuthorContains),
+                Trimmed(SourceContains),
+                Trimmed(TagsCsv)
+            };
+
+            var first = candidates.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c));
+            if (!string.IsNullOrWhiteSpace(first))
+                return first!;
+
+            var index = existing.Count + 1;
+            string name;
+            do
+            {
+                name = $"Preset {index}";
+                index++;
+            } while (existing.Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)));
+
+            return name;
         }
     }
 }
