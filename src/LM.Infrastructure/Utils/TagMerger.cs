@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LM.Infrastructure.Utils
 {
@@ -10,21 +9,39 @@ namespace LM.Infrastructure.Utils
     {
         public static string? Merge(string? existingCsv, IEnumerable<string>? add)
         {
-            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var ordered = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddIfNew(string? value)
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    return;
+
+                var trimmed = value.Trim();
+                if (trimmed.Length == 0)
+                    return;
+
+                if (seen.Add(trimmed))
+                    ordered.Add(trimmed);
+            }
 
             if (!string.IsNullOrWhiteSpace(existingCsv))
             {
-                foreach (var t in existingCsv.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
-                    set.Add(t.Trim());
+                foreach (var token in existingCsv.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    AddIfNew(token);
+                }
             }
 
             if (add is not null)
             {
-                foreach (var k in add.Where(s => !string.IsNullOrWhiteSpace(s)))
-                    set.Add(k!.Trim());
+                foreach (var extra in add)
+                {
+                    AddIfNew(extra);
+                }
             }
 
-            return set.Count == 0 ? null : string.Join(", ", set);
+            return ordered.Count == 0 ? null : string.Join(", ", ordered);
         }
     }
 }
