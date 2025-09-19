@@ -112,7 +112,7 @@ namespace LM.HubSpoke.Models
         public string? History { get; init; }            // "hooks/history.jsonl"
 
         [JsonPropertyName("notes")]
-        public string? Notes { get; init; }              // "notes.md"
+        public string? Notes { get; init; }              // "hooks/notes.json"
 
         [JsonPropertyName("provenance")]
         public string? Provenance { get; init; }         // "hooks/provenance.json"

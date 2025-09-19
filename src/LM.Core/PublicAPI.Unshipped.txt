@@ -92,6 +92,8 @@ LM.Core.Models.Entry.Nct.get -> string?
 LM.Core.Models.Entry.Nct.set -> void
 LM.Core.Models.Entry.Notes.get -> string?
 LM.Core.Models.Entry.Notes.set -> void
+LM.Core.Models.Entry.UserNotes.get -> string?
+LM.Core.Models.Entry.UserNotes.set -> void
 LM.Core.Models.Entry.OriginalFileName.get -> string?
 LM.Core.Models.Entry.OriginalFileName.set -> void
 LM.Core.Models.Entry.Pmid.get -> string?
