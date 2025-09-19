@@ -4,9 +4,13 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized; // NotifyCollectionChangedEventArgs
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using LM.Infrastructure.Hooks;     // for HookOrchestrator I
 using LM.Core.Abstractions;       // for IPmidNormalizerEntryStore, IFileStorageRepository, IHasher, ISimilarityService, IWorkSpaceService, IMetadataExtractor, IDoiNormalizer, IPublicationLookup
@@ -15,27 +19,43 @@ using LM.HubSpoke.Abstractions;    // ISimilarityLog
 
 namespace LM.App.Wpf.ViewModels
 {
-    public class AddViewModel : INotifyPropertyChanged
+    public class AddViewModel : INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string? n = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 
         private readonly IAddPipeline _pipeline;
+        private readonly IWorkSpaceService _workspace;
+        private readonly WatchedFolderScanner _scanner;
+        private readonly bool _ownsScanner;
+        private WatchedFolderConfig _watchedConfig = new();
+        private readonly SemaphoreSlim _watchedFolderSaveGate = new(1, 1);
+        private readonly SemaphoreSlim _initGate = new(1, 1);
+        private bool _isRestoringWatchedFolders;
+        private string? _watchedFolderConfigPath;
+        private bool _isInitialized;
+        private bool _disposed;
 
         // Cache RelayCommand references to avoid repeated casting
         private readonly RelayCommand _addFilesCommand;
         private readonly RelayCommand _bulkAddFolderCommand;
         private readonly RelayCommand _commitSelectedCommand;
         private readonly RelayCommand _clearCommand;
+        private readonly RelayCommand _addWatchedFolderCommand;
+        private readonly RelayCommand _removeWatchedFolderCommand;
+        private readonly RelayCommand _scanWatchedFolderCommand;
 
         // Cache EntryTypes array
         private static readonly Array s_entryTypes = Enum.GetValues(typeof(EntryType));
 
         // ---- Primary ctor (preferred) ----
-        public AddViewModel(IAddPipeline pipeline)
+        public AddViewModel(IAddPipeline pipeline, IWorkSpaceService workspace, WatchedFolderScanner? scanner = null)
         {
             _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _scanner = scanner ?? new WatchedFolderScanner(_pipeline);
+            _ownsScanner = scanner is null;
 
             // Track collection changes AND per-item Selected changes -> keeps Commit button state correct
             Staging.CollectionChanged += OnStagingCollectionChanged;
@@ -45,6 +65,12 @@ namespace LM.App.Wpf.ViewModels
             _bulkAddFolderCommand = new RelayCommand(async _ => await RunGuardedAsync(BulkAddFolderAsync), _ => !IsBusy);
             _commitSelectedCommand = new RelayCommand(async _ => await RunGuardedAsync(CommitSelectedAsync), CanCommitSelected);
             _clearCommand = new RelayCommand(ExecuteClear, _ => !IsBusy);
+
+            _addWatchedFolderCommand = new RelayCommand(async _ => await RunGuardedAsync(AddWatchedFolderAsync), _ => !IsBusy);
+            _removeWatchedFolderCommand = new RelayCommand(p => RemoveWatchedFolder(p as WatchedFolder), p => !IsBusy && p is WatchedFolder);
+            _scanWatchedFolderCommand = new RelayCommand(async p => await RunGuardedAsync(() => ScanWatchedFolderAsync(p as WatchedFolder)), p => !IsBusy && p is WatchedFolder);
+
+            _scanner.ItemsStaged += OnScannerItemsStaged;
         }
 
         // ---- Back-compat ctor (old 7-arg wiring still works) ----
@@ -64,7 +90,8 @@ namespace LM.App.Wpf.ViewModels
                                    publicationLookup, doiNormalizer,
                                    orchestrator,
                                    pmidNormalizer,   // <-- here
-                                   simLog))
+                                   simLog),
+                   workspace)
         { }
 
         // If you also expose the 10-arg overload explicitly (including orchestrator), keep it:
@@ -85,9 +112,64 @@ namespace LM.App.Wpf.ViewModels
         { }
 
 
+        public async Task InitializeAsync(CancellationToken ct = default)
+        {
+            if (_isInitialized)
+                return;
+
+            await _initGate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                if (_isInitialized)
+                    return;
+
+                WatchedFolderConfig loaded;
+                try
+                {
+                    loaded = await WatchedFolderConfig.LoadAsync(GetWatchedFolderConfigPath(), ct).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[AddViewModel] Failed to load watched folder config: {ex}");
+                    loaded = new WatchedFolderConfig();
+                }
+
+                _watchedConfig = loaded;
+                OnPropertyChanged(nameof(WatchedFolders));
+
+                _isRestoringWatchedFolders = true;
+                try
+                {
+                    WatchedFolders.CollectionChanged += OnWatchedFoldersChanged;
+                    foreach (var folder in WatchedFolders)
+                        folder.PropertyChanged += OnWatchedFolderPropertyChanged;
+                }
+                finally
+                {
+                    _isRestoringWatchedFolders = false;
+                }
+
+                try
+                {
+                    _scanner.Attach(_watchedConfig);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[AddViewModel] Failed to attach watched folder scanner: {ex}");
+                }
+
+                _isInitialized = true;
+            }
+            finally
+            {
+                _initGate.Release();
+            }
+        }
+
         // ---------------- UI state ----------------
 
         public ObservableCollection<StagingItem> Staging { get; } = new();
+        public ObservableCollection<WatchedFolder> WatchedFolders => _watchedConfig.Folders;
         public Array EntryTypes => s_entryTypes;
 
         public string IndexLabel => Staging.Count == 0 || Current is null
@@ -140,6 +222,9 @@ namespace LM.App.Wpf.ViewModels
                 _bulkAddFolderCommand.RaiseCanExecuteChanged();
                 _commitSelectedCommand.RaiseCanExecuteChanged();
                 _clearCommand.RaiseCanExecuteChanged();
+                _addWatchedFolderCommand.RaiseCanExecuteChanged();
+                _removeWatchedFolderCommand.RaiseCanExecuteChanged();
+                _scanWatchedFolderCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -148,6 +233,9 @@ namespace LM.App.Wpf.ViewModels
         public ICommand BulkAddFolderCommand => _bulkAddFolderCommand;
         public ICommand CommitSelectedCommand => _commitSelectedCommand;
         public ICommand ClearCommand => _clearCommand;
+        public ICommand AddWatchedFolderCommand => _addWatchedFolderCommand;
+        public ICommand RemoveWatchedFolderCommand => _removeWatchedFolderCommand;
+        public ICommand ScanWatchedFolderCommand => _scanWatchedFolderCommand;
 
         private bool CanCommitSelected(object? _) => !IsBusy && HasSelectedItems();
         private bool HasSelectedItems() => Staging.Any(s => s.Selected);
@@ -186,14 +274,54 @@ namespace LM.App.Wpf.ViewModels
 
         private async Task AddItemsToStagingAsync(System.Collections.Generic.IEnumerable<string> paths)
         {
-            var items = await _pipeline.StagePathsAsync(paths, CancellationToken.None);
+            var items = await _pipeline.StagePathsAsync(paths, CancellationToken.None).ConfigureAwait(false);
+            await AddStagedItemsAsync(items).ConfigureAwait(false);
+        }
 
-            foreach (var item in items)
-                Staging.Add(item);
+        private Task AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<StagingItem> items)
+        {
+            if (items is null || items.Count == 0)
+                return Task.CompletedTask;
 
-            Current ??= Staging.FirstOrDefault();
-            OnPropertyChanged(nameof(IndexLabel));
-            _commitSelectedCommand.RaiseCanExecuteChanged();
+            void Add()
+            {
+                foreach (var item in items)
+                    Staging.Add(item);
+
+                Current ??= Staging.FirstOrDefault();
+                OnPropertyChanged(nameof(IndexLabel));
+                _commitSelectedCommand.RaiseCanExecuteChanged();
+            }
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null)
+            {
+                Add();
+                return Task.CompletedTask;
+            }
+
+            if (dispatcher.CheckAccess())
+            {
+                Add();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(Add).Task;
+        }
+
+        private async void OnScannerItemsStaged(object? sender, WatchedFolderScanEventArgs e)
+        {
+            if (e?.Items is null || e.Items.Count == 0)
+                return;
+
+            try
+            {
+                await AddStagedItemsAsync(e.Items).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[AddViewModel] Failed to append watched items: {ex}");
+            }
         }
 
         private async Task CommitSelectedAsync()
@@ -224,6 +352,137 @@ namespace LM.App.Wpf.ViewModels
             Current = Staging[newIndex];
         }
 
+        // ---- Watched folder helpers ----
+
+        private Task EnsureInitializedAsync()
+            => _isInitialized ? Task.CompletedTask : InitializeAsync();
+
+        private async Task AddWatchedFolderAsync()
+        {
+            await EnsureInitializedAsync().ConfigureAwait(false);
+
+            using var dialog = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Select a folder to watch for new files"
+            };
+
+            if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                return;
+
+            var selected = dialog.SelectedPath?.Trim();
+            if (string.IsNullOrWhiteSpace(selected))
+                return;
+
+            if (WatchedFolders.Any(f => string.Equals(f.Path, selected, StringComparison.OrdinalIgnoreCase)))
+                return;
+
+            var folder = new WatchedFolder
+            {
+                Path = selected,
+                IsEnabled = true
+            };
+
+            WatchedFolders.Add(folder);
+
+            await _scanner.ScanAsync(folder, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private async Task ScanWatchedFolderAsync(WatchedFolder? folder)
+        {
+            await EnsureInitializedAsync().ConfigureAwait(false);
+
+            if (folder is null)
+                return;
+
+            await _scanner.ScanAsync(folder, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private void RemoveWatchedFolder(WatchedFolder? folder)
+        {
+            if (!_isInitialized)
+                return;
+
+            if (folder is null)
+                return;
+
+            if (WatchedFolders.Contains(folder))
+                WatchedFolders.Remove(folder);
+        }
+
+        private void OnWatchedFoldersChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems is not null)
+            {
+                foreach (WatchedFolder folder in e.NewItems)
+                    folder.PropertyChanged += OnWatchedFolderPropertyChanged;
+            }
+
+            if (e.OldItems is not null)
+            {
+                foreach (WatchedFolder folder in e.OldItems)
+                    folder.PropertyChanged -= OnWatchedFolderPropertyChanged;
+            }
+
+            ScheduleWatchedFolderSave();
+        }
+
+        private void OnWatchedFolderPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(WatchedFolder.IsEnabled) ||
+                e.PropertyName == nameof(WatchedFolder.Path))
+            {
+                ScheduleWatchedFolderSave();
+            }
+        }
+
+        private void ScheduleWatchedFolderSave()
+        {
+            if (!_isInitialized || _isRestoringWatchedFolders || _disposed)
+                return;
+
+            _ = SaveWatchedFoldersAsync(CancellationToken.None);
+        }
+
+        private async Task SaveWatchedFoldersAsync(CancellationToken ct)
+        {
+            await _watchedFolderSaveGate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                await _watchedConfig.SaveAsync(GetWatchedFolderConfigPath(), ct).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[AddViewModel] Failed to save watched folders: {ex}");
+            }
+            finally
+            {
+                _watchedFolderSaveGate.Release();
+            }
+        }
+
+        private string GetWatchedFolderConfigPath()
+        {
+            if (!string.IsNullOrEmpty(_watchedFolderConfigPath))
+                return _watchedFolderConfigPath;
+
+            var root = _workspace.GetWorkspaceRoot();
+            var fullRoot = Path.GetFullPath(root);
+            var trimmed = fullRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (trimmed.Length == 0)
+                trimmed = fullRoot;
+
+            var name = Path.GetFileName(trimmed);
+            if (string.IsNullOrEmpty(name))
+                name = "workspace";
+
+            var directory = Path.GetDirectoryName(trimmed);
+            if (string.IsNullOrEmpty(directory))
+                directory = fullRoot;
+
+            _watchedFolderConfigPath = Path.Combine(directory, $"{name}.watched-folders.json");
+            return _watchedFolderConfigPath;
+        }
+
         private async Task RunGuardedAsync(Func<Task> action)
         {
             if (IsBusy) return;
@@ -251,6 +510,26 @@ namespace LM.App.Wpf.ViewModels
         {
             if (e.PropertyName == nameof(StagingItem.Selected))
                 _commitSelectedCommand.RaiseCanExecuteChanged();
+        }
+
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+
+            Staging.CollectionChanged -= OnStagingCollectionChanged;
+
+            if (_isInitialized)
+            {
+                WatchedFolders.CollectionChanged -= OnWatchedFoldersChanged;
+                foreach (var folder in WatchedFolders)
+                    folder.PropertyChanged -= OnWatchedFolderPropertyChanged;
+            }
+
+            _scanner.ItemsStaged -= OnScannerItemsStaged;
+            _scanner.Dispose();
         }
     }
 }

@@ -15,9 +15,86 @@
       <Button Content="Clear" Command="{Binding ClearCommand}"/>
     </StackPanel>
 
-	  <!-- Staging grid -->
-	  <DataGrid ItemsSource="{Binding Staging}"
-				SelectedItem="{Binding Current, Mode=TwoWay}"
+    <!-- Watched folders management -->
+    <Border DockPanel.Dock="Top" Margin="12,0,12,12" Padding="12" Background="#FFF8F8F8" CornerRadius="4">
+      <StackPanel>
+        <DockPanel>
+          <TextBlock Text="Watched folders" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+          <Button Content="Add watched folder..."
+                  Command="{Binding AddWatchedFolderCommand}"
+                  DockPanel.Dock="Right"
+                  HorizontalAlignment="Right"/>
+        </DockPanel>
+
+        <ListView ItemsSource="{Binding WatchedFolders}" Margin="0,8,0,0" BorderThickness="0">
+          <ListView.Style>
+            <Style TargetType="ListView">
+              <Setter Property="Visibility" Value="Visible"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding WatchedFolders.Count}" Value="0">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ListView.Style>
+          <ListView.View>
+            <GridView>
+              <GridViewColumn Width="80" Header="Enabled">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" HorizontalAlignment="Center"/>
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn Width="*" Header="Folder">
+                <GridViewColumn.DisplayMemberBinding>
+                  <Binding Path="Path"/>
+                </GridViewColumn.DisplayMemberBinding>
+              </GridViewColumn>
+              <GridViewColumn Width="160" Header="Last scan">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding LastScanDisplay}"/>
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+              <GridViewColumn Width="200">
+                <GridViewColumn.CellTemplate>
+                  <DataTemplate>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                      <Button Content="Scan now"
+                              Command="{Binding DataContext.ScanWatchedFolderCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                              CommandParameter="{Binding}"
+                              Margin="0,0,6,0"/>
+                      <Button Content="Remove"
+                              Command="{Binding DataContext.RemoveWatchedFolderCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                              CommandParameter="{Binding}"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </GridViewColumn.CellTemplate>
+              </GridViewColumn>
+            </GridView>
+          </ListView.View>
+        </ListView>
+
+        <TextBlock Text="No watched folders configured." Foreground="Gray" FontStyle="Italic" HorizontalAlignment="Center" Margin="0,8,0,0">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding WatchedFolders.Count}" Value="0">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </StackPanel>
+    </Border>
+
+          <!-- Staging grid -->
+          <DataGrid ItemsSource="{Binding Staging}"
+                                SelectedItem="{Binding Current, Mode=TwoWay}"
                 IsSynchronizedWithCurrentItem="True"
                 Margin="12"
 				IsReadOnly="False"

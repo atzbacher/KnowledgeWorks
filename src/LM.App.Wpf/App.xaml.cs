@@ -25,6 +25,8 @@ namespace LM.App.Wpf
 {
     public partial class App : System.Windows.Application
     {
+        private AddViewModel? _addViewModel;
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -72,7 +74,9 @@ namespace LM.App.Wpf
             var presetStore = new LibraryFilterPresetStore(ws);
             var presetPrompt = new LibraryPresetPrompt();
             var libraryVm = new LibraryViewModel(services.Store, ws, presetStore, presetPrompt);
-            var addVm = new AddViewModel(services.Pipeline);
+            var addVm = new AddViewModel(services.Pipeline, ws, services.Scanner);
+            await addVm.InitializeAsync();
+            _addViewModel = addVm;
             var searchPrompt = new SearchSavePrompt();
             var searchVm = new SearchViewModel(services.Store, services.Storage, ws, searchPrompt);
 
@@ -87,6 +91,12 @@ namespace LM.App.Wpf
             if (shell.FindName("SearchViewControl") is SearchView searchView)
                 searchView.DataContext = searchVm;
 
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _addViewModel?.Dispose();
+            base.OnExit(e);
         }
     }
 }
