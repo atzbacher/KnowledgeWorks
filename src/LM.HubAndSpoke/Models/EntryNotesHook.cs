@@ -112,12 +112,14 @@ namespace LM.HubSpoke.Models
             if (!string.IsNullOrWhiteSpace(Title))
                 sb.AppendLine($"Title: {Title.Trim()}");
 
-            sb.AppendLine($"Query: {Query}");
-            sb.AppendLine($"Provider: {Provider}");
+            var query = string.IsNullOrWhiteSpace(Query) ? "unknown" : Query.Trim();
+            var provider = string.IsNullOrWhiteSpace(Provider) ? "unknown" : Provider.Trim();
+            sb.AppendLine($"Query: {query}");
+            sb.AppendLine($"Provider: {provider}");
 
             var createdBy = string.IsNullOrWhiteSpace(CreatedBy) ? "unknown" : CreatedBy.Trim();
-            sb.AppendLine($"Created by {createdBy} on {CreatedUtc:u}.");
-            sb.AppendLine($"Run count: {RunCount}");
+            sb.AppendLine($"Created by {createdBy} on {EntryNotesFormatting.FormatTimestamp(CreatedUtc)}.");
+            sb.AppendLine($"Run count: {Math.Max(RunCount, 0)}");
 
             if (LatestRun is not null)
             {
@@ -127,8 +129,11 @@ namespace LM.HubSpoke.Models
                     sb.AppendLine(rangeLine);
             }
 
-            if (!string.IsNullOrWhiteSpace(DerivedFromEntryId))
-                sb.AppendLine($"Derived from entry {DerivedFromEntryId}.");
+            var derivedFrom = string.IsNullOrWhiteSpace(DerivedFromEntryId)
+                ? null
+                : DerivedFromEntryId.Trim();
+            if (!string.IsNullOrWhiteSpace(derivedFrom))
+                sb.AppendLine($"Derived from entry {derivedFrom}.");
 
             return sb.ToString().Trim();
         }
@@ -166,7 +171,10 @@ namespace LM.HubSpoke.Models
                 ? (string.IsNullOrWhiteSpace(fallbackExecutor) ? "unknown" : fallbackExecutor!.Trim())
                 : ExecutedBy!.Trim();
 
-            return $"Latest run executed by {executor} on {RunUtc:u} (hits: {TotalHits}).";
+            var runUtc = EntryNotesFormatting.FormatTimestamp(RunUtc);
+            var hits = TotalHits < 0 ? 0 : TotalHits;
+
+            return $"Latest run executed by {executor} on {runUtc} (hits: {hits}).";
         }
 
         internal string? ToRangeLine()
@@ -177,6 +185,36 @@ namespace LM.HubSpoke.Models
             var fromText = From?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "–";
             var toText = To?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "–";
             return $"Range: {fromText} → {toText}";
+        }
+    }
+
+    internal static class EntryNotesFormatting
+    {
+        public static string FormatTimestamp(DateTime timestamp)
+        {
+            if (timestamp == default)
+                return "unknown";
+
+            try
+            {
+                var normalized = NormalizeUtc(timestamp);
+                return normalized.ToString("u", CultureInfo.InvariantCulture);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                var normalized = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                return normalized.ToString("u", CultureInfo.InvariantCulture);
+            }
+        }
+
+        private static DateTime NormalizeUtc(DateTime timestamp)
+        {
+            return timestamp.Kind switch
+            {
+                DateTimeKind.Utc => timestamp,
+                DateTimeKind.Local => timestamp.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(timestamp, DateTimeKind.Utc)
+            };
         }
     }
 
@@ -203,13 +241,13 @@ namespace LM.HubSpoke.Models
             string? rendered = null;
             LitSearchNoteSummary? litSearch = null;
 
-            if (root.TryGetProperty("rawText", out var rawTextElement) && rawTextElement.ValueKind != JsonValueKind.Null)
+            if (root.TryGetProperty("rawText", out var rawTextElement) && rawTextElement.ValueKind == JsonValueKind.String)
                 rawText = rawTextElement.GetString();
 
-            if (root.TryGetProperty("rendered", out var renderedElement) && renderedElement.ValueKind != JsonValueKind.Null)
+            if (root.TryGetProperty("rendered", out var renderedElement) && renderedElement.ValueKind == JsonValueKind.String)
                 rendered = renderedElement.GetString();
 
-            if (root.TryGetProperty("litSearch", out var litElement) && litElement.ValueKind != JsonValueKind.Null)
+            if (root.TryGetProperty("litSearch", out var litElement) && litElement.ValueKind == JsonValueKind.Object)
                 litSearch = JsonSerializer.Deserialize<LitSearchNoteSummary>(litElement.GetRawText(), options);
 
             return new EntryNotesSummary
