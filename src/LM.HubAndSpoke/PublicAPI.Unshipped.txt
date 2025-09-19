@@ -352,7 +352,7 @@ LM.HubSpoke.Models.LitSearchNoteSummary.RunCount.get -> int
 LM.HubSpoke.Models.LitSearchNoteSummary.RunCount.init -> void
 LM.HubSpoke.Models.LitSearchNoteSummary.Title.get -> string?
 LM.HubSpoke.Models.LitSearchNoteSummary.Title.init -> void
-LM.HubSpoke.Models.LitSearchNoteSummary.ToDisplayString() -> string
+LM.HubSpoke.Models.LitSearchNoteSummary.ToDisplayString() -> string!
 LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.External = 0 -> LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.Internal = 1 -> LM.HubSpoke.Models.EntryOrigin
