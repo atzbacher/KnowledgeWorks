@@ -104,17 +104,19 @@ namespace LM.HubSpoke.Entries
             // 2) Hub
             var isPublication = entry.Type == EntryType.Publication;
             var isLitSearch = string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
-            var createdBy = BuildPersonRef(entry.AddedBy);
+            var createdUtc = entry.AddedOnUtc == default ? now : entry.AddedOnUtc;
+            var createdBy = BuildPersonRef(entry.AddedBy, createdUtc);
+            var updatedBy = BuildPersonRef(entry.AddedBy, now);
             var hasNotes = !string.IsNullOrWhiteSpace(entry.Notes) || !string.IsNullOrWhiteSpace(entry.UserNotes);
 
             var hub = new EntryHub
             {
                 EntryId = entryId,
                 DisplayTitle = entry.Title ?? entry.DisplayName ?? string.Empty,
-                CreatedUtc = entry.AddedOnUtc == default ? now : entry.AddedOnUtc,
+                CreatedUtc = createdUtc,
                 UpdatedUtc = now,
                 CreatedBy = createdBy,
-                UpdatedBy = createdBy,
+                UpdatedBy = updatedBy,
                 CreationMethod = isLitSearch ? CreationMethod.Search : CreationMethod.Manual,
                 Origin = entry.IsInternal ? EntryOrigin.Internal : EntryOrigin.External,
                 PrimaryPurpose = isPublication ? EntryPurpose.Manuscript : EntryPurpose.Document,
@@ -130,24 +132,6 @@ namespace LM.HubSpoke.Entries
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);
 
-            var entryDir = WorkspaceLayout.EntryDir(_ws, entryId);
-            var notesPath = WorkspaceLayout.NotesHookPath(_ws, entryId);
-            if (hasNotes)
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(notesPath)!);
-                var notesHook = new EntryNotesHook
-                {
-                    Summary = entry.Notes,
-                    UserNotes = entry.UserNotes,
-                    UpdatedUtc = now
-                };
-                await File.WriteAllTextAsync(notesPath, JsonSerializer.Serialize(notesHook, JsonStd.Options), ct);
-            }
-            else if (File.Exists(notesPath))
-            {
-                File.Delete(notesPath);
-            }
-
             // 3) Spoke
             if (!_handlers.TryGetValue(entry.Type, out var handler))
                 handler = _handlers.ContainsKey(EntryType.Report) ? _handlers[EntryType.Report] : _handlers.Values.First();
@@ -159,6 +143,8 @@ namespace LM.HubSpoke.Entries
             var hookPath = Path.Combine(WorkspaceLayout.EntryDir(_ws, entryId), handler.HookPath.Replace('/', Path.DirectorySeparatorChar));
             Directory.CreateDirectory(Path.GetDirectoryName(hookPath)!);
             await File.WriteAllTextAsync(hookPath, JsonSerializer.Serialize(hook, JsonStd.Options), ct);
+
+            await PersistNotesAsync(entry, hook, entryId, now, hasNotes, ct);
 
             // 4) Extract text (optional)
             string? extracted = null;
@@ -193,13 +179,99 @@ namespace LM.HubSpoke.Entries
             _idIndex.AddOrUpdate(entry.Doi, entry.Pmid, entryId);
         }
 
-        private static PersonRef BuildPersonRef(string? user)
+        private async Task PersistNotesAsync(Entry entry, object? hook, string entryId, DateTime now, bool hasNotes, CancellationToken ct)
+        {
+            var notesPath = WorkspaceLayout.NotesHookPath(_ws, entryId);
+
+            if (!hasNotes)
+            {
+                if (File.Exists(notesPath))
+                    File.Delete(notesPath);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(notesPath)!);
+
+            var summary = BuildNotesSummary(entry, hook);
+            var trimmedUserNotes = string.IsNullOrWhiteSpace(entry.UserNotes) ? null : entry.UserNotes.Trim();
+
+            var notesHook = new EntryNotesHook
+            {
+                Summary = summary,
+                UserNotes = trimmedUserNotes,
+                UpdatedUtc = now
+            };
+
+            await File.WriteAllTextAsync(notesPath, JsonSerializer.Serialize(notesHook, JsonStd.Options), ct);
+        }
+
+        private static EntryNotesSummary? BuildNotesSummary(Entry entry, object? hook)
+        {
+            var rendered = string.IsNullOrWhiteSpace(entry.Notes) ? null : entry.Notes!.Trim();
+            var userNotes = string.IsNullOrWhiteSpace(entry.UserNotes) ? null : entry.UserNotes!.Trim();
+
+            if (hook is LitSearchHook litHook)
+            {
+                var summary = new LitSearchNoteSummary
+                {
+                    Title = string.IsNullOrWhiteSpace(litHook.Title) ? null : litHook.Title,
+                    Query = litHook.Query,
+                    Provider = litHook.Provider,
+                    CreatedBy = litHook.CreatedBy,
+                    CreatedUtc = litHook.CreatedUtc,
+                    RunCount = litHook.Runs?.Count ?? 0,
+                    DerivedFromEntryId = litHook.DerivedFromEntryId,
+                    LatestRun = BuildLatestRunSummary(litHook.Runs)
+                };
+
+                return EntryNotesSummary.FromLitSearch(summary, rendered ?? userNotes);
+            }
+
+            var fallback = rendered ?? userNotes;
+            return string.IsNullOrWhiteSpace(fallback) ? null : EntryNotesSummary.FromRawText(fallback);
+        }
+
+        private static LitSearchNoteRunSummary? BuildLatestRunSummary(IReadOnlyList<LitSearchRun>? runs)
+        {
+            if (runs is null || runs.Count == 0)
+                return null;
+
+            var latest = runs[^1];
+            return new LitSearchNoteRunSummary
+            {
+                RunId = latest.RunId,
+                RunUtc = latest.RunUtc,
+                TotalHits = latest.TotalHits,
+                ExecutedBy = latest.ExecutedBy,
+                From = latest.From,
+                To = latest.To
+            };
+        }
+
+        private static PersonRef BuildPersonRef(string? user, DateTime? timestampUtc)
         {
             if (string.IsNullOrWhiteSpace(user))
-                return PersonRef.Unknown;
+            {
+                var unknown = PersonRef.Unknown;
+                return timestampUtc.HasValue
+                    ? unknown with { TimestampUtc = NormalizeUtc(timestampUtc.Value) }
+                    : unknown;
+            }
 
             var trimmed = user.Trim();
-            return new PersonRef(trimmed, trimmed);
+            var person = new PersonRef(trimmed, trimmed);
+            return timestampUtc.HasValue
+                ? person with { TimestampUtc = NormalizeUtc(timestampUtc.Value) }
+                : person;
+        }
+
+        private static DateTime NormalizeUtc(DateTime timestamp)
+        {
+            if (timestamp.Kind == DateTimeKind.Utc)
+                return timestamp;
+            if (timestamp.Kind == DateTimeKind.Local)
+                return timestamp.ToUniversalTime();
+            return DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
         }
 
         public async Task<Entry?> FindByIdsAsync(string? doi, string? pmid, CancellationToken ct = default)

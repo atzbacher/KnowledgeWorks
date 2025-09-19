@@ -141,8 +141,10 @@ namespace LM.HubSpoke.Spokes
                     {
                         if (!string.IsNullOrWhiteSpace(notesHook.UserNotes))
                             hook.UserNotes = notesHook.UserNotes;
-                        if (!string.IsNullOrWhiteSpace(notesHook.Summary))
-                            hook.NotesSummary = notesHook.Summary;
+
+                        var summaryText = notesHook.SummaryText;
+                        if (!string.IsNullOrWhiteSpace(summaryText))
+                            hook.NotesSummary = summaryText;
                         return;
                     }
                 }

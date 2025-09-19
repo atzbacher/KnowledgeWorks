@@ -138,6 +138,10 @@ namespace LM.HubSpoke.Models
         [property: JsonPropertyName("id")] string Id,
         [property: JsonPropertyName("display_name")] string? DisplayName)
     {
+        [JsonPropertyName("timestamp_utc")]
+        [JsonConverter(typeof(NullableUtcDateTimeConverter))]
+        public DateTime? TimestampUtc { get; init; }
+
         public static PersonRef Unknown => new("unknown", null);
     }
 
