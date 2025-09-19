@@ -210,7 +210,9 @@ namespace LM.App.Wpf.ViewModels
             private readonly object _gate = new();
             private readonly HashSet<string> _pending = new(StringComparer.OrdinalIgnoreCase);
             private readonly FileSystemWatcher _watcher;
-            private readonly Timer _timer;
+
+            private readonly System.Threading.Timer _timer;
+
             private bool _disposed;
 
             public FolderSubscription(WatchedFolder folder, Func<WatchedFolder, IReadOnlyList<string>, Task> flush, TimeSpan debounce)
@@ -229,8 +231,9 @@ namespace LM.App.Wpf.ViewModels
                 _watcher.Renamed += OnRenamed;
                 _watcher.EnableRaisingEvents = true;
 
-                _timer = new Timer(OnTimer, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
-            }
+
+                _timer = new System.Threading.Timer(OnTimer, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+
 
             public void Dispose()
             {

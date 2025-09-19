@@ -47,6 +47,8 @@
                 </GridViewColumn.CellTemplate>
               </GridViewColumn>
               <GridViewColumn Width="320" Header="Folder">
+
+
                 <GridViewColumn.DisplayMemberBinding>
                   <Binding Path="Path"/>
                 </GridViewColumn.DisplayMemberBinding>

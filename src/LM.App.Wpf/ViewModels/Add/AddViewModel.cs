@@ -293,7 +293,9 @@ namespace LM.App.Wpf.ViewModels
                 _commitSelectedCommand.RaiseCanExecuteChanged();
             }
 
-            var dispatcher = Application.Current?.Dispatcher;
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+
             if (dispatcher is null)
             {
                 Add();
