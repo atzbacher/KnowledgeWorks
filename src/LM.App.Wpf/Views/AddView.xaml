@@ -20,10 +20,13 @@
       <StackPanel>
         <DockPanel>
           <TextBlock Text="Watched folders" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
-          <Button Content="Add watched folder..."
-                  Command="{Binding AddWatchedFolderCommand}"
-                  DockPanel.Dock="Right"
-                  HorizontalAlignment="Right"/>
+          <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+            <Button Content="Scan all"
+                    Command="{Binding ScanAllWatchedFoldersCommand}"
+                    Margin="0,0,8,0"/>
+            <Button Content="Add watched folder..."
+                    Command="{Binding AddWatchedFolderCommand}"/>
+          </StackPanel>
         </DockPanel>
 
         <ListView ItemsSource="{Binding WatchedFolders}" Margin="0,8,0,0" BorderThickness="0">

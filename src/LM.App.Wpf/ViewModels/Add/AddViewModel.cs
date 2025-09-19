@@ -1,6 +1,7 @@
 #nullable enable
 using LM.App.Wpf.Common;           // RelayCommand
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized; // NotifyCollectionChangedEventArgs
 using System.ComponentModel;
@@ -45,6 +46,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly RelayCommand _addWatchedFolderCommand;
         private readonly RelayCommand _removeWatchedFolderCommand;
         private readonly RelayCommand _scanWatchedFolderCommand;
+        private readonly RelayCommand _scanAllWatchedFoldersCommand;
 
         // Cache EntryTypes array
         private static readonly Array s_entryTypes = Enum.GetValues(typeof(EntryType));
@@ -69,6 +71,7 @@ namespace LM.App.Wpf.ViewModels
             _addWatchedFolderCommand = new RelayCommand(async _ => await RunGuardedAsync(AddWatchedFolderAsync), _ => !IsBusy);
             _removeWatchedFolderCommand = new RelayCommand(p => RemoveWatchedFolder(p as WatchedFolder), p => !IsBusy && p is WatchedFolder);
             _scanWatchedFolderCommand = new RelayCommand(async p => await RunGuardedAsync(() => ScanWatchedFolderAsync(p as WatchedFolder)), p => !IsBusy && p is WatchedFolder);
+            _scanAllWatchedFoldersCommand = new RelayCommand(async _ => await RunGuardedAsync(ScanAllWatchedFoldersAsync), _ => !IsBusy && WatchedFolders.Any(static f => f.IsEnabled));
 
             _scanner.ItemsStaged += OnScannerItemsStaged;
         }
@@ -136,6 +139,7 @@ namespace LM.App.Wpf.ViewModels
 
                 _watchedConfig = loaded;
                 OnPropertyChanged(nameof(WatchedFolders));
+                _scanAllWatchedFoldersCommand.RaiseCanExecuteChanged();
 
                 _isRestoringWatchedFolders = true;
                 try
@@ -225,6 +229,7 @@ namespace LM.App.Wpf.ViewModels
                 _addWatchedFolderCommand.RaiseCanExecuteChanged();
                 _removeWatchedFolderCommand.RaiseCanExecuteChanged();
                 _scanWatchedFolderCommand.RaiseCanExecuteChanged();
+                _scanAllWatchedFoldersCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -236,6 +241,7 @@ namespace LM.App.Wpf.ViewModels
         public ICommand AddWatchedFolderCommand => _addWatchedFolderCommand;
         public ICommand RemoveWatchedFolderCommand => _removeWatchedFolderCommand;
         public ICommand ScanWatchedFolderCommand => _scanWatchedFolderCommand;
+        public ICommand ScanAllWatchedFoldersCommand => _scanAllWatchedFoldersCommand;
 
         private bool CanCommitSelected(object? _) => !IsBusy && HasSelectedItems();
         private bool HasSelectedItems() => Staging.Any(s => s.Selected);
@@ -396,7 +402,27 @@ namespace LM.App.Wpf.ViewModels
             if (folder is null)
                 return;
 
-            await _scanner.ScanAsync(folder, CancellationToken.None, force: true).ConfigureAwait(false);
+            await _scanner.ScanAsync(folder, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private async Task ScanAllWatchedFoldersAsync()
+        {
+            await EnsureInitializedAsync().ConfigureAwait(false);
+
+            if (WatchedFolders.Count == 0)
+                return;
+
+            List<WatchedFolder> targets = WatchedFolders
+                .Where(static f => f.IsEnabled)
+                .ToList();
+
+            if (targets.Count == 0)
+                return;
+
+            foreach (var folder in targets)
+            {
+                await _scanner.ScanAsync(folder, CancellationToken.None).ConfigureAwait(false);
+            }
         }
 
         private void RemoveWatchedFolder(WatchedFolder? folder)
@@ -432,6 +458,7 @@ namespace LM.App.Wpf.ViewModels
             }
 
             ScheduleWatchedFolderSave();
+            _scanAllWatchedFoldersCommand.RaiseCanExecuteChanged();
         }
 
         private void OnWatchedFolderPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -447,6 +474,7 @@ namespace LM.App.Wpf.ViewModels
             else if (e.PropertyName == nameof(WatchedFolder.IsEnabled))
             {
                 ScheduleWatchedFolderSave();
+                _scanAllWatchedFoldersCommand.RaiseCanExecuteChanged();
             }
             else if (e.PropertyName == nameof(WatchedFolder.LastScanUtc) ||
                      e.PropertyName == nameof(WatchedFolder.LastScanWasUnchanged))
