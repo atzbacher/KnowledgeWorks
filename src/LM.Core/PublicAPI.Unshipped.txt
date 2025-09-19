@@ -193,6 +193,22 @@ LM.Core.Models.Filters.EntryFilter.YearFrom.get -> int?
 LM.Core.Models.Filters.EntryFilter.YearFrom.set -> void
 LM.Core.Models.Filters.EntryFilter.YearTo.get -> int?
 LM.Core.Models.Filters.EntryFilter.YearTo.set -> void
+LM.Core.Models.Filters.EntryFilter.SourceContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.SourceContains.set -> void
+LM.Core.Models.Filters.EntryFilter.InternalIdContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.InternalIdContains.set -> void
+LM.Core.Models.Filters.EntryFilter.DoiContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.DoiContains.set -> void
+LM.Core.Models.Filters.EntryFilter.PmidContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.PmidContains.set -> void
+LM.Core.Models.Filters.EntryFilter.NctContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.NctContains.set -> void
+LM.Core.Models.Filters.EntryFilter.AddedByContains.get -> string?
+LM.Core.Models.Filters.EntryFilter.AddedByContains.set -> void
+LM.Core.Models.Filters.EntryFilter.AddedOnFromUtc.get -> System.DateTime?
+LM.Core.Models.Filters.EntryFilter.AddedOnFromUtc.set -> void
+LM.Core.Models.Filters.EntryFilter.AddedOnToUtc.get -> System.DateTime?
+LM.Core.Models.Filters.EntryFilter.AddedOnToUtc.set -> void
 LM.Core.Models.GrantInfo
 LM.Core.Models.GrantInfo.Agency.get -> string?
 LM.Core.Models.GrantInfo.Agency.init -> void

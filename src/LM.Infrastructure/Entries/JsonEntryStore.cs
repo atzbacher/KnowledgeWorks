@@ -184,6 +184,11 @@ namespace LM.Infrastructure.Entries
                 var needle = f.AuthorContains.Trim();
                 q = q.Where(e => (e.Authors?.Any(a => a.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0) ?? false));
             }
+            if (!string.IsNullOrWhiteSpace(f.SourceContains))
+            {
+                var needle = f.SourceContains.Trim();
+                q = q.Where(e => e.Source?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
             if (f.TypesAny is { Length: > 0 })
             {
                 var set = new HashSet<EntryType>(f.TypesAny);
@@ -203,7 +208,51 @@ namespace LM.Infrastructure.Entries
                 q = q.Where(e => e.Tags?.Any(t => tags.Contains(t)) ?? false);
             }
 
-            var list = q.OrderByDescending(e => e.Year.HasValue).ThenBy(e => e.Title).Take(1000).ToList();
+            if (!string.IsNullOrWhiteSpace(f.InternalIdContains))
+            {
+                var needle = f.InternalIdContains.Trim();
+                q = q.Where(e => e.InternalId?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (!string.IsNullOrWhiteSpace(f.DoiContains))
+            {
+                var needle = f.DoiContains.Trim();
+                q = q.Where(e => e.Doi?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (!string.IsNullOrWhiteSpace(f.PmidContains))
+            {
+                var needle = f.PmidContains.Trim();
+                q = q.Where(e => e.Pmid?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (!string.IsNullOrWhiteSpace(f.NctContains))
+            {
+                var needle = f.NctContains.Trim();
+                q = q.Where(e => e.Nct?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (!string.IsNullOrWhiteSpace(f.AddedByContains))
+            {
+                var needle = f.AddedByContains.Trim();
+                q = q.Where(e => e.AddedBy?.IndexOf(needle, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            if (f.AddedOnFromUtc.HasValue)
+            {
+                var from = f.AddedOnFromUtc.Value;
+                q = q.Where(e => e.AddedOnUtc >= from);
+            }
+            if (f.AddedOnToUtc.HasValue)
+            {
+                var to = f.AddedOnToUtc.Value;
+                q = q.Where(e => e.AddedOnUtc <= to);
+            }
+
+            var list = q
+                .OrderByDescending(e => e.Year.HasValue)
+                .ThenByDescending(e => e.Year ?? int.MinValue)
+                .ThenBy(e => e.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(e => e.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(e => e.AddedOnUtc)
+                .ThenBy(e => e.Id, StringComparer.OrdinalIgnoreCase)
+                .Take(1000)
+                .ToList();
             return Task.FromResult<IReadOnlyList<Entry>>(list);
         }
 
