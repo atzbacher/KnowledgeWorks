@@ -16,5 +16,13 @@ namespace LM.Core.Models.Filters
         public int? YearFrom { get; set; }
         public int? YearTo { get; set; }
         public bool? IsInternal { get; set; } // null = either
+        public string? SourceContains { get; set; }
+        public string? InternalIdContains { get; set; }
+        public string? DoiContains { get; set; }
+        public string? PmidContains { get; set; }
+        public string? NctContains { get; set; }
+        public string? AddedByContains { get; set; }
+        public DateTime? AddedOnFromUtc { get; set; }
+        public DateTime? AddedOnToUtc { get; set; }
     }
 }

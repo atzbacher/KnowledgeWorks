@@ -24,6 +24,24 @@
         <TextBlock Text="Tags (comma-separated)"/>
         <TextBox Text="{Binding TagsCsv, UpdateSourceTrigger=PropertyChanged}"/>
 
+        <TextBlock Text="Source contains"/>
+        <TextBox Text="{Binding SourceContains, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Internal ID contains"/>
+        <TextBox Text="{Binding InternalIdContains, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="DOI contains"/>
+        <TextBox Text="{Binding DoiContains, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="PMID contains"/>
+        <TextBox Text="{Binding PmidContains, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="NCT contains"/>
+        <TextBox Text="{Binding NctContains, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Added by contains"/>
+        <TextBox Text="{Binding AddedByContains, UpdateSourceTrigger=PropertyChanged}"/>
+
         <TextBlock Text="Type"/>
         <UniformGrid Columns="2" Margin="0,6,0,0">
           <CheckBox Content="Publication" IsChecked="{Binding TypePublication}"/>
@@ -39,6 +57,13 @@
           <TextBox Width="60" Text="{Binding YearFrom, UpdateSourceTrigger=PropertyChanged}"/>
           <TextBlock Text=" to " VerticalAlignment="Center" Margin="6,0,6,0"/>
           <TextBox Width="60" Text="{Binding YearTo, UpdateSourceTrigger=PropertyChanged}"/>
+        </DockPanel>
+
+        <TextBlock Text="Added on range"/>
+        <DockPanel>
+          <DatePicker Width="120" SelectedDate="{Binding AddedOnFrom, UpdateSourceTrigger=PropertyChanged}"/>
+          <TextBlock Text=" to " VerticalAlignment="Center" Margin="6,0,6,0"/>
+          <DatePicker Width="120" SelectedDate="{Binding AddedOnTo, UpdateSourceTrigger=PropertyChanged}"/>
         </DockPanel>
 
         <TextBlock Text="Visibility"/>
@@ -72,8 +97,15 @@
                 IsReadOnly="True">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*"/>
+          <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="2*"/>
           <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="1*"/>
           <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="0.8*"/>
+          <DataGridTextColumn Header="Added on" Binding="{Binding AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="1.2*"/>
+          <DataGridTextColumn Header="Added by" Binding="{Binding AddedBy}" Width="1.2*"/>
+          <DataGridTextColumn Header="Internal ID" Binding="{Binding InternalId}" Width="1.5*"/>
+          <DataGridTextColumn Header="DOI" Binding="{Binding Doi}" Width="2*"/>
+          <DataGridTextColumn Header="PMID" Binding="{Binding Pmid}" Width="1.5*"/>
+          <DataGridTextColumn Header="NCT" Binding="{Binding Nct}" Width="1.5*"/>
           <DataGridTextColumn Header="Authors" Binding="{Binding Authors}" Width="2*"/>
           <DataGridTextColumn Header="Tags" Binding="{Binding Tags}" Width="2*"/>
           <DataGridTextColumn Header="Internal" Binding="{Binding IsInternal}" Width="0.8*"/>
