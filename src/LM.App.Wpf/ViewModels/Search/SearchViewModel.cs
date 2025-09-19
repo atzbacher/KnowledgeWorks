@@ -339,10 +339,10 @@ namespace LM.App.Wpf.ViewModels
                     ? existingEntry ?? await _store.GetByIdAsync(_loadedEntryId) ?? new Entry { Id = _loadedEntryId }
                     : new Entry { Id = LM.Core.Utils.IdGen.NewId() };
 
-                litEntry.Type = EntryType.Other;
+                litEntry.Type = EntryType.LitSearch;
                 litEntry.Title = effectiveTitle;
                 litEntry.DisplayName = effectiveTitle;
-                litEntry.Source = "LitSearch";
+                litEntry.Source = null;
                 litEntry.AddedOnUtc = createdUtc;
                 litEntry.AddedBy = createdBy;
                 litEntry.Notes = string.IsNullOrWhiteSpace(trimmedNotes) ? null : note;
@@ -377,9 +377,40 @@ namespace LM.App.Wpf.ViewModels
                     await File.WriteAllTextAsync(tmpUrl, $"[InternetShortcut]{Environment.NewLine}URL={(url ?? "about:blank")}");
 
                     var rel = await _storage.SaveNewAsync(tmpUrl, string.Empty);
+                    var entryId = LM.Core.Utils.IdGen.NewId();
+                    var authors = SplitAuthors(h.Authors);
+                    var tagList = new List<string>();
+                    var tagSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    var source = NormalizeSource(h);
+
+                    PubMedImportResult? import = null;
+                    if (h.Source == SearchDatabase.PubMed && !string.IsNullOrWhiteSpace(h.ExternalId))
+                    {
+                        import = await TrySavePubMedXmlAsync(litEntryId, entryId, run.RunId, h.ExternalId);
+                        if (import is not null)
+                        {
+                            if (import.Authors.Count > 0)
+                                authors = import.Authors.Select(a => a.Trim())
+                                                         .Where(s => !string.IsNullOrWhiteSpace(s))
+                                                         .Distinct(StringComparer.OrdinalIgnoreCase)
+                                                         .ToList();
+
+                            if (import.Keywords.Count > 0)
+                                foreach (var kw in import.Keywords)
+                                    AddTag(tagList, tagSet, kw);
+
+                            if (import.MeshHeadings.Count > 0)
+                                foreach (var term in import.MeshHeadings)
+                                    AddTag(tagList, tagSet, term);
+
+                            if (string.IsNullOrWhiteSpace(source) && !string.IsNullOrWhiteSpace(import.JournalTitle))
+                                source = import.JournalTitle;
+                        }
+                    }
+
                     var entry = new Entry
                     {
-                        Id = LM.Core.Utils.IdGen.NewId(),
+                        Id = entryId,
                         Type = h.Source == SearchDatabase.PubMed ? EntryType.Publication : EntryType.Other,
                         Title = h.Title,
                         DisplayName = h.Title,
@@ -387,25 +418,22 @@ namespace LM.App.Wpf.ViewModels
                         Doi = h.Doi,
                         Pmid = h.Source == SearchDatabase.PubMed ? h.ExternalId : null,
                         Nct = h.Source == SearchDatabase.ClinicalTrialsGov ? h.ExternalId : null,
-                        Authors = LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(h.Authors).ToList(),
+                        Authors = authors,
                         Links = url is null ? new List<string>() : new List<string> { url },
-                        Source = h.Source == SearchDatabase.PubMed ? "PubMed" : "ClinicalTrials.gov",
+                        Source = string.IsNullOrWhiteSpace(source) ? null : source,
                         AddedOnUtc = DateTime.UtcNow,
+                        AddedBy = user,
+                        Tags = tagList,
                         MainFilePath = rel,
                         OriginalFileName = Path.GetFileName(rel)
                     };
+
                     await _store.SaveAsync(entry);          // store it (Article/Document spokes handle indexing)
 
                     h.AlreadyInDb = true;
                     h.ExistingEntryId = entry.Id;
 
-                    string? xmlPath = null;
-                    if (h.Source == SearchDatabase.PubMed && !string.IsNullOrWhiteSpace(h.ExternalId))
-                    {
-                        xmlPath = await TrySavePubMedXmlAsync(litEntryId, entry.Id!, run.RunId, h.ExternalId);
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(xmlPath) &&
+                    if (import?.RelativeXmlPath is string xmlPath &&
                         !run.RawAttachments.Any(p => string.Equals(p, xmlPath, StringComparison.OrdinalIgnoreCase)))
                     {
                         run.RawAttachments.Add(xmlPath);
@@ -636,7 +664,9 @@ namespace LM.App.Wpf.ViewModels
                     if (ct.IsCancellationRequested)
                         break;
 
-                    if (!string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase))
+                    var isLitSearchEntry = entry.Type == EntryType.LitSearch
+                        || string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
+                    if (!isLitSearchEntry)
                         continue;
                     if (string.IsNullOrWhiteSpace(entry.Id))
                         continue;
@@ -941,6 +971,18 @@ namespace LM.App.Wpf.ViewModels
 
         private sealed record LitSearchRunContext(string HooksAbsolutePath, string HooksRelativePath, string FilePrefix);
         private sealed record LitSearchRunLibraryFile(string AbsolutePath, string RelativePath);
+        private sealed record PubMedImportResult(
+            string? RelativeXmlPath,
+            IReadOnlyList<string> Authors,
+            IReadOnlyList<string> Keywords,
+            IReadOnlyList<string> MeshHeadings,
+            string? JournalTitle);
+
+        private sealed record PubMedMetadata(
+            IReadOnlyList<string> Authors,
+            IReadOnlyList<string> Keywords,
+            IReadOnlyList<string> MeshHeadings,
+            string? JournalTitle);
 
         private LitSearchRunContext EnsureLitSearchRunContext(string entryId, string runId)
         {
@@ -983,7 +1025,7 @@ namespace LM.App.Wpf.ViewModels
             return path.Replace('\\', '/');
         }
 
-        private async Task<string?> TrySavePubMedXmlAsync(string litEntryId, string importedEntryId, string runId, string pubmedId)
+        private async Task<PubMedImportResult?> TrySavePubMedXmlAsync(string litEntryId, string importedEntryId, string runId, string pubmedId)
         {
             try
             {
@@ -991,6 +1033,7 @@ namespace LM.App.Wpf.ViewModels
                 if (string.IsNullOrWhiteSpace(xml))
                     return null;
 
+                var metadata = ExtractPubMedMetadata(XDocument.Parse(xml));
                 var libraryFile = EnsureLitSearchRunLibraryFile(litEntryId, runId);
                 var document = LoadOrCreateRunXml(libraryFile.AbsolutePath, litEntryId, runId);
 
@@ -1021,7 +1064,12 @@ namespace LM.App.Wpf.ViewModels
                 root.Add(record);
                 SaveRunXml(document, libraryFile.AbsolutePath);
 
-                return libraryFile.RelativePath;
+                return new PubMedImportResult(
+                    libraryFile.RelativePath,
+                    metadata.Authors,
+                    metadata.Keywords,
+                    metadata.MeshHeadings,
+                    metadata.JournalTitle);
             }
             catch
             {
@@ -1048,6 +1096,143 @@ namespace LM.App.Wpf.ViewModels
             var settings = new XmlWriterSettings { Indent = true, Encoding = Encoding.UTF8 };
             using var writer = XmlWriter.Create(absolutePath, settings);
             document.Save(writer);
+        }
+
+        private static string? NormalizeSource(SearchHit hit)
+        {
+            if (!string.IsNullOrWhiteSpace(hit.JournalOrSource))
+                return hit.JournalOrSource.Trim();
+            if (hit.Source == SearchDatabase.ClinicalTrialsGov)
+                return "ClinicalTrials.gov";
+            return null;
+        }
+
+        private static void AddTag(List<string> tagList, HashSet<string> tagSet, string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+            var trimmed = value.Trim();
+            if (trimmed.Length == 0)
+                return;
+            if (tagSet.Add(trimmed))
+                tagList.Add(trimmed);
+        }
+
+        private static List<string> SplitAuthors(string? raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                return new List<string>();
+
+            var parts = raw
+                .Split(new[] { ';', '|', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .Where(p => p.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (parts.Count == 0 && !string.IsNullOrWhiteSpace(raw))
+                parts.Add(raw.Trim());
+
+            return parts;
+        }
+
+        private static PubMedMetadata ExtractPubMedMetadata(XDocument document)
+        {
+            var authors = new List<string>();
+            var authorSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var keywords = new List<string>();
+            var keywordSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var mesh = new List<string>();
+            var meshSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            string? journalTitle = null;
+
+            var article = document.Descendants().FirstOrDefault(e => e.Name.LocalName == "Article");
+            if (article is not null)
+            {
+                journalTitle = article
+                    .Elements().FirstOrDefault(e => e.Name.LocalName == "Journal")?
+                    .Elements().FirstOrDefault(e => e.Name.LocalName == "Title")?
+                    .Value?.Trim();
+
+                var authorList = article.Elements().FirstOrDefault(e => e.Name.LocalName == "AuthorList");
+                if (authorList is not null)
+                {
+                    foreach (var author in authorList.Elements().Where(e => e.Name.LocalName == "Author"))
+                    {
+                        var formatted = FormatPubMedAuthor(author);
+                        AddDistinct(authors, authorSet, formatted);
+                    }
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(journalTitle))
+            {
+                journalTitle = document
+                    .Descendants().FirstOrDefault(e => e.Name.LocalName == "MedlineJournalInfo")?
+                    .Elements().FirstOrDefault(e => e.Name.LocalName == "MedlineTA")?
+                    .Value?.Trim() ?? journalTitle;
+            }
+
+            var medlineCitation = document.Descendants().FirstOrDefault(e => e.Name.LocalName == "MedlineCitation");
+            if (medlineCitation is not null)
+            {
+                foreach (var keyword in medlineCitation
+                    .Elements().Where(e => e.Name.LocalName == "KeywordList")
+                    .SelectMany(list => list.Elements().Where(e => e.Name.LocalName == "Keyword")))
+                {
+                    AddDistinct(keywords, keywordSet, keyword.Value);
+                }
+            }
+
+            foreach (var heading in document
+                .Descendants().Where(e => e.Name.LocalName == "MeshHeadingList")
+                .SelectMany(list => list.Elements().Where(e => e.Name.LocalName == "MeshHeading")))
+            {
+                var descriptor = heading.Elements().FirstOrDefault(e => e.Name.LocalName == "DescriptorName")?.Value?.Trim();
+                var qualifier = heading.Elements().FirstOrDefault(e => e.Name.LocalName == "QualifierName")?.Value?.Trim();
+                var term = string.IsNullOrWhiteSpace(qualifier) ? descriptor : $"{descriptor} / {qualifier}";
+                AddDistinct(mesh, meshSet, term);
+            }
+
+            return new PubMedMetadata(authors, keywords, mesh, journalTitle);
+        }
+
+        private static string? FormatPubMedAuthor(XElement author)
+        {
+            var collective = author.Elements().FirstOrDefault(e => e.Name.LocalName == "CollectiveName")?.Value?.Trim();
+            if (!string.IsNullOrWhiteSpace(collective))
+                return collective;
+
+            var last = author.Elements().FirstOrDefault(e => e.Name.LocalName == "LastName")?.Value?.Trim();
+            var fore = author.Elements().FirstOrDefault(e => e.Name.LocalName == "ForeName")?.Value?.Trim();
+            var initials = author.Elements().FirstOrDefault(e => e.Name.LocalName == "Initials")?.Value?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(last))
+            {
+                var given = !string.IsNullOrWhiteSpace(fore) ? fore : initials;
+                return !string.IsNullOrWhiteSpace(given) ? $"{last}, {given}" : last;
+            }
+
+            var literal = author.Elements().FirstOrDefault(e => e.Name.LocalName == "Name")?.Value?.Trim();
+            if (!string.IsNullOrWhiteSpace(literal))
+                return literal;
+
+            literal = author.Value?.Trim();
+            return string.IsNullOrWhiteSpace(literal) ? null : literal;
+        }
+
+        private static void AddDistinct(List<string> target, HashSet<string> seen, string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return;
+
+            var trimmed = value.Trim();
+            if (trimmed.Length == 0)
+                return;
+
+            if (seen.Add(trimmed))
+                target.Add(trimmed);
         }
 
         private static List<string> BuildCheckedEntryIds(IEnumerable<SearchHit> hits)

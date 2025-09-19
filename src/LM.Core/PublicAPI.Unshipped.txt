@@ -155,6 +155,7 @@ LM.Core.Models.EntryFile.SizeBytes.set -> void
 LM.Core.Models.EntryFile.StoredFileName.get -> string!
 LM.Core.Models.EntryFile.StoredFileName.set -> void
 LM.Core.Models.EntryType
+LM.Core.Models.EntryType.LitSearch = 6 -> LM.Core.Models.EntryType
 LM.Core.Models.EntryType.Other = 5 -> LM.Core.Models.EntryType
 LM.Core.Models.EntryType.Presentation = 1 -> LM.Core.Models.EntryType
 LM.Core.Models.EntryType.Publication = 0 -> LM.Core.Models.EntryType
