@@ -304,12 +304,57 @@ LM.HubSpoke.Models.EntryNotesHook
 LM.HubSpoke.Models.EntryNotesHook.EntryNotesHook() -> void
 LM.HubSpoke.Models.EntryNotesHook.SchemaVersion.get -> string!
 LM.HubSpoke.Models.EntryNotesHook.SchemaVersion.init -> void
-LM.HubSpoke.Models.EntryNotesHook.Summary.get -> string?
+LM.HubSpoke.Models.EntryNotesHook.Summary.get -> LM.HubSpoke.Models.EntryNotesSummary?
 LM.HubSpoke.Models.EntryNotesHook.Summary.init -> void
+LM.HubSpoke.Models.EntryNotesHook.SummaryText.get -> string?
 LM.HubSpoke.Models.EntryNotesHook.UpdatedUtc.get -> System.DateTime
 LM.HubSpoke.Models.EntryNotesHook.UpdatedUtc.init -> void
 LM.HubSpoke.Models.EntryNotesHook.UserNotes.get -> string?
 LM.HubSpoke.Models.EntryNotesHook.UserNotes.init -> void
+LM.HubSpoke.Models.EntryNotesSummary
+LM.HubSpoke.Models.EntryNotesSummary.EntryNotesSummary() -> void
+LM.HubSpoke.Models.EntryNotesSummary.FromLitSearch(LM.HubSpoke.Models.LitSearchNoteSummary! summary, string? renderedText) -> LM.HubSpoke.Models.EntryNotesSummary!
+LM.HubSpoke.Models.EntryNotesSummary.FromRawText(string! text) -> LM.HubSpoke.Models.EntryNotesSummary!
+LM.HubSpoke.Models.EntryNotesSummary.GetRenderedText() -> string?
+LM.HubSpoke.Models.EntryNotesSummary.LitSearch.get -> LM.HubSpoke.Models.LitSearchNoteSummary?
+LM.HubSpoke.Models.EntryNotesSummary.LitSearch.init -> void
+LM.HubSpoke.Models.EntryNotesSummary.RawText.get -> string?
+LM.HubSpoke.Models.EntryNotesSummary.RawText.init -> void
+LM.HubSpoke.Models.EntryNotesSummary.Rendered.get -> string?
+LM.HubSpoke.Models.EntryNotesSummary.Rendered.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary
+LM.HubSpoke.Models.LitSearchNoteRunSummary.ExecutedBy.get -> string?
+LM.HubSpoke.Models.LitSearchNoteRunSummary.ExecutedBy.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.From.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchNoteRunSummary.From.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.LitSearchNoteRunSummary() -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.RunId.get -> string!
+LM.HubSpoke.Models.LitSearchNoteRunSummary.RunId.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.RunUtc.get -> System.DateTime
+LM.HubSpoke.Models.LitSearchNoteRunSummary.RunUtc.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.To.get -> System.DateTime?
+LM.HubSpoke.Models.LitSearchNoteRunSummary.To.init -> void
+LM.HubSpoke.Models.LitSearchNoteRunSummary.TotalHits.get -> int
+LM.HubSpoke.Models.LitSearchNoteRunSummary.TotalHits.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary
+LM.HubSpoke.Models.LitSearchNoteSummary.CreatedBy.get -> string?
+LM.HubSpoke.Models.LitSearchNoteSummary.CreatedBy.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.CreatedUtc.get -> System.DateTime
+LM.HubSpoke.Models.LitSearchNoteSummary.CreatedUtc.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.DerivedFromEntryId.get -> string?
+LM.HubSpoke.Models.LitSearchNoteSummary.DerivedFromEntryId.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.LatestRun.get -> LM.HubSpoke.Models.LitSearchNoteRunSummary?
+LM.HubSpoke.Models.LitSearchNoteSummary.LatestRun.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.LitSearchNoteSummary() -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.Provider.get -> string!
+LM.HubSpoke.Models.LitSearchNoteSummary.Provider.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.Query.get -> string!
+LM.HubSpoke.Models.LitSearchNoteSummary.Query.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.RunCount.get -> int
+LM.HubSpoke.Models.LitSearchNoteSummary.RunCount.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.Title.get -> string?
+LM.HubSpoke.Models.LitSearchNoteSummary.Title.init -> void
+LM.HubSpoke.Models.LitSearchNoteSummary.ToDisplayString() -> string
 LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.External = 0 -> LM.HubSpoke.Models.EntryOrigin
 LM.HubSpoke.Models.EntryOrigin.Internal = 1 -> LM.HubSpoke.Models.EntryOrigin
@@ -453,6 +498,8 @@ LM.HubSpoke.Models.PersonRef.Id.get -> string!
 LM.HubSpoke.Models.PersonRef.Id.init -> void
 LM.HubSpoke.Models.PersonRef.PersonRef() -> void
 LM.HubSpoke.Models.PersonRef.PersonRef(string! Id, string? DisplayName) -> void
+LM.HubSpoke.Models.PersonRef.TimestampUtc.get -> System.DateTime?
+LM.HubSpoke.Models.PersonRef.TimestampUtc.init -> void
 LM.HubSpoke.Models.PublicationHistory
 LM.HubSpoke.Models.PublicationHistory.Accepted.get -> System.DateTimeOffset?
 LM.HubSpoke.Models.PublicationHistory.Accepted.init -> void

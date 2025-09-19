@@ -427,6 +427,8 @@ namespace LM.App.Wpf.ViewModels
 
                 await RefreshPreviousRunsAsync();
                 SelectedPreviousRun = PreviousRuns.FirstOrDefault(r => r.RunId == run.RunId) ?? SelectedPreviousRun;
+
+                ClearSearchUiAfterSave();
             }
             finally { IsBusy = false; }
         }
@@ -1096,8 +1098,10 @@ namespace LM.App.Wpf.ViewModels
                     {
                         if (!string.IsNullOrWhiteSpace(notesHook.UserNotes))
                             hook.UserNotes = notesHook.UserNotes;
-                        if (!string.IsNullOrWhiteSpace(notesHook.Summary))
-                            hook.NotesSummary = notesHook.Summary;
+
+                        var summaryText = notesHook.SummaryText;
+                        if (!string.IsNullOrWhiteSpace(summaryText))
+                            hook.NotesSummary = summaryText;
 
                         entry.UserNotes = hook.UserNotes;
                         entry.Notes = hook.NotesSummary;
@@ -1125,6 +1129,17 @@ namespace LM.App.Wpf.ViewModels
 
             entry.UserNotes ??= hook.UserNotes;
             entry.Notes ??= hook.NotesSummary;
+        }
+
+        private void ClearSearchUiAfterSave()
+        {
+            Query = string.Empty;
+            From = null;
+            To = null;
+            Results.Clear();
+            _loadedEntryId = null;
+            _loadedHook = null;
+            RaiseCanExec();
         }
 
         private static LitSearchRun CloneRunWithMetadata(LitSearchRun source, string runId, bool isFavorite)
