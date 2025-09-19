@@ -6,6 +6,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -45,26 +47,81 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        public async Task ScanAsync(WatchedFolder? folder, CancellationToken ct)
+        public async Task ScanAsync(WatchedFolder? folder, CancellationToken ct, bool force = false)
         {
             if (folder is null) return;
             if (string.IsNullOrWhiteSpace(folder.Path)) return;
             if (!Directory.Exists(folder.Path)) return;
 
+            DirectorySnapshot? snapshot = null;
+            WatchedFolderState? previous = GetState(folder);
+            string? newHash = null;
+            bool hasPreviousHash = !string.IsNullOrEmpty(previous?.AggregatedHash);
+            bool hasNewHash = false;
+
             try
             {
-                var files = Directory.EnumerateFiles(folder.Path, "*.*", SearchOption.AllDirectories);
-                var staged = await _pipeline.StagePathsAsync(files, ct).ConfigureAwait(false);
-                folder.MarkScanned(DateTimeOffset.UtcNow);
-                if (staged.Count > 0)
-                {
-                    OnItemsStaged(folder, staged);
-                }
+                snapshot = await Task.Run(() => TryCreateSnapshot(folder.Path, ct), ct).ConfigureAwait(false);
+                newHash = snapshot?.AggregatedHash;
+                hasNewHash = !string.IsNullOrEmpty(newHash);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"[WatchedFolderScanner] Failed to scan '{folder.Path}': {ex}");
+                Trace.WriteLine($"[WatchedFolderScanner] Failed to hash '{folder.Path}': {ex}");
             }
+
+            var comparable = hasPreviousHash && hasNewHash;
+            var unchanged = comparable && hasPreviousHash && string.Equals(previous!.AggregatedHash, newHash, StringComparison.Ordinal);
+            var shouldStage = force || !comparable || !unchanged;
+
+            if (shouldStage)
+            {
+                IEnumerable<string> pathsToStage = snapshot is not null
+                    ? snapshot.Paths
+                    : EnumerateAllFiles(folder.Path);
+
+                try
+                {
+                    var staged = await _pipeline.StagePathsAsync(pathsToStage, ct).ConfigureAwait(false);
+                    if (staged.Count > 0)
+                    {
+                        OnItemsStaged(folder, staged);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[WatchedFolderScanner] Failed to scan '{folder.Path}': {ex}");
+                }
+
+                if (!hasNewHash)
+                {
+                    try
+                    {
+                        snapshot = await Task.Run(() => TryCreateSnapshot(folder.Path, CancellationToken.None), CancellationToken.None).ConfigureAwait(false);
+                        newHash = snapshot?.AggregatedHash;
+                        hasNewHash = !string.IsNullOrEmpty(newHash);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine($"[WatchedFolderScanner] Failed to hash '{folder.Path}' after scan: {ex}");
+                    }
+                }
+
+                comparable = hasPreviousHash && hasNewHash;
+                unchanged = comparable && hasPreviousHash && string.Equals(previous!.AggregatedHash, newHash, StringComparison.Ordinal);
+            }
+
+            var storedHash = newHash ?? previous?.AggregatedHash;
+            var state = new WatchedFolderState(folder.Path, DateTimeOffset.UtcNow, storedHash, comparable && unchanged);
+            StoreState(folder, state);
         }
 
         public void Dispose()
@@ -181,10 +238,25 @@ namespace LM.App.Wpf.ViewModels
 
             return Task.Run(async () =>
             {
+                WatchedFolderState? previous = GetState(folder);
+                string? newHash = null;
+                bool hasPreviousHash = !string.IsNullOrEmpty(previous?.AggregatedHash);
+                bool hasNewHash = false;
+
+                try
+                {
+                    var snapshot = TryCreateSnapshot(folder.Path, CancellationToken.None);
+                    newHash = snapshot?.AggregatedHash;
+                    hasNewHash = !string.IsNullOrEmpty(newHash);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[WatchedFolderScanner] Failed to hash '{folder.Path}' during watch: {ex}");
+                }
+
                 try
                 {
                     var staged = await _pipeline.StagePathsAsync(paths, CancellationToken.None).ConfigureAwait(false);
-                    folder.MarkScanned(DateTimeOffset.UtcNow);
                     if (staged.Count > 0)
                     {
                         OnItemsStaged(folder, staged);
@@ -194,7 +266,107 @@ namespace LM.App.Wpf.ViewModels
                 {
                     Trace.WriteLine($"[WatchedFolderScanner] Failed to stage changes for '{folder.Path}': {ex}");
                 }
+
+                if (!hasNewHash)
+                {
+                    try
+                    {
+                        var snapshot = TryCreateSnapshot(folder.Path, CancellationToken.None);
+                        newHash = snapshot?.AggregatedHash;
+                        hasNewHash = !string.IsNullOrEmpty(newHash);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine($"[WatchedFolderScanner] Failed to hash '{folder.Path}' after watch: {ex}");
+                    }
+                }
+
+                var comparable = hasPreviousHash && hasNewHash;
+                var unchanged = comparable && hasPreviousHash && string.Equals(previous!.AggregatedHash, newHash, StringComparison.Ordinal);
+                var storedHash = newHash ?? previous?.AggregatedHash;
+                var state = new WatchedFolderState(folder.Path, DateTimeOffset.UtcNow, storedHash, comparable && unchanged);
+                StoreState(folder, state);
             });
+        }
+
+        private WatchedFolderState? GetState(WatchedFolder folder)
+            => _config?.GetState(folder);
+
+        private void StoreState(WatchedFolder folder, WatchedFolderState state)
+        {
+            if (_config is not null)
+            {
+                _config.StoreState(folder, state);
+            }
+            else
+            {
+                folder.ApplyState(state);
+            }
+        }
+
+        private static DirectorySnapshot? TryCreateSnapshot(string folderPath, CancellationToken ct)
+        {
+            try
+            {
+                return CreateSnapshot(folderPath, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[WatchedFolderScanner] Failed to compute directory fingerprint for '{folderPath}': {ex}");
+                return null;
+            }
+        }
+
+        private static DirectorySnapshot CreateSnapshot(string folderPath, CancellationToken ct)
+        {
+            var fullRoot = Path.GetFullPath(folderPath);
+            var entries = new List<FileFingerprint>();
+
+            foreach (var file in Directory.EnumerateFiles(fullRoot, "*", SearchOption.AllDirectories))
+            {
+                ct.ThrowIfCancellationRequested();
+                try
+                {
+                    var info = new FileInfo(file);
+                    var relative = Path.GetRelativePath(fullRoot, info.FullName).Replace(Path.DirectorySeparatorChar, '/');
+                    entries.Add(new FileFingerprint(info.FullName, relative, info.LastWriteTimeUtc.Ticks));
+                }
+                catch (Exception)
+                {
+                    // Skip files we cannot access.
+                }
+            }
+
+            entries.Sort(static (a, b) => string.Compare(a.RelativePath, b.RelativePath, StringComparison.OrdinalIgnoreCase));
+
+            using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            foreach (var entry in entries)
+            {
+                ct.ThrowIfCancellationRequested();
+                var line = entry.RelativePath + "|" + entry.LastWriteTicks.ToString();
+                var bytes = Encoding.UTF8.GetBytes(line);
+                hash.AppendData(bytes);
+            }
+
+            var aggregatedHash = Convert.ToHexString(hash.GetHashAndReset());
+            var paths = entries.Select(static e => e.FullPath).ToArray();
+            return new DirectorySnapshot(aggregatedHash, paths);
+        }
+
+        private static string[] EnumerateAllFiles(string folderPath)
+        {
+            try
+            {
+                return Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories).ToArray();
+            }
+            catch (Exception)
+            {
+                return Array.Empty<string>();
+            }
         }
 
         private void OnItemsStaged(WatchedFolder folder, IReadOnlyList<StagingItem> items)
@@ -289,6 +461,10 @@ namespace LM.App.Wpf.ViewModels
                 _ = _flush(_folder, paths);
             }
         }
+
+        private sealed record FileFingerprint(string FullPath, string RelativePath, long LastWriteTicks);
+
+        private sealed record DirectorySnapshot(string AggregatedHash, string[] Paths);
     }
 
     public sealed class WatchedFolderScanEventArgs : EventArgs

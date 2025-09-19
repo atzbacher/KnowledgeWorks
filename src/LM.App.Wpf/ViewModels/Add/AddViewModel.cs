@@ -396,7 +396,7 @@ namespace LM.App.Wpf.ViewModels
             if (folder is null)
                 return;
 
-            await _scanner.ScanAsync(folder, CancellationToken.None).ConfigureAwait(false);
+            await _scanner.ScanAsync(folder, CancellationToken.None, force: true).ConfigureAwait(false);
         }
 
         private void RemoveWatchedFolder(WatchedFolder? folder)
@@ -416,13 +416,19 @@ namespace LM.App.Wpf.ViewModels
             if (e.NewItems is not null)
             {
                 foreach (WatchedFolder folder in e.NewItems)
+                {
                     folder.PropertyChanged += OnWatchedFolderPropertyChanged;
+                    _watchedConfig.ApplyState(folder);
+                }
             }
 
             if (e.OldItems is not null)
             {
                 foreach (WatchedFolder folder in e.OldItems)
+                {
                     folder.PropertyChanged -= OnWatchedFolderPropertyChanged;
+                    _watchedConfig.ClearState(folder);
+                }
             }
 
             ScheduleWatchedFolderSave();
@@ -430,8 +436,20 @@ namespace LM.App.Wpf.ViewModels
 
         private void OnWatchedFolderPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(WatchedFolder.IsEnabled) ||
-                e.PropertyName == nameof(WatchedFolder.Path))
+            if (sender is not WatchedFolder folder)
+                return;
+
+            if (e.PropertyName == nameof(WatchedFolder.Path))
+            {
+                _watchedConfig.ClearState(folder);
+                ScheduleWatchedFolderSave();
+            }
+            else if (e.PropertyName == nameof(WatchedFolder.IsEnabled))
+            {
+                ScheduleWatchedFolderSave();
+            }
+            else if (e.PropertyName == nameof(WatchedFolder.LastScanUtc) ||
+                     e.PropertyName == nameof(WatchedFolder.LastScanWasUnchanged))
             {
                 ScheduleWatchedFolderSave();
             }
