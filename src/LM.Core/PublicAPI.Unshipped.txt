@@ -12,6 +12,8 @@ LM.Core.Abstractions.IEntryStore.GetByIdAsync(string! id, System.Threading.Cance
 LM.Core.Abstractions.IEntryStore.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! filter, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Core.Abstractions.IFullTextSearchService
+LM.Core.Abstractions.IFullTextSearchService.SearchAsync(LM.Core.Models.Search.FullTextSearchQuery! query, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>!>!
 LM.Core.Abstractions.IFileStorageRepository
 LM.Core.Abstractions.IFileStorageRepository.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IHasher
@@ -283,6 +285,33 @@ LM.Core.Models.Relation.Type.set -> void
 LM.Core.Models.SearchDatabase
 LM.Core.Models.SearchDatabase.ClinicalTrialsGov = 1 -> LM.Core.Models.SearchDatabase
 LM.Core.Models.SearchDatabase.PubMed = 0 -> LM.Core.Models.SearchDatabase
+LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchField.Abstract = 2 -> LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchField.Content = 4 -> LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchField.None = 0 -> LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchField.Title = 1 -> LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchHit
+LM.Core.Models.Search.FullTextSearchHit.Deconstruct(out string! EntryId, out double Score, out string? Highlight) -> void
+LM.Core.Models.Search.FullTextSearchHit.EntryId.get -> string!
+LM.Core.Models.Search.FullTextSearchHit.FullTextSearchHit(string! EntryId, double Score, string? Highlight) -> void
+LM.Core.Models.Search.FullTextSearchHit.Highlight.get -> string?
+LM.Core.Models.Search.FullTextSearchHit.Score.get -> double
+LM.Core.Models.Search.FullTextSearchQuery
+LM.Core.Models.Search.FullTextSearchQuery.Fields.get -> LM.Core.Models.Search.FullTextSearchField
+LM.Core.Models.Search.FullTextSearchQuery.Fields.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.FullTextSearchQuery() -> void
+LM.Core.Models.Search.FullTextSearchQuery.IsInternal.get -> bool?
+LM.Core.Models.Search.FullTextSearchQuery.IsInternal.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.Limit.get -> int
+LM.Core.Models.Search.FullTextSearchQuery.Limit.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.Text.get -> string?
+LM.Core.Models.Search.FullTextSearchQuery.Text.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.TypesAny.get -> LM.Core.Models.Filters.EntryType[]?
+LM.Core.Models.Search.FullTextSearchQuery.TypesAny.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.YearFrom.get -> int?
+LM.Core.Models.Search.FullTextSearchQuery.YearFrom.set -> void
+LM.Core.Models.Search.FullTextSearchQuery.YearTo.get -> int?
+LM.Core.Models.Search.FullTextSearchQuery.YearTo.set -> void
 LM.Core.Models.SearchHit
 LM.Core.Models.SearchHit.AlreadyInDb.get -> bool
 LM.Core.Models.SearchHit.AlreadyInDb.set -> void

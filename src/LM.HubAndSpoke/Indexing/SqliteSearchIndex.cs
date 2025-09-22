@@ -2,6 +2,7 @@
 using LM.Core.Abstractions;            // IWorkSpaceService
 using LM.Core.Models;
 using LM.Core.Models.Filters;         // EntryFilter
+using LM.Core.Models.Search;
 using Microsoft.Data.Sqlite;          // SqliteConnection, SqliteTransaction
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,19 @@ using System.Threading.Tasks;
 
 namespace LM.HubSpoke.Indexing
 {
-    internal sealed class SqliteSearchIndex
+    internal sealed class SqliteSearchIndex : IFullTextSearchService
     {
         private readonly IWorkSpaceService _ws;
         private readonly string _dbPath;
+
+        private static readonly (FullTextSearchField Flag, string Column)[] FieldColumnMap = new[]
+        {
+            (FullTextSearchField.Title, "title"),
+            (FullTextSearchField.Abstract, "abstract"),
+            (FullTextSearchField.Content, "content")
+        };
+
+        private static readonly string[] DefaultMatchColumns = FieldColumnMap.Select(f => f.Column).ToArray();
 
         internal readonly record struct IndexRecord(
             string EntryId,
@@ -336,6 +346,80 @@ LIMIT 500;";
             return hits;
         }
 
+        public async Task<IReadOnlyList<FullTextSearchHit>> SearchAsync(FullTextSearchQuery query, CancellationToken ct = default)
+        {
+            if (query is null)
+                throw new ArgumentNullException(nameof(query));
+
+            var tokens = TokenizeForFts(query.Text ?? string.Empty);
+            if (tokens.Count == 0)
+                return Array.Empty<FullTextSearchHit>();
+
+            var columns = ResolveColumns(query.Fields);
+            var matchExpr = BuildMatchExpression(tokens, columns);
+
+            await using var c = new SqliteConnection($"Data Source={_dbPath};Mode=ReadOnly;");
+            await c.OpenAsync(ct);
+
+            var types = (query.TypesAny as EntryType[])
+                        ?? query.TypesAny?.ToArray()
+                        ?? Array.Empty<EntryType>();
+
+            var whereTypes = BuildTypesWhereClause(types);
+
+            var sql = @"
+SELECT e.entry_id,
+       bm25(entry_text) AS raw_score,
+       snippet(entry_text, 'title', '[', ']', '…', 12) AS snip_title,
+       snippet(entry_text, 'abstract', '[', ']', '…', 12) AS snip_abstract,
+       snippet(entry_text, 'content', '[', ']', '…', 20) AS snip_content
+FROM entry_text
+JOIN entries e ON e.entry_id = entry_text.entry_id
+WHERE entry_text MATCH $match
+  AND ( $yf IS NULL OR e.year >= $yf )
+  AND ( $yt IS NULL OR e.year <= $yt )
+  AND ( $int IS NULL OR e.is_internal = $int )" + whereTypes + @"
+ORDER BY raw_score ASC
+LIMIT $limit;";
+
+            await using var cmd = c.CreateCommand();
+            cmd.CommandText = sql;
+            cmd.Parameters.AddWithValue("$match", matchExpr);
+            cmd.Parameters.AddWithValue("$yf", (object?)query.YearFrom ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$yt", (object?)query.YearTo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$int", query.IsInternal.HasValue ? (query.IsInternal.Value ? 1 : 0) : (object)DBNull.Value);
+
+            var limit = query.Limit <= 0 ? 100 : Math.Clamp(query.Limit, 1, 500);
+            cmd.Parameters.AddWithValue("$limit", limit);
+
+            if (types.Length > 0)
+            {
+                for (int i = 0; i < types.Length; i++)
+                    cmd.Parameters.AddWithValue($"$tp{i}", types[i].ToString());
+            }
+
+            var hits = new List<FullTextSearchHit>();
+
+            try
+            {
+                await using var reader = await cmd.ExecuteReaderAsync(ct);
+                while (await reader.ReadAsync(ct))
+                {
+                    var entryId = reader.GetString(0);
+                    var rawScore = reader.IsDBNull(1) ? 0d : reader.GetDouble(1);
+                    var highlight = PickHighlight(reader, columns);
+                    hits.Add(new FullTextSearchHit(entryId, NormalizeScore(rawScore), highlight));
+                }
+            }
+            catch (SqliteException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[SqliteSearchIndex] Full-text search failed: {ex.Message}; expr='{matchExpr}'");
+                return Array.Empty<FullTextSearchHit>();
+            }
+
+            return hits;
+        }
+
 
         public async Task<IReadOnlyList<string>> FindByHashAsync(string sha256, CancellationToken ct = default)
         {
@@ -440,6 +524,81 @@ LIMIT 500;";
             while (await r.ReadAsync(ct))
                 list.Add(r.GetString(0));
             return list;
+        }
+
+        private static IReadOnlyList<string> ResolveColumns(FullTextSearchField fields)
+        {
+            if (fields == FullTextSearchField.None)
+                return DefaultMatchColumns;
+
+            var columns = new List<string>(FieldColumnMap.Length);
+            foreach (var (flag, column) in FieldColumnMap)
+            {
+                if (fields.HasFlag(flag))
+                    columns.Add(column);
+            }
+
+            return columns.Count == 0 ? DefaultMatchColumns : columns;
+        }
+
+        private static string BuildMatchExpression(IReadOnlyList<string> tokens, IReadOnlyList<string> columns)
+        {
+            if (tokens.Count == 0 || columns.Count == 0)
+                return string.Empty;
+
+            var clauses = new List<string>(tokens.Count);
+            foreach (var token in tokens)
+            {
+                var perColumn = columns.Select(column => $"{column}:{token}*");
+                clauses.Add($"({string.Join(" OR ", perColumn)})");
+            }
+
+            return string.Join(" AND ", clauses);
+        }
+
+        private static string BuildTypesWhereClause(IReadOnlyList<EntryType> types)
+        {
+            if (types.Count == 0)
+                return string.Empty;
+
+            var placeholders = string.Join(",", Enumerable.Range(0, types.Count).Select(i => $"$tp{i}"));
+            return $"\n  AND e.type IN ({placeholders})";
+        }
+
+        private static string? PickHighlight(SqliteDataReader reader, IReadOnlyList<string> preferredColumns)
+        {
+            static string? Value(SqliteDataReader r, int index)
+                => r.IsDBNull(index) ? null : r.GetString(index);
+
+            var map = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["title"] = Value(reader, 2),
+                ["abstract"] = Value(reader, 3),
+                ["content"] = Value(reader, 4)
+            };
+
+            foreach (var column in preferredColumns)
+            {
+                if (map.TryGetValue(column, out var snippet) && !string.IsNullOrWhiteSpace(snippet))
+                    return snippet;
+            }
+
+            foreach (var snippet in map.Values)
+            {
+                if (!string.IsNullOrWhiteSpace(snippet))
+                    return snippet;
+            }
+
+            return null;
+        }
+
+        private static double NormalizeScore(double rawScore)
+        {
+            if (double.IsNaN(rawScore) || double.IsInfinity(rawScore))
+                return 0d;
+
+            var clamped = Math.Max(0d, rawScore);
+            return 1d / (1d + clamped);
         }
 
         private static string? BuildMatchExpression(EntryFilter f)

@@ -8,6 +8,7 @@
              d:DesignHeight="600" d:DesignWidth="900">
   <UserControl.Resources>
     <common:StringJoinConverter x:Key="StringJoinConverter" />
+    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
   </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
@@ -19,6 +20,20 @@
     <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
       <StackPanel Margin="12">
         <TextBlock Text="Library Filters" FontWeight="Bold" Margin="0,0,0,8"/>
+        <CheckBox Content="Use full-text search"
+                  IsChecked="{Binding UseFullTextSearch}"
+                  Margin="0,0,0,8"/>
+        <StackPanel Margin="0,0,0,12"
+                    Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
+          <TextBlock Text="Full-text query"/>
+          <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"/>
+          <TextBlock Text="Search within" Margin="0,6,0,0"/>
+          <UniformGrid Columns="3" Margin="0,4,0,0">
+            <CheckBox Content="Title" IsChecked="{Binding FullTextInTitle}"/>
+            <CheckBox Content="Abstract" IsChecked="{Binding FullTextInAbstract}"/>
+            <CheckBox Content="Content" IsChecked="{Binding FullTextInContent}"/>
+          </UniformGrid>
+        </StackPanel>
         <TextBlock Text="Title contains"/>
         <TextBox Text="{Binding TitleContains, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -104,7 +119,13 @@
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-      <TextBlock Text="Results" FontWeight="Bold" Margin="12"/>
+      <StackPanel Orientation="Horizontal" Margin="12">
+        <TextBlock Text="Results" FontWeight="Bold"/>
+        <TextBlock Text="(Full-text ranking)"
+                   Margin="8,0,0,0"
+                   Foreground="DimGray"
+                   Visibility="{Binding ResultsAreFullText, Converter={StaticResource BoolToVisibilityConverter}}"/>
+      </StackPanel>
 
       <DataGrid Grid.Row="1"
                 ItemsSource="{Binding Results}"
@@ -112,27 +133,35 @@
                 Margin="12"
                 IsReadOnly="True">
         <DataGrid.Columns>
-          <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="3*"/>
-          <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="2*"/>
-          <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="1*"/>
-          <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="0.8*"/>
-          <DataGridTextColumn Header="Added on" Binding="{Binding AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="1.2*"/>
-          <DataGridTextColumn Header="Added by" Binding="{Binding AddedBy}" Width="1.2*"/>
-          <DataGridTextColumn Header="Internal ID" Binding="{Binding InternalId}" Width="1.5*"/>
-          <DataGridTextColumn Header="DOI" Binding="{Binding Doi}" Width="2*"/>
-          <DataGridTextColumn Header="PMID" Binding="{Binding Pmid}" Width="1.5*"/>
-          <DataGridTextColumn Header="NCT" Binding="{Binding Nct}" Width="1.5*"/>
+          <DataGridTextColumn Header="Title" Binding="{Binding Entry.Title}" Width="3*"/>
+          <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="0.8*"/>
+          <DataGridTextColumn Header="Source" Binding="{Binding Entry.Source}" Width="2*"/>
+          <DataGridTextColumn Header="Type" Binding="{Binding Entry.Type}" Width="1*"/>
+          <DataGridTextColumn Header="Year" Binding="{Binding Entry.Year}" Width="0.8*"/>
+          <DataGridTextColumn Header="Added on" Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="1.2*"/>
+          <DataGridTextColumn Header="Added by" Binding="{Binding Entry.AddedBy}" Width="1.2*"/>
+          <DataGridTextColumn Header="Internal ID" Binding="{Binding Entry.InternalId}" Width="1.5*"/>
+          <DataGridTextColumn Header="DOI" Binding="{Binding Entry.Doi}" Width="2*"/>
+          <DataGridTextColumn Header="PMID" Binding="{Binding Entry.Pmid}" Width="1.5*"/>
+          <DataGridTextColumn Header="NCT" Binding="{Binding Entry.Nct}" Width="1.5*"/>
           <DataGridTextColumn Header="Authors" Width="2*">
             <DataGridTextColumn.Binding>
-              <Binding Path="Authors" Converter="{StaticResource StringJoinConverter}" />
+              <Binding Path="Entry.Authors" Converter="{StaticResource StringJoinConverter}" />
             </DataGridTextColumn.Binding>
           </DataGridTextColumn>
           <DataGridTextColumn Header="Tags" Width="2*">
             <DataGridTextColumn.Binding>
-              <Binding Path="Tags" Converter="{StaticResource StringJoinConverter}" />
+              <Binding Path="Entry.Tags" Converter="{StaticResource StringJoinConverter}" />
             </DataGridTextColumn.Binding>
           </DataGridTextColumn>
-          <DataGridTextColumn Header="Internal" Binding="{Binding IsInternal}" Width="0.8*"/>
+          <DataGridTextColumn Header="Internal" Binding="{Binding Entry.IsInternal}" Width="0.8*"/>
+          <DataGridTemplateColumn Header="Snippet" Width="3*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding HighlightDisplay}" TextWrapping="Wrap" FontStyle="Italic" Foreground="DimGray"/>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
         </DataGrid.Columns>
       </DataGrid>
 

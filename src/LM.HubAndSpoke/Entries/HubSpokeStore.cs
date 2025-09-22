@@ -32,6 +32,8 @@ namespace LM.HubSpoke.Entries
         private volatile bool _idIndexBuilt = false;
         private readonly SemaphoreSlim _idIndexLock = new(1, 1);
 
+        public IFullTextSearchService FullTextSearch => _index;
+
         // BACK-COMPAT CTOR (old signature) — callers can keep using this.
         // It forwards to the internal ctor with minimal fallback normalizers.
         public HubSpokeStore(
