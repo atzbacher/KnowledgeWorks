@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using LM.Core.Models;
 using LM.Infrastructure.Extraction;
 using LM.Infrastructure.FileSystem;
+using Microsoft.Data.Sqlite;
+
 using Xunit;
 
 namespace LM.Infrastructure.Tests
@@ -108,6 +110,87 @@ namespace LM.Infrastructure.Tests
             var recentDescriptors = await _repository.GetRecentAsync(5);
             Assert.Contains(recentDescriptors, d => d.RegionHash == descriptor.RegionHash);
         }
+
+
+        [Fact]
+        public async Task UpsertAsync_UpgradesLegacySchema()
+        {
+            var dbPath = _workspace.GetLocalDbPath();
+            Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
+            await using (var connection = new SqliteConnection($"Data Source={dbPath};Mode=ReadWriteCreate;Cache=Shared;"))
+            {
+                await connection.OpenAsync();
+
+                await using (var legacyDescriptor = connection.CreateCommand())
+                {
+                    legacyDescriptor.CommandText = @"
+CREATE TABLE IF NOT EXISTS region_descriptor (
+    region_hash TEXT PRIMARY KEY,
+    entry_hub_id TEXT NOT NULL,
+    source_rel_path TEXT NOT NULL,
+    bounds TEXT,
+    created_utc TEXT NOT NULL,
+    last_export_status TEXT NOT NULL
+);";
+                    await legacyDescriptor.ExecuteNonQueryAsync();
+                }
+
+                await using (var legacySessions = connection.CreateCommand())
+                {
+                    legacySessions.CommandText = @"
+CREATE TABLE IF NOT EXISTS region_recent_session (
+    session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    region_hash TEXT NOT NULL,
+    completed_utc TEXT NOT NULL
+);";
+                    await legacySessions.ExecuteNonQueryAsync();
+                }
+
+                await using (var legacyFts = connection.CreateCommand())
+                {
+                    legacyFts.CommandText = @"
+CREATE VIRTUAL TABLE region_descriptor_fts USING fts5(
+    region_hash UNINDEXED,
+    entry_hub_id UNINDEXED,
+    source_rel_path UNINDEXED,
+    ocr_text,
+    notes
+);";
+                    await legacyFts.ExecuteNonQueryAsync();
+                }
+            }
+
+            var descriptor = CreateDescriptor();
+            descriptor.OcrText = "legacy upgrade text";
+            descriptor.Annotation = "legacy";
+            descriptor.Tags.Clear();
+            descriptor.Tags.Add("LegacyTag");
+
+            await _repository.UpsertAsync(descriptor);
+
+            var fetched = await _repository.GetAsync(descriptor.RegionHash);
+            Assert.Equal("legacy", fetched!.Annotation);
+
+            var hits = await _repository.SearchAsync("legacy", 5);
+            Assert.Contains(hits, h => h.RegionHash == descriptor.RegionHash);
+
+            var result = new RegionExportResult
+            {
+                Descriptor = descriptor,
+                ExporterId = descriptor.ExporterId ?? "legacy",
+                CompletedUtc = DateTime.UtcNow,
+                Duration = TimeSpan.FromMilliseconds(25),
+                AdditionalOutputs = { ["color"] = "blue" }
+            };
+
+            await _repository.SaveSessionAsync(result);
+
+            var sessions = await _repository.GetRecentSessionsAsync(5);
+            Assert.Single(sessions);
+            Assert.Equal("blue", sessions[0].AdditionalOutputs["color"]);
+        }
+
 
         private RegionDescriptor CreateDescriptor()
         {
