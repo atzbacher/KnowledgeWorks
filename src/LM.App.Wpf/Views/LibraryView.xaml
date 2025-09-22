@@ -3,17 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:common="clr-namespace:LM.App.Wpf.Common"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
   <UserControl.Resources>
-    <common:StringJoinConverter x:Key="StringJoinConverter" />
-    <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
   </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="310"/>
       <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="5"/>
+      <ColumnDefinition Width="360"/>
     </Grid.ColumnDefinitions>
 
     <!-- Filters Panel -->
@@ -169,5 +173,53 @@
         <Button Content="Open" Command="{Binding OpenCommand}"/>
       </StackPanel>
     </Grid>
+
+    <GridSplitter Grid.Column="2"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="#FFE0E0E0"
+                  ShowsPreview="True"
+                  Width="5"/>
+
+    <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
+          <ContentPresenter x:Name="EntryDetailPresenter"
+                            Content="{Binding Selected}"
+                            ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
+                            Margin="12">
+            <ContentPresenter.Style>
+              <Style TargetType="ContentPresenter">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                  <Trigger Property="Content" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                  </Trigger>
+                </Style.Triggers>
+              </Style>
+            </ContentPresenter.Style>
+          </ContentPresenter>
+
+          <TextBlock Text="Select an entry to view details."
+                     Margin="12"
+                     FontStyle="Italic"
+                     Foreground="Gray"
+                     TextWrapping="Wrap"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Content, ElementName=EntryDetailPresenter}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </Grid>
+      </ScrollViewer>
+    </Border>
   </Grid>
 </UserControl>
