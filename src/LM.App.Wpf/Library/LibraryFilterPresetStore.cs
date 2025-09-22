@@ -133,6 +133,11 @@ namespace LM.App.Wpf.Library
 
     public sealed class LibraryFilterState
     {
+        public bool UseFullTextSearch { get; set; }
+        public string? FullTextQuery { get; set; }
+        public bool FullTextInTitle { get; set; } = true;
+        public bool FullTextInAbstract { get; set; } = true;
+        public bool FullTextInContent { get; set; } = true;
         public string? TitleContains { get; set; }
         public string? AuthorContains { get; set; }
         public string? TagsCsv { get; set; }

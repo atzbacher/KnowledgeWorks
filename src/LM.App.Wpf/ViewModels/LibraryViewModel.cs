@@ -10,6 +10,7 @@ using LM.App.Wpf.Library;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
+using LM.Core.Models.Search;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -19,8 +20,9 @@ namespace LM.App.Wpf.ViewModels
     public sealed class LibraryViewModel : ViewModelBase
     {
         private readonly IEntryStore _store;
+        private readonly IFullTextSearchService _fullTextSearch;
         private readonly IWorkSpaceService _ws;
-        private Entry? _selected;
+        private LibrarySearchResult? _selected;
         private string? _sourceContains;
         private string? _internalIdContains;
         private string? _doiContains;
@@ -31,17 +33,24 @@ namespace LM.App.Wpf.ViewModels
         private DateTime? _addedOnTo;
         private readonly LibraryFilterPresetStore _presetStore;
         private readonly ILibraryPresetPrompt _presetPrompt;
+        private bool _useFullTextSearch;
+        private string? _fullTextQuery;
+        private bool _fullTextInTitle = true;
+        private bool _fullTextInAbstract = true;
+        private bool _fullTextInContent = true;
+        private bool _resultsAreFullText;
 
-        public LibraryViewModel(IEntryStore store, IWorkSpaceService ws, LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
+        public LibraryViewModel(IEntryStore store, IFullTextSearchService fullTextSearch, IWorkSpaceService ws, LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
         {
             _store = store;
+            _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
             _ws = ws;
             _presetStore = presetStore ?? throw new ArgumentNullException(nameof(presetStore));
             _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
 
             SearchCommand = new AsyncRelayCommand(SearchAsync);
             ClearCommand  = new RelayCommand(_ => ClearFilters());
-            OpenCommand   = new RelayCommand(_ => OpenSelected(), _ => Selected is not null);
+            OpenCommand   = new RelayCommand(_ => OpenSelected(), _ => Selected?.Entry is not null);
             SavePresetCommand = new AsyncRelayCommand(SavePresetAsync);
             LoadPresetCommand = new AsyncRelayCommand(LoadPresetAsync);
             ManagePresetsCommand = new AsyncRelayCommand(ManagePresetsAsync);
@@ -160,12 +169,103 @@ namespace LM.App.Wpf.ViewModels
         public bool TypeReport { get; set; } = true;
         public bool TypeOther { get; set; } = true;
 
-        public ObservableCollection<Entry> Results { get; } = new();
+        public bool UseFullTextSearch
+        {
+            get => _useFullTextSearch;
+            set
+            {
+                if (_useFullTextSearch != value)
+                {
+                    _useFullTextSearch = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsMetadataSearch));
+                    if (!value)
+                        ResultsAreFullText = false;
+                }
+            }
+        }
 
-        public Entry? Selected
+        public bool IsMetadataSearch => !UseFullTextSearch;
+
+        public string? FullTextQuery
+        {
+            get => _fullTextQuery;
+            set
+            {
+                if (_fullTextQuery != value)
+                {
+                    _fullTextQuery = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool FullTextInTitle
+        {
+            get => _fullTextInTitle;
+            set
+            {
+                if (_fullTextInTitle != value)
+                {
+                    _fullTextInTitle = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool FullTextInAbstract
+        {
+            get => _fullTextInAbstract;
+            set
+            {
+                if (_fullTextInAbstract != value)
+                {
+                    _fullTextInAbstract = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool FullTextInContent
+        {
+            get => _fullTextInContent;
+            set
+            {
+                if (_fullTextInContent != value)
+                {
+                    _fullTextInContent = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool ResultsAreFullText
+        {
+            get => _resultsAreFullText;
+            private set
+            {
+                if (_resultsAreFullText != value)
+                {
+                    _resultsAreFullText = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public ObservableCollection<LibrarySearchResult> Results { get; } = new();
+
+        public LibrarySearchResult? Selected
         {
             get => _selected;
-            set { _selected = value; OnPropertyChanged(); (OpenCommand as RelayCommand)?.RaiseCanExecuteChanged(); }
+            set
+            {
+                if (!ReferenceEquals(_selected, value))
+                {
+                    _selected = value;
+                    OnPropertyChanged();
+                    (OpenCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                }
+            }
         }
 
         // Commands
@@ -193,75 +293,10 @@ namespace LM.App.Wpf.ViewModels
             try
             {
                 Results.Clear();
-
-                static string? TrimOrNull(string? value)
-                    => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
-
-                static DateTime? ToUtcStartOfDay(DateTime? localDate)
-                {
-                    if (!localDate.HasValue) return null;
-                    var local = DateTime.SpecifyKind(localDate.Value.Date, DateTimeKind.Local);
-                    return local.ToUniversalTime();
-                }
-
-                static DateTime? ToUtcEndOfDay(DateTime? localDate)
-                {
-                    if (!localDate.HasValue) return null;
-                    var local = DateTime.SpecifyKind(localDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Local);
-                    return local.ToUniversalTime();
-                }
-
-                var filter = new EntryFilter
-
-                {
-                    TitleContains = TrimOrNull(TitleContains),
-                    AuthorContains = TrimOrNull(AuthorContains),
-                    TagsAny = string.IsNullOrWhiteSpace(TagsCsv)
-                        ? new List<string>()
-                        : TagsCsv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList(),
-                    TypesAny = TypePublication || TypePresentation || TypeReport || TypeWhitePaper || TypeSlideDeck || TypeOther
-                        ? BuildTypeFilter()
-                        : null,   // only filter if user selected something
-                    YearFrom = YearFrom,
-                    YearTo = YearTo,
-                    IsInternal = IsInternal.HasValue ? IsInternal : null, // only filter if user touched it
-                    SourceContains = TrimOrNull(SourceContains),
-                    InternalIdContains = TrimOrNull(InternalIdContains),
-                    DoiContains = TrimOrNull(DoiContains),
-                    PmidContains = TrimOrNull(PmidContains),
-                    NctContains = TrimOrNull(NctContains),
-                    AddedByContains = TrimOrNull(AddedByContains),
-                    AddedOnFromUtc = ToUtcStartOfDay(AddedOnFrom),
-                    AddedOnToUtc = ToUtcEndOfDay(AddedOnTo)
-                };
-
-                Debug.WriteLine(
-    $"Filter: Title='{filter.TitleContains}', Author='{filter.AuthorContains}', " +
-    $"Tags=[{string.Join(",", filter.TagsAny ?? new List<string>())}], " +
-    $"Types=[{string.Join(",", filter.TypesAny ?? Array.Empty<EntryType>())}], " +
-    $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInternal}"
-);
-                var rows = await _store.SearchAsync(filter);
-
-                // DEBUG: how many did we get?
-                Debug.WriteLine($"[LibraryViewModel] SearchAsync → {rows.Count} rows");
-
-                foreach (var r in rows)
-                {
-                    // Defensive: ensure Title/DisplayName are never null
-                    r.Title ??= "(untitled)";
-                    r.DisplayName ??= r.Title;
-
-                    // Optional: join collections for display if XAML is binding directly
-                    if (r.Authors != null && r.Authors.Count > 0)
-                        r.DisplayName += $" — {string.Join(", ", r.Authors)}";
-
-                    Results.Add(r);
-                }
-
-                // DEBUG: reflect back into UI even if 0
-                if (rows.Count == 0)
-                    Debug.WriteLine("[LibraryViewModel] No entries matched filter");
+                if (UseFullTextSearch)
+                    await RunFullTextSearchAsync();
+                else
+                    await RunMetadataSearchAsync();
             }
             catch (Exception ex)
             {
@@ -270,11 +305,144 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
+        private EntryType[]? GetSelectedTypesOrNull()
+            => TypePublication || TypePresentation || TypeReport || TypeWhitePaper || TypeSlideDeck || TypeOther
+                ? BuildTypeFilter()
+                : null;
+
+        private async Task RunMetadataSearchAsync()
+        {
+            static string? TrimOrNull(string? value)
+                => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+            static DateTime? ToUtcStartOfDay(DateTime? localDate)
+            {
+                if (!localDate.HasValue) return null;
+                var local = DateTime.SpecifyKind(localDate.Value.Date, DateTimeKind.Local);
+                return local.ToUniversalTime();
+            }
+
+            static DateTime? ToUtcEndOfDay(DateTime? localDate)
+            {
+                if (!localDate.HasValue) return null;
+                var local = DateTime.SpecifyKind(localDate.Value.Date.AddDays(1).AddTicks(-1), DateTimeKind.Local);
+                return local.ToUniversalTime();
+            }
+
+            var filter = new EntryFilter
+
+            {
+                TitleContains = TrimOrNull(TitleContains),
+                AuthorContains = TrimOrNull(AuthorContains),
+                TagsAny = string.IsNullOrWhiteSpace(TagsCsv)
+                    ? new List<string>()
+                    : TagsCsv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList(),
+                TypesAny = GetSelectedTypesOrNull(),
+                YearFrom = YearFrom,
+                YearTo = YearTo,
+                IsInternal = IsInternal.HasValue ? IsInternal : null,
+                SourceContains = TrimOrNull(SourceContains),
+                InternalIdContains = TrimOrNull(InternalIdContains),
+                DoiContains = TrimOrNull(DoiContains),
+                PmidContains = TrimOrNull(PmidContains),
+                NctContains = TrimOrNull(NctContains),
+                AddedByContains = TrimOrNull(AddedByContains),
+                AddedOnFromUtc = ToUtcStartOfDay(AddedOnFrom),
+                AddedOnToUtc = ToUtcEndOfDay(AddedOnTo)
+            };
+
+            Debug.WriteLine(
+$"Filter: Title='{filter.TitleContains}', Author='{filter.AuthorContains}', " +
+$"Tags=[{string.Join(",", filter.TagsAny ?? new List<string>())}], " +
+$"Types=[{string.Join(",", filter.TypesAny ?? Array.Empty<EntryType>())}], " +
+$"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInternal}");
+
+            var rows = await _store.SearchAsync(filter);
+            ResultsAreFullText = false;
+
+            Debug.WriteLine($"[LibraryViewModel] Metadata search → {rows.Count} rows");
+
+            foreach (var entry in rows)
+            {
+                PrepareEntry(entry);
+                Results.Add(new LibrarySearchResult(entry, null, null));
+            }
+
+            if (rows.Count == 0)
+                Debug.WriteLine("[LibraryViewModel] No entries matched metadata filter");
+        }
+
+        private async Task RunFullTextSearchAsync()
+        {
+            var trimmed = string.IsNullOrWhiteSpace(FullTextQuery) ? null : FullTextQuery!.Trim();
+            if (string.IsNullOrEmpty(trimmed))
+            {
+                ResultsAreFullText = false;
+                return;
+            }
+
+            var query = new FullTextSearchQuery
+            {
+                Text = trimmed,
+                Fields = BuildFullTextFieldMask(),
+                YearFrom = YearFrom,
+                YearTo = YearTo,
+                IsInternal = IsInternal,
+                TypesAny = GetSelectedTypesOrNull()
+            };
+
+            var hits = await _fullTextSearch.SearchAsync(query);
+            ResultsAreFullText = true;
+
+            Debug.WriteLine($"[LibraryViewModel] Full-text search → {hits.Count} hits");
+
+            foreach (var hit in hits)
+            {
+                var entry = await _store.GetByIdAsync(hit.EntryId);
+                if (entry is null)
+                    continue;
+
+                PrepareEntry(entry);
+                Results.Add(new LibrarySearchResult(entry, hit.Score, hit.Highlight));
+            }
+
+            if (hits.Count == 0)
+                Debug.WriteLine("[LibraryViewModel] Full-text search returned no matches");
+        }
+
+        private FullTextSearchField BuildFullTextFieldMask()
+        {
+            var mask = FullTextSearchField.None;
+            if (FullTextInTitle) mask |= FullTextSearchField.Title;
+            if (FullTextInAbstract) mask |= FullTextSearchField.Abstract;
+            if (FullTextInContent) mask |= FullTextSearchField.Content;
+
+            return mask == FullTextSearchField.None
+                ? FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content
+                : mask;
+        }
+
+        private static void PrepareEntry(Entry entry)
+        {
+            var title = string.IsNullOrWhiteSpace(entry.Title) ? "(untitled)" : entry.Title!.Trim();
+            entry.Title = title;
+
+            var displayName = title;
+            if (entry.Authors != null && entry.Authors.Count > 0)
+                displayName += $" — {string.Join(", ", entry.Authors)}";
+
+            entry.DisplayName = displayName;
+        }
+
 
 
 
         private void ClearFilters()
         {
+            UseFullTextSearch = false;
+            FullTextQuery = null;
+            FullTextInTitle = FullTextInAbstract = FullTextInContent = true;
+            ResultsAreFullText = false;
             TitleContains = AuthorContains = TagsCsv = null;
             IsInternal = null;
             YearFrom = YearTo = null;
@@ -292,10 +460,11 @@ namespace LM.App.Wpf.ViewModels
 
         private void OpenSelected()
         {
-            if (Selected is null) return;
+            var entry = Selected?.Entry;
+            if (entry is null) return;
             try
             {
-                var abs = _ws.GetAbsolutePath(Selected.MainFilePath);
+                var abs = _ws.GetAbsolutePath(entry.MainFilePath);
                 Process.Start(new ProcessStartInfo { FileName = abs, UseShellExecute = true });
             }
             catch (Exception ex)
@@ -456,6 +625,11 @@ namespace LM.App.Wpf.ViewModels
         private LibraryFilterState CaptureState()
             => new()
             {
+                UseFullTextSearch = UseFullTextSearch,
+                FullTextQuery = FullTextQuery,
+                FullTextInTitle = FullTextInTitle,
+                FullTextInAbstract = FullTextInAbstract,
+                FullTextInContent = FullTextInContent,
                 TitleContains = TitleContains,
                 AuthorContains = AuthorContains,
                 TagsCsv = TagsCsv,
@@ -480,6 +654,11 @@ namespace LM.App.Wpf.ViewModels
 
         private void ApplyPreset(LibraryFilterState state)
         {
+            UseFullTextSearch = state.UseFullTextSearch;
+            FullTextQuery = state.FullTextQuery;
+            FullTextInTitle = state.FullTextInTitle;
+            FullTextInAbstract = state.FullTextInAbstract;
+            FullTextInContent = state.FullTextInContent;
             TitleContains = state.TitleContains;
             AuthorContains = state.AuthorContains;
             TagsCsv = state.TagsCsv;
@@ -505,6 +684,12 @@ namespace LM.App.Wpf.ViewModels
 
         private void NotifyFiltersChanged()
         {
+            OnPropertyChanged(nameof(UseFullTextSearch));
+            OnPropertyChanged(nameof(FullTextQuery));
+            OnPropertyChanged(nameof(FullTextInTitle));
+            OnPropertyChanged(nameof(FullTextInAbstract));
+            OnPropertyChanged(nameof(FullTextInContent));
+            OnPropertyChanged(nameof(IsMetadataSearch));
             OnPropertyChanged(nameof(TitleContains));
             OnPropertyChanged(nameof(AuthorContains));
             OnPropertyChanged(nameof(TagsCsv));
