@@ -1,6 +1,8 @@
 using System;
+
 using System.IO;
 using System.Linq;
+
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ using Microsoft.Data.Sqlite;
 namespace LM.Infrastructure.Extraction
 {
     public sealed partial class SqliteExtractionRepository : IExtractionRepository
+
     {
         private const int SessionRetentionLimit = 200;
 
@@ -26,6 +29,7 @@ namespace LM.Infrastructure.Extraction
         {
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
         }
+
 
         private async Task EnsureInitializedAsync(CancellationToken cancellationToken)
         {
@@ -59,6 +63,7 @@ namespace LM.Infrastructure.Extraction
 
             return new SqliteConnection($"Data Source={_dbPath};Mode=ReadWriteCreate;Cache=Shared;");
         }
+
 
         private async Task PersistDescriptorAsync(RegionDescriptor descriptor, CancellationToken cancellationToken)
         {

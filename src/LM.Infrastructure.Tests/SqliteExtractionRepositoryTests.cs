@@ -7,6 +7,7 @@ using LM.Core.Models;
 using LM.Infrastructure.Extraction;
 using LM.Infrastructure.FileSystem;
 using Microsoft.Data.Sqlite;
+
 using Xunit;
 
 namespace LM.Infrastructure.Tests
@@ -109,6 +110,7 @@ namespace LM.Infrastructure.Tests
             var recentDescriptors = await _repository.GetRecentAsync(5);
             Assert.Contains(recentDescriptors, d => d.RegionHash == descriptor.RegionHash);
         }
+
 
         [Fact]
         public async Task UpsertAsync_UpgradesLegacySchema()
