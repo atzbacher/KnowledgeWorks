@@ -1,4 +1,6 @@
 #nullable enable
+LM.HubSpoke.Extraction.ExtractionSchemaBootstrapper
+LM.HubSpoke.Extraction.ExtractionSchemaBootstrapper.EnsureAsync(LM.Core.Abstractions.IWorkSpaceService! workspace, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.HubSpoke.Abstractions.CasResult
 LM.HubSpoke.Abstractions.CasResult.Bytes.get -> long
 LM.HubSpoke.Abstractions.CasResult.Bytes.init -> void
