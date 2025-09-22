@@ -325,10 +325,12 @@ LM.Core.Abstractions.IExtractionRepository
 LM.Core.Abstractions.IExtractionRepository.DeleteAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IExtractionRepository.GetAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionDescriptor?>!
 LM.Core.Abstractions.IExtractionRepository.GetRecentAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
+LM.Core.Abstractions.IExtractionRepository.GetRecentSessionsAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionExportResult!>!>!
 LM.Core.Abstractions.IExtractionRepository.ListByEntryAsync(string! entryHubId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.RegionDescriptor!>!
 LM.Core.Abstractions.IExtractionRepository.SearchAsync(string! query, int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
 LM.Core.Abstractions.IExtractionRepository.UpdateStatusAsync(string! regionHash, LM.Core.Models.RegionExportStatus status, string? errorMessage = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IExtractionRepository.UpsertAsync(LM.Core.Models.RegionDescriptor! descriptor, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IExtractionRepository.SaveSessionAsync(LM.Core.Models.RegionExportResult! result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IRegionExporter
 LM.Core.Abstractions.IRegionExporter.CanHandle(LM.Core.Models.RegionExportRequest! request) -> bool
 LM.Core.Abstractions.IRegionExporter.ExporterId.get -> string!

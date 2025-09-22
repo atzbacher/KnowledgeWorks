@@ -5,6 +5,7 @@ using LM.Core.Models.Filters;
 using LM.Core.Utils;
 using LM.HubSpoke.Abstractions;
 using LM.HubSpoke.FileSystem;
+using LM.HubSpoke.Extraction;
 using LM.HubSpoke.Hubs;
 using LM.HubSpoke.Indexing;
 using LM.HubSpoke.Storage;
@@ -81,6 +82,7 @@ namespace LM.HubSpoke.Entries
         public async Task InitializeAsync(CancellationToken ct = default)
         {
             WorkspaceLayout.Ensure(_ws);
+            await ExtractionSchemaBootstrapper.EnsureAsync(_ws, ct);
             await _index.InitializeAsync(ct);
         }
 

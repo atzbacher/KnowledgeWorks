@@ -32,6 +32,16 @@ namespace LM.Core.Abstractions
         Task<IReadOnlyList<RegionDescriptor>> GetRecentAsync(int take, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// Records a recent extraction session so UIs can display run history.
+        /// </summary>
+        Task SaveSessionAsync(RegionExportResult result, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Returns the most recent extraction sessions, including exporter metadata.
+        /// </summary>
+        Task<IReadOnlyList<RegionExportResult>> GetRecentSessionsAsync(int take, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Searches descriptors via the OCR full-text index.
         /// </summary>
         Task<IReadOnlyList<RegionDescriptor>> SearchAsync(string query, int take, CancellationToken cancellationToken = default);

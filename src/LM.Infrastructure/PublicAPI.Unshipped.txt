@@ -24,6 +24,17 @@ LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.Entr
 LM.Infrastructure.Export.MetadataDebugSlideExporter
 LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void
+LM.Infrastructure.Extraction.SqliteExtractionRepository
+LM.Infrastructure.Extraction.SqliteExtractionRepository.DeleteAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.GetAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionDescriptor?>!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.GetRecentAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.GetRecentSessionsAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionExportResult!>!>!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.ListByEntryAsync(string! entryHubId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.RegionDescriptor!>!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.SaveSessionAsync(LM.Core.Models.RegionExportResult! result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.SearchAsync(string! query, int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.SqliteExtractionRepository(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Extraction.SqliteExtractionRepository.UpdateStatusAsync(string! regionHash, LM.Core.Models.RegionExportStatus status, string? errorMessage = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Extraction.SqliteExtractionRepository.UpsertAsync(LM.Core.Models.RegionDescriptor! descriptor, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Infrastructure.FileSystem.WorkspaceService
 LM.Infrastructure.FileSystem.WorkspaceService.EnsureWorkspaceAsync(string! absoluteWorkspacePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Infrastructure.FileSystem.WorkspaceService.GetAbsolutePath(string! relativePath) -> string!
