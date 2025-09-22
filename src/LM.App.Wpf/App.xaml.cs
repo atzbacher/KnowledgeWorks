@@ -74,7 +74,7 @@ namespace LM.App.Wpf
             var presetStore = new LibraryFilterPresetStore(ws);
             var presetPrompt = new LibraryPresetPrompt();
             var entryEditor = new WorkspaceEntryEditor(ws);
-            var libraryVm = new LibraryViewModel(services.Store, services.FullTextSearch, ws, presetStore, presetPrompt, entryEditor);
+            var libraryVm = new LibraryViewModel(services.Store, services.FullTextSearch, ws, services.Storage, presetStore, presetPrompt, entryEditor);
             var addVm = new AddViewModel(services.Pipeline, ws, services.Scanner);
             await addVm.InitializeAsync();
             _addViewModel = addVm;

@@ -253,7 +253,7 @@ LM.App.Wpf.ViewModels.LibraryViewModel.InternalIdContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.get -> bool?
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.IsMetadataSearch.get -> bool
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.LoadPresetCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.ManagePresetsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.NctContains.get -> string?

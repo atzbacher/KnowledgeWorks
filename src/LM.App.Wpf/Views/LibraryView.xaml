@@ -184,7 +184,10 @@
                   Width="5"/>
 
     <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
+      <ScrollViewer VerticalScrollBarVisibility="Auto"
+                    AllowDrop="True"
+                    DragOver="LibraryDetailDragOver"
+                    Drop="LibraryDetailDrop">
         <Grid>
 
           <ContentPresenter x:Name="EntryDetailPresenter"
