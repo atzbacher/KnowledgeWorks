@@ -254,7 +254,7 @@ namespace LM.App.Wpf.ViewModels
             await JsonSerializer.SerializeAsync(stream, snapshot, JsonOptions, ct).ConfigureAwait(false);
         }
 
-        public WatchedFolderState? GetState(string path)
+        public WatchedFolderState? GetState(string? path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return null;
@@ -283,6 +283,7 @@ namespace LM.App.Wpf.ViewModels
         public void StoreState(WatchedFolder folder, WatchedFolderState state)
         {
             if (folder is null) throw new ArgumentNullException(nameof(folder));
+            if (state is null) throw new ArgumentNullException(nameof(state));
 
             var normalized = NormalizePath(folder.Path);
             lock (_stateGate)
