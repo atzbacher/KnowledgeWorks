@@ -15,3 +15,7 @@ Run:
 ```powershell
 dotnet run --project src\LM.App.Wpf\LM.App.Wpf.csproj -c Debug
 ```
+
+## Feature documentation
+
+- Visual/Data Extraction feature specifications live under [`docs/visual-extractor/`](docs/visual-extractor/). Start with the [overview](docs/visual-extractor/README.md) for architecture, service contracts, UI flows, storage, and add-in integration guidance.
