@@ -35,6 +35,7 @@ namespace LM.App.Wpf.Composition
             public required ISimilarityLog SimLog { get; init; }
             public required IAddPipeline Pipeline { get; init; }
             public required WatchedFolderScanner Scanner { get; init; }
+            public required IFullTextSearchService FullTextSearch { get; init; }
         }
 
         /// <summary>
@@ -96,7 +97,8 @@ namespace LM.App.Wpf.Composition
                 Hooks = orchestrator,
                 SimLog = simlog,
                 Pipeline = pipeline,
-                Scanner = scanner
+                Scanner = scanner,
+                FullTextSearch = store.FullTextSearch
             };
         }
     }

@@ -73,7 +73,7 @@ namespace LM.App.Wpf
             // ViewModels
             var presetStore = new LibraryFilterPresetStore(ws);
             var presetPrompt = new LibraryPresetPrompt();
-            var libraryVm = new LibraryViewModel(services.Store, ws, presetStore, presetPrompt);
+            var libraryVm = new LibraryViewModel(services.Store, services.FullTextSearch, ws, presetStore, presetPrompt);
             var addVm = new AddViewModel(services.Pipeline, ws, services.Scanner);
             await addVm.InitializeAsync();
             _addViewModel = addVm;
