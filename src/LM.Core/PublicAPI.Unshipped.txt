@@ -317,3 +317,180 @@ static LM.Core.Utils.IdGen.NewId() -> string!
 static LM.Core.Utils.JsonEx.Deserialize<T>(string! s) -> T?
 static LM.Core.Utils.JsonEx.Serialize<T>(T v) -> string!
 static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!
+LM.Core.Abstractions.IExtractionPostProcessor
+LM.Core.Abstractions.IExtractionPostProcessor.CanHandle(LM.Core.Models.RegionExportResult! result) -> bool
+LM.Core.Abstractions.IExtractionPostProcessor.Name.get -> string!
+LM.Core.Abstractions.IExtractionPostProcessor.PostProcessAsync(LM.Core.Models.RegionExportResult! result, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IExtractionRepository
+LM.Core.Abstractions.IExtractionRepository.DeleteAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IExtractionRepository.GetAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionDescriptor?>!
+LM.Core.Abstractions.IExtractionRepository.GetRecentAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
+LM.Core.Abstractions.IExtractionRepository.ListByEntryAsync(string! entryHubId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.RegionDescriptor!>!
+LM.Core.Abstractions.IExtractionRepository.SearchAsync(string! query, int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.RegionDescriptor!>!>!
+LM.Core.Abstractions.IExtractionRepository.UpdateStatusAsync(string! regionHash, LM.Core.Models.RegionExportStatus status, string? errorMessage = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IExtractionRepository.UpsertAsync(LM.Core.Models.RegionDescriptor! descriptor, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IRegionExporter
+LM.Core.Abstractions.IRegionExporter.CanHandle(LM.Core.Models.RegionExportRequest! request) -> bool
+LM.Core.Abstractions.IRegionExporter.ExporterId.get -> string!
+LM.Core.Abstractions.IRegionExporter.ExportAsync(LM.Core.Models.RegionExportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionExportResult!>!
+LM.Core.Abstractions.IRegionPreviewService
+LM.Core.Abstractions.IRegionPreviewService.InvalidateAsync(string! cacheKey, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IRegionPreviewService.RenderAsync(LM.Core.Models.RegionExportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionPreview!>!
+LM.Core.Abstractions.IVisualExtractionCoordinator
+LM.Core.Abstractions.IVisualExtractionCoordinator.CancelAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IVisualExtractionCoordinator.EnumerateRecentAsync(int take, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.RegionDescriptor!>!
+LM.Core.Abstractions.IVisualExtractionCoordinator.ExportCompleted -> System.EventHandler<LM.Core.Models.RegionExportCompleted!>?
+LM.Core.Abstractions.IVisualExtractionCoordinator.ExportFailed -> System.EventHandler<LM.Core.Models.RegionExportFailed!>?
+LM.Core.Abstractions.IVisualExtractionCoordinator.GetDescriptorAsync(string! regionHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionDescriptor?>!
+LM.Core.Abstractions.IVisualExtractionCoordinator.QueueExportAsync(LM.Core.Models.RegionExportRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.RegionExportResult!>!
+LM.Core.Models.RegionBounds
+LM.Core.Models.RegionBounds.Clone() -> LM.Core.Models.RegionBounds!
+LM.Core.Models.RegionBounds.Height.get -> double
+LM.Core.Models.RegionBounds.Height.set -> void
+LM.Core.Models.RegionBounds.IsEmpty.get -> bool
+LM.Core.Models.RegionBounds.RegionBounds() -> void
+LM.Core.Models.RegionBounds.Width.get -> double
+LM.Core.Models.RegionBounds.Width.set -> void
+LM.Core.Models.RegionBounds.X.get -> double
+LM.Core.Models.RegionBounds.X.set -> void
+LM.Core.Models.RegionBounds.Y.get -> double
+LM.Core.Models.RegionBounds.Y.set -> void
+LM.Core.Models.RegionDescriptor
+LM.Core.Models.RegionDescriptor.Annotation.get -> string?
+LM.Core.Models.RegionDescriptor.Annotation.set -> void
+LM.Core.Models.RegionDescriptor.Bounds.get -> LM.Core.Models.RegionBounds!
+LM.Core.Models.RegionDescriptor.Bounds.set -> void
+LM.Core.Models.RegionDescriptor.CreatedUtc.get -> System.DateTime
+LM.Core.Models.RegionDescriptor.CreatedUtc.set -> void
+LM.Core.Models.RegionDescriptor.EntryHubId.get -> string!
+LM.Core.Models.RegionDescriptor.EntryHubId.set -> void
+LM.Core.Models.RegionDescriptor.ExporterId.get -> string?
+LM.Core.Models.RegionDescriptor.ExporterId.set -> void
+LM.Core.Models.RegionDescriptor.ExtraMetadata.get -> System.Collections.Generic.Dictionary<string!, string!>!
+LM.Core.Models.RegionDescriptor.ImagePath.get -> string?
+LM.Core.Models.RegionDescriptor.ImagePath.set -> void
+LM.Core.Models.RegionDescriptor.LastExportStatus.get -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionDescriptor.LastExportStatus.set -> void
+LM.Core.Models.RegionDescriptor.Notes.get -> string?
+LM.Core.Models.RegionDescriptor.Notes.set -> void
+LM.Core.Models.RegionDescriptor.OcrText.get -> string?
+LM.Core.Models.RegionDescriptor.OcrText.set -> void
+LM.Core.Models.RegionDescriptor.OcrTextPath.get -> string?
+LM.Core.Models.RegionDescriptor.OcrTextPath.set -> void
+LM.Core.Models.RegionDescriptor.OfficePackagePath.get -> string?
+LM.Core.Models.RegionDescriptor.OfficePackagePath.set -> void
+LM.Core.Models.RegionDescriptor.PageNumber.get -> int?
+LM.Core.Models.RegionDescriptor.PageNumber.set -> void
+LM.Core.Models.RegionDescriptor.RegionDescriptor() -> void
+LM.Core.Models.RegionDescriptor.RegionHash.get -> string!
+LM.Core.Models.RegionDescriptor.RegionHash.set -> void
+LM.Core.Models.RegionDescriptor.SourceRelativePath.get -> string!
+LM.Core.Models.RegionDescriptor.SourceRelativePath.set -> void
+LM.Core.Models.RegionDescriptor.SourceSha256.get -> string?
+LM.Core.Models.RegionDescriptor.SourceSha256.set -> void
+LM.Core.Models.RegionDescriptor.Tags.get -> System.Collections.Generic.List<string!>!
+LM.Core.Models.RegionDescriptor.UpdatedUtc.get -> System.DateTime?
+LM.Core.Models.RegionDescriptor.UpdatedUtc.set -> void
+LM.Core.Models.RegionExportCompleted
+LM.Core.Models.RegionExportCompleted.CompletedUtc.get -> System.DateTime
+LM.Core.Models.RegionExportCompleted.CompletedUtc.set -> void
+LM.Core.Models.RegionExportCompleted.RegionExportCompleted() -> void
+LM.Core.Models.RegionExportCompleted.Request.get -> LM.Core.Models.RegionExportRequest!
+LM.Core.Models.RegionExportCompleted.Request.set -> void
+LM.Core.Models.RegionExportCompleted.Result.get -> LM.Core.Models.RegionExportResult!
+LM.Core.Models.RegionExportCompleted.Result.set -> void
+LM.Core.Models.RegionExportFailed
+LM.Core.Models.RegionExportFailed.ErrorCode.get -> string?
+LM.Core.Models.RegionExportFailed.ErrorCode.set -> void
+LM.Core.Models.RegionExportFailed.ErrorMessage.get -> string!
+LM.Core.Models.RegionExportFailed.ErrorMessage.set -> void
+LM.Core.Models.RegionExportFailed.ExporterId.get -> string!
+LM.Core.Models.RegionExportFailed.ExporterId.set -> void
+LM.Core.Models.RegionExportFailed.FailedUtc.get -> System.DateTime
+LM.Core.Models.RegionExportFailed.FailedUtc.set -> void
+LM.Core.Models.RegionExportFailed.IsRetryable.get -> bool
+LM.Core.Models.RegionExportFailed.IsRetryable.set -> void
+LM.Core.Models.RegionExportFailed.RegionExportFailed() -> void
+LM.Core.Models.RegionExportFailed.Request.get -> LM.Core.Models.RegionExportRequest!
+LM.Core.Models.RegionExportFailed.Request.set -> void
+LM.Core.Models.RegionExportRequest
+LM.Core.Models.RegionExportRequest.AllowCachedResult.get -> bool
+LM.Core.Models.RegionExportRequest.AllowCachedResult.set -> void
+LM.Core.Models.RegionExportRequest.EntryHubId.get -> string!
+LM.Core.Models.RegionExportRequest.EntryHubId.set -> void
+LM.Core.Models.RegionExportRequest.ExportOptions.get -> System.Collections.Generic.Dictionary<string!, string!>!
+LM.Core.Models.RegionExportRequest.ExporterId.get -> string!
+LM.Core.Models.RegionExportRequest.ExporterId.set -> void
+LM.Core.Models.RegionExportRequest.OfficeDestination.get -> string?
+LM.Core.Models.RegionExportRequest.OfficeDestination.set -> void
+LM.Core.Models.RegionExportRequest.RequestedBy.get -> string?
+LM.Core.Models.RegionExportRequest.RequestedBy.set -> void
+LM.Core.Models.RegionExportRequest.RequestedUtc.get -> System.DateTime
+LM.Core.Models.RegionExportRequest.RequestedUtc.set -> void
+LM.Core.Models.RegionExportRequest.RegionExportRequest() -> void
+LM.Core.Models.RegionExportRequest.Selection.get -> LM.Core.Models.RegionSelection!
+LM.Core.Models.RegionExportRequest.Selection.set -> void
+LM.Core.Models.RegionExportRequest.SourceMimeType.get -> string?
+LM.Core.Models.RegionExportRequest.SourceMimeType.set -> void
+LM.Core.Models.RegionExportRequest.SourceRelativePath.get -> string!
+LM.Core.Models.RegionExportRequest.SourceRelativePath.set -> void
+LM.Core.Models.RegionExportRequest.SourceSha256.get -> string?
+LM.Core.Models.RegionExportRequest.SourceSha256.set -> void
+LM.Core.Models.RegionExportResult
+LM.Core.Models.RegionExportResult.AdditionalOutputs.get -> System.Collections.Generic.Dictionary<string!, string!>!
+LM.Core.Models.RegionExportResult.CompletedUtc.get -> System.DateTime
+LM.Core.Models.RegionExportResult.CompletedUtc.set -> void
+LM.Core.Models.RegionExportResult.Descriptor.get -> LM.Core.Models.RegionDescriptor!
+LM.Core.Models.RegionExportResult.Descriptor.set -> void
+LM.Core.Models.RegionExportResult.Duration.get -> System.TimeSpan
+LM.Core.Models.RegionExportResult.Duration.set -> void
+LM.Core.Models.RegionExportResult.ExporterId.get -> string!
+LM.Core.Models.RegionExportResult.ExporterId.set -> void
+LM.Core.Models.RegionExportResult.ImagePath.get -> string!
+LM.Core.Models.RegionExportResult.ImagePath.set -> void
+LM.Core.Models.RegionExportResult.OfficePackagePath.get -> string?
+LM.Core.Models.RegionExportResult.OfficePackagePath.set -> void
+LM.Core.Models.RegionExportResult.OcrTextPath.get -> string?
+LM.Core.Models.RegionExportResult.OcrTextPath.set -> void
+LM.Core.Models.RegionExportResult.RegionExportResult() -> void
+LM.Core.Models.RegionExportResult.WasCached.get -> bool
+LM.Core.Models.RegionExportResult.WasCached.set -> void
+LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionExportStatus.Canceled = 4 -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionExportStatus.Completed = 2 -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionExportStatus.Failed = 3 -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionExportStatus.Pending = 1 -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionExportStatus.Unknown = 0 -> LM.Core.Models.RegionExportStatus
+LM.Core.Models.RegionPreview
+LM.Core.Models.RegionPreview.CacheKey.get -> string!
+LM.Core.Models.RegionPreview.CacheKey.set -> void
+LM.Core.Models.RegionPreview.DpiX.get -> double
+LM.Core.Models.RegionPreview.DpiX.set -> void
+LM.Core.Models.RegionPreview.DpiY.get -> double
+LM.Core.Models.RegionPreview.DpiY.set -> void
+LM.Core.Models.RegionPreview.FromCache.get -> bool
+LM.Core.Models.RegionPreview.FromCache.set -> void
+LM.Core.Models.RegionPreview.GeneratedUtc.get -> System.DateTime
+LM.Core.Models.RegionPreview.GeneratedUtc.set -> void
+LM.Core.Models.RegionPreview.PixelHeight.get -> int
+LM.Core.Models.RegionPreview.PixelHeight.set -> void
+LM.Core.Models.RegionPreview.PixelWidth.get -> int
+LM.Core.Models.RegionPreview.PixelWidth.set -> void
+LM.Core.Models.RegionPreview.PreviewPath.get -> string!
+LM.Core.Models.RegionPreview.PreviewPath.set -> void
+LM.Core.Models.RegionPreview.RegionPreview() -> void
+LM.Core.Models.RegionSelection
+LM.Core.Models.RegionSelection.Annotation.get -> string?
+LM.Core.Models.RegionSelection.Annotation.set -> void
+LM.Core.Models.RegionSelection.Bounds.get -> LM.Core.Models.RegionBounds!
+LM.Core.Models.RegionSelection.Bounds.set -> void
+LM.Core.Models.RegionSelection.Notes.get -> string?
+LM.Core.Models.RegionSelection.Notes.set -> void
+LM.Core.Models.RegionSelection.PageNumber.get -> int?
+LM.Core.Models.RegionSelection.PageNumber.set -> void
+LM.Core.Models.RegionSelection.RegionSelection() -> void
+LM.Core.Models.RegionSelection.RotationDegrees.get -> double
+LM.Core.Models.RegionSelection.RotationDegrees.set -> void
+LM.Core.Models.RegionSelection.Tags.get -> System.Collections.Generic.List<string!>!
+LM.Core.Models.RegionSelection.ZoomLevel.get -> double
+LM.Core.Models.RegionSelection.ZoomLevel.set -> void
