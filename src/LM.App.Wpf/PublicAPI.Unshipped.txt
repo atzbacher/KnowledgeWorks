@@ -200,13 +200,10 @@ LM.App.Wpf.ViewModels.WatchedFolderState.LastScanUtc.init -> void
 LM.App.Wpf.ViewModels.WatchedFolderState.LastScanWasUnchanged.get -> bool
 LM.App.Wpf.ViewModels.WatchedFolderState.LastScanWasUnchanged.init -> void
 LM.App.Wpf.ViewModels.WatchedFolderState.Path.get -> string!
-LM.App.Wpf.ViewModels.WatchedFolderState.WatchedFolderState(string path, System.DateTimeOffset? lastScanUtc, string? aggregatedHash, bool lastScanWasUnchanged) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig
 LM.App.Wpf.ViewModels.WatchedFolderConfig.ApplyState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.ClearState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
-LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(string? path) -> LM.App.Wpf.ViewModels.WatchedFolderState?
-LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> LM.App.Wpf.ViewModels.WatchedFolderState?
 LM.App.Wpf.ViewModels.WatchedFolderConfig.SaveAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.WatchedFolderConfig.StoreState(LM.App.Wpf.ViewModels.WatchedFolder! folder, LM.App.Wpf.ViewModels.WatchedFolderState! state) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.WatchedFolderConfig() -> void
@@ -374,6 +371,7 @@ LM.App.Wpf.ViewModels.StagingItem.Type.get -> LM.Core.Models.EntryType
 LM.App.Wpf.ViewModels.StagingItem.Type.set -> void
 LM.App.Wpf.ViewModels.StagingItem.Year.get -> int?
 LM.App.Wpf.ViewModels.StagingItem.Year.set -> void
+LM.App.Wpf.ViewModels.WatchedFolderState.Path.init -> void
 LM.App.Wpf.ViewModels.WatchedFolderState.WatchedFolderState(string! Path, System.DateTimeOffset? LastScanUtc, string? AggregatedHash, bool LastScanWasUnchanged) -> void
 LM.App.Wpf.Views.AddView
 LM.App.Wpf.Views.AddView.AddView() -> void
