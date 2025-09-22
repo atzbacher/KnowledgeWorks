@@ -80,7 +80,10 @@
     </Style.Triggers>
   </Style>
 
-  <DataTemplate DataType="{x:Type viewModels:LibrarySearchResult}">
+
+  <DataTemplate x:Key="LibraryEntryDetailTemplate"
+                DataType="{x:Type viewModels:LibrarySearchResult}">
+
     <StackPanel>
       <Grid Margin="0,0,0,12">
         <Grid.ColumnDefinitions>

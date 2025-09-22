@@ -186,14 +186,21 @@
     <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
-          <ContentPresenter Content="{Binding Selected}" Margin="12">
+
+          <ContentPresenter x:Name="EntryDetailPresenter"
+                            Content="{Binding Selected}"
+                            ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
+                            Margin="12">
+
             <ContentPresenter.Style>
               <Style TargetType="ContentPresenter">
                 <Setter Property="Visibility" Value="Visible"/>
                 <Style.Triggers>
-                  <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
+
+                  <Trigger Property="Content" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
-                  </DataTrigger>
+                  </Trigger>
+
                 </Style.Triggers>
               </Style>
             </ContentPresenter.Style>
@@ -210,7 +217,9 @@
               <Style TargetType="TextBlock">
                 <Setter Property="Visibility" Value="Collapsed"/>
                 <Style.Triggers>
-                  <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
+
+                  <DataTrigger Binding="{Binding Content, ElementName=EntryDetailPresenter}" Value="{x:Null}">
+
                     <Setter Property="Visibility" Value="Visible"/>
                   </DataTrigger>
                 </Style.Triggers>
