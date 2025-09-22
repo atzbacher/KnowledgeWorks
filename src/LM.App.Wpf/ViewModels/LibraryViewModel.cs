@@ -514,9 +514,15 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
             }
         }
 
-        internal bool CanAcceptFileDrop(IEnumerable<string>? filePaths)
+
+        internal bool CanAcceptFileDrop(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
         {
-            if (Selected?.Entry is null || filePaths is null)
+            if (filePaths is null)
+                return false;
+
+            var entry = (dropTarget ?? Selected)?.Entry;
+            if (entry is null)
+
                 return false;
 
             foreach (var path in filePaths)
@@ -532,10 +538,12 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
             return false;
         }
 
-        internal async Task HandleFileDropAsync(IEnumerable<string>? filePaths)
+
+        internal async Task HandleFileDropAsync(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
         {
-            var selectedResult = Selected;
-            var entry = selectedResult?.Entry;
+            var targetResult = dropTarget ?? Selected;
+            var entry = targetResult?.Entry;
+
             if (entry is null)
             {
                 System.Windows.MessageBox.Show(
@@ -646,7 +654,9 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
                 return;
             }
 
-            await RefreshSelectedEntryAsync(selectedResult, entryId);
+
+            await RefreshSelectedEntryAsync(targetResult, entryId);
+
 
             ShowDropWarnings(unsupported, duplicates, failures);
         }

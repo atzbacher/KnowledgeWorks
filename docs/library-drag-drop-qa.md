@@ -6,9 +6,15 @@
 
 ## Add attachments via drag & drop
 1. Open File Explorer and select one or more supported files (`.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.txt`, `.md`).
-2. Drag the files onto the detail panel in the Library view.
-3. Expected: the drop cursor shows a **Copy** icon, the UI accepts the drop, and the attachments list refreshes with the new files.
+2. Drag the files onto the detail panel **or** directly onto a row in the results grid.
+3. Expected: the drop cursor shows a **Copy** icon, the target row becomes selected, and the attachments list refreshes with the new files.
 4. Confirm the workspace now contains hashed copies under `library/` and the entry JSON lists the new attachment paths.
+
+### Drop onto an unselected row
+1. Deselect all items (e.g., press `Esc`) so the detail panel is empty.
+2. Drag a supported file from File Explorer and drop it onto a different row in the results grid.
+3. Expected: the drop is accepted, the row becomes selected, and the attachments list updates for that entry.
+
 
 ## Unsupported files
 1. Drag a file with an unsupported extension (e.g., `.exe`) onto the same detail panel.

@@ -30,6 +30,17 @@ namespace LM.App.Wpf.Library
 
             var relative = Path.Combine("entries", entry.Id, "entry.json");
             var metadataPath = _workspace.GetAbsolutePath(relative);
+            var folder = Path.GetDirectoryName(metadataPath);
+
+            if (string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
+            {
+                System.Windows.MessageBox.Show(
+                    $"Entry folder was not found at:\n{folder ?? metadataPath}",
+                    "Edit Entry",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
 
             try
             {
@@ -51,11 +62,34 @@ namespace LM.App.Wpf.Library
             }
             catch (Exception ex)
             {
+                Trace.WriteLine($"[WorkspaceEntryEditor] Failed to open metadata directly: {ex}");
+                if (TryOpenContainingFolder(metadataPath))
+                    return;
+
                 System.Windows.MessageBox.Show(
                     $"Failed to open entry metadata:\n{ex.Message}",
                     "Edit Entry",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private static bool TryOpenContainingFolder(string metadataPath)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{metadataPath}\"",
+                    UseShellExecute = true
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[WorkspaceEntryEditor] Explorer fallback failed: {ex}");
+                return false;
             }
         }
     }

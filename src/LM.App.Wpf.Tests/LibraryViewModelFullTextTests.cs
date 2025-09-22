@@ -142,6 +142,38 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+
+        public async Task HandleFileDropAsync_AddsAttachmentsForDropTarget()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var entryA = new Entry { Id = "drop-a", Title = "First" };
+            var entryB = new Entry { Id = "drop-b", Title = "Second" };
+            store.EntriesById[entryA.Id] = entryA;
+            store.EntriesById[entryB.Id] = entryB;
+
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var resultA = new LibrarySearchResult(entryA, null, null);
+            var resultB = new LibrarySearchResult(entryB, null, null);
+            vm.Results.Add(resultA);
+            vm.Results.Add(resultB);
+            vm.Selected = resultA;
+
+            var filePath = Path.Combine(temp.RootPath, "paper.pdf");
+            File.WriteAllText(filePath, "demo");
+
+            await vm.HandleFileDropAsync(new[] { filePath }, resultB);
+
+            Assert.Equal(Path.Combine("attachments", entryB.Id), storage.TargetDirs[0]);
+            Assert.Equal(1, store.SaveCallCount);
+            Assert.Equal(entryB.Id, vm.Results[1].Entry.Id);
+            Assert.Equal(entryB.Id, vm.Selected.Entry.Id);
+            Assert.Contains(vm.Selected.Entry.Attachments, a => a.RelativePath == storage.SavedRelativePaths[0]);
+        }
+
+        [Fact]
+
         public async Task HandleFileDropAsync_SkipsDuplicatesWhenRelativePathExists()
         {
             using var temp = new TempWorkspace();
@@ -196,6 +228,25 @@ namespace LM.App.Wpf.Tests
             Assert.True(vm.CanAcceptFileDrop(new[] { pdf }));
             Assert.False(vm.CanAcceptFileDrop(new[] { exe }));
         }
+
+
+        [Fact]
+        public void CanAcceptFileDrop_UsesDropTargetWhenSelectionDiffers()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+
+            var entry = new Entry { Id = "target-1", Title = "Drop target" };
+            var targetResult = new LibrarySearchResult(entry, null, null);
+
+            var pdf = Path.Combine(temp.RootPath, "drop.pdf");
+            File.WriteAllText(pdf, "pdf");
+
+            Assert.True(vm.CanAcceptFileDrop(new[] { pdf }, targetResult));
+        }
+
 
         private static async Task InvokeSearchAsync(LibraryViewModel vm)
         {

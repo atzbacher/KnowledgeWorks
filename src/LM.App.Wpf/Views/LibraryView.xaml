@@ -137,7 +137,10 @@
                 ItemsSource="{Binding Results}"
                 SelectedItem="{Binding Selected}"
                 Margin="12"
-                IsReadOnly="True">
+                IsReadOnly="True"
+                AllowDrop="True"
+                PreviewDragOver="LibraryResultsDragOver"
+                Drop="LibraryResultsDrop">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Title" Binding="{Binding Entry.Title}" Width="3*"/>
           <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="0.8*"/>
@@ -186,7 +189,9 @@
     <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
                     AllowDrop="True"
-                    DragOver="LibraryDetailDragOver"
+
+                    PreviewDragOver="LibraryDetailDragOver"
+
                     Drop="LibraryDetailDrop">
         <Grid>
 
