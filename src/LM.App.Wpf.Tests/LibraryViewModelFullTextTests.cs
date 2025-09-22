@@ -142,6 +142,7 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+
         public async Task HandleFileDropAsync_AddsAttachmentsForDropTarget()
         {
             using var temp = new TempWorkspace();
@@ -172,6 +173,7 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+
         public async Task HandleFileDropAsync_SkipsDuplicatesWhenRelativePathExists()
         {
             using var temp = new TempWorkspace();
@@ -227,6 +229,7 @@ namespace LM.App.Wpf.Tests
             Assert.False(vm.CanAcceptFileDrop(new[] { exe }));
         }
 
+
         [Fact]
         public void CanAcceptFileDrop_UsesDropTargetWhenSelectionDiffers()
         {
@@ -243,6 +246,7 @@ namespace LM.App.Wpf.Tests
 
             Assert.True(vm.CanAcceptFileDrop(new[] { pdf }, targetResult));
         }
+
 
         private static async Task InvokeSearchAsync(LibraryViewModel vm)
         {

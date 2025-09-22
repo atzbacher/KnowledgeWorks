@@ -1,12 +1,15 @@
 using System;
 using System.Diagnostics;
+
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+
 using LM.App.Wpf.ViewModels;
 using DataFormats = System.Windows.DataFormats;
 using DragDropEffects = System.Windows.DragDropEffects;
 using DragEventArgs = System.Windows.DragEventArgs;
+
 
 namespace LM.App.Wpf.Views
 {
@@ -28,6 +31,7 @@ namespace LM.App.Wpf.Views
             e.Handled = true;
         }
 
+
         private void LibraryResultsDragOver(object sender, DragEventArgs e)
         {
             var dropTarget = ResolveDropTarget(e.OriginalSource);
@@ -42,6 +46,7 @@ namespace LM.App.Wpf.Views
 
             e.Handled = true;
         }
+
 
         private async void LibraryDetailDrop(object sender, DragEventArgs e)
         {
@@ -62,6 +67,7 @@ namespace LM.App.Wpf.Views
                 Trace.WriteLine($"[LibraryView] Drop failed: {ex}");
             }
         }
+
 
         private async void LibraryResultsDrop(object sender, DragEventArgs e)
         {
@@ -87,6 +93,7 @@ namespace LM.App.Wpf.Views
             }
         }
 
+
         private static bool TryGetFilePaths(DragEventArgs e, out string[] paths)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -101,6 +108,7 @@ namespace LM.App.Wpf.Views
             paths = Array.Empty<string>();
             return false;
         }
+
 
         private static LibrarySearchResult? ResolveDropTarget(object? originalSource)
         {
@@ -124,5 +132,6 @@ namespace LM.App.Wpf.Views
 
             return null;
         }
+
     }
 }
