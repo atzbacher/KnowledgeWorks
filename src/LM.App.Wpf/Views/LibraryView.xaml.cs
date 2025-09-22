@@ -1,8 +1,12 @@
 using System;
 using System.Diagnostics;
-using System.Windows;
+
 using System.Windows.Controls;
 using LM.App.Wpf.ViewModels;
+using DataFormats = System.Windows.DataFormats;
+using DragDropEffects = System.Windows.DragDropEffects;
+using DragEventArgs = System.Windows.DragEventArgs;
+
 
 namespace LM.App.Wpf.Views
 {
