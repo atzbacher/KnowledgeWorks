@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+
+using System.Runtime.CompilerServices;
+
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
@@ -104,7 +107,9 @@ namespace LM.App.Wpf.Tests
             public Task<Entry?> GetByIdAsync(string id, CancellationToken ct = default)
                 => Task.FromResult(EntriesById.TryGetValue(id, out var entry) ? entry : null);
 
-            public async IAsyncEnumerable<Entry> EnumerateAsync(CancellationToken ct = default)
+
+            public async IAsyncEnumerable<Entry> EnumerateAsync([EnumeratorCancellation] CancellationToken ct = default)
+
             {
                 foreach (var entry in EntriesById.Values)
                     yield return entry;
