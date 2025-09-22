@@ -172,6 +172,7 @@ LM.App.Wpf.ViewModels.AddViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 LM.App.Wpf.ViewModels.AddViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.SelectByOffset(int delta) -> void
 LM.App.Wpf.ViewModels.AddViewModel.SelectedType.get -> LM.Core.Models.EntryType
 LM.App.Wpf.ViewModels.AddViewModel.SelectedType.set -> void
