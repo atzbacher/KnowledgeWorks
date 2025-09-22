@@ -22,6 +22,8 @@ namespace LM.App.Wpf.ViewModels
         private readonly IEntryStore _store;
         private readonly IFullTextSearchService _fullTextSearch;
         private readonly IWorkSpaceService _ws;
+        private readonly ILibraryEntryEditor _entryEditor;
+        private readonly RelayCommand _editCommand;
         private LibrarySearchResult? _selected;
         private string? _sourceContains;
         private string? _internalIdContains;
@@ -40,17 +42,25 @@ namespace LM.App.Wpf.ViewModels
         private bool _fullTextInContent = true;
         private bool _resultsAreFullText;
 
-        public LibraryViewModel(IEntryStore store, IFullTextSearchService fullTextSearch, IWorkSpaceService ws, LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
+        public LibraryViewModel(IEntryStore store,
+                                IFullTextSearchService fullTextSearch,
+                                IWorkSpaceService ws,
+                                LibraryFilterPresetStore presetStore,
+                                ILibraryPresetPrompt presetPrompt,
+                                ILibraryEntryEditor entryEditor)
         {
             _store = store;
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
             _ws = ws;
             _presetStore = presetStore ?? throw new ArgumentNullException(nameof(presetStore));
             _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
+            _entryEditor = entryEditor ?? throw new ArgumentNullException(nameof(entryEditor));
 
             SearchCommand = new AsyncRelayCommand(SearchAsync);
             ClearCommand  = new RelayCommand(_ => ClearFilters());
             OpenCommand   = new RelayCommand(_ => OpenSelected(), _ => Selected?.Entry is not null);
+            _editCommand  = new RelayCommand(_ => EditSelected(), _ => Selected?.Entry is not null);
+            EditCommand   = _editCommand;
             SavePresetCommand = new AsyncRelayCommand(SavePresetAsync);
             LoadPresetCommand = new AsyncRelayCommand(LoadPresetAsync);
             ManagePresetsCommand = new AsyncRelayCommand(ManagePresetsAsync);
@@ -264,6 +274,7 @@ namespace LM.App.Wpf.ViewModels
                     _selected = value;
                     OnPropertyChanged();
                     (OpenCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                    _editCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -272,6 +283,7 @@ namespace LM.App.Wpf.ViewModels
         public ICommand SearchCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand OpenCommand { get; }
+        public ICommand EditCommand { get; }
         public ICommand SavePresetCommand { get; }
         public ICommand LoadPresetCommand { get; }
         public ICommand ManagePresetsCommand { get; }
@@ -471,6 +483,25 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
             {
                 System.Windows.MessageBox.Show($"Failed to open file:\n{ex.Message}", "Open Error",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private void EditSelected()
+        {
+            var entry = Selected?.Entry;
+            if (entry is null) return;
+
+            try
+            {
+                _entryEditor.EditEntry(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open entry editor:\n{ex.Message}",
+                    "Edit Entry",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
 

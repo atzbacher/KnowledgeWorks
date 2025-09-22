@@ -26,5 +26,17 @@ namespace LM.App.Wpf.ViewModels
             : null;
 
         public string? HighlightDisplay => string.IsNullOrWhiteSpace(Highlight) ? null : Highlight;
+
+        public bool HasSource => !string.IsNullOrWhiteSpace(Entry.Source);
+        public bool HasNotes => !string.IsNullOrWhiteSpace(Entry.Notes);
+        public bool HasUserNotes => !string.IsNullOrWhiteSpace(Entry.UserNotes);
+        public bool HasInternalId => !string.IsNullOrWhiteSpace(Entry.InternalId);
+        public bool HasDoi => !string.IsNullOrWhiteSpace(Entry.Doi);
+        public bool HasPmid => !string.IsNullOrWhiteSpace(Entry.Pmid);
+        public bool HasNct => !string.IsNullOrWhiteSpace(Entry.Nct);
+        public bool HasIdentifiers => HasInternalId || HasDoi || HasPmid || HasNct;
+        public bool HasLinks => Entry.Links is { Count: > 0 };
+        public bool HasAttachments => Entry.Attachments is { Count: > 0 };
+        public bool HasRelations => Entry.Relations is { Count: > 0 };
     }
 }
