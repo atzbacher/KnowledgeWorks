@@ -106,6 +106,11 @@ LM.App.Wpf.Library.LibraryFilterPresetStore.LibraryFilterPresetStore(LM.Core.Abs
 LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.LibraryFilterPreset!>!>!
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
+LM.App.Wpf.Library.ILibraryEntryEditor
+LM.App.Wpf.Library.ILibraryEntryEditor.EditEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.WorkspaceEntryEditor
+LM.App.Wpf.Library.WorkspaceEntryEditor.WorkspaceEntryEditor(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.Library.WorkspaceEntryEditor.EditEntry(LM.Core.Models.Entry! entry) -> void
 LM.App.Wpf.Library.LibraryFilterState
 LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.get -> bool
 LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.set -> void
@@ -248,12 +253,13 @@ LM.App.Wpf.ViewModels.LibraryViewModel.InternalIdContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.get -> bool?
 LM.App.Wpf.ViewModels.LibraryViewModel.IsInternal.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.IsMetadataSearch.get -> bool
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.LoadPresetCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.ManagePresetsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.NctContains.get -> string?
 LM.App.Wpf.ViewModels.LibraryViewModel.NctContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.EditCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.PmidContains.get -> string?
 LM.App.Wpf.ViewModels.LibraryViewModel.PmidContains.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.FullTextInAbstract.get -> bool
@@ -303,6 +309,17 @@ LM.App.Wpf.ViewModels.LibrarySearchResult.IsFullText.get -> bool
 LM.App.Wpf.ViewModels.LibrarySearchResult.LibrarySearchResult(LM.Core.Models.Entry! entry, double? score, string? highlight) -> void
 LM.App.Wpf.ViewModels.LibrarySearchResult.Score.get -> double?
 LM.App.Wpf.ViewModels.LibrarySearchResult.ScoreDisplay.get -> string?
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasAttachments.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasDoi.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasIdentifiers.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasInternalId.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasLinks.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNct.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNotes.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasPmid.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasRelations.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasSource.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasUserNotes.get -> bool
 LM.App.Wpf.ViewModels.SearchItemViewModel
 LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
 LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void

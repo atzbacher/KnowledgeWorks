@@ -4,16 +4,332 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:common="clr-namespace:LM.App.Wpf.Common"
+             xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
   <UserControl.Resources>
     <common:StringJoinConverter x:Key="StringJoinConverter" />
     <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <DataTemplate DataType="{x:Type viewModels:LibrarySearchResult}">
+      <StackPanel>
+        <StackPanel.Resources>
+          <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,16,0,4"/>
+          </Style>
+          <Style x:Key="SectionText" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+          </Style>
+        </StackPanel.Resources>
+
+        <Grid Margin="0,0,0,12">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0">
+            <TextBlock Text="{Binding Entry.Title}"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding Entry.DisplayName}"
+                       FontStyle="Italic"
+                       Foreground="Gray"
+                       Margin="0,4,0,0"
+                       TextWrapping="Wrap">
+              <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                  <Setter Property="Visibility" Value="Visible"/>
+                  <Style.Triggers>
+                    <Trigger Property="Text" Value="">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                    <Trigger Property="Text" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
+                  </Style.Triggers>
+                </Style>
+              </TextBlock.Style>
+            </TextBlock>
+
+            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+              <TextBlock Text="{Binding Entry.Type}"/>
+              <TextBlock Text="{Binding Entry.Year}"
+                         Margin="12,0,0,0">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                      <Trigger Property="Text" Value="">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                      </Trigger>
+                      <Trigger Property="Text" Value="{x:Null}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                      </Trigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+              <TextBlock Text="Internal"
+                         Margin="12,0,0,0">
+                <TextBlock.Style>
+                  <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                      <DataTrigger Binding="{Binding Entry.IsInternal}" Value="True">
+                        <Setter Property="Visibility" Value="Visible"/>
+                      </DataTrigger>
+                    </Style.Triggers>
+                  </Style>
+                </TextBlock.Style>
+              </TextBlock>
+            </StackPanel>
+          </StackPanel>
+
+          <Button Grid.Column="1"
+                  Content="Edit"
+                  Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                  Margin="12,0,0,0"
+                  Padding="12,4"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"/>
+        </Grid>
+
+        <TextBlock Text="Source" Style="{StaticResource SectionHeader}"/>
+        <TextBlock Text="{Binding Entry.Source}" Style="{StaticResource SectionText}"
+                   Visibility="{Binding HasSource, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        <TextBlock Text="No source recorded."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasSource}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="Notes" Style="{StaticResource SectionHeader}"/>
+        <TextBlock Text="{Binding Entry.Notes}" Style="{StaticResource SectionText}" TextWrapping="Wrap">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Visible"/>
+              <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <TextBlock Text="No notes recorded."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasNotes}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="User notes" Style="{StaticResource SectionHeader}"/>
+        <TextBlock Text="{Binding Entry.UserNotes}" Style="{StaticResource SectionText}" TextWrapping="Wrap">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Visible"/>
+              <Style.Triggers>
+                <Trigger Property="Text" Value="">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <TextBlock Text="No user notes provided."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasUserNotes}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="Identifiers" Style="{StaticResource SectionHeader}"/>
+        <StackPanel>
+          <TextBlock Visibility="{Binding HasInternalId, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="Internal ID: "/>
+            <Run Text="{Binding Entry.InternalId}"/>
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasDoi, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="DOI: "/>
+            <Run Text="{Binding Entry.Doi}"/>
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasPmid, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="PMID: "/>
+            <Run Text="{Binding Entry.Pmid}"/>
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasNct, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="NCT: "/>
+            <Run Text="{Binding Entry.Nct}"/>
+          </TextBlock>
+        </StackPanel>
+        <TextBlock Text="No identifiers recorded."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasIdentifiers}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="Links" Style="{StaticResource SectionHeader}"/>
+        <ItemsControl ItemsSource="{Binding Entry.Links}"
+                      Visibility="{Binding HasLinks, Converter={StaticResource BoolToVisibilityConverter}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding}" Style="{StaticResource SectionText}"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="No links added."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasLinks}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="Attachments" Style="{StaticResource SectionHeader}"/>
+        <ItemsControl ItemsSource="{Binding Entry.Attachments}"
+                      Visibility="{Binding HasAttachments, Converter={StaticResource BoolToVisibilityConverter}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border BorderBrush="#FFE0E0E0" BorderThickness="1" Padding="8" Margin="0,0,0,8">
+                <StackPanel>
+                  <TextBlock Text="{Binding RelativePath}" FontWeight="SemiBold"/>
+                  <TextBlock Text="{Binding Notes}" Style="{StaticResource SectionText}">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                          <Trigger Property="Text" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </Trigger>
+                          <Trigger Property="Text" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </Trigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <TextBlock>
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding Tags}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding Tags.Count}" Value="0">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                    <Run Text="Tags: "/>
+                    <Run Text="{Binding Tags, Converter={StaticResource StringJoinConverter}}"/>
+                  </TextBlock>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="No attachments found."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAttachments}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+
+        <TextBlock Text="Relations" Style="{StaticResource SectionHeader}"/>
+        <ItemsControl ItemsSource="{Binding Entry.Relations}"
+                      Visibility="{Binding HasRelations, Converter={StaticResource BoolToVisibilityConverter}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock>
+                <Run Text="{Binding Type}" FontWeight="SemiBold"/>
+                <Run Text=" → "/>
+                <Run Text="{Binding TargetEntryId}"/>
+              </TextBlock>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="No relations associated."
+                   FontStyle="Italic"
+                   Foreground="Gray">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasRelations}" Value="False">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </StackPanel>
+    </DataTemplate>
   </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="310"/>
       <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="5"/>
+      <ColumnDefinition Width="360"/>
     </Grid.ColumnDefinitions>
 
     <!-- Filters Panel -->
@@ -169,5 +485,50 @@
         <Button Content="Open" Command="{Binding OpenCommand}"/>
       </StackPanel>
     </Grid>
+
+    <GridSplitter Grid.Column="2"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="#FFE0E0E0"
+                  ShowsPreview="True"
+                  Width="5"/>
+
+    <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
+          <ContentPresenter Content="{Binding Selected}" Margin="12">
+            <ContentPresenter.Style>
+              <Style TargetType="ContentPresenter">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </ContentPresenter.Style>
+          </ContentPresenter>
+
+          <TextBlock Text="Select an entry to view details."
+                     Margin="12"
+                     FontStyle="Italic"
+                     Foreground="Gray"
+                     TextWrapping="Wrap"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Setter Property="Visibility" Value="Collapsed"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding Selected}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Visible"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </Grid>
+      </ScrollViewer>
+    </Border>
   </Grid>
 </UserControl>
