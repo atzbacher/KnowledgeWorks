@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
   <UserControl.Resources>
@@ -11,6 +12,7 @@
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
+
   </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
@@ -184,17 +186,21 @@
     <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid>
+
           <ContentPresenter x:Name="EntryDetailPresenter"
                             Content="{Binding Selected}"
                             ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
                             Margin="12">
+
             <ContentPresenter.Style>
               <Style TargetType="ContentPresenter">
                 <Setter Property="Visibility" Value="Visible"/>
                 <Style.Triggers>
+
                   <Trigger Property="Content" Value="{x:Null}">
                     <Setter Property="Visibility" Value="Collapsed"/>
                   </Trigger>
+
                 </Style.Triggers>
               </Style>
             </ContentPresenter.Style>
@@ -211,7 +217,9 @@
               <Style TargetType="TextBlock">
                 <Setter Property="Visibility" Value="Collapsed"/>
                 <Style.Triggers>
+
                   <DataTrigger Binding="{Binding Content, ElementName=EntryDetailPresenter}" Value="{x:Null}">
+
                     <Setter Property="Visibility" Value="Visible"/>
                   </DataTrigger>
                 </Style.Triggers>
