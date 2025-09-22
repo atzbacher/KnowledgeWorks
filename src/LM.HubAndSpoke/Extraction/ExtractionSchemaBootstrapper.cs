@@ -1,8 +1,10 @@
 using System;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
@@ -14,6 +16,7 @@ namespace LM.HubSpoke.Extraction
     {
         private const string DefaultTimestampSql = "'1970-01-01T00:00:00Z'";
         private const string DefaultBoundsSql = "'[0,0,0,0]'";
+
 
         private const string DescriptorTableSql = @"
 CREATE TABLE IF NOT EXISTS region_descriptor (
@@ -105,6 +108,7 @@ CREATE INDEX IF NOT EXISTS idx_region_recent_session_completed ON region_recent_
             PropertyNameCaseInsensitive = true
         };
 
+
         public static async Task EnsureAsync(IWorkSpaceService workspace, CancellationToken cancellationToken = default)
         {
             if (workspace is null) throw new ArgumentNullException(nameof(workspace));
@@ -124,6 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_region_recent_session_completed ON region_recent_
             }
 
             await ExecuteAsync(connection, DescriptorTableSql, cancellationToken);
+
             await EnsureColumnsAsync(connection, "region_descriptor", DescriptorColumns, cancellationToken);
             await ExecuteAsync(connection, DescriptorIndexesSql, cancellationToken);
 
@@ -142,9 +147,11 @@ CREATE INDEX IF NOT EXISTS idx_region_recent_session_completed ON region_recent_
         {
             await using var command = connection.CreateCommand();
             command.Transaction = transaction;
+
             command.CommandText = sql;
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
+
 
         private static async Task EnsureColumnsAsync(
             SqliteConnection connection,
@@ -202,6 +209,7 @@ CREATE INDEX IF NOT EXISTS idx_region_recent_session_completed ON region_recent_
             SqliteTransaction? transaction)
         {
             await ExecuteAsync(connection, @"
+
 CREATE VIRTUAL TABLE region_descriptor_fts USING fts5(
     region_hash UNINDEXED,
     entry_hub_id UNINDEXED,
@@ -210,6 +218,7 @@ CREATE VIRTUAL TABLE region_descriptor_fts USING fts5(
     notes,
     annotation,
     tags
+
 );", cancellationToken, transaction);
         }
 
@@ -329,5 +338,6 @@ VALUES($hash, $entry, $source, $ocr, $notes, $annotation, $tags);";
         }
 
         private readonly record struct ColumnDefinition(string Name, string Type, string? DefaultSql = null);
+
     }
 }

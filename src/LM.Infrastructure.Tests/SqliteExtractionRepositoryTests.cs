@@ -7,6 +7,7 @@ using LM.Core.Models;
 using LM.Infrastructure.Extraction;
 using LM.Infrastructure.FileSystem;
 using Microsoft.Data.Sqlite;
+
 using Xunit;
 
 namespace LM.Infrastructure.Tests
@@ -110,6 +111,7 @@ namespace LM.Infrastructure.Tests
             Assert.Contains(recentDescriptors, d => d.RegionHash == descriptor.RegionHash);
         }
 
+
         [Fact]
         public async Task UpsertAsync_UpgradesLegacySchema()
         {
@@ -188,6 +190,7 @@ CREATE VIRTUAL TABLE region_descriptor_fts USING fts5(
             Assert.Single(sessions);
             Assert.Equal("blue", sessions[0].AdditionalOutputs["color"]);
         }
+
 
         private RegionDescriptor CreateDescriptor()
         {
