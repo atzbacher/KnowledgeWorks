@@ -79,6 +79,38 @@ namespace LM.App.Wpf.Tests
             Assert.Same(entry, result.Entry);
         }
 
+        [Fact]
+        public void EditCommand_CanExecuteReflectsSelection()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var editor = new RecordingEntryEditor();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, editor);
+
+            Assert.False(vm.EditCommand.CanExecute(null));
+
+            var entry = new Entry { Id = "abc", Title = "Sample" };
+            vm.Selected = new LibrarySearchResult(entry, null, null);
+
+            Assert.True(vm.EditCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public void EditCommand_InvokesEditorForSelectedEntry()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var editor = new RecordingEntryEditor();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, editor);
+
+            var entry = new Entry { Id = "abc", Title = "Editable" };
+            vm.Selected = new LibrarySearchResult(entry, null, null);
+
+            vm.EditCommand.Execute(null);
+
+            Assert.Same(entry, editor.LastEdited);
+        }
+
         private static async Task InvokeSearchAsync(LibraryViewModel vm)
         {
             var method = typeof(LibraryViewModel).GetMethod("SearchAsync", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -86,12 +118,28 @@ namespace LM.App.Wpf.Tests
             await task.ConfigureAwait(false);
         }
 
-        private static LibraryViewModel CreateViewModel(IEntryStore store, IFullTextSearchService search, TempWorkspace workspace)
+        private static LibraryViewModel CreateViewModel(IEntryStore store,
+                                                       IFullTextSearchService search,
+                                                       TempWorkspace workspace,
+                                                       ILibraryEntryEditor? editor = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
             var prompt = new StubPresetPrompt();
-            return new LibraryViewModel(store, search, ws, presetStore, prompt);
+            editor ??= new NoopEntryEditor();
+            return new LibraryViewModel(store, search, ws, presetStore, prompt, editor);
+        }
+
+        private sealed class NoopEntryEditor : ILibraryEntryEditor
+        {
+            public void EditEntry(Entry entry) { }
+        }
+
+        private sealed class RecordingEntryEditor : ILibraryEntryEditor
+        {
+            public Entry? LastEdited { get; private set; }
+
+            public void EditEntry(Entry entry) => LastEdited = entry;
         }
 
         private sealed class FakeEntryStore : IEntryStore
