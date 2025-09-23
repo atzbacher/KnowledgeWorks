@@ -17,7 +17,7 @@ namespace LM.App.Wpf.Views
 
         private void LibraryDetailDragOver(object sender, DragEventArgs e)
         {
-            if (DataContext is not LibraryViewModel vm || !TryGetFilePaths(e, out var paths) || !vm.CanAcceptFileDrop(paths))
+            if (DataContext is not LibraryViewModel vm || !TryGetFilePaths(e, out var paths) || !vm.Results.CanAcceptFileDrop(paths))
             {
                 e.Effects = DragDropEffects.None;
             }
@@ -32,7 +32,7 @@ namespace LM.App.Wpf.Views
         private void LibraryResultsDragOver(object sender, DragEventArgs e)
         {
             var dropTarget = ResolveDropTarget(e.OriginalSource);
-            if (DataContext is not LibraryViewModel vm || !TryGetFilePaths(e, out var paths) || !vm.CanAcceptFileDrop(paths, dropTarget))
+            if (DataContext is not LibraryViewModel vm || !TryGetFilePaths(e, out var paths) || !vm.Results.CanAcceptFileDrop(paths, dropTarget))
             {
                 e.Effects = DragDropEffects.None;
             }
@@ -56,7 +56,7 @@ namespace LM.App.Wpf.Views
 
             try
             {
-                await vm.HandleFileDropAsync(paths);
+                await vm.Results.HandleFileDropAsync(paths);
             }
             catch (Exception ex)
             {
@@ -73,14 +73,14 @@ namespace LM.App.Wpf.Views
                 return;
             }
 
-            if (dropTarget is not null && !ReferenceEquals(vm.Selected, dropTarget))
-                vm.Selected = dropTarget;
+            if (dropTarget is not null && !ReferenceEquals(vm.Results.Selected, dropTarget))
+                vm.Results.Selected = dropTarget;
 
             e.Handled = true;
 
             try
             {
-                await vm.HandleFileDropAsync(paths, dropTarget);
+                await vm.Results.HandleFileDropAsync(paths, dropTarget);
             }
             catch (Exception ex)
             {

@@ -23,7 +23,7 @@
     </Grid.ColumnDefinitions>
 
     <!-- Filters Panel -->
-    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
       <StackPanel Margin="12">
         <TextBlock Text="Library Filters" FontWeight="Bold" Margin="0,0,0,8"/>
         <CheckBox Content="Use full-text search"
@@ -101,7 +101,7 @@
         <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
           <Button Content="Search"
                   Margin="0,0,8,0"
-                  Command="{Binding SearchCommand}"/>
+                  Command="{Binding DataContext.SearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
           <Button Content="Clear"
                   Margin="0,0,8,0"
                   Command="{Binding ClearCommand}"/>
@@ -118,7 +118,7 @@
     </ScrollViewer>
 
     <!-- Results -->
-    <Grid Grid.Column="1">
+    <Grid Grid.Column="1" DataContext="{Binding Results}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -134,7 +134,7 @@
       </StackPanel>
 
       <DataGrid Grid.Row="1"
-                ItemsSource="{Binding Results}"
+                ItemsSource="{Binding Items}"
                 SelectedItem="{Binding Selected}"
                 Margin="12"
                 IsReadOnly="True"
@@ -189,9 +189,8 @@
     <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
                     AllowDrop="True"
-
+                    DataContext="{Binding Results}"
                     PreviewDragOver="LibraryDetailDragOver"
-
                     Drop="LibraryDetailDrop">
         <Grid>
 

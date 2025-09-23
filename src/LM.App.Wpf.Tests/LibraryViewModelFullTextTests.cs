@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
@@ -36,9 +37,9 @@ namespace LM.App.Wpf.Tests
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
             await InvokeSearchAsync(vm);
 
-            Assert.False(vm.ResultsAreFullText);
-            Assert.Single(vm.Results);
-            var result = vm.Results[0];
+            Assert.False(vm.Results.ResultsAreFullText);
+            Assert.Single(vm.Results.Items);
+            var result = vm.Results.Items[0];
             Assert.Same(entry, result.Entry);
             Assert.Null(result.Score);
             Assert.Null(result.Highlight);
@@ -66,14 +67,14 @@ namespace LM.App.Wpf.Tests
             };
 
             var vm = CreateViewModel(store, search, temp);
-            vm.UseFullTextSearch = true;
-            vm.FullTextQuery = "biomarker";
+            vm.Filters.UseFullTextSearch = true;
+            vm.Filters.FullTextQuery = "biomarker";
 
             await InvokeSearchAsync(vm);
 
-            Assert.True(vm.ResultsAreFullText);
-            Assert.Single(vm.Results);
-            var result = vm.Results[0];
+            Assert.True(vm.Results.ResultsAreFullText);
+            Assert.Single(vm.Results.Items);
+            var result = vm.Results.Items[0];
             Assert.Equal("0.420", result.ScoreDisplay);
             Assert.Equal("[biomarker] snippet", result.HighlightDisplay);
             Assert.Same(entry, result.Entry);
@@ -87,12 +88,12 @@ namespace LM.App.Wpf.Tests
             var editor = new RecordingEntryEditor();
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, editor);
 
-            Assert.False(vm.EditCommand.CanExecute(null));
+            Assert.False(vm.Results.EditCommand.CanExecute(null));
 
             var entry = new Entry { Id = "abc", Title = "Sample" };
-            vm.Selected = new LibrarySearchResult(entry, null, null);
+            vm.Results.Selected = new LibrarySearchResult(entry, null, null);
 
-            Assert.True(vm.EditCommand.CanExecute(null));
+            Assert.True(vm.Results.EditCommand.CanExecute(null));
         }
 
         [Fact]
@@ -104,9 +105,9 @@ namespace LM.App.Wpf.Tests
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, editor);
 
             var entry = new Entry { Id = "abc", Title = "Editable" };
-            vm.Selected = new LibrarySearchResult(entry, null, null);
+            vm.Results.Selected = new LibrarySearchResult(entry, null, null);
 
-            vm.EditCommand.Execute(null);
+            vm.Results.EditCommand.Execute(null);
 
             Assert.Same(entry, editor.LastEdited);
         }
@@ -122,13 +123,13 @@ namespace LM.App.Wpf.Tests
             var storage = new RecordingFileStorageRepository();
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
             var result = new LibrarySearchResult(entry, null, null);
-            vm.Results.Add(result);
-            vm.Selected = result;
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "demo");
 
-            await vm.HandleFileDropAsync(new[] { filePath });
+            await vm.Results.HandleFileDropAsync(new[] { filePath });
 
             Assert.Equal(1, store.SaveCallCount);
             var savedEntry = store.EntriesById[entry.Id];
@@ -136,9 +137,9 @@ namespace LM.App.Wpf.Tests
             var attachment = savedEntry.Attachments[0];
             Assert.Equal(storage.SavedRelativePaths[0], attachment.RelativePath);
             Assert.Equal(Path.Combine("attachments", entry.Id), storage.TargetDirs[0]);
-            Assert.Same(vm.Selected, vm.Results[0]);
-            Assert.NotSame(result, vm.Selected);
-            Assert.Contains(vm.Selected.Entry.Attachments, a => a.RelativePath == attachment.RelativePath);
+            Assert.Same(vm.Results.Selected, vm.Results.Items[0]);
+            Assert.NotSame(result, vm.Results.Selected);
+            Assert.Contains(vm.Results.Selected.Entry.Attachments, a => a.RelativePath == attachment.RelativePath);
         }
 
         [Fact]
@@ -155,20 +156,20 @@ namespace LM.App.Wpf.Tests
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
             var resultA = new LibrarySearchResult(entryA, null, null);
             var resultB = new LibrarySearchResult(entryB, null, null);
-            vm.Results.Add(resultA);
-            vm.Results.Add(resultB);
-            vm.Selected = resultA;
+            vm.Results.Items.Add(resultA);
+            vm.Results.Items.Add(resultB);
+            vm.Results.Selected = resultA;
 
             var filePath = Path.Combine(temp.RootPath, "paper.pdf");
             File.WriteAllText(filePath, "demo");
 
-            await vm.HandleFileDropAsync(new[] { filePath }, resultB);
+            await vm.Results.HandleFileDropAsync(new[] { filePath }, resultB);
 
             Assert.Equal(Path.Combine("attachments", entryB.Id), storage.TargetDirs[0]);
             Assert.Equal(1, store.SaveCallCount);
-            Assert.Equal(entryB.Id, vm.Results[1].Entry.Id);
-            Assert.Equal(entryB.Id, vm.Selected.Entry.Id);
-            Assert.Contains(vm.Selected.Entry.Attachments, a => a.RelativePath == storage.SavedRelativePaths[0]);
+            Assert.Equal(entryB.Id, vm.Results.Items[1].Entry.Id);
+            Assert.Equal(entryB.Id, vm.Results.Selected.Entry.Id);
+            Assert.Contains(vm.Results.Selected.Entry.Attachments, a => a.RelativePath == storage.SavedRelativePaths[0]);
         }
 
         [Fact]
@@ -194,12 +195,12 @@ namespace LM.App.Wpf.Tests
             };
 
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
-            vm.Selected = new LibrarySearchResult(entry, null, null);
+            vm.Results.Selected = new LibrarySearchResult(entry, null, null);
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "dup");
 
-            await vm.HandleFileDropAsync(new[] { filePath });
+            await vm.Results.HandleFileDropAsync(new[] { filePath });
 
             Assert.Equal(0, store.SaveCallCount);
             Assert.Single(entry.Attachments);
@@ -218,13 +219,13 @@ namespace LM.App.Wpf.Tests
             var exe = Path.Combine(temp.RootPath, "run.exe");
             File.WriteAllText(exe, "exe");
 
-            Assert.False(vm.CanAcceptFileDrop(new[] { pdf }));
+            Assert.False(vm.Results.CanAcceptFileDrop(new[] { pdf }));
 
             var entry = new Entry { Id = "sel-1", Title = "Doc" };
-            vm.Selected = new LibrarySearchResult(entry, null, null);
+            vm.Results.Selected = new LibrarySearchResult(entry, null, null);
 
-            Assert.True(vm.CanAcceptFileDrop(new[] { pdf }));
-            Assert.False(vm.CanAcceptFileDrop(new[] { exe }));
+            Assert.True(vm.Results.CanAcceptFileDrop(new[] { pdf }));
+            Assert.False(vm.Results.CanAcceptFileDrop(new[] { exe }));
         }
 
         [Fact]
@@ -241,7 +242,7 @@ namespace LM.App.Wpf.Tests
             var pdf = Path.Combine(temp.RootPath, "drop.pdf");
             File.WriteAllText(pdf, "pdf");
 
-            Assert.True(vm.CanAcceptFileDrop(new[] { pdf }, targetResult));
+            Assert.True(vm.Results.CanAcceptFileDrop(new[] { pdf }, targetResult));
         }
 
         private static async Task InvokeSearchAsync(LibraryViewModel vm)
@@ -262,12 +263,21 @@ namespace LM.App.Wpf.Tests
             var prompt = new StubPresetPrompt();
             editor ??= new NoopEntryEditor();
             storage ??= new RecordingFileStorageRepository();
-            return new LibraryViewModel(store, search, ws, storage, presetStore, prompt, editor);
+            var filters = new LibraryFiltersViewModel(presetStore, prompt);
+            var documents = new NoopDocumentService();
+            var results = new LibraryResultsViewModel(store, storage, editor, documents);
+            return new LibraryViewModel(store, search, filters, results);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
         {
             public void EditEntry(Entry entry) { }
+        }
+
+
+        private sealed class NoopDocumentService : ILibraryDocumentService
+        {
+            public void OpenEntry(Entry entry) { }
         }
 
         private sealed class RecordingEntryEditor : ILibraryEntryEditor

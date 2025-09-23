@@ -1,7 +1,6 @@
-using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels;
-using LM.App.Wpf.Views;
+using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -17,15 +16,23 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<LibraryFilterPresetStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
             services.AddSingleton<ILibraryEntryEditor>(sp => new WorkspaceEntryEditor(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
+
+            services.AddSingleton(sp => new LibraryFiltersViewModel(
+                sp.GetRequiredService<LibraryFilterPresetStore>(),
+                sp.GetRequiredService<ILibraryPresetPrompt>()));
+
+            services.AddSingleton(sp => new LibraryResultsViewModel(
+                sp.GetRequiredService<IEntryStore>(),
+                sp.GetRequiredService<IFileStorageRepository>(),
+                sp.GetRequiredService<ILibraryEntryEditor>(),
+                sp.GetRequiredService<ILibraryDocumentService>()));
 
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFullTextSearchService>(),
-                sp.GetRequiredService<IWorkSpaceService>(),
-                sp.GetRequiredService<IFileStorageRepository>(),
-                sp.GetRequiredService<LibraryFilterPresetStore>(),
-                sp.GetRequiredService<ILibraryPresetPrompt>(),
-                sp.GetRequiredService<ILibraryEntryEditor>()));
+                sp.GetRequiredService<LibraryFiltersViewModel>(),
+                sp.GetRequiredService<LibraryResultsViewModel>()));
         }
     }
 }
