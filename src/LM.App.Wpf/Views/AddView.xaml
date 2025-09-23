@@ -10,13 +10,16 @@
     <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="12">
       <Button Content="Add file..." Command="{Binding AddFilesCommand}"/>
       <Button Content="Bulk add folder..." Command="{Binding BulkAddFolderCommand}"/>
-      <Button Content="Review staged…" Click="OnReviewStaged"/>
+      <Button Content="Review staged…" Command="{Binding ReviewStagedCommand}"/>
       <Button Content="Commit selected" Command="{Binding CommitSelectedCommand}"/>
       <Button Content="Clear" Command="{Binding ClearCommand}"/>
     </StackPanel>
 
     <!-- Watched folders management -->
     <Border DockPanel.Dock="Top" Margin="12,0,12,12" Padding="12" Background="#FFF8F8F8" CornerRadius="4">
+      <Border.DataContext>
+        <Binding Path="WatchedFoldersViewModel"/>
+      </Border.DataContext>
       <StackPanel>
         <DockPanel>
           <TextBlock Text="Watched folders" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
@@ -29,12 +32,12 @@
           </StackPanel>
         </DockPanel>
 
-        <ListView ItemsSource="{Binding WatchedFolders}" Margin="0,8,0,0" BorderThickness="0">
+        <ListView ItemsSource="{Binding Folders}" Margin="0,8,0,0" BorderThickness="0">
           <ListView.Style>
             <Style TargetType="ListView">
               <Setter Property="Visibility" Value="Visible"/>
               <Style.Triggers>
-                <DataTrigger Binding="{Binding WatchedFolders.Count}" Value="0">
+                <DataTrigger Binding="{Binding Folders.Count}" Value="0">
                   <Setter Property="Visibility" Value="Collapsed"/>
                 </DataTrigger>
               </Style.Triggers>
@@ -120,7 +123,7 @@
             <Style TargetType="TextBlock">
               <Setter Property="Visibility" Value="Collapsed"/>
               <Style.Triggers>
-                <DataTrigger Binding="{Binding WatchedFolders.Count}" Value="0">
+                <DataTrigger Binding="{Binding Folders.Count}" Value="0">
                   <Setter Property="Visibility" Value="Visible"/>
                 </DataTrigger>
               </Style.Triggers>
@@ -135,12 +138,15 @@
                                 SelectedItem="{Binding Current, Mode=TwoWay}"
                 IsSynchronizedWithCurrentItem="True"
                 Margin="12"
-				IsReadOnly="False"
-				CanUserAddRows="False"
-				MouseDoubleClick="OnRowDoubleClick">
+                                IsReadOnly="False"
+                                CanUserAddRows="False"
+        >
+            <DataGrid.InputBindings>
+              <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ReviewStagedCommand}"/>
+            </DataGrid.InputBindings>
 
-		  <!-- Row visuals: grey-out exact duplicates, amber for near matches -->
-		  <DataGrid.RowStyle>
+                  <!-- Row visuals: grey-out exact duplicates, amber for near matches -->
+                  <DataGrid.RowStyle>
 			  <Style TargetType="DataGridRow">
 				  <Setter Property="Opacity" Value="1"/>
 				  <Setter Property="IsEnabled" Value="True"/>

@@ -1,3 +1,4 @@
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
@@ -28,12 +29,22 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<ISimilarityLog>()));
 
             services.AddSingleton<WatchedFolderScanner>(sp => new WatchedFolderScanner(sp.GetRequiredService<IAddPipeline>()));
+            services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddSingleton<StagingListViewModel>(sp => new StagingListViewModel(sp.GetRequiredService<IAddPipeline>()));
+            services.AddSingleton<WatchedFoldersViewModel>(sp => new WatchedFoldersViewModel(
+                sp.GetRequiredService<StagingListViewModel>(),
+                sp.GetRequiredService<WatchedFolderScanner>(),
+                sp.GetRequiredService<IWatchedFolderSettingsStore>(),
+                sp.GetRequiredService<IDialogService>()));
 
             services.AddSingleton(sp => new AddViewModel(
                 sp.GetRequiredService<IAddPipeline>(),
                 sp.GetRequiredService<IWorkSpaceService>(),
                 sp.GetRequiredService<WatchedFolderScanner>(),
-                sp.GetRequiredService<IWatchedFolderSettingsStore>()));
+                sp.GetRequiredService<IWatchedFolderSettingsStore>(),
+                sp.GetRequiredService<StagingListViewModel>(),
+                sp.GetRequiredService<WatchedFoldersViewModel>(),
+                sp.GetRequiredService<IDialogService>()));
         }
     }
 }

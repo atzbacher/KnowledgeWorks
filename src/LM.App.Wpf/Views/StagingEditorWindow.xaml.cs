@@ -9,13 +9,12 @@ namespace LM.App.Wpf.Views
 {
     public partial class StagingEditorWindow : Window
     {
-        private AddViewModel VM => (AddViewModel)DataContext;
+        private StagingListViewModel VM => (StagingListViewModel)DataContext;
 
-        public StagingEditorWindow(AddViewModel vm)
+        public StagingEditorWindow(StagingListViewModel vm)
         {
             InitializeComponent();
             DataContext = vm ?? throw new ArgumentNullException(nameof(vm));
-            // VM already exposes: Current, SelectedType, EntryTypes, IndexLabel, SelectByOffset(...)
         }
 
         private void OnPrev(object sender, RoutedEventArgs e) => VM.SelectByOffset(-1);
