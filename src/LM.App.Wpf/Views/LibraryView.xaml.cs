@@ -11,7 +11,7 @@ using DragEventArgs = System.Windows.DragEventArgs;
 
 namespace LM.App.Wpf.Views
 {
-    public partial class LibraryView : UserControl
+    public partial class LibraryView : System.Windows.Controls.UserControl
     {
         public LibraryView() { InitializeComponent(); }
 
