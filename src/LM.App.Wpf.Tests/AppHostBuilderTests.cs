@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
+using LM.App.Wpf.ViewModels;
 using LM.Core.Abstractions;
 using LM.Infrastructure.FileSystem;
 using Xunit;

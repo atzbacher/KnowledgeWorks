@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <!-- keep your target; net8.0-windows or net9.0-windows are both fine -->
@@ -6,6 +6,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
+    <!-- Enable Windows targeting when building on non-Windows agents -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,35 +16,36 @@
     <ProjectReference Include="..\LM.Infrastructure\LM.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<!-- Roslyn analyzer that tracks public surface via PublicAPI.*.txt -->
-		<PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
+  <ItemGroup>
+    <!-- Roslyn analyzer that tracks public surface via PublicAPI.*.txt -->
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
 
-		<!-- Make the API files visible in Solution Explorer -->
-		<AdditionalFiles Include="PublicAPI.Shipped.txt" />
-		<AdditionalFiles Include="PublicAPI.Unshipped.txt" />
-	</ItemGroup>
+    <!-- Make the API files visible in Solution Explorer -->
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Application\" />
+    <Folder Include="ViewModels\Library\" />
+    <Folder Include="ViewModels\Review\" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Application\" />
-	  <Folder Include="ViewModels\Library\" />
-	  <Folder Include="ViewModels\Review\" />
-	</ItemGroup>
+  <!-- Create empty API files automatically if they are missing -->
+  <Target Name="EnsurePublicApiFiles" BeforeTargets="Build">
+    <WriteLinesToFile File="PublicAPI.Shipped.txt" Lines="" Overwrite="false" Condition="!Exists('PublicAPI.Shipped.txt')" />
+    <WriteLinesToFile File="PublicAPI.Unshipped.txt" Lines="" Overwrite="false" Condition="!Exists('PublicAPI.Unshipped.txt')" />
+  </Target>
 
-	<!-- Create empty API files automatically if they are missing -->
-	<Target Name="EnsurePublicApiFiles" BeforeTargets="Build">
-		<WriteLinesToFile File="PublicAPI.Shipped.txt" Lines="" Overwrite="false" Condition="!Exists('PublicAPI.Shipped.txt')" />
-		<WriteLinesToFile File="PublicAPI.Unshipped.txt" Lines="" Overwrite="false" Condition="!Exists('PublicAPI.Unshipped.txt')" />
-	</Target>
-
-	<PropertyGroup>
-		<EnableNETAnalyzers>true</EnableNETAnalyzers>
-		<AnalysisLevel>latest</AnalysisLevel>
-	</PropertyGroup>
-	
-	
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
 </Project>

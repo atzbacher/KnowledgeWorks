@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.Core.Models;
 using LM.Core.Models.Filters;
 using LM.Core.Models.Search;
 
