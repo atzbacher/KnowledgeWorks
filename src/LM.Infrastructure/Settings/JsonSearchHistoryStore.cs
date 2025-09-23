@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
+using LM.Core.Models;
 using LM.Core.Models.Search;
 
 namespace LM.Infrastructure.Settings

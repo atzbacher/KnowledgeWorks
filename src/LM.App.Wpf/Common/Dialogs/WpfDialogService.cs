@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.Views;
+using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.Common.Dialogs
 {
@@ -48,7 +49,7 @@ namespace LM.App.Wpf.Common.Dialogs
 
             var window = new StagingEditorWindow(stagingList)
             {
-                Owner = Application.Current?.Windows
+                Owner = WpfApplication.Current?.Windows
                     .OfType<Window>()
                     .FirstOrDefault(static w => w.IsActive)
             };

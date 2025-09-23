@@ -25,6 +25,15 @@ namespace LM.App.Wpf.Application
 
         public void Dispose() => _host.Dispose();
 
-        public ValueTask DisposeAsync() => _host.DisposeAsync();
+        public ValueTask DisposeAsync()
+        {
+            if (_host is IAsyncDisposable asyncDisposable)
+            {
+                return asyncDisposable.DisposeAsync();
+            }
+
+            _host.Dispose();
+            return ValueTask.CompletedTask;
+        }
     }
 }
