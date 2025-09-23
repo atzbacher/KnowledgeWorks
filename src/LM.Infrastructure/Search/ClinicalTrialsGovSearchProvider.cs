@@ -6,15 +6,18 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LM.Core.Abstractions.Search;
 using LM.Core.Models;
 
-namespace LM.Infrastructure.Pubmed
+namespace LM.Infrastructure.Search
 {
-    public sealed class ClinicalTrialsGovSearchProvider
+    public sealed class ClinicalTrialsGovSearchProvider : ISearchProvider
     {
         private readonly HttpClient _http = new HttpClient();
 
-        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, DateTime? from, DateTime? to, CancellationToken ct)
+        public SearchDatabase Database => SearchDatabase.ClinicalTrialsGov;
+
+        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, DateTime? from, DateTime? to, CancellationToken ct = default)
         {
             // v2 API - study list (we’ll keep it small and page size=200)
             var url = $"https://clinicaltrials.gov/api/v2/studies?query.term={Uri.EscapeDataString(query)}&pageSize=200";

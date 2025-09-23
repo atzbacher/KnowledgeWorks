@@ -404,7 +404,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
 LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.Core.Abstractions.Configuration.ISearchHistoryStore? searchHistoryStore = null, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel! providers, LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel! history, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.App.Wpf.ViewModels.PreviousSearchSummary?
@@ -414,6 +414,32 @@ LM.App.Wpf.ViewModels.SearchViewModel.ShowRunDetailsCommand.get -> System.Window
 LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.History.get -> LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel!
+LM.App.Wpf.ViewModels.SearchViewModel.Providers.get -> LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.RecordExecutionAsync(LM.Core.Models.Search.SearchExecutionResult! result, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.RecentSearchHistory.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.Core.Models.Search.SearchHistoryEntry!>!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.SearchHistoryViewModel(LM.Core.Abstractions.Configuration.ISearchHistoryStore! store) -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.From.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.From.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Query.get -> string!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Query.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.ExecuteSearchAsync() -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.RunSearchCommand.get -> LM.App.Wpf.Common.AsyncRelayCommand!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SearchExecuted -> System.EventHandler<LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs!>?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SearchProvidersViewModel(LM.Core.Abstractions.Search.ISearchExecutionService! executionService) -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SelectedDatabase.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.To.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.To.set -> void
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs.Result.get -> LM.Core.Models.Search.SearchExecutionResult!
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs.SearchExecutedEventArgs(LM.Core.Models.Search.SearchExecutionResult! result) -> void
 LM.App.Wpf.ViewModels.PreviousSearchSummary
 LM.App.Wpf.ViewModels.PreviousSearchSummary.DisplayName.get -> string!
 LM.App.Wpf.ViewModels.PreviousSearchSummary.EntryId.get -> string!

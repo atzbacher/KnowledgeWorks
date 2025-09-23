@@ -15,6 +15,11 @@ LM.Core.Abstractions.IEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.T
 LM.Core.Abstractions.IEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! filter, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
 LM.Core.Abstractions.IFullTextSearchService
 LM.Core.Abstractions.IFullTextSearchService.SearchAsync(LM.Core.Models.Search.FullTextSearchQuery! query, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>!>!
+LM.Core.Abstractions.Search.ISearchExecutionService
+LM.Core.Abstractions.Search.ISearchExecutionService.ExecuteAsync(LM.Core.Models.Search.SearchExecutionRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchExecutionResult!>!
+LM.Core.Abstractions.Search.ISearchProvider
+LM.Core.Abstractions.Search.ISearchProvider.Database.get -> LM.Core.Models.SearchDatabase
+LM.Core.Abstractions.Search.ISearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
 LM.Core.Abstractions.IFileStorageRepository
 LM.Core.Abstractions.IFileStorageRepository.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IHasher
@@ -371,6 +376,22 @@ LM.Core.Models.Search.SearchHistoryEntry.Query.get -> string!
 LM.Core.Models.Search.SearchHistoryEntry.Query.init -> void
 LM.Core.Models.Search.SearchHistoryEntry.To.get -> System.DateTime?
 LM.Core.Models.Search.SearchHistoryEntry.To.init -> void
+LM.Core.Models.Search.SearchExecutionRequest
+LM.Core.Models.Search.SearchExecutionRequest.Database.get -> LM.Core.Models.SearchDatabase
+LM.Core.Models.Search.SearchExecutionRequest.Database.init -> void
+LM.Core.Models.Search.SearchExecutionRequest.From.get -> System.DateTime?
+LM.Core.Models.Search.SearchExecutionRequest.From.init -> void
+LM.Core.Models.Search.SearchExecutionRequest.Query.get -> string!
+LM.Core.Models.Search.SearchExecutionRequest.Query.init -> void
+LM.Core.Models.Search.SearchExecutionRequest.To.get -> System.DateTime?
+LM.Core.Models.Search.SearchExecutionRequest.To.init -> void
+LM.Core.Models.Search.SearchExecutionResult
+LM.Core.Models.Search.SearchExecutionResult.ExecutedUtc.get -> System.DateTimeOffset
+LM.Core.Models.Search.SearchExecutionResult.ExecutedUtc.init -> void
+LM.Core.Models.Search.SearchExecutionResult.Hits.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!
+LM.Core.Models.Search.SearchExecutionResult.Hits.init -> void
+LM.Core.Models.Search.SearchExecutionResult.Request.get -> LM.Core.Models.Search.SearchExecutionRequest!
+LM.Core.Models.Search.SearchExecutionResult.Request.init -> void
 LM.Core.Models.UserPreferences
 LM.Core.Models.UserPreferences.Search.get -> LM.Core.Models.SearchPreferences!
 LM.Core.Models.UserPreferences.Search.init -> void
