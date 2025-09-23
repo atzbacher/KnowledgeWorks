@@ -4,12 +4,20 @@ using System.Linq;
 using System.Windows;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.Views;
+using Microsoft.Extensions.DependencyInjection;
 using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.Common.Dialogs
 {
     public sealed class WpfDialogService : IDialogService
     {
+        private readonly IServiceProvider _services;
+
+        public WpfDialogService(IServiceProvider services)
+        {
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+        }
+
         public string[]? ShowOpenFileDialog(FilePickerOptions options)
         {
             if (options is null)
@@ -47,12 +55,13 @@ namespace LM.App.Wpf.Common.Dialogs
             if (stagingList is null)
                 throw new ArgumentNullException(nameof(stagingList));
 
-            var window = new StagingEditorWindow(stagingList)
-            {
-                Owner = WpfApplication.Current?.Windows
-                    .OfType<Window>()
-                    .FirstOrDefault(static w => w.IsActive)
-            };
+            using var scope = _services.CreateScope();
+            var window = scope.ServiceProvider.GetRequiredService<StagingEditorWindow>();
+            var owner = WpfApplication.Current?.Windows
+                .OfType<Window>()
+                .FirstOrDefault(static w => w.IsActive);
+            if (owner is not null)
+                window.Owner = owner;
 
             return window.ShowDialog();
         }

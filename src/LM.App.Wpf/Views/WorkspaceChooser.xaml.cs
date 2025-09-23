@@ -1,40 +1,33 @@
-using LM.App.Wpf.Diagnostics;
+using System;
+using System.Windows;
+using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
     public partial class WorkspaceChooser : System.Windows.Window
     {
-        public string? SelectedWorkspacePath { get; private set; }
-        public WorkspaceChooser() { InitializeComponent(); }
+        private readonly WorkspaceChooserViewModel _viewModel;
 
-        private void OnBrowse(object sender, System.Windows.RoutedEventArgs e)
+        public WorkspaceChooser(WorkspaceChooserViewModel viewModel)
         {
-            var dlg = new System.Windows.Forms.FolderBrowserDialog
-            {
-                Description = "Select the workspace folder (shared via OneDrive/SharePoint)",
-                UseDescriptionForTitle = true,
-                ShowNewFolderButton = true
-            };
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                PathBox.Text = dlg.SelectedPath;
+            InitializeComponent();
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            DataContext = _viewModel;
+            _viewModel.CloseRequested += OnCloseRequested;
         }
 
-        private void OnOk(object sender, System.Windows.RoutedEventArgs e)
+        public string? SelectedWorkspacePath => _viewModel.SelectedWorkspacePath;
+
+        protected override void OnClosed(EventArgs e)
         {
-            var path = PathBox.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(path) || !System.IO.Directory.Exists(path))
-            {
-                System.Windows.MessageBox.Show("Please choose an existing folder.", "Workspace",
-                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                return;
-            }
+            _viewModel.CloseRequested -= OnCloseRequested;
+            base.OnClosed(e);
+        }
 
-            // NEW: set debug flag from checkbox (internal toggle)
-            DebugFlags.DumpStagingJson = DebugDumpCheck.IsChecked == true;
-
-            SelectedWorkspacePath = System.IO.Path.GetFullPath(path);
-            DialogResult = true;
-            Close();
+        private void OnCloseRequested(object? sender, DialogCloseRequestedEventArgs e)
+        {
+            DialogResult = e.DialogResult;
         }
     }
 }

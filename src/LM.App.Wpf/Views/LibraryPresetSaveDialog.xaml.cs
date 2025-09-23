@@ -1,42 +1,32 @@
 #nullable enable
+using System;
 using System.Windows;
-using LM.App.Wpf.Common;
+using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
     public partial class LibraryPresetSaveDialog : Window
     {
-        public string ResultName { get; private set; } = string.Empty;
+        private readonly LibraryPresetSaveDialogViewModel _viewModel;
 
-        public LibraryPresetSaveDialog(LibraryPresetSaveContext context)
+        public LibraryPresetSaveDialog(LibraryPresetSaveDialogViewModel viewModel)
         {
             InitializeComponent();
-
-            NameBox.Text = context.DefaultName;
-            Loaded += (_, _) =>
-            {
-                NameBox.Focus();
-                NameBox.SelectAll();
-            };
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            DataContext = _viewModel;
+            _viewModel.CloseRequested += OnCloseRequested;
         }
 
-        private void OnSave(object sender, RoutedEventArgs e)
+        protected override void OnClosed(EventArgs e)
         {
-            var name = NameBox.Text?.Trim();
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                System.Windows.MessageBox.Show(this, "Please provide a name for the preset.", "Save Library Preset", MessageBoxButton.OK, MessageBoxImage.Information);
-                NameBox.Focus();
-                return;
-            }
-
-            ResultName = name;
-            DialogResult = true;
+            _viewModel.CloseRequested -= OnCloseRequested;
+            base.OnClosed(e);
         }
 
-        private void OnCancel(object sender, RoutedEventArgs e)
+        private void OnCloseRequested(object? sender, DialogCloseRequestedEventArgs e)
         {
-            DialogResult = false;
+            DialogResult = e.DialogResult;
         }
     }
 }

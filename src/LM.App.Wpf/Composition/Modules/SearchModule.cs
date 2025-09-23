@@ -1,5 +1,6 @@
 using LM.App.Wpf.Common;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Search;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
@@ -19,6 +20,8 @@ namespace LM.App.Wpf.Composition.Modules
             var services = builder.Services;
 
             services.AddSingleton<ISearchSavePrompt, SearchSavePrompt>();
+            services.AddTransient<SearchSaveDialogViewModel>();
+            services.AddTransient<SearchSaveDialog>();
             services.AddSingleton<ISearchHistoryStore>(sp => new JsonSearchHistoryStore(sp.GetRequiredService<IWorkSpaceService>()));
             services.AddSingleton<IUserPreferencesStore, JsonUserPreferencesStore>();
             services.AddSingleton<ISearchExecutionService, SearchExecutionService>();
