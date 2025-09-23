@@ -21,29 +21,96 @@ LM.App.Wpf.Common.ViewModelBase
 LM.App.Wpf.Common.ViewModelBase.OnPropertyChanged(string? name = null) -> void
 LM.App.Wpf.Common.ViewModelBase.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
+LM.App.Wpf.Models.WatchedFolder
+LM.App.Wpf.Models.WatchedFolder.IncludeSubdirectories.get -> bool
+LM.App.Wpf.Models.WatchedFolder.IncludeSubdirectories.init -> void
+LM.App.Wpf.Models.WatchedFolder.IsEnabled.get -> bool
+LM.App.Wpf.Models.WatchedFolder.IsEnabled.init -> void
+LM.App.Wpf.Models.WatchedFolder.Path.get -> string!
+LM.App.Wpf.Models.WatchedFolder.Path.init -> void
+LM.App.Wpf.Models.WatchedFolder.WatchedFolder() -> void
+LM.App.Wpf.Services.DialogService
+LM.App.Wpf.Services.DialogService.DialogService() -> void
+LM.App.Wpf.Services.DialogService.ShowFolderBrowserDialog(string! description) -> string?
+LM.App.Wpf.Services.DialogService.ShowOpenFileDialog(string! filter, bool allowMultiple) -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Services.DialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.Add.StagingListViewModel! stagingViewModel) -> void
+LM.App.Wpf.Services.FileSystemWatchedFolderScanner
+LM.App.Wpf.Services.FileSystemWatchedFolderScanner.FileSystemWatchedFolderScanner() -> void
+LM.App.Wpf.Services.FileSystemWatchedFolderScanner.ScanAsync(LM.App.Wpf.Models.WatchedFolder! folder, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
+LM.App.Wpf.Services.IDialogService
+LM.App.Wpf.Services.IDialogService.ShowFolderBrowserDialog(string! description) -> string?
+LM.App.Wpf.Services.IDialogService.ShowOpenFileDialog(string! filter, bool allowMultiple) -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Services.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.Add.StagingListViewModel! stagingViewModel) -> void
+LM.App.Wpf.Services.IWatchedFolderConfigStore
+LM.App.Wpf.Services.IWatchedFolderConfigStore.Load() -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Models.WatchedFolder!>!
+LM.App.Wpf.Services.IWatchedFolderConfigStore.Save(System.Collections.Generic.IEnumerable<LM.App.Wpf.Models.WatchedFolder!>! folders) -> void
+LM.App.Wpf.Services.IWatchedFolderScanner
+LM.App.Wpf.Services.IWatchedFolderScanner.ScanAsync(LM.App.Wpf.Models.WatchedFolder! folder, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
+LM.App.Wpf.Services.InMemoryWatchedFolderConfigStore
+LM.App.Wpf.Services.InMemoryWatchedFolderConfigStore.InMemoryWatchedFolderConfigStore() -> void
+LM.App.Wpf.Services.InMemoryWatchedFolderConfigStore.Load() -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Models.WatchedFolder!>!
+LM.App.Wpf.Services.InMemoryWatchedFolderConfigStore.Save(System.Collections.Generic.IEnumerable<LM.App.Wpf.Models.WatchedFolder!>! folders) -> void
+LM.App.Wpf.Services.NullDialogService
+LM.App.Wpf.Services.NullDialogService.NullDialogService() -> void
+LM.App.Wpf.Services.NullDialogService.ShowFolderBrowserDialog(string! description) -> string?
+LM.App.Wpf.Services.NullDialogService.ShowOpenFileDialog(string! filter, bool allowMultiple) -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Services.NullDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.Add.StagingListViewModel! stagingViewModel) -> void
+LM.App.Wpf.Services.WatchedFolderConfigStore
+LM.App.Wpf.Services.WatchedFolderConfigStore.Load() -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Models.WatchedFolder!>!
+LM.App.Wpf.Services.WatchedFolderConfigStore.Save(System.Collections.Generic.IEnumerable<LM.App.Wpf.Models.WatchedFolder!>! folders) -> void
+LM.App.Wpf.Services.WatchedFolderConfigStore.WatchedFolderConfigStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.ViewModels.AddPipeline
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.AddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
-LM.App.Wpf.ViewModels.AddViewModel
-LM.App.Wpf.ViewModels.AddViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
-LM.App.Wpf.ViewModels.AddViewModel.BulkAddFolderCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.CommitSelectedCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
-LM.App.Wpf.ViewModels.AddViewModel.Current.set -> void
-LM.App.Wpf.ViewModels.AddViewModel.EntryTypes.get -> System.Array!
-LM.App.Wpf.ViewModels.AddViewModel.IndexLabel.get -> string!
-LM.App.Wpf.ViewModels.AddViewModel.IsBusy.get -> bool
-LM.App.Wpf.ViewModels.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
-LM.App.Wpf.ViewModels.AddViewModel.SelectByOffset(int delta) -> void
-LM.App.Wpf.ViewModels.AddViewModel.SelectedType.get -> LM.Core.Models.EntryType
-LM.App.Wpf.ViewModels.AddViewModel.SelectedType.set -> void
-LM.App.Wpf.ViewModels.AddViewModel.Staging.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.Add.AddViewModel
+LM.App.Wpf.ViewModels.Add.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
+LM.App.Wpf.ViewModels.Add.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.App.Wpf.Services.IDialogService! dialogService, LM.App.Wpf.Services.IWatchedFolderScanner! watchedFolderScanner, LM.App.Wpf.Services.IWatchedFolderConfigStore! configStore) -> void
+LM.App.Wpf.ViewModels.Add.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null, LM.App.Wpf.Services.IDialogService? dialogService = null, LM.App.Wpf.Services.IWatchedFolderScanner? watchedFolderScanner = null, LM.App.Wpf.Services.IWatchedFolderConfigStore? configStore = null) -> void
+LM.App.Wpf.ViewModels.Add.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null, LM.App.Wpf.Services.IDialogService? dialogService = null, LM.App.Wpf.Services.IWatchedFolderScanner? watchedFolderScanner = null, LM.App.Wpf.Services.IWatchedFolderConfigStore? configStore = null) -> void
+LM.App.Wpf.ViewModels.Add.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Add.AddViewModel.Staging.get -> LM.App.Wpf.ViewModels.Add.StagingListViewModel!
+LM.App.Wpf.ViewModels.Add.AddViewModel.WatchedFolders.get -> LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.BulkAddFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.CommitSelectedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.Current.set -> void
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.EntryTypes.get -> System.Array!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.IndexLabel.get -> string!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.ReviewCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.SelectedType.get -> LM.Core.Models.EntryType
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.SelectedType.set -> void
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.SelectByOffset(int delta) -> void
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Add.StagingListViewModel.StagingListViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.App.Wpf.Services.IDialogService! dialogs) -> void
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.IncludeSubdirectories.get -> bool
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.IncludeSubdirectories.set -> void
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.IsEnabled.get -> bool
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.IsEnabled.set -> void
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.Path.get -> string!
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.Path.set -> void
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.ToModel() -> LM.App.Wpf.Models.WatchedFolder!
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.WatchedFolderItemViewModel(LM.App.Wpf.Models.WatchedFolder! folder) -> void
+LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel.WatchedFolderItemViewModel(string! path, bool includeSubdirectories, bool isEnabled) -> void
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.AddFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel!>!
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.RemoveFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.ScanCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.SelectedFolder.get -> LM.App.Wpf.ViewModels.Add.WatchedFolderItemViewModel?
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.SelectedFolder.set -> void
+LM.App.Wpf.ViewModels.Add.WatchedFoldersViewModel.WatchedFoldersViewModel(LM.App.Wpf.Services.IWatchedFolderConfigStore! configStore, LM.App.Wpf.Services.IWatchedFolderScanner! scanner, LM.App.Wpf.Services.IDialogService! dialogs, LM.App.Wpf.ViewModels.Add.StagingListViewModel! staging) -> void
 LM.App.Wpf.ViewModels.IAddPipeline
 LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.IAddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!

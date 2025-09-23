@@ -2,16 +2,16 @@
 using System;
 using System.Linq;
 using System.Windows;
-using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Add;
 using LM.Infrastructure.Utils;
 
 namespace LM.App.Wpf.Views
 {
     public partial class StagingEditorWindow : Window
     {
-        private AddViewModel VM => (AddViewModel)DataContext;
+        private StagingListViewModel VM => (StagingListViewModel)DataContext;
 
-        public StagingEditorWindow(AddViewModel vm)
+        public StagingEditorWindow(StagingListViewModel vm)
         {
             InitializeComponent();
             DataContext = vm ?? throw new ArgumentNullException(nameof(vm));
