@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.Services;
+using LM.App.Wpf.ViewModels.Add;
 using LM.Core.Abstractions;
 using LM.HubSpoke.Abstractions;
 using LM.HubSpoke.Entries;
@@ -34,6 +36,9 @@ namespace LM.App.Wpf.Composition
             public required HookOrchestrator Hooks { get; init; }
             public required ISimilarityLog SimLog { get; init; }
             public required IAddPipeline Pipeline { get; init; }
+            public required IDialogService Dialogs { get; init; }
+            public required IWatchedFolderScanner WatchedFolderScanner { get; init; }
+            public required IWatchedFolderConfigStore WatchedFolderConfig { get; init; }
         }
 
         /// <summary>
@@ -73,6 +78,10 @@ namespace LM.App.Wpf.Composition
                 pmidNorm,          // <-- insert here
                 simlog);
 
+            var dialogs = new DialogService();
+            var watchedScanner = new FileSystemWatchedFolderScanner();
+            var watchedConfig = new WatchedFolderConfigStore(ws);
+
             return new AppServices
             {
                 Workspaces = ws,
@@ -87,7 +96,10 @@ namespace LM.App.Wpf.Composition
                 Store = store,
                 Hooks = orchestrator,
                 SimLog = simlog,
-                Pipeline = pipeline
+                Pipeline = pipeline,
+                Dialogs = dialogs,
+                WatchedFolderScanner = watchedScanner,
+                WatchedFolderConfig = watchedConfig
             };
         }
     }

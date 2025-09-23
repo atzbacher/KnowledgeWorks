@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Add;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.HubSpoke.Spokes;
@@ -69,7 +70,11 @@ namespace LM.App.Wpf
 
             // ViewModels
             var libraryVm = new LibraryViewModel(services.Store, ws);
-            var addVm = new AddViewModel(services.Pipeline);
+            var addVm = new AddViewModel(
+                services.Pipeline,
+                services.Dialogs,
+                services.WatchedFolderScanner,
+                services.WatchedFolderConfig);
 
             // Bind
             if (shell.LibraryViewControl != null) shell.LibraryViewControl.DataContext = libraryVm;

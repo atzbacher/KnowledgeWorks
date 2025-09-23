@@ -7,22 +7,26 @@
              d:DesignHeight="600" d:DesignWidth="1000">
   <DockPanel>
     <!-- Toolbar -->
-    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="12">
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="12"
+                DataContext="{Binding Staging}">
       <Button Content="Add file..." Command="{Binding AddFilesCommand}"/>
       <Button Content="Bulk add folder..." Command="{Binding BulkAddFolderCommand}"/>
-      <Button Content="Review staged…" Click="OnReviewStaged"/>
+      <Button Content="Review staged…" Command="{Binding ReviewCommand}"/>
       <Button Content="Commit selected" Command="{Binding CommitSelectedCommand}"/>
       <Button Content="Clear" Command="{Binding ClearCommand}"/>
     </StackPanel>
 
-	  <!-- Staging grid -->
-	  <DataGrid ItemsSource="{Binding Staging}"
-				SelectedItem="{Binding Current, Mode=TwoWay}"
-                IsSynchronizedWithCurrentItem="True"
-                Margin="12"
-				IsReadOnly="False"
-				CanUserAddRows="False"
-				MouseDoubleClick="OnRowDoubleClick">
+    <!-- Staging grid -->
+    <DataGrid DataContext="{Binding Staging}"
+              ItemsSource="{Binding Items}"
+              SelectedItem="{Binding Current, Mode=TwoWay}"
+              IsSynchronizedWithCurrentItem="True"
+              Margin="12"
+              IsReadOnly="False"
+              CanUserAddRows="False">
+      <DataGrid.InputBindings>
+        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding ReviewCommand}"/>
+      </DataGrid.InputBindings>
 
 		  <!-- Row visuals: grey-out exact duplicates, amber for near matches -->
 		  <DataGrid.RowStyle>
