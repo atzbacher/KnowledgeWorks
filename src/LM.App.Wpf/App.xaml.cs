@@ -4,10 +4,13 @@ using System.Threading.Tasks;
 using System.Windows;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.Infrastructure.FileSystem;
+using Microsoft.Extensions.DependencyInjection;
 
 using WpfMessageBox = System.Windows.MessageBox;
 
@@ -44,16 +47,24 @@ namespace LM.App.Wpf
             this.MainWindow = shell;
             shell.Show();
 
-            var ws = new WorkspaceService();
-            var chooser = new WorkspaceChooser { Owner = shell };
+            using var startupServices = new ServiceCollection()
+                .AddSingleton<IDialogService, WpfDialogService>()
+                .AddTransient<WorkspaceChooserViewModel>()
+                .AddTransient<WorkspaceChooser>()
+                .BuildServiceProvider();
+
+            var chooser = startupServices.GetRequiredService<WorkspaceChooser>();
+            chooser.Owner = shell;
             var ok = chooser.ShowDialog();
-            if (ok != true || string.IsNullOrWhiteSpace(chooser.SelectedWorkspacePath))
+            var selectedWorkspacePath = chooser.SelectedWorkspacePath;
+            if (ok != true || string.IsNullOrWhiteSpace(selectedWorkspacePath))
             {
                 shell.Close();
                 Shutdown();
                 return;
             }
-            await ws.EnsureWorkspaceAsync(chooser.SelectedWorkspacePath);
+            var ws = new WorkspaceService();
+            await ws.EnsureWorkspaceAsync(selectedWorkspacePath);
 
             var host = AppHostBuilder.Create()
                                      .AddModule(new CoreModule(ws))

@@ -1,12 +1,8 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace LM.App.Wpf.Common
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged
+    internal abstract class ViewModelBase : ObservableObject
     {
-        public event PropertyChangedEventHandler? PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

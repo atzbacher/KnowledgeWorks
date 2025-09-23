@@ -1,0 +1,126 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:core="clr-namespace:LM.Core.Models;assembly=LM.Core">
+  <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+  <DataTemplate x:Key="PublicationTemplate">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0">
+        <TextBlock Text="Title"/>
+        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Display name"/>
+        <DockPanel>
+          <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}" />
+          <Button Content="Generate"
+                  Margin="8,0,0,0"
+                  Command="{Binding DataContext.GenerateShortTitleCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+        </DockPanel>
+
+        <TextBlock Text="Authors (comma-separated)"/>
+        <TextBox Text="{Binding AuthorsCsv, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <DockPanel>
+          <StackPanel Width="160">
+            <TextBlock Text="Year"/>
+            <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+          <StackPanel Margin="12,0,0,0">
+            <TextBlock Text="Source (journal/venue)"/>
+            <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+        </DockPanel>
+
+        <TextBlock Text="Tags (comma-separated)"/>
+        <TextBox Text="{Binding TagsCsv, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <CheckBox Content="Internal" IsChecked="{Binding IsInternal}" Margin="0,8,0,0"/>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Margin="12,0,0,0">
+        <DockPanel>
+          <StackPanel Width="200">
+            <TextBlock Text="DOI"/>
+            <TextBox Text="{Binding Doi, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+          <StackPanel Margin="12,0,0,0" Width="160">
+            <TextBlock Text="PMID"/>
+            <TextBox Text="{Binding Pmid, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+        </DockPanel>
+
+        <TextBlock Text="Internal ID"/>
+        <TextBox Text="{Binding InternalId, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Notes"/>
+        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True" Height="120"/>
+
+        <TextBlock Text="Similar to (if any)"/>
+        <TextBox Text="{Binding MatchedTitle}" IsReadOnly="True"/>
+        <TextBlock Text="Similarity"/>
+        <TextBlock Text="{Binding Similarity, StringFormat={}{0:P0}}"/>
+      </StackPanel>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate x:Key="DocumentTemplate">
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="*"/>
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0">
+        <TextBlock Text="Title"/>
+        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Display name"/>
+        <DockPanel>
+          <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}" />
+          <Button Content="Generate"
+                  Margin="8,0,0,0"
+                  Command="{Binding DataContext.GenerateShortTitleCommand, RelativeSource={RelativeSource AncestorType=Window}}"/>
+        </DockPanel>
+
+        <TextBlock Text="Authors (comma-separated)"/>
+        <TextBox Text="{Binding AuthorsCsv, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <DockPanel>
+          <StackPanel Width="160">
+            <TextBlock Text="Year"/>
+            <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+          <StackPanel Margin="12,0,0,0">
+            <TextBlock Text="Source (owner/department)"/>
+            <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}"/>
+          </StackPanel>
+        </DockPanel>
+
+        <TextBlock Text="Tags (comma-separated)"/>
+        <TextBox Text="{Binding TagsCsv, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <CheckBox Content="Internal" IsChecked="{Binding IsInternal}" Margin="0,8,0,0"/>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Margin="12,0,0,0">
+        <TextBlock Text="Internal ID"/>
+        <TextBox Text="{Binding InternalId, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <TextBlock Text="Notes"/>
+        <TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True" Height="120"/>
+
+        <TextBlock Text="Similar to (if any)"/>
+        <TextBox Text="{Binding MatchedTitle}" IsReadOnly="True"/>
+        <TextBlock Text="Similarity"/>
+        <TextBlock Text="{Binding Similarity, StringFormat={}{0:P0}}"/>
+      </StackPanel>
+    </Grid>
+  </DataTemplate>
+</ResourceDictionary>

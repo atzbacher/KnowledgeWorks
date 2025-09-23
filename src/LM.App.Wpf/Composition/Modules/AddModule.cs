@@ -1,5 +1,7 @@
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs;
+using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.HubSpoke.Abstractions;
@@ -30,6 +32,8 @@ namespace LM.App.Wpf.Composition.Modules
 
             services.AddSingleton<WatchedFolderScanner>(sp => new WatchedFolderScanner(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddTransient<StagingEditorViewModel>();
+            services.AddTransient<StagingEditorWindow>();
             services.AddSingleton<StagingListViewModel>(sp => new StagingListViewModel(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<WatchedFoldersViewModel>(sp => new WatchedFoldersViewModel(
                 sp.GetRequiredService<StagingListViewModel>(),

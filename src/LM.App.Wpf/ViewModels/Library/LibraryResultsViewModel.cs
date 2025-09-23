@@ -4,9 +4,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.App.Wpf.Views.Behaviors;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
@@ -16,7 +19,7 @@ namespace LM.App.Wpf.ViewModels.Library
     /// <summary>
     /// Handles Library search result presentation and document operations.
     /// </summary>
-    public sealed class LibraryResultsViewModel : ViewModelBase
+    public sealed partial class LibraryResultsViewModel : ViewModelBase
     {
         private static readonly HashSet<string> s_supportedAttachmentExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -27,10 +30,12 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IFileStorageRepository _storage;
         private readonly ILibraryEntryEditor _entryEditor;
         private readonly ILibraryDocumentService _documentService;
-        private readonly RelayCommand _openCommand;
-        private readonly RelayCommand _editCommand;
-        private LibrarySearchResult? _selected;
-        private bool _resultsAreFullText;
+
+        [ObservableProperty]
+        private LibrarySearchResult? selected;
+
+        [ObservableProperty(SetterAccessModifier = AccessModifier.Private)]
+        private bool resultsAreFullText;
 
         public LibraryResultsViewModel(IEntryStore store,
                                        IFileStorageRepository storage,
@@ -43,40 +48,9 @@ namespace LM.App.Wpf.ViewModels.Library
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
 
             Items = new ObservableCollection<LibrarySearchResult>();
-            _openCommand = new RelayCommand(_ => OpenSelected(), _ => Selected?.Entry is not null);
-            _editCommand = new RelayCommand(_ => EditSelected(), _ => Selected?.Entry is not null);
         }
 
         public ObservableCollection<LibrarySearchResult> Items { get; }
-
-        public LibrarySearchResult? Selected
-        {
-            get => _selected;
-            set
-            {
-                if (ReferenceEquals(_selected, value))
-                    return;
-                _selected = value;
-                OnPropertyChanged();
-                _openCommand.RaiseCanExecuteChanged();
-                _editCommand.RaiseCanExecuteChanged();
-            }
-        }
-
-        public bool ResultsAreFullText
-        {
-            get => _resultsAreFullText;
-            private set
-            {
-                if (_resultsAreFullText == value)
-                    return;
-                _resultsAreFullText = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand OpenCommand => _openCommand;
-        public ICommand EditCommand => _editCommand;
 
         public void Clear()
         {
@@ -132,6 +106,42 @@ namespace LM.App.Wpf.ViewModels.Library
             }
 
             return false;
+        }
+
+        [RelayCommand]
+        private void PreviewDrop(FileDropRequest request)
+        {
+            if (request is null)
+                return;
+
+            var dropTarget = request.DropTarget as LibrarySearchResult;
+            var canAccept = CanAcceptFileDrop(request.Paths, dropTarget);
+
+            request.Args.Effects = canAccept ? DragDropEffects.Copy : DragDropEffects.None;
+            request.Args.Handled = true;
+        }
+
+        [RelayCommand]
+        private async Task DropAsync(FileDropRequest request)
+        {
+            if (request is null)
+                return;
+
+            if (request.Paths.Count == 0)
+            {
+                request.Args.Effects = DragDropEffects.None;
+                request.Args.Handled = true;
+                return;
+            }
+
+            var dropTarget = request.DropTarget as LibrarySearchResult;
+
+            if (dropTarget is not null && !ReferenceEquals(Selected, dropTarget))
+                Selected = dropTarget;
+
+            await HandleFileDropAsync(request.Paths, dropTarget).ConfigureAwait(false);
+
+            request.Args.Handled = true;
         }
 
         public async Task HandleFileDropAsync(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
@@ -254,7 +264,8 @@ namespace LM.App.Wpf.ViewModels.Library
             ShowDropWarnings(unsupported, duplicates, failures);
         }
 
-        private void OpenSelected()
+        [RelayCommand(CanExecute = nameof(CanModifySelected))]
+        private void Open()
         {
             var entry = Selected?.Entry;
             if (entry is null) return;
@@ -273,7 +284,8 @@ namespace LM.App.Wpf.ViewModels.Library
             }
         }
 
-        private void EditSelected()
+        [RelayCommand(CanExecute = nameof(CanModifySelected))]
+        private void Edit()
         {
             var entry = Selected?.Entry;
             if (entry is null) return;
@@ -290,6 +302,14 @@ namespace LM.App.Wpf.ViewModels.Library
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
             }
+        }
+
+        private bool CanModifySelected() => Selected?.Entry is not null;
+
+        partial void OnSelectedChanged(LibrarySearchResult? value)
+        {
+            OpenCommand.NotifyCanExecuteChanged();
+            EditCommand.NotifyCanExecuteChanged();
         }
 
         private async Task RefreshSelectedEntryAsync(LibrarySearchResult? previous, string entryId)

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.Core.Models;
@@ -15,211 +15,97 @@ namespace LM.App.Wpf.ViewModels.Library
     /// <summary>
     /// Encapsulates metadata filter state, full-text options, and preset persistence for the Library view.
     /// </summary>
-    public sealed class LibraryFiltersViewModel : ViewModelBase
+    public sealed partial class LibraryFiltersViewModel : ViewModelBase
     {
         private readonly LibraryFilterPresetStore _presetStore;
         private readonly ILibraryPresetPrompt _presetPrompt;
 
-        private bool _useFullTextSearch;
-        private string? _fullTextQuery;
-        private bool _fullTextInTitle = true;
-        private bool _fullTextInAbstract = true;
-        private bool _fullTextInContent = true;
-        private string? _titleContains;
-        private string? _authorContains;
-        private string? _tagsCsv;
-        private bool? _isInternal;
-        private int? _yearFrom;
-        private int? _yearTo;
-        private string? _sourceContains;
-        private string? _internalIdContains;
-        private string? _doiContains;
-        private string? _pmidContains;
-        private string? _nctContains;
-        private string? _addedByContains;
-        private DateTime? _addedOnFrom;
-        private DateTime? _addedOnTo;
-        private bool _typePublication = true;
-        private bool _typePresentation = true;
-        private bool _typeWhitePaper = true;
-        private bool _typeSlideDeck = true;
-        private bool _typeReport = true;
-        private bool _typeOther = true;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsMetadataSearch))]
+        private bool useFullTextSearch;
+
+        [ObservableProperty]
+        private string? fullTextQuery;
+
+        [ObservableProperty]
+        private bool fullTextInTitle = true;
+
+        [ObservableProperty]
+        private bool fullTextInAbstract = true;
+
+        [ObservableProperty]
+        private bool fullTextInContent = true;
+
+        [ObservableProperty]
+        private string? titleContains;
+
+        [ObservableProperty]
+        private string? authorContains;
+
+        [ObservableProperty]
+        private string? tagsCsv;
+
+        [ObservableProperty]
+        private bool? isInternal;
+
+        [ObservableProperty]
+        private int? yearFrom;
+
+        [ObservableProperty]
+        private int? yearTo;
+
+        [ObservableProperty]
+        private string? sourceContains;
+
+        [ObservableProperty]
+        private string? internalIdContains;
+
+        [ObservableProperty]
+        private string? doiContains;
+
+        [ObservableProperty]
+        private string? pmidContains;
+
+        [ObservableProperty]
+        private string? nctContains;
+
+        [ObservableProperty]
+        private string? addedByContains;
+
+        [ObservableProperty]
+        private DateTime? addedOnFrom;
+
+        [ObservableProperty]
+        private DateTime? addedOnTo;
+
+        [ObservableProperty]
+        private bool typePublication = true;
+
+        [ObservableProperty]
+        private bool typePresentation = true;
+
+        [ObservableProperty]
+        private bool typeWhitePaper = true;
+
+        [ObservableProperty]
+        private bool typeSlideDeck = true;
+
+        [ObservableProperty]
+        private bool typeReport = true;
+
+        [ObservableProperty]
+        private bool typeOther = true;
 
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
         {
             _presetStore = presetStore ?? throw new ArgumentNullException(nameof(presetStore));
             _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
 
-            ClearCommand = new RelayCommand(_ => Clear());
-            SavePresetCommand = new AsyncRelayCommand(SavePresetAsync);
-            LoadPresetCommand = new AsyncRelayCommand(LoadPresetAsync);
-            ManagePresetsCommand = new AsyncRelayCommand(ManagePresetsAsync);
-        }
-
-        public bool UseFullTextSearch
-        {
-            get => _useFullTextSearch;
-            set
-            {
-                if (SetProperty(ref _useFullTextSearch, value))
-                {
-                    OnPropertyChanged(nameof(IsMetadataSearch));
-                }
-            }
         }
 
         public bool IsMetadataSearch => !UseFullTextSearch;
 
-        public string? FullTextQuery
-        {
-            get => _fullTextQuery;
-            set => SetProperty(ref _fullTextQuery, value);
-        }
-
-        public bool FullTextInTitle
-        {
-            get => _fullTextInTitle;
-            set => SetProperty(ref _fullTextInTitle, value);
-        }
-
-        public bool FullTextInAbstract
-        {
-            get => _fullTextInAbstract;
-            set => SetProperty(ref _fullTextInAbstract, value);
-        }
-
-        public bool FullTextInContent
-        {
-            get => _fullTextInContent;
-            set => SetProperty(ref _fullTextInContent, value);
-        }
-
-        public string? TitleContains
-        {
-            get => _titleContains;
-            set => SetProperty(ref _titleContains, value);
-        }
-
-        public string? AuthorContains
-        {
-            get => _authorContains;
-            set => SetProperty(ref _authorContains, value);
-        }
-
-        public string? TagsCsv
-        {
-            get => _tagsCsv;
-            set => SetProperty(ref _tagsCsv, value);
-        }
-
-        public bool? IsInternal
-        {
-            get => _isInternal;
-            set => SetProperty(ref _isInternal, value);
-        }
-
-        public int? YearFrom
-        {
-            get => _yearFrom;
-            set => SetProperty(ref _yearFrom, value);
-        }
-
-        public int? YearTo
-        {
-            get => _yearTo;
-            set => SetProperty(ref _yearTo, value);
-        }
-
-        public string? SourceContains
-        {
-            get => _sourceContains;
-            set => SetProperty(ref _sourceContains, value);
-        }
-
-        public string? InternalIdContains
-        {
-            get => _internalIdContains;
-            set => SetProperty(ref _internalIdContains, value);
-        }
-
-        public string? DoiContains
-        {
-            get => _doiContains;
-            set => SetProperty(ref _doiContains, value);
-        }
-
-        public string? PmidContains
-        {
-            get => _pmidContains;
-            set => SetProperty(ref _pmidContains, value);
-        }
-
-        public string? NctContains
-        {
-            get => _nctContains;
-            set => SetProperty(ref _nctContains, value);
-        }
-
-        public string? AddedByContains
-        {
-            get => _addedByContains;
-            set => SetProperty(ref _addedByContains, value);
-        }
-
-        public DateTime? AddedOnFrom
-        {
-            get => _addedOnFrom;
-            set => SetProperty(ref _addedOnFrom, value);
-        }
-
-        public DateTime? AddedOnTo
-        {
-            get => _addedOnTo;
-            set => SetProperty(ref _addedOnTo, value);
-        }
-
-        public bool TypePublication
-        {
-            get => _typePublication;
-            set => SetProperty(ref _typePublication, value);
-        }
-
-        public bool TypePresentation
-        {
-            get => _typePresentation;
-            set => SetProperty(ref _typePresentation, value);
-        }
-
-        public bool TypeWhitePaper
-        {
-            get => _typeWhitePaper;
-            set => SetProperty(ref _typeWhitePaper, value);
-        }
-
-        public bool TypeSlideDeck
-        {
-            get => _typeSlideDeck;
-            set => SetProperty(ref _typeSlideDeck, value);
-        }
-
-        public bool TypeReport
-        {
-            get => _typeReport;
-            set => SetProperty(ref _typeReport, value);
-        }
-
-        public bool TypeOther
-        {
-            get => _typeOther;
-            set => SetProperty(ref _typeOther, value);
-        }
-
-        public ICommand ClearCommand { get; }
-        public ICommand SavePresetCommand { get; }
-        public ICommand LoadPresetCommand { get; }
-        public ICommand ManagePresetsCommand { get; }
-
+        [RelayCommand]
         public void Clear()
         {
             UseFullTextSearch = false;
@@ -394,6 +280,7 @@ namespace LM.App.Wpf.ViewModels.Library
                 : mask;
         }
 
+        [RelayCommand]
         private async Task SavePresetAsync()
         {
             try
@@ -438,6 +325,7 @@ namespace LM.App.Wpf.ViewModels.Library
             }
         }
 
+        [RelayCommand]
         private async Task LoadPresetAsync()
         {
             try
@@ -492,6 +380,7 @@ namespace LM.App.Wpf.ViewModels.Library
             }
         }
 
+        [RelayCommand]
         private async Task ManagePresetsAsync()
         {
             try
@@ -577,13 +466,5 @@ namespace LM.App.Wpf.ViewModels.Library
             return name;
         }
 
-        private bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value))
-                return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
-        }
     }
 }
