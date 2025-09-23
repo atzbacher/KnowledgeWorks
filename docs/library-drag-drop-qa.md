@@ -15,7 +15,6 @@
 2. Drag a supported file from File Explorer and drop it onto a different row in the results grid.
 3. Expected: the drop is accepted, the row becomes selected, and the attachments list updates for that entry.
 
-
 ## Unsupported files
 1. Drag a file with an unsupported extension (e.g., `.exe`) onto the same detail panel.
 2. Expected: the drop cursor is disabled and the UI displays an informational message stating the file was skipped.

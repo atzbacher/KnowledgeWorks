@@ -514,7 +514,6 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
             }
         }
 
-
         internal bool CanAcceptFileDrop(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
         {
             if (filePaths is null)
@@ -537,7 +536,6 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
 
             return false;
         }
-
 
         internal async Task HandleFileDropAsync(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
         {
