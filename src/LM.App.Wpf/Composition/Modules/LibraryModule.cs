@@ -1,0 +1,31 @@
+using LM.App.Wpf.Common;
+using LM.App.Wpf.Library;
+using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.Views;
+using LM.Core.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace LM.App.Wpf.Composition.Modules
+{
+    internal sealed class LibraryModule : IAppModule
+    {
+        public void ConfigureServices(HostApplicationBuilder builder)
+        {
+            var services = builder.Services;
+
+            services.AddSingleton<LibraryFilterPresetStore>();
+            services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
+            services.AddSingleton<ILibraryEntryEditor>(sp => new WorkspaceEntryEditor(sp.GetRequiredService<IWorkSpaceService>()));
+
+            services.AddSingleton(sp => new LibraryViewModel(
+                sp.GetRequiredService<IEntryStore>(),
+                sp.GetRequiredService<IFullTextSearchService>(),
+                sp.GetRequiredService<IWorkSpaceService>(),
+                sp.GetRequiredService<IFileStorageRepository>(),
+                sp.GetRequiredService<LibraryFilterPresetStore>(),
+                sp.GetRequiredService<ILibraryPresetPrompt>(),
+                sp.GetRequiredService<ILibraryEntryEditor>()));
+        }
+    }
+}

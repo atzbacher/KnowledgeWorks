@@ -170,7 +170,7 @@ LM.App.Wpf.ViewModels.AddPipeline.CommitAsync(System.Collections.Generic.IEnumer
 LM.App.Wpf.ViewModels.AddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.AddViewModel
 LM.App.Wpf.ViewModels.AddViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore? watchedFolderSettings = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
@@ -206,22 +206,15 @@ LM.App.Wpf.ViewModels.WatchedFolder.ResetScanState() -> void
 LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusLabel.get -> string!
 LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusToolTip.get -> string!
 LM.App.Wpf.ViewModels.WatchedFolder.WatchedFolder() -> void
-LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> LM.App.Wpf.ViewModels.WatchedFolderState?
-LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(string! path) -> LM.App.Wpf.ViewModels.WatchedFolderState?
-LM.App.Wpf.ViewModels.WatchedFolderState
-LM.App.Wpf.ViewModels.WatchedFolderState.AggregatedHash.get -> string?
-LM.App.Wpf.ViewModels.WatchedFolderState.AggregatedHash.init -> void
-LM.App.Wpf.ViewModels.WatchedFolderState.LastScanUtc.get -> System.DateTimeOffset?
-LM.App.Wpf.ViewModels.WatchedFolderState.LastScanUtc.init -> void
-LM.App.Wpf.ViewModels.WatchedFolderState.LastScanWasUnchanged.get -> bool
-LM.App.Wpf.ViewModels.WatchedFolderState.LastScanWasUnchanged.init -> void
-LM.App.Wpf.ViewModels.WatchedFolderState.Path.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> LM.Core.Models.WatchedFolderState?
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(string! path) -> LM.Core.Models.WatchedFolderState?
 LM.App.Wpf.ViewModels.WatchedFolderConfig
 LM.App.Wpf.ViewModels.WatchedFolderConfig.ApplyState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.ClearState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
-LM.App.Wpf.ViewModels.WatchedFolderConfig.SaveAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
-LM.App.Wpf.ViewModels.WatchedFolderConfig.StoreState(LM.App.Wpf.ViewModels.WatchedFolder! folder, LM.App.Wpf.ViewModels.WatchedFolderState! state) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.CreateSnapshot() -> LM.Core.Models.WatchedFolderSettings!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.Load(LM.Core.Models.WatchedFolderSettings! settings) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.StoreState(LM.App.Wpf.ViewModels.WatchedFolder! folder, LM.Core.Models.WatchedFolderState! state) -> void
 LM.App.Wpf.ViewModels.WatchedFolderConfig.WatchedFolderConfig() -> void
 LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs
 LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs.Folder.get -> LM.App.Wpf.ViewModels.WatchedFolder!
@@ -332,13 +325,14 @@ LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.LoadSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.PreviousSearchSummary!>!
+LM.App.Wpf.ViewModels.SearchViewModel.RecentSearchHistory.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.Core.Models.Search.SearchHistoryEntry!>!
 LM.App.Wpf.ViewModels.SearchViewModel.PreviousRunsCount.get -> int
 LM.App.Wpf.ViewModels.SearchViewModel.Query.get -> string!
 LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
 LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt) -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.Core.Abstractions.Configuration.ISearchHistoryStore? searchHistoryStore = null, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.App.Wpf.ViewModels.PreviousSearchSummary?
@@ -419,8 +413,6 @@ LM.App.Wpf.ViewModels.StagingItem.Type.get -> LM.Core.Models.EntryType
 LM.App.Wpf.ViewModels.StagingItem.Type.set -> void
 LM.App.Wpf.ViewModels.StagingItem.Year.get -> int?
 LM.App.Wpf.ViewModels.StagingItem.Year.set -> void
-LM.App.Wpf.ViewModels.WatchedFolderState.Path.init -> void
-LM.App.Wpf.ViewModels.WatchedFolderState.WatchedFolderState(string! Path, System.DateTimeOffset? LastScanUtc, string? AggregatedHash, bool LastScanWasUnchanged) -> void
 LM.App.Wpf.Views.AddView
 LM.App.Wpf.Views.AddView.AddView() -> void
 LM.App.Wpf.Views.AddView.InitializeComponent() -> void
@@ -459,4 +451,3 @@ LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser() -> void
 override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void
 override LM.App.Wpf.App.OnStartup(System.Windows.StartupEventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
-static LM.App.Wpf.ViewModels.WatchedFolderConfig.LoadAsync(string! path, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.App.Wpf.ViewModels.WatchedFolderConfig!>!
