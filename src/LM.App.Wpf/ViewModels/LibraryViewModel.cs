@@ -521,6 +521,7 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
 
             var entry = (dropTarget ?? Selected)?.Entry;
             if (entry is null)
+
                 return false;
 
             foreach (var path in filePaths)
@@ -540,6 +541,7 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
         {
             var targetResult = dropTarget ?? Selected;
             var entry = targetResult?.Entry;
+
             if (entry is null)
             {
                 System.Windows.MessageBox.Show(
@@ -650,7 +652,9 @@ $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInter
                 return;
             }
 
+
             await RefreshSelectedEntryAsync(targetResult, entryId);
+
 
             ShowDropWarnings(unsupported, duplicates, failures);
         }

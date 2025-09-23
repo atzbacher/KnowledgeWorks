@@ -8,6 +8,7 @@ using DataFormats = System.Windows.DataFormats;
 using DragDropEffects = System.Windows.DragDropEffects;
 using DragEventArgs = System.Windows.DragEventArgs;
 
+
 namespace LM.App.Wpf.Views
 {
     public partial class LibraryView : UserControl

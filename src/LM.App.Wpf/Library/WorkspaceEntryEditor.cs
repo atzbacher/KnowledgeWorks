@@ -30,7 +30,9 @@ namespace LM.App.Wpf.Library
 
             var relative = Path.Combine("entries", entry.Id, "entry.json");
             var metadataPath = _workspace.GetAbsolutePath(relative);
+
             if (!EntryMetadataFile.TryEnsureExists(entry, metadataPath))
+
             {
                 var message = $"Entry metadata could not be found or recreated at:\n{metadataPath}";
                 if (TryRevealMetadata(metadataPath))
@@ -64,7 +66,9 @@ namespace LM.App.Wpf.Library
             catch (Exception ex)
             {
                 Trace.WriteLine($"[WorkspaceEntryEditor] Failed to open metadata directly: {ex}");
+
                 if (TryRevealMetadata(metadataPath))
+
                     return;
 
                 System.Windows.MessageBox.Show(
@@ -74,6 +78,7 @@ namespace LM.App.Wpf.Library
                     System.Windows.MessageBoxImage.Error);
             }
         }
+
 
         private static bool TryRevealMetadata(string metadataPath)
         {
