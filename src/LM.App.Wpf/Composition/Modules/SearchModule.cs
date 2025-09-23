@@ -1,9 +1,12 @@
 using LM.App.Wpf.Common;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Search;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
+using LM.Core.Abstractions.Search;
 using LM.Infrastructure.Settings;
+using LM.Infrastructure.Search;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -18,13 +21,21 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<ISearchSavePrompt, SearchSavePrompt>();
             services.AddSingleton<ISearchHistoryStore>(sp => new JsonSearchHistoryStore(sp.GetRequiredService<IWorkSpaceService>()));
             services.AddSingleton<IUserPreferencesStore, JsonUserPreferencesStore>();
+            services.AddSingleton<ISearchExecutionService, SearchExecutionService>();
+            services.AddSingleton<PubMedSearchProvider>();
+            services.AddSingleton<ISearchProvider>(sp => sp.GetRequiredService<PubMedSearchProvider>());
+            services.AddSingleton<ISearchProvider, ClinicalTrialsGovSearchProvider>();
+            services.AddSingleton<SearchProvidersViewModel>();
+            services.AddSingleton<SearchHistoryViewModel>();
 
             services.AddSingleton(sp => new SearchViewModel(
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFileStorageRepository>(),
                 sp.GetRequiredService<IWorkSpaceService>(),
                 sp.GetRequiredService<ISearchSavePrompt>(),
-                sp.GetRequiredService<ISearchHistoryStore>(),
+                sp.GetRequiredService<SearchProvidersViewModel>(),
+                sp.GetRequiredService<SearchHistoryViewModel>(),
+                sp.GetRequiredService<PubMedSearchProvider>(),
                 sp.GetRequiredService<IUserPreferencesStore>()));
         }
     }

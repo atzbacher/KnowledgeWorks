@@ -23,15 +23,15 @@
     <!-- Controls -->
     <StackPanel Grid.Row="0" Orientation="Horizontal">
       <TextBox Width="420"
-               Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" />
+               Text="{Binding Providers.Query, UpdateSourceTrigger=PropertyChanged}" />
       <ComboBox Width="200"
-                ItemsSource="{Binding Databases}"
+                ItemsSource="{Binding Providers.Databases}"
                 SelectedValuePath="Value"
                 DisplayMemberPath="DisplayName"
-                SelectedValue="{Binding SelectedDatabase, Mode=TwoWay}" />
-      <DatePicker Width="140" SelectedDate="{Binding From}" />
-      <DatePicker Width="140" SelectedDate="{Binding To}" />
-      <Button Content="Run search" Command="{Binding RunSearchCommand}" />
+                SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}" />
+      <DatePicker Width="140" SelectedDate="{Binding Providers.From}" />
+      <DatePicker Width="140" SelectedDate="{Binding Providers.To}" />
+      <Button Content="Run search" Command="{Binding Providers.RunSearchCommand}" />
       <Button Content="Save Search" Command="{Binding SaveSearchCommand}" />
       <Button Content="Load Search" Command="{Binding LoadSearchCommand}" />
       <Button Content="Export Search" Command="{Binding ExportSearchCommand}" />
@@ -39,7 +39,7 @@
 
     <!-- Results -->
     <DataGrid Grid.Row="2"
-              ItemsSource="{Binding Results}"
+              ItemsSource="{Binding Providers.Results}"
               AutoGenerateColumns="False"
               IsReadOnly="False"
               CanUserAddRows="False">
