@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Input;
+using LM.Infrastructure.Search;
 using LM.Infrastructure.Settings;
 
 namespace LM.App.Wpf.ViewModels
@@ -38,6 +39,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly Dictionary<string, PreviousSearchContext> _entryIndex = new(StringComparer.Ordinal);
         private readonly SearchProvidersViewModel _providers;
         private readonly SearchHistoryViewModel _history;
+        private readonly PubMedSearchProvider _pubmed;
         private readonly IUserPreferencesStore _preferencesStore;
         private readonly TaskCompletionSource<bool> _preferencesReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private UserPreferences _preferences = new();
@@ -51,6 +53,7 @@ namespace LM.App.Wpf.ViewModels
                                ISearchSavePrompt savePrompt,
                                SearchProvidersViewModel providers,
                                SearchHistoryViewModel history,
+                               PubMedSearchProvider pubMedProvider,
                                IUserPreferencesStore? preferencesStore = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -59,6 +62,7 @@ namespace LM.App.Wpf.ViewModels
             _savePrompt = savePrompt ?? throw new ArgumentNullException(nameof(savePrompt));
             _providers = providers ?? throw new ArgumentNullException(nameof(providers));
             _history = history ?? throw new ArgumentNullException(nameof(history));
+            _pubmed = pubMedProvider ?? throw new ArgumentNullException(nameof(pubMedProvider));
             _preferencesStore = preferencesStore ?? new JsonUserPreferencesStore();
 
             RunSearchCommand = _providers.RunSearchCommand;
@@ -1505,16 +1509,4 @@ namespace LM.App.Wpf.ViewModels
         }
     }
 
-    public sealed record SearchDatabaseOption
-    {
-        public SearchDatabaseOption(SearchDatabase value, string displayName)
-        {
-            Value = value;
-            DisplayName = displayName;
-        }
-
-        public SearchDatabase Value { get; }
-
-        public string DisplayName { get; }
-    }
 }

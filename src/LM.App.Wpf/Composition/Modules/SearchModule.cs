@@ -22,7 +22,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<ISearchHistoryStore>(sp => new JsonSearchHistoryStore(sp.GetRequiredService<IWorkSpaceService>()));
             services.AddSingleton<IUserPreferencesStore, JsonUserPreferencesStore>();
             services.AddSingleton<ISearchExecutionService, SearchExecutionService>();
-            services.AddSingleton<ISearchProvider, PubMedSearchProvider>();
+            services.AddSingleton<PubMedSearchProvider>();
+            services.AddSingleton<ISearchProvider>(sp => sp.GetRequiredService<PubMedSearchProvider>());
             services.AddSingleton<ISearchProvider, ClinicalTrialsGovSearchProvider>();
             services.AddSingleton<SearchProvidersViewModel>();
             services.AddSingleton<SearchHistoryViewModel>();
@@ -34,6 +35,7 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<ISearchSavePrompt>(),
                 sp.GetRequiredService<SearchProvidersViewModel>(),
                 sp.GetRequiredService<SearchHistoryViewModel>(),
+                sp.GetRequiredService<PubMedSearchProvider>(),
                 sp.GetRequiredService<IUserPreferencesStore>()));
         }
     }

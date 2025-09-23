@@ -404,7 +404,7 @@ LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
 LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel! providers, LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel! history, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel! providers, LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel! history, LM.Infrastructure.Search.PubMedSearchProvider! pubMedProvider, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.App.Wpf.ViewModels.PreviousSearchSummary?
