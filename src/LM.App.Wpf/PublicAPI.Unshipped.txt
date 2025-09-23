@@ -19,6 +19,8 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
 LM.App.Wpf.Common.ILibraryPresetPrompt
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
@@ -94,11 +96,9 @@ LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.get -> string?
 LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.init -> void
 LM.App.Wpf.Common.Dialogs.IDialogService
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
-LM.App.Wpf.Common.Dialogs.IDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string[]?
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
 LM.App.Wpf.Common.Dialogs.WpfDialogService
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
-LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string[]?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService() -> void
 LM.App.Wpf.Common.StringJoinConverter
@@ -213,6 +213,29 @@ LM.App.Wpf.ViewModels.AddViewModel.Staging.get -> System.Collections.ObjectModel
 LM.App.Wpf.ViewModels.AddViewModel.StagingListViewModel.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.AddViewModel.WatchedFolders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
 LM.App.Wpf.ViewModels.AddViewModel.WatchedFoldersViewModel.get -> LM.App.Wpf.ViewModels.WatchedFoldersViewModel!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InternalIdContains.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InternalIdContains.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.CanAcceptFileDrop(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleFileDropAsync(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.LibrarySearchResult
+LM.App.Wpf.ViewModels.LibrarySearchResult.Entry.get -> LM.Core.Models.Entry!
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasAttachments.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasDoi.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasIdentifiers.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasInternalId.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasLinks.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNct.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNotes.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasPmid.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasRelations.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasSource.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasUserNotes.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.Highlight.get -> string?
+LM.App.Wpf.ViewModels.LibrarySearchResult.HighlightDisplay.get -> string?
+LM.App.Wpf.ViewModels.LibrarySearchResult.IsFullText.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.LibrarySearchResult(LM.Core.Models.Entry! entry, double? score, string? highlight) -> void
+LM.App.Wpf.ViewModels.LibrarySearchResult.Score.get -> double?
+LM.App.Wpf.ViewModels.LibrarySearchResult.ScoreDisplay.get -> string?
 LM.App.Wpf.ViewModels.StagingListViewModel
 LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.StagingListViewModel.Clear() -> void
@@ -346,10 +369,8 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearFrom.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.get -> int?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.CanAcceptFileDrop(System.Collections.Generic.IEnumerable<string?>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleFileDropAsync(System.Collections.Generic.IEnumerable<string?>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits) -> System.Threading.Tasks.Task!

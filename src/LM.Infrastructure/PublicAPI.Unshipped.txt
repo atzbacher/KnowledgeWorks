@@ -55,6 +55,7 @@ LM.Infrastructure.Search.PubMedSearchProvider
 LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
 LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
 LM.Infrastructure.Search.PubMedSearchProvider.FetchFullRecordXmlAsync(string! pubmedId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore
 LM.Infrastructure.Storage.FileStorageService
 LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Storage.FileStorageService.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
@@ -79,7 +80,6 @@ LM.Infrastructure.Utils.TagNormalizer
 static LM.Infrastructure.Hooks.ArticleHookFactory.CreateFromPublication(LM.Core.Models.PublicationRecord! r) -> LM.HubSpoke.Models.ArticleHook!
 static LM.Infrastructure.Utils.BibliographyHelper.GenerateShortTitle(string? title, System.Collections.Generic.IEnumerable<string!>! authors, string? source, int? year) -> string!
 static LM.Infrastructure.Utils.TagMerger.Merge(string? existingCsv, System.Collections.Generic.IEnumerable<string!>? add) -> string?
-static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore
 LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.JsonWatchedFolderSettingsStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
 LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -91,3 +91,4 @@ LM.Infrastructure.Settings.JsonUserPreferencesStore
 LM.Infrastructure.Settings.JsonUserPreferencesStore.JsonUserPreferencesStore() -> void
 LM.Infrastructure.Settings.JsonUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
 LM.Infrastructure.Settings.JsonUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!

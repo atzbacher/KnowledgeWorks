@@ -1,6 +1,7 @@
 #nullable enable
 IPublicationLookup
 IPublicationLookup.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
+LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore
 LM.Core.Abstractions.IContentExtractor
 LM.Core.Abstractions.IContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IEntryStore
@@ -339,6 +340,7 @@ LM.Core.Models.SearchHit.Url.init -> void
 LM.Core.Models.SearchHit.Year.get -> int?
 LM.Core.Models.SearchHit.Year.init -> void
 LM.Core.Models.SearchHit.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.Core.Models.WatchedFolderState.WatchedFolderState(string! Path, System.DateTimeOffset? LastScanUtc, string? AggregatedHash, bool LastScanWasUnchanged) -> void
 LM.Core.Utils.Hashes
 LM.Core.Utils.IdGen
 LM.Core.Utils.JsonEx
@@ -347,7 +349,6 @@ static LM.Core.Utils.Hashes.Sha256File(string! path) -> string!
 static LM.Core.Utils.IdGen.NewId() -> string!
 static LM.Core.Utils.JsonEx.Deserialize<T>(string! s) -> T?
 static LM.Core.Utils.JsonEx.Serialize<T>(T v) -> string!
-static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore
 LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
 LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.Configuration.ISearchHistoryStore
@@ -397,3 +398,4 @@ LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.get -> bool
 LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.init -> void
 LM.Core.Models.WatchedFolderState.Path.get -> string!
 LM.Core.Models.WatchedFolderState.Path.init -> void
+static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!
