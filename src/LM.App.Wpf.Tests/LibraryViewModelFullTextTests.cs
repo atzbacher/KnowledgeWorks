@@ -111,6 +111,139 @@ namespace LM.App.Wpf.Tests
             Assert.Same(entry, editor.LastEdited);
         }
 
+        [Fact]
+        public async Task HandleFileDropAsync_AddsAttachmentsAndSavesEntry()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var entry = new Entry { Id = "drop-1", Title = "Doc" };
+            store.EntriesById[entry.Id] = entry;
+
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Add(result);
+            vm.Selected = result;
+
+            var filePath = Path.Combine(temp.RootPath, "notes.pdf");
+            File.WriteAllText(filePath, "demo");
+
+            await vm.HandleFileDropAsync(new[] { filePath });
+
+            Assert.Equal(1, store.SaveCallCount);
+            var savedEntry = store.EntriesById[entry.Id];
+            Assert.Single(savedEntry.Attachments);
+            var attachment = savedEntry.Attachments[0];
+            Assert.Equal(storage.SavedRelativePaths[0], attachment.RelativePath);
+            Assert.Equal(Path.Combine("attachments", entry.Id), storage.TargetDirs[0]);
+            Assert.Same(vm.Selected, vm.Results[0]);
+            Assert.NotSame(result, vm.Selected);
+            Assert.Contains(vm.Selected.Entry.Attachments, a => a.RelativePath == attachment.RelativePath);
+        }
+
+        [Fact]
+        public async Task HandleFileDropAsync_AddsAttachmentsForDropTarget()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var entryA = new Entry { Id = "drop-a", Title = "First" };
+            var entryB = new Entry { Id = "drop-b", Title = "Second" };
+            store.EntriesById[entryA.Id] = entryA;
+            store.EntriesById[entryB.Id] = entryB;
+
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var resultA = new LibrarySearchResult(entryA, null, null);
+            var resultB = new LibrarySearchResult(entryB, null, null);
+            vm.Results.Add(resultA);
+            vm.Results.Add(resultB);
+            vm.Selected = resultA;
+
+            var filePath = Path.Combine(temp.RootPath, "paper.pdf");
+            File.WriteAllText(filePath, "demo");
+
+            await vm.HandleFileDropAsync(new[] { filePath }, resultB);
+
+            Assert.Equal(Path.Combine("attachments", entryB.Id), storage.TargetDirs[0]);
+            Assert.Equal(1, store.SaveCallCount);
+            Assert.Equal(entryB.Id, vm.Results[1].Entry.Id);
+            Assert.Equal(entryB.Id, vm.Selected.Entry.Id);
+            Assert.Contains(vm.Selected.Entry.Attachments, a => a.RelativePath == storage.SavedRelativePaths[0]);
+        }
+
+        [Fact]
+        public async Task HandleFileDropAsync_SkipsDuplicatesWhenRelativePathExists()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var existingPath = Path.Combine("attachments", "dup-1", "notes.pdf");
+            var entry = new Entry
+            {
+                Id = "dup-1",
+                Title = "Doc",
+                Attachments = new List<Attachment>
+                {
+                    new Attachment { RelativePath = existingPath }
+                }
+            };
+            store.EntriesById[entry.Id] = entry;
+
+            var storage = new RecordingFileStorageRepository
+            {
+                PathFactory = _ => existingPath
+            };
+
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            vm.Selected = new LibrarySearchResult(entry, null, null);
+
+            var filePath = Path.Combine(temp.RootPath, "notes.pdf");
+            File.WriteAllText(filePath, "dup");
+
+            await vm.HandleFileDropAsync(new[] { filePath });
+
+            Assert.Equal(0, store.SaveCallCount);
+            Assert.Single(entry.Attachments);
+        }
+
+        [Fact]
+        public void CanAcceptFileDrop_RequiresSelectionAndSupportedFile()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+
+            var pdf = Path.Combine(temp.RootPath, "drop.pdf");
+            File.WriteAllText(pdf, "pdf");
+            var exe = Path.Combine(temp.RootPath, "run.exe");
+            File.WriteAllText(exe, "exe");
+
+            Assert.False(vm.CanAcceptFileDrop(new[] { pdf }));
+
+            var entry = new Entry { Id = "sel-1", Title = "Doc" };
+            vm.Selected = new LibrarySearchResult(entry, null, null);
+
+            Assert.True(vm.CanAcceptFileDrop(new[] { pdf }));
+            Assert.False(vm.CanAcceptFileDrop(new[] { exe }));
+        }
+
+        [Fact]
+        public void CanAcceptFileDrop_UsesDropTargetWhenSelectionDiffers()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var storage = new RecordingFileStorageRepository();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+
+            var entry = new Entry { Id = "target-1", Title = "Drop target" };
+            var targetResult = new LibrarySearchResult(entry, null, null);
+
+            var pdf = Path.Combine(temp.RootPath, "drop.pdf");
+            File.WriteAllText(pdf, "pdf");
+
+            Assert.True(vm.CanAcceptFileDrop(new[] { pdf }, targetResult));
+        }
+
         private static async Task InvokeSearchAsync(LibraryViewModel vm)
         {
             var method = typeof(LibraryViewModel).GetMethod("SearchAsync", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -121,13 +254,15 @@ namespace LM.App.Wpf.Tests
         private static LibraryViewModel CreateViewModel(IEntryStore store,
                                                        IFullTextSearchService search,
                                                        TempWorkspace workspace,
-                                                       ILibraryEntryEditor? editor = null)
+                                                       ILibraryEntryEditor? editor = null,
+                                                       IFileStorageRepository? storage = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
             var prompt = new StubPresetPrompt();
             editor ??= new NoopEntryEditor();
-            return new LibraryViewModel(store, search, ws, presetStore, prompt, editor);
+            storage ??= new RecordingFileStorageRepository();
+            return new LibraryViewModel(store, search, ws, storage, presetStore, prompt, editor);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
@@ -148,9 +283,18 @@ namespace LM.App.Wpf.Tests
 
             public Dictionary<string, Entry> EntriesById { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+            public int SaveCallCount { get; private set; }
+
             public Task InitializeAsync(CancellationToken ct = default) => Task.CompletedTask;
 
-            public Task SaveAsync(Entry entry, CancellationToken ct = default) => throw new NotImplementedException();
+            public Task SaveAsync(Entry entry, CancellationToken ct = default)
+            {
+                SaveCallCount++;
+                if (string.IsNullOrWhiteSpace(entry.Id))
+                    throw new InvalidOperationException("Entry must have an identifier.");
+                EntriesById[entry.Id] = entry;
+                return Task.CompletedTask;
+            }
 
             public Task<Entry?> GetByIdAsync(string id, CancellationToken ct = default)
                 => Task.FromResult(EntriesById.TryGetValue(id, out var entry) ? entry : null);
@@ -174,6 +318,23 @@ namespace LM.App.Wpf.Tests
 
             public Task<Entry?> FindByIdsAsync(string? doi, string? pmid, CancellationToken ct = default)
                 => throw new NotImplementedException();
+        }
+
+        private sealed class RecordingFileStorageRepository : IFileStorageRepository
+        {
+            public List<string> TargetDirs { get; } = new();
+            public List<string> SavedRelativePaths { get; } = new();
+            public Func<string, string>? PathFactory { get; set; }
+
+            public Task<string> SaveNewAsync(string sourcePath, string relativeTargetDir, string? preferredFileName = null, CancellationToken ct = default)
+            {
+                TargetDirs.Add(relativeTargetDir);
+                var fileName = Path.GetFileName(sourcePath) ?? string.Empty;
+                var relative = PathFactory?.Invoke(sourcePath)
+                    ?? (string.IsNullOrEmpty(relativeTargetDir) ? fileName : Path.Combine(relativeTargetDir, fileName));
+                SavedRelativePaths.Add(relative);
+                return Task.FromResult(relative);
+            }
         }
 
         private sealed class FakeFullTextSearchService : IFullTextSearchService
