@@ -84,6 +84,23 @@ LM.App.Wpf.Common.RelayCommand.CanExecuteChanged -> System.EventHandler?
 LM.App.Wpf.Common.RelayCommand.Execute(object? parameter) -> void
 LM.App.Wpf.Common.RelayCommand.RaiseCanExecuteChanged() -> void
 LM.App.Wpf.Common.RelayCommand.RelayCommand(System.Action<object?>! exec, System.Func<object?, bool>? can = null) -> void
+LM.App.Wpf.Common.Dialogs.FilePickerOptions
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.AllowMultiple.get -> bool
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.AllowMultiple.init -> void
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.Filter.get -> string?
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.Filter.init -> void
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.get -> string?
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.init -> void
+LM.App.Wpf.Common.Dialogs.IDialogService
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string[]?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string[]?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService() -> void
 LM.App.Wpf.Common.StringJoinConverter
 LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
@@ -170,7 +187,7 @@ LM.App.Wpf.ViewModels.AddPipeline.CommitAsync(System.Collections.Generic.IEnumer
 LM.App.Wpf.ViewModels.AddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.AddViewModel
 LM.App.Wpf.ViewModels.AddViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore? watchedFolderSettings = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore? watchedFolderSettings = null, LM.App.Wpf.ViewModels.StagingListViewModel? stagingList = null, LM.App.Wpf.ViewModels.WatchedFoldersViewModel? watchedFolders = null, LM.App.Wpf.Common.Dialogs.IDialogService? dialogService = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
@@ -185,6 +202,7 @@ LM.App.Wpf.ViewModels.AddViewModel.IndexLabel.get -> string!
 LM.App.Wpf.ViewModels.AddViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.AddViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.AddViewModel.ReviewStagedCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
@@ -192,7 +210,39 @@ LM.App.Wpf.ViewModels.AddViewModel.SelectByOffset(int delta) -> void
 LM.App.Wpf.ViewModels.AddViewModel.SelectedType.get -> LM.Core.Models.EntryType
 LM.App.Wpf.ViewModels.AddViewModel.SelectedType.set -> void
 LM.App.Wpf.ViewModels.AddViewModel.Staging.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.AddViewModel.StagingListViewModel.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.AddViewModel.WatchedFolders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.AddViewModel.WatchedFoldersViewModel.get -> LM.App.Wpf.ViewModels.WatchedFoldersViewModel!
+LM.App.Wpf.ViewModels.StagingListViewModel
+LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.Clear() -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.CommitSelectedAsync(System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
+LM.App.Wpf.ViewModels.StagingListViewModel.Current.set -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.EntryTypes.get -> System.Array!
+LM.App.Wpf.ViewModels.StagingListViewModel.HasItems.get -> bool
+LM.App.Wpf.ViewModels.StagingListViewModel.HasSelectedItems.get -> bool
+LM.App.Wpf.ViewModels.StagingListViewModel.IndexLabel.get -> string!
+LM.App.Wpf.ViewModels.StagingListViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.StagingListViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectByOffset(int delta) -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectedType.get -> LM.Core.Models.EntryType
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectedType.set -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.StagingListViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.SetCommandGuard(System.Func<System.Func<System.Threading.Tasks.Task!>!, System.Threading.Tasks.Task!>! guard) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.UpdateParentBusy(bool isBusy) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.WatchedFoldersViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList, LM.App.Wpf.ViewModels.WatchedFolderScanner! scanner, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore! settingsStore, LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
 LM.App.Wpf.ViewModels.WatchedFolder
 LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.get -> bool
 LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.set -> void
@@ -443,7 +493,7 @@ LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
-LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.AddViewModel! vm) -> void
+LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.StagingListViewModel! vm) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
 LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
