@@ -6,15 +6,18 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LM.Core.Abstractions.Search;
 using LM.Core.Models;
 
 namespace LM.Infrastructure.Search
 {
-    public sealed class PubMedSearchProvider
+    public sealed class PubMedSearchProvider : ISearchProvider
     {
         private readonly HttpClient _http = new HttpClient();
 
-        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, DateTime? from, DateTime? to, CancellationToken ct)
+        public SearchDatabase Database => SearchDatabase.PubMed;
+
+        public async Task<IReadOnlyList<SearchHit>> SearchAsync(string query, DateTime? from, DateTime? to, CancellationToken ct = default)
         {
             // ESearch
             string term = query;

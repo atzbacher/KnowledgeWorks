@@ -45,16 +45,21 @@ LM.Infrastructure.Hooks.HookPersister.SaveArticleIfAnyAsync(string! entryId, LM.
 LM.Infrastructure.Metadata.CompositeMetadataExtractor
 LM.Infrastructure.Metadata.CompositeMetadataExtractor.CompositeMetadataExtractor(LM.Core.Abstractions.IContentExtractor! content) -> void
 LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.FileMetadata!>!
-LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider
-LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
-LM.Infrastructure.Pubmed.ClinicalTrialsGovSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
 LM.Infrastructure.PubMed.PubMedClient
 LM.Infrastructure.PubMed.PubMedClient.PubMedClient() -> void
 LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
 LM.Infrastructure.Search.PubMedSearchProvider
 LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
-LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.Search.PubMedSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
+LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
 LM.Infrastructure.Search.PubMedSearchProvider.FetchFullRecordXmlAsync(string! pubmedId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+LM.Infrastructure.Search.SearchExecutionService
+LM.Infrastructure.Search.SearchExecutionService.SearchExecutionService(System.Collections.Generic.IEnumerable<LM.Core.Abstractions.Search.ISearchProvider!>! providers, LM.Core.Abstractions.IEntryStore! store) -> void
+LM.Infrastructure.Search.SearchExecutionService.ExecuteAsync(LM.Core.Models.Search.SearchExecutionRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchExecutionResult!>!
 LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore
 LM.Infrastructure.Storage.FileStorageService
 LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void

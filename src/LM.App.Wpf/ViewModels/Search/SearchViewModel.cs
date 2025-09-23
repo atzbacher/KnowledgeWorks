@@ -2,15 +2,15 @@
 using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayCommand
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
-using LM.HubSpoke.Models;
 using LM.Core.Models;            // LitSearchHook, LitSearchRun, JsonStd
 using LM.Core.Models.Search;
-using LM.Infrastructure.Pubmed;
-using LM.Infrastructure.Search;
+using LM.HubSpoke.Models;
+using LM.App.Wpf.ViewModels.Search;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -30,19 +30,16 @@ namespace LM.App.Wpf.ViewModels
 {
     public sealed class SearchViewModel : ViewModelBase
     {
-        private readonly PubMedSearchProvider _pubmed = new();
-        private readonly ClinicalTrialsGovSearchProvider _ctgov = new();
         private readonly IEntryStore _store;
         private readonly IFileStorageRepository _storage;
         private readonly IWorkSpaceService _ws;
         private readonly ISearchSavePrompt _savePrompt;
         private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
         private readonly Dictionary<string, PreviousSearchContext> _entryIndex = new(StringComparer.Ordinal);
-        private readonly ISearchHistoryStore _searchHistoryStore;
+        private readonly SearchProvidersViewModel _providers;
+        private readonly SearchHistoryViewModel _history;
         private readonly IUserPreferencesStore _preferencesStore;
-        private readonly ObservableCollection<SearchHistoryEntry> _searchHistory = new();
-        private readonly ReadOnlyObservableCollection<SearchHistoryEntry> _recentHistory;
-        private readonly TaskCompletionSource<bool> _stateReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly TaskCompletionSource<bool> _preferencesReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private UserPreferences _preferences = new();
 
         private string? _loadedEntryId;
@@ -52,18 +49,19 @@ namespace LM.App.Wpf.ViewModels
                                IFileStorageRepository storage,
                                IWorkSpaceService ws,
                                ISearchSavePrompt savePrompt,
-                               ISearchHistoryStore? searchHistoryStore = null,
+                               SearchProvidersViewModel providers,
+                               SearchHistoryViewModel history,
                                IUserPreferencesStore? preferencesStore = null)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             _ws = ws ?? throw new ArgumentNullException(nameof(ws));
             _savePrompt = savePrompt ?? throw new ArgumentNullException(nameof(savePrompt));
-            _searchHistoryStore = searchHistoryStore ?? new JsonSearchHistoryStore(_ws);
+            _providers = providers ?? throw new ArgumentNullException(nameof(providers));
+            _history = history ?? throw new ArgumentNullException(nameof(history));
             _preferencesStore = preferencesStore ?? new JsonUserPreferencesStore();
-            _recentHistory = new ReadOnlyObservableCollection<SearchHistoryEntry>(_searchHistory);
 
-            RunSearchCommand = new AsyncRelayCommand(RunSearchAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Query));
+            RunSearchCommand = _providers.RunSearchCommand;
             SaveSearchCommand = new AsyncRelayCommand(SaveSearchAsync, () => !IsBusy && Results.Any());
             LoadSearchCommand = new AsyncRelayCommand(LoadSearchAsync, () => !IsBusy && SelectedPreviousRun is not null);
             ExportSearchCommand = new AsyncRelayCommand(ExportSearchAsync, () => !IsBusy && Results.Any());
@@ -71,70 +69,75 @@ namespace LM.App.Wpf.ViewModels
             ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is PreviousSearchSummary);
             ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is PreviousSearchSummary);
 
-            _ = LoadStateAsync();
-            _ = RefreshPreviousRunsAsync();
+            _providers.SearchExecuted += OnProvidersSearchExecuted;
+            _providers.PropertyChanged += OnProvidersPropertyChanged;
+            _providers.Results.CollectionChanged += OnResultsCollectionChanged;
 
             PreviousRuns.CollectionChanged += OnPreviousRunsCollectionChanged;
+
+            _ = _history.InitializeAsync();
+            _ = LoadPreferencesAsync();
+            _ = RefreshPreviousRunsAsync();
         }
 
-        private string _query = string.Empty;
+        public SearchProvidersViewModel Providers => _providers;
+        public SearchHistoryViewModel History => _history;
+
         public string Query
         {
-            get => _query;
+            get => _providers.Query;
             set
             {
-                if (_query == value) return;
-                _query = value;
+                if (string.Equals(_providers.Query, value, StringComparison.Ordinal))
+                    return;
+                _providers.Query = value;
                 OnPropertyChanged();
                 RaiseCanExec();
             }
         }
 
-        public IReadOnlyList<SearchDatabaseOption> Databases { get; } = new[]
-        {
-            new SearchDatabaseOption(SearchDatabase.PubMed, "PubMed"),
-            new SearchDatabaseOption(SearchDatabase.ClinicalTrialsGov, "ClinicalTrials.gov"),
-        };
+        public IReadOnlyList<SearchDatabaseOption> Databases => _providers.Databases;
 
-        private SearchDatabase _selectedDatabase = SearchDatabase.PubMed;
         public SearchDatabase SelectedDatabase
         {
-            get => _selectedDatabase;
+            get => _providers.SelectedDatabase;
             set
             {
-                if (_selectedDatabase == value) return;
-                _selectedDatabase = value;
+                if (_providers.SelectedDatabase == value)
+                    return;
+                _providers.SelectedDatabase = value;
                 OnPropertyChanged();
                 _ = SavePreferencesAsync(value);
             }
         }
-        private DateTime? _from;
+
         public DateTime? From
         {
-            get => _from;
+            get => _providers.From;
             set
             {
-                if (_from == value) return;
-                _from = value;
+                if (Nullable.Equals(_providers.From, value))
+                    return;
+                _providers.From = value;
                 OnPropertyChanged();
             }
         }
 
-        private DateTime? _to;
         public DateTime? To
         {
-            get => _to;
+            get => _providers.To;
             set
             {
-                if (_to == value) return;
-                _to = value;
+                if (Nullable.Equals(_providers.To, value))
+                    return;
+                _providers.To = value;
                 OnPropertyChanged();
             }
         }
 
-        public ObservableCollection<SearchHit> Results { get; } = new();
+        public ObservableCollection<SearchHit> Results => _providers.Results;
         public ObservableCollection<PreviousSearchSummary> PreviousRuns { get; } = new();
-        public ReadOnlyObservableCollection<SearchHistoryEntry> RecentSearchHistory => _recentHistory;
+        public ReadOnlyObservableCollection<SearchHistoryEntry> RecentSearchHistory => _history.RecentSearchHistory;
 
         public int PreviousRunsCount => PreviousRuns.Count;
 
@@ -151,8 +154,20 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        private bool _isBusy;
-        public bool IsBusy { get => _isBusy; private set { _isBusy = value; OnPropertyChanged(); RaiseCanExec(); } }
+        private bool _selfBusy;
+        public bool IsBusy
+        {
+            get => _selfBusy || _providers.IsBusy;
+            private set
+            {
+                if (_selfBusy == value)
+                    return;
+                _selfBusy = value;
+                _providers.SetLocked(value);
+                OnPropertyChanged();
+                RaiseCanExec();
+            }
+        }
 
         public ICommand RunSearchCommand { get; }
         public ICommand SaveSearchCommand { get; }
@@ -164,7 +179,6 @@ namespace LM.App.Wpf.ViewModels
 
         private void RaiseCanExec()
         {
-            (RunSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (SaveSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (LoadSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ExportSearchCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
@@ -173,63 +187,61 @@ namespace LM.App.Wpf.ViewModels
             (ShowRunDetailsCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
         }
 
-        private async Task RunSearchAsync()
+        private async void OnProvidersSearchExecuted(object? sender, SearchExecutedEventArgs e)
         {
-            IsBusy = true;
-            Results.Clear();
-
             try
             {
-                var ct = CancellationToken.None;
-                var hits = SelectedDatabase switch
-                {
-                    SearchDatabase.PubMed => await _pubmed.SearchAsync(Query, From, To, ct),
-                    SearchDatabase.ClinicalTrialsGov => await _ctgov.SearchAsync(Query, From, To, ct),
-                    _ => Array.Empty<SearchHit>()
-                };
-
-                // Mark what's already in DB (by DOI/PMID/NCT, else near-match title+year)
-                var all = new List<Entry>();
-                await foreach (var entry in _store.EnumerateAsync(ct))
-                {
-                    all.Add(entry);
-                }
-                // small sets expected
-                foreach (var h in hits)
-                {
-                    var match = FindExistingEntry(all, h);
-                    h.AlreadyInDb = match is not null;
-                    h.ExistingEntryId = match?.Id;
-                    Results.Add(h);
-                }
-
-                await AppendSearchHistoryAsync();
-
+                await _history.RecordExecutionAsync(e.Result, CancellationToken.None);
             }
-            finally { IsBusy = false; }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[SearchViewModel] Failed to record search history: {ex}");
+            }
+
+            RaiseCanExec();
         }
 
-        private async Task LoadStateAsync()
+        private void OnProvidersPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SearchProvidersViewModel.IsBusy))
+            {
+                OnPropertyChanged(nameof(IsBusy));
+                RaiseCanExec();
+            }
+            else if (e.PropertyName == nameof(SearchProvidersViewModel.SelectedDatabase))
+            {
+                OnPropertyChanged(nameof(SelectedDatabase));
+            }
+            else if (e.PropertyName == nameof(SearchProvidersViewModel.Query))
+            {
+                OnPropertyChanged(nameof(Query));
+                RaiseCanExec();
+            }
+            else if (e.PropertyName == nameof(SearchProvidersViewModel.From))
+            {
+                OnPropertyChanged(nameof(From));
+            }
+            else if (e.PropertyName == nameof(SearchProvidersViewModel.To))
+            {
+                OnPropertyChanged(nameof(To));
+            }
+        }
+
+        private void OnResultsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+            => RaiseCanExec();
+
+        private async Task LoadPreferencesAsync()
         {
             try
             {
-                var history = await _searchHistoryStore.LoadAsync(CancellationToken.None);
-                if (history?.Entries is not null)
-                {
-                    foreach (var entry in history.Entries.OrderByDescending(e => e.ExecutedUtc))
-                    {
-                        _searchHistory.Add(entry);
-                    }
-                }
-
                 var preferences = await _preferencesStore.LoadAsync(CancellationToken.None);
                 if (preferences is not null)
                 {
                     _preferences = preferences;
                     var preferred = _preferences.Search?.LastSelectedDatabase ?? SearchDatabase.PubMed;
-                    if (_selectedDatabase != preferred)
+                    if (_providers.SelectedDatabase != preferred)
                     {
-                        _selectedDatabase = preferred;
+                        _providers.SelectedDatabase = preferred;
                         OnPropertyChanged(nameof(SelectedDatabase));
                     }
                 }
@@ -238,17 +250,14 @@ namespace LM.App.Wpf.ViewModels
             {
                 Trace.WriteLine($"[SearchViewModel] Failed to load persisted search state: {ex}");
             }
-            finally
-            {
-                _stateReady.TrySetResult(true);
-            }
+            finally { _preferencesReady.TrySetResult(true); }
         }
 
         private async Task SavePreferencesAsync(SearchDatabase database)
         {
             try
             {
-                await _stateReady.Task;
+                await _preferencesReady.Task;
                 var updated = _preferences with
                 {
                     Search = new SearchPreferences
@@ -263,63 +272,6 @@ namespace LM.App.Wpf.ViewModels
             catch (Exception ex)
             {
                 Trace.WriteLine($"[SearchViewModel] Failed to persist preferences: {ex}");
-            }
-        }
-
-        private async Task AppendSearchHistoryAsync()
-        {
-            await _stateReady.Task;
-
-            if (string.IsNullOrWhiteSpace(Query))
-                return;
-
-            var entry = new SearchHistoryEntry
-            {
-                Query = Query.Trim(),
-                Database = SelectedDatabase,
-                From = From,
-                To = To,
-                ExecutedUtc = DateTimeOffset.UtcNow
-            };
-
-            SearchHistoryEntry? existing = null;
-            for (var i = 0; i < _searchHistory.Count; i++)
-            {
-                var candidate = _searchHistory[i];
-                if (string.Equals(candidate.Query, entry.Query, StringComparison.OrdinalIgnoreCase) &&
-                    candidate.Database == entry.Database &&
-                    Nullable.Equals(candidate.From, entry.From) &&
-                    Nullable.Equals(candidate.To, entry.To))
-                {
-                    existing = candidate;
-                    break;
-                }
-            }
-
-            if (existing is not null)
-            {
-                _searchHistory.Remove(existing);
-            }
-
-            _searchHistory.Insert(0, entry);
-
-            const int maxHistory = 50;
-            while (_searchHistory.Count > maxHistory)
-            {
-                _searchHistory.RemoveAt(_searchHistory.Count - 1);
-            }
-
-            try
-            {
-                var document = new SearchHistoryDocument
-                {
-                    Entries = _searchHistory.ToList()
-                };
-                await _searchHistoryStore.SaveAsync(document, CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine($"[SearchViewModel] Failed to persist search history: {ex}");
             }
         }
 
@@ -622,7 +574,7 @@ namespace LM.App.Wpf.ViewModels
             if (!TryLoadSearch(summary))
                 return;
 
-            await RunSearchAsync();
+            await _providers.ExecuteSearchAsync();
         }
 
         private async Task ToggleFavoriteAsync(object? parameter)
@@ -953,42 +905,6 @@ namespace LM.App.Wpf.ViewModels
 
             var trimmed = (query ?? string.Empty).Trim();
             return trimmed.Length > 80 ? trimmed[..80] + "…" : trimmed;
-        }
-
-        private static Entry? FindExistingEntry(IReadOnlyList<Entry> entries, SearchHit hit)
-        {
-            if (entries.Count == 0)
-                return null;
-
-            if (!string.IsNullOrWhiteSpace(hit.Doi))
-            {
-                var doiMatch = entries.FirstOrDefault(e =>
-                    !string.IsNullOrWhiteSpace(e.Doi) &&
-                    string.Equals(e.Doi, hit.Doi, StringComparison.OrdinalIgnoreCase));
-                if (doiMatch is not null)
-                    return doiMatch;
-            }
-
-            if (!string.IsNullOrWhiteSpace(hit.ExternalId))
-            {
-                var idMatch = entries.FirstOrDefault(e =>
-                    (!string.IsNullOrWhiteSpace(e.Pmid) && string.Equals(e.Pmid, hit.ExternalId, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(e.Nct) && string.Equals(e.Nct, hit.ExternalId, StringComparison.OrdinalIgnoreCase)));
-                if (idMatch is not null)
-                    return idMatch;
-            }
-
-            if (!string.IsNullOrWhiteSpace(hit.Title))
-            {
-                var titleMatch = entries.FirstOrDefault(e =>
-                    !string.IsNullOrWhiteSpace(e.Title) &&
-                    string.Equals(e.Title, hit.Title, StringComparison.OrdinalIgnoreCase) &&
-                    e.Year == hit.Year);
-                if (titleMatch is not null)
-                    return titleMatch;
-            }
-
-            return null;
         }
 
         private static bool ShouldContinueExisting(LitSearchHook? hook, string? entryId, string currentQuery)
