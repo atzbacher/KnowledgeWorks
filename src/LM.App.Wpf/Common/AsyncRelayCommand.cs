@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.Common
 {
@@ -38,13 +39,13 @@ namespace LM.App.Wpf.Common
             try
             {
                 _isExecuting = true;
-                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+                RaiseCanExecuteChangedCore();
                 await _execute(parameter);
             }
             finally
             {
                 _isExecuting = false;
-                CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+                RaiseCanExecuteChangedCore();
             }
         }
 
@@ -53,6 +54,22 @@ namespace LM.App.Wpf.Common
         /// <summary>
         /// Manually trigger re-evaluation of CanExecute.
         /// </summary>
-        public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        public void RaiseCanExecuteChanged() => RaiseCanExecuteChangedCore();
+
+        private void RaiseCanExecuteChangedCore()
+        {
+            var handlers = CanExecuteChanged;
+            if (handlers is null)
+                return;
+
+            var dispatcher = WpfApplication.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(() => handlers(this, EventArgs.Empty));
+                return;
+            }
+
+            handlers(this, EventArgs.Empty);
+        }
     }
 }

@@ -15,6 +15,7 @@ using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Settings;
 using LM.HubSpoke.Abstractions;
+using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -166,6 +167,13 @@ namespace LM.App.Wpf.ViewModels
             {
                 if (_isBusy == value)
                     return;
+
+                var dispatcher = WpfApplication.Current?.Dispatcher;
+                if (dispatcher is not null && !dispatcher.CheckAccess())
+                {
+                    dispatcher.Invoke(() => IsBusy = value);
+                    return;
+                }
 
                 _isBusy = value;
                 OnPropertyChanged();
