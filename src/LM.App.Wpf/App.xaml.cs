@@ -2,22 +2,12 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using LM.App.Wpf.Library;
+using LM.App.Wpf.Application;
+using LM.App.Wpf.Composition.Modules;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
-using LM.HubSpoke.Spokes;
-using LM.HubSpoke.Abstractions;
 using LM.Infrastructure.FileSystem;
-using LM.Infrastructure.Storage;
-using LM.Infrastructure.Utils;
-using LM.Infrastructure.Content;
-using LM.Infrastructure.Metadata;
-using LM.Infrastructure.Text;
-using LM.Infrastructure.PubMed;
-using LM.HubSpoke.Indexing;
-
-
 
 using WpfMessageBox = System.Windows.MessageBox;
 
@@ -25,6 +15,7 @@ namespace LM.App.Wpf
 {
     public partial class App : System.Windows.Application
     {
+        private AppHost? _host;
         private AddViewModel? _addViewModel;
 
         protected override async void OnStartup(StartupEventArgs e)
@@ -64,22 +55,22 @@ namespace LM.App.Wpf
             }
             await ws.EnsureWorkspaceAsync(chooser.SelectedWorkspacePath);
 
-            // Build all services around the chosen workspace (centralized wiring)
-            var services = LM.App.Wpf.Composition.ServiceConfig.Build(ws);
+            var host = AppHostBuilder.Create()
+                                     .AddModule(new CoreModule(ws))
+                                     .AddModule(new AddModule())
+                                     .AddModule(new LibraryModule())
+                                     .AddModule(new SearchModule())
+                                     .Build();
+            _host = host;
 
-            // Initialize store
-            await services.Store.InitializeAsync();
+            var store = host.GetRequiredService<IEntryStore>();
+            await store.InitializeAsync();
 
-            // ViewModels
-            var presetStore = new LibraryFilterPresetStore(ws);
-            var presetPrompt = new LibraryPresetPrompt();
-            var entryEditor = new WorkspaceEntryEditor(ws);
-            var libraryVm = new LibraryViewModel(services.Store, services.FullTextSearch, ws, services.Storage, presetStore, presetPrompt, entryEditor);
-            var addVm = new AddViewModel(services.Pipeline, ws, services.Scanner);
+            var libraryVm = host.GetRequiredService<LibraryViewModel>();
+            var addVm = host.GetRequiredService<AddViewModel>();
             await addVm.InitializeAsync();
             _addViewModel = addVm;
-            var searchPrompt = new SearchSavePrompt();
-            var searchVm = new SearchViewModel(services.Store, services.Storage, ws, searchPrompt);
+            var searchVm = host.GetRequiredService<SearchViewModel>();
 
             // Bind – resolve the views by name because the generated fields are not
             // available when building from the command line (designer-only feature).
@@ -97,6 +88,7 @@ namespace LM.App.Wpf
         protected override void OnExit(ExitEventArgs e)
         {
             _addViewModel?.Dispose();
+            _host?.Dispose();
             base.OnExit(e);
         }
     }

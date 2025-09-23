@@ -15,7 +15,9 @@ using System.Windows;
 using System.Windows.Input;
 using LM.Infrastructure.Hooks;     // for HookOrchestrator I
 using LM.Core.Abstractions;       // for IPmidNormalizerEntryStore, IFileStorageRepository, IHasher, ISimilarityService, IWorkSpaceService, IMetadataExtractor, IDoiNormalizer, IPublicationLookup
-using LM.Core.Models;              // EntryType     
+using LM.Core.Abstractions.Configuration;
+using LM.Core.Models;              // EntryType
+using LM.Infrastructure.Settings;
 using LM.HubSpoke.Abstractions;    // ISimilarityLog
 
 namespace LM.App.Wpf.ViewModels
@@ -29,12 +31,12 @@ namespace LM.App.Wpf.ViewModels
         private readonly IAddPipeline _pipeline;
         private readonly IWorkSpaceService _workspace;
         private readonly WatchedFolderScanner _scanner;
+        private readonly IWatchedFolderSettingsStore _watchedFolderSettings;
         private readonly bool _ownsScanner;
         private WatchedFolderConfig _watchedConfig = new();
         private readonly SemaphoreSlim _watchedFolderSaveGate = new(1, 1);
         private readonly SemaphoreSlim _initGate = new(1, 1);
         private bool _isRestoringWatchedFolders;
-        private string? _watchedFolderConfigPath;
         private bool _isInitialized;
         private bool _disposed;
 
@@ -52,11 +54,15 @@ namespace LM.App.Wpf.ViewModels
         private static readonly Array s_entryTypes = Enum.GetValues(typeof(EntryType));
 
         // ---- Primary ctor (preferred) ----
-        public AddViewModel(IAddPipeline pipeline, IWorkSpaceService workspace, WatchedFolderScanner? scanner = null)
+        public AddViewModel(IAddPipeline pipeline,
+                            IWorkSpaceService workspace,
+                            WatchedFolderScanner? scanner = null,
+                            IWatchedFolderSettingsStore? watchedFolderSettings = null)
         {
             _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _scanner = scanner ?? new WatchedFolderScanner(_pipeline);
+            _watchedFolderSettings = watchedFolderSettings ?? new JsonWatchedFolderSettingsStore(_workspace);
             _ownsScanner = scanner is null;
 
             // Track collection changes AND per-item Selected changes -> keeps Commit button state correct
@@ -126,18 +132,28 @@ namespace LM.App.Wpf.ViewModels
                 if (_isInitialized)
                     return;
 
-                WatchedFolderConfig loaded;
+                WatchedFolderSettings settings;
                 try
                 {
-                    loaded = await WatchedFolderConfig.LoadAsync(GetWatchedFolderConfigPath(), ct).ConfigureAwait(false);
+                    settings = await _watchedFolderSettings.LoadAsync(ct).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     Trace.WriteLine($"[AddViewModel] Failed to load watched folder config: {ex}");
-                    loaded = new WatchedFolderConfig();
+                    settings = new WatchedFolderSettings();
                 }
 
-                _watchedConfig = loaded;
+                var config = new WatchedFolderConfig();
+                try
+                {
+                    config.Load(settings);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"[AddViewModel] Failed to hydrate watched folder config: {ex}");
+                }
+
+                _watchedConfig = config;
                 OnPropertyChanged(nameof(WatchedFolders));
                 _scanAllWatchedFoldersCommand.RaiseCanExecuteChanged();
 
@@ -496,7 +512,8 @@ namespace LM.App.Wpf.ViewModels
             await _watchedFolderSaveGate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
-                await _watchedConfig.SaveAsync(GetWatchedFolderConfigPath(), ct).ConfigureAwait(false);
+                var snapshot = _watchedConfig.CreateSnapshot();
+                await _watchedFolderSettings.SaveAsync(snapshot, ct).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -506,29 +523,6 @@ namespace LM.App.Wpf.ViewModels
             {
                 _watchedFolderSaveGate.Release();
             }
-        }
-
-        private string GetWatchedFolderConfigPath()
-        {
-            if (!string.IsNullOrEmpty(_watchedFolderConfigPath))
-                return _watchedFolderConfigPath;
-
-            var root = _workspace.GetWorkspaceRoot();
-            var fullRoot = Path.GetFullPath(root);
-            var trimmed = fullRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            if (trimmed.Length == 0)
-                trimmed = fullRoot;
-
-            var name = Path.GetFileName(trimmed);
-            if (string.IsNullOrEmpty(name))
-                name = "workspace";
-
-            var directory = Path.GetDirectoryName(trimmed);
-            if (string.IsNullOrEmpty(directory))
-                directory = fullRoot;
-
-            _watchedFolderConfigPath = Path.Combine(directory, $"{name}.watched-folders.json");
-            return _watchedFolderConfigPath;
         }
 
         private async Task RunGuardedAsync(Func<Task> action)
