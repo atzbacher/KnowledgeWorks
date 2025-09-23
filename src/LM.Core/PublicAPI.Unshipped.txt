@@ -347,4 +347,53 @@ static LM.Core.Utils.Hashes.Sha256File(string! path) -> string!
 static LM.Core.Utils.IdGen.NewId() -> string!
 static LM.Core.Utils.JsonEx.Deserialize<T>(string! s) -> T?
 static LM.Core.Utils.JsonEx.Serialize<T>(T v) -> string!
-static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!
+static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore
+LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
+LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.Configuration.ISearchHistoryStore
+LM.Core.Abstractions.Configuration.ISearchHistoryStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchHistoryDocument!>!
+LM.Core.Abstractions.Configuration.ISearchHistoryStore.SaveAsync(LM.Core.Models.Search.SearchHistoryDocument! document, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.Configuration.IUserPreferencesStore
+LM.Core.Abstractions.Configuration.IUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
+LM.Core.Abstractions.Configuration.IUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Models.Search.SearchHistoryDocument
+LM.Core.Models.Search.SearchHistoryDocument.Entries.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.SearchHistoryEntry!>!
+LM.Core.Models.Search.SearchHistoryDocument.Entries.init -> void
+LM.Core.Models.Search.SearchHistoryEntry
+LM.Core.Models.Search.SearchHistoryEntry.Database.get -> LM.Core.Models.SearchDatabase
+LM.Core.Models.Search.SearchHistoryEntry.Database.init -> void
+LM.Core.Models.Search.SearchHistoryEntry.ExecutedUtc.get -> System.DateTimeOffset
+LM.Core.Models.Search.SearchHistoryEntry.ExecutedUtc.init -> void
+LM.Core.Models.Search.SearchHistoryEntry.From.get -> System.DateTime?
+LM.Core.Models.Search.SearchHistoryEntry.From.init -> void
+LM.Core.Models.Search.SearchHistoryEntry.Query.get -> string!
+LM.Core.Models.Search.SearchHistoryEntry.Query.init -> void
+LM.Core.Models.Search.SearchHistoryEntry.To.get -> System.DateTime?
+LM.Core.Models.Search.SearchHistoryEntry.To.init -> void
+LM.Core.Models.UserPreferences
+LM.Core.Models.UserPreferences.Search.get -> LM.Core.Models.SearchPreferences!
+LM.Core.Models.UserPreferences.Search.init -> void
+LM.Core.Models.SearchPreferences
+LM.Core.Models.SearchPreferences.LastSelectedDatabase.get -> LM.Core.Models.SearchDatabase
+LM.Core.Models.SearchPreferences.LastSelectedDatabase.init -> void
+LM.Core.Models.SearchPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
+LM.Core.Models.SearchPreferences.LastUpdatedUtc.init -> void
+LM.Core.Models.WatchedFolderSettings
+LM.Core.Models.WatchedFolderSettings.Folders.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.WatchedFolderSettingsFolder!>!
+LM.Core.Models.WatchedFolderSettings.Folders.init -> void
+LM.Core.Models.WatchedFolderSettings.States.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.WatchedFolderState!>!
+LM.Core.Models.WatchedFolderSettings.States.init -> void
+LM.Core.Models.WatchedFolderSettingsFolder
+LM.Core.Models.WatchedFolderSettingsFolder.IsEnabled.get -> bool
+LM.Core.Models.WatchedFolderSettingsFolder.IsEnabled.init -> void
+LM.Core.Models.WatchedFolderSettingsFolder.Path.get -> string!
+LM.Core.Models.WatchedFolderSettingsFolder.Path.init -> void
+LM.Core.Models.WatchedFolderState
+LM.Core.Models.WatchedFolderState.AggregatedHash.get -> string?
+LM.Core.Models.WatchedFolderState.AggregatedHash.init -> void
+LM.Core.Models.WatchedFolderState.LastScanUtc.get -> System.DateTimeOffset?
+LM.Core.Models.WatchedFolderState.LastScanUtc.init -> void
+LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.get -> bool
+LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.init -> void
+LM.Core.Models.WatchedFolderState.Path.get -> string!
+LM.Core.Models.WatchedFolderState.Path.init -> void

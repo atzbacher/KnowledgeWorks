@@ -1,8 +1,10 @@
 ﻿#nullable enable
 using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayCommand
 using LM.Core.Abstractions;
+using LM.Core.Abstractions.Configuration;
 using LM.HubSpoke.Models;
 using LM.Core.Models;            // LitSearchHook, LitSearchRun, JsonStd
+using LM.Core.Models.Search;
 using LM.Infrastructure.Pubmed;
 using LM.Infrastructure.Search;
 using System;
@@ -22,6 +24,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Input;
+using LM.Infrastructure.Settings;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -35,16 +38,30 @@ namespace LM.App.Wpf.ViewModels
         private readonly ISearchSavePrompt _savePrompt;
         private readonly Dictionary<string, PreviousSearchContext> _runIndex = new(StringComparer.Ordinal);
         private readonly Dictionary<string, PreviousSearchContext> _entryIndex = new(StringComparer.Ordinal);
+        private readonly ISearchHistoryStore _searchHistoryStore;
+        private readonly IUserPreferencesStore _preferencesStore;
+        private readonly ObservableCollection<SearchHistoryEntry> _searchHistory = new();
+        private readonly ReadOnlyObservableCollection<SearchHistoryEntry> _recentHistory;
+        private readonly TaskCompletionSource<bool> _stateReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private UserPreferences _preferences = new();
 
         private string? _loadedEntryId;
         private LitSearchHook? _loadedHook;
 
-        public SearchViewModel(IEntryStore store, IFileStorageRepository storage, IWorkSpaceService ws, ISearchSavePrompt savePrompt)
+        public SearchViewModel(IEntryStore store,
+                               IFileStorageRepository storage,
+                               IWorkSpaceService ws,
+                               ISearchSavePrompt savePrompt,
+                               ISearchHistoryStore? searchHistoryStore = null,
+                               IUserPreferencesStore? preferencesStore = null)
         {
-            _store = store;
-            _storage = storage;
-            _ws = ws;
+            _store = store ?? throw new ArgumentNullException(nameof(store));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _ws = ws ?? throw new ArgumentNullException(nameof(ws));
             _savePrompt = savePrompt ?? throw new ArgumentNullException(nameof(savePrompt));
+            _searchHistoryStore = searchHistoryStore ?? new JsonSearchHistoryStore(_ws);
+            _preferencesStore = preferencesStore ?? new JsonUserPreferencesStore();
+            _recentHistory = new ReadOnlyObservableCollection<SearchHistoryEntry>(_searchHistory);
 
             RunSearchCommand = new AsyncRelayCommand(RunSearchAsync, () => !IsBusy && !string.IsNullOrWhiteSpace(Query));
             SaveSearchCommand = new AsyncRelayCommand(SaveSearchAsync, () => !IsBusy && Results.Any());
@@ -54,6 +71,7 @@ namespace LM.App.Wpf.ViewModels
             ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is PreviousSearchSummary);
             ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is PreviousSearchSummary);
 
+            _ = LoadStateAsync();
             _ = RefreshPreviousRunsAsync();
 
             PreviousRuns.CollectionChanged += OnPreviousRunsCollectionChanged;
@@ -87,6 +105,7 @@ namespace LM.App.Wpf.ViewModels
                 if (_selectedDatabase == value) return;
                 _selectedDatabase = value;
                 OnPropertyChanged();
+                _ = SavePreferencesAsync(value);
             }
         }
         private DateTime? _from;
@@ -115,6 +134,7 @@ namespace LM.App.Wpf.ViewModels
 
         public ObservableCollection<SearchHit> Results { get; } = new();
         public ObservableCollection<PreviousSearchSummary> PreviousRuns { get; } = new();
+        public ReadOnlyObservableCollection<SearchHistoryEntry> RecentSearchHistory => _recentHistory;
 
         public int PreviousRunsCount => PreviousRuns.Count;
 
@@ -183,8 +203,124 @@ namespace LM.App.Wpf.ViewModels
                     Results.Add(h);
                 }
 
+                await AppendSearchHistoryAsync();
+
             }
             finally { IsBusy = false; }
+        }
+
+        private async Task LoadStateAsync()
+        {
+            try
+            {
+                var history = await _searchHistoryStore.LoadAsync(CancellationToken.None);
+                if (history?.Entries is not null)
+                {
+                    foreach (var entry in history.Entries.OrderByDescending(e => e.ExecutedUtc))
+                    {
+                        _searchHistory.Add(entry);
+                    }
+                }
+
+                var preferences = await _preferencesStore.LoadAsync(CancellationToken.None);
+                if (preferences is not null)
+                {
+                    _preferences = preferences;
+                    var preferred = _preferences.Search?.LastSelectedDatabase ?? SearchDatabase.PubMed;
+                    if (_selectedDatabase != preferred)
+                    {
+                        _selectedDatabase = preferred;
+                        OnPropertyChanged(nameof(SelectedDatabase));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[SearchViewModel] Failed to load persisted search state: {ex}");
+            }
+            finally
+            {
+                _stateReady.TrySetResult(true);
+            }
+        }
+
+        private async Task SavePreferencesAsync(SearchDatabase database)
+        {
+            try
+            {
+                await _stateReady.Task;
+                var updated = _preferences with
+                {
+                    Search = new SearchPreferences
+                    {
+                        LastSelectedDatabase = database,
+                        LastUpdatedUtc = DateTimeOffset.UtcNow
+                    }
+                };
+                _preferences = updated;
+                await _preferencesStore.SaveAsync(updated, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[SearchViewModel] Failed to persist preferences: {ex}");
+            }
+        }
+
+        private async Task AppendSearchHistoryAsync()
+        {
+            await _stateReady.Task;
+
+            if (string.IsNullOrWhiteSpace(Query))
+                return;
+
+            var entry = new SearchHistoryEntry
+            {
+                Query = Query.Trim(),
+                Database = SelectedDatabase,
+                From = From,
+                To = To,
+                ExecutedUtc = DateTimeOffset.UtcNow
+            };
+
+            SearchHistoryEntry? existing = null;
+            for (var i = 0; i < _searchHistory.Count; i++)
+            {
+                var candidate = _searchHistory[i];
+                if (string.Equals(candidate.Query, entry.Query, StringComparison.OrdinalIgnoreCase) &&
+                    candidate.Database == entry.Database &&
+                    Nullable.Equals(candidate.From, entry.From) &&
+                    Nullable.Equals(candidate.To, entry.To))
+                {
+                    existing = candidate;
+                    break;
+                }
+            }
+
+            if (existing is not null)
+            {
+                _searchHistory.Remove(existing);
+            }
+
+            _searchHistory.Insert(0, entry);
+
+            const int maxHistory = 50;
+            while (_searchHistory.Count > maxHistory)
+            {
+                _searchHistory.RemoveAt(_searchHistory.Count - 1);
+            }
+
+            try
+            {
+                var document = new SearchHistoryDocument
+                {
+                    Entries = _searchHistory.ToList()
+                };
+                await _searchHistoryStore.SaveAsync(document, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[SearchViewModel] Failed to persist search history: {ex}");
+            }
         }
 
         /// <summary>
