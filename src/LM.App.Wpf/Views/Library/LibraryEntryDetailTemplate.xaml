@@ -111,7 +111,7 @@
 
         <Button Grid.Column="1"
                 Content="Edit"
-                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                 Margin="12,0,0,0"
                 Padding="12,4"
                 HorizontalAlignment="Right"
