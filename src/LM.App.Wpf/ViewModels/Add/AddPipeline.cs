@@ -252,9 +252,17 @@ namespace LM.App.Wpf.ViewModels
 
                     // Append to target entry (Attachment has only RelativePath in your model)
                     target.Attachments ??= new List<Attachment>();
+                    var now = DateTime.UtcNow;
+                    var addedBy = Environment.UserName ?? string.Empty;
+                    var title = Path.GetFileNameWithoutExtension(r.FilePath) ?? string.Empty;
                     target.Attachments.Add(new Attachment
                     {
-                        RelativePath = attachmentRel
+                        RelativePath = attachmentRel,
+                        Title = string.IsNullOrWhiteSpace(title) ? attachmentRel : title!,
+                        Kind = AttachmentKind.Supplement,
+                        Tags = new List<string>(),
+                        AddedBy = addedBy,
+                        AddedUtc = now
                     });
 
                     // Persist updated target

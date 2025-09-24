@@ -224,7 +224,17 @@
                     Padding="8"
                     Margin="0,0,0,8">
               <StackPanel>
-                <TextBlock Text="{Binding RelativePath}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding RelativePath}" Style="{StaticResource OptionalSectionTextStyle}" />
+                <TextBlock Margin="0,4,0,0">
+                  <Run Text="Type: " />
+                  <Run Text="{Binding Kind}" />
+                </TextBlock>
+                <TextBlock Text="{Binding AddedBy, StringFormat=Added by {0}}"
+                           Margin="0,2,0,0"
+                           Style="{StaticResource OptionalSectionTextStyle}" />
+                <TextBlock Text="{Binding AddedUtc, StringFormat=Added on {0:yyyy-MM-dd HH:mm}}"
+                           Margin="0,2,0,0" />
                 <TextBlock Text="{Binding Notes}" Style="{StaticResource AttachmentNotesTextStyle}" />
                 <TextBlock Style="{StaticResource AttachmentTagsTextStyle}">
                   <Run Text="Tags: " />

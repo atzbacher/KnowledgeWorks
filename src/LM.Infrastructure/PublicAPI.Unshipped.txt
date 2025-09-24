@@ -35,6 +35,10 @@ LM.Infrastructure.Hooks.ArticleHookFactory
 LM.Infrastructure.Hooks.HookContext
 LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
 LM.Infrastructure.Hooks.HookContext.Article.init -> void
+LM.Infrastructure.Hooks.HookContext.Attachments.get -> LM.HubSpoke.Models.AttachmentHook?
+LM.Infrastructure.Hooks.HookContext.Attachments.init -> void
+LM.Infrastructure.Hooks.HookContext.ChangeLog.get -> LM.HubSpoke.Models.EntryChangeLogHook?
+LM.Infrastructure.Hooks.HookContext.ChangeLog.init -> void
 LM.Infrastructure.Hooks.HookContext.HookContext() -> void
 LM.Infrastructure.Hooks.HookOrchestrator
 LM.Infrastructure.Hooks.HookOrchestrator.HookOrchestrator(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void

@@ -73,6 +73,30 @@ LM.HubSpoke.Models.Affiliation.Email.get -> string?
 LM.HubSpoke.Models.Affiliation.Email.init -> void
 LM.HubSpoke.Models.Affiliation.Text.get -> string!
 LM.HubSpoke.Models.Affiliation.Text.init -> void
+LM.HubSpoke.Models.AttachmentHook
+LM.HubSpoke.Models.AttachmentHook.AttachmentHook() -> void
+LM.HubSpoke.Models.AttachmentHook.Attachments.get -> System.Collections.Generic.List<LM.HubSpoke.Models.AttachmentHookItem!>!
+LM.HubSpoke.Models.AttachmentHook.Attachments.set -> void
+LM.HubSpoke.Models.AttachmentHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.AttachmentHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.AttachmentHookItem
+LM.HubSpoke.Models.AttachmentHookItem.AddedBy.get -> string!
+LM.HubSpoke.Models.AttachmentHookItem.AddedBy.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.AddedUtc.get -> System.DateTime
+LM.HubSpoke.Models.AttachmentHookItem.AddedUtc.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.AttachmentHookItem() -> void
+LM.HubSpoke.Models.AttachmentHookItem.AttachmentId.get -> string!
+LM.HubSpoke.Models.AttachmentHookItem.AttachmentId.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.LibraryPath.get -> string!
+LM.HubSpoke.Models.AttachmentHookItem.LibraryPath.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.Notes.get -> string?
+LM.HubSpoke.Models.AttachmentHookItem.Notes.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.Purpose.get -> LM.Core.Models.AttachmentKind
+LM.HubSpoke.Models.AttachmentHookItem.Purpose.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.Tags.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.AttachmentHookItem.Tags.init -> void
+LM.HubSpoke.Models.AttachmentHookItem.Title.get -> string!
+LM.HubSpoke.Models.AttachmentHookItem.Title.init -> void
 LM.HubSpoke.Models.ArticleAbstract
 LM.HubSpoke.Models.ArticleAbstract.ArticleAbstract() -> void
 LM.HubSpoke.Models.ArticleAbstract.Sections.get -> System.Collections.Generic.List<LM.HubSpoke.Models.AbstractSection!>!
@@ -198,6 +222,18 @@ LM.HubSpoke.Models.Author.LastName.get -> string?
 LM.HubSpoke.Models.Author.LastName.init -> void
 LM.HubSpoke.Models.Author.ORCID.get -> string?
 LM.HubSpoke.Models.Author.ORCID.init -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.AttachmentId.get -> string!
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.AttachmentId.init -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.ChangeLogAttachmentDetails() -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.LibraryPath.get -> string!
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.LibraryPath.init -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Purpose.get -> LM.Core.Models.AttachmentKind
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Purpose.init -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Tags.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Tags.init -> void
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Title.get -> string!
+LM.HubSpoke.Models.ChangeLogAttachmentDetails.Title.init -> void
 LM.HubSpoke.Models.Chemical
 LM.HubSpoke.Models.Chemical.Chemical() -> void
 LM.HubSpoke.Models.Chemical.Name.get -> string!
@@ -243,6 +279,24 @@ LM.HubSpoke.Models.DocumentType.Presentation = 0 -> LM.HubSpoke.Models.DocumentT
 LM.HubSpoke.Models.DocumentType.Report = 2 -> LM.HubSpoke.Models.DocumentType
 LM.HubSpoke.Models.DocumentType.StandardOperatingProcedure = 3 -> LM.HubSpoke.Models.DocumentType
 LM.HubSpoke.Models.DocumentType.Whitepaper = 4 -> LM.HubSpoke.Models.DocumentType
+LM.HubSpoke.Models.EntryChangeLogEvent
+LM.HubSpoke.Models.EntryChangeLogEvent.Action.get -> string!
+LM.HubSpoke.Models.EntryChangeLogEvent.Action.init -> void
+LM.HubSpoke.Models.EntryChangeLogEvent.Details.get -> LM.HubSpoke.Models.ChangeLogAttachmentDetails?
+LM.HubSpoke.Models.EntryChangeLogEvent.Details.init -> void
+LM.HubSpoke.Models.EntryChangeLogEvent.EntryChangeLogEvent() -> void
+LM.HubSpoke.Models.EntryChangeLogEvent.EventId.get -> string!
+LM.HubSpoke.Models.EntryChangeLogEvent.EventId.init -> void
+LM.HubSpoke.Models.EntryChangeLogEvent.PerformedBy.get -> string!
+LM.HubSpoke.Models.EntryChangeLogEvent.PerformedBy.init -> void
+LM.HubSpoke.Models.EntryChangeLogEvent.TimestampUtc.get -> System.DateTime
+LM.HubSpoke.Models.EntryChangeLogEvent.TimestampUtc.init -> void
+LM.HubSpoke.Models.EntryChangeLogHook
+LM.HubSpoke.Models.EntryChangeLogHook.EntryChangeLogHook() -> void
+LM.HubSpoke.Models.EntryChangeLogHook.Events.get -> System.Collections.Generic.List<LM.HubSpoke.Models.EntryChangeLogEvent!>!
+LM.HubSpoke.Models.EntryChangeLogHook.Events.set -> void
+LM.HubSpoke.Models.EntryChangeLogHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.EntryChangeLogHook.SchemaVersion.init -> void
 LM.HubSpoke.Models.EntryHooks
 LM.HubSpoke.Models.EntryHooks.Article.get -> string?
 LM.HubSpoke.Models.EntryHooks.Article.init -> void
