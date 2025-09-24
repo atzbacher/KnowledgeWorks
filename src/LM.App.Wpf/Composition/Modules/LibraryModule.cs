@@ -1,10 +1,12 @@
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.Views.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
+using LM.Infrastructure.Hooks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -25,6 +27,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<EntryEditorViewModel>();
             services.AddSingleton<ILibraryEntryEditor, LibraryEntryEditor>();
             services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddTransient<AttachmentMetadataDialogViewModel>();
+            services.AddSingleton<IAttachmentMetadataPrompt, AttachmentMetadataPrompt>();
 
             services.AddSingleton(sp => new LibraryFiltersViewModel(
                 sp.GetRequiredService<LibraryFilterPresetStore>(),
@@ -34,7 +38,9 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFileStorageRepository>(),
                 sp.GetRequiredService<ILibraryEntryEditor>(),
-                sp.GetRequiredService<ILibraryDocumentService>()));
+                sp.GetRequiredService<ILibraryDocumentService>(),
+                sp.GetRequiredService<IAttachmentMetadataPrompt>(),
+                sp.GetRequiredService<HookOrchestrator>()));
 
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),

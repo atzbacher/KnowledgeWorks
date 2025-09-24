@@ -12,6 +12,8 @@ using LM.App.Wpf.Views.Behaviors;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
+using LM.Infrastructure.Hooks;
+using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Library
 {
@@ -29,6 +31,8 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IFileStorageRepository _storage;
         private readonly ILibraryEntryEditor _entryEditor;
         private readonly ILibraryDocumentService _documentService;
+        private readonly IAttachmentMetadataPrompt _attachmentPrompt;
+        private readonly HookOrchestrator _hookOrchestrator;
 
         [ObservableProperty]
         private LibrarySearchResult? selected;
@@ -44,12 +48,16 @@ namespace LM.App.Wpf.ViewModels.Library
         public LibraryResultsViewModel(IEntryStore store,
                                        IFileStorageRepository storage,
                                        ILibraryEntryEditor entryEditor,
-                                       ILibraryDocumentService documentService)
+                                       ILibraryDocumentService documentService,
+                                       IAttachmentMetadataPrompt attachmentPrompt,
+                                       HookOrchestrator hookOrchestrator)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
             _entryEditor = entryEditor ?? throw new ArgumentNullException(nameof(entryEditor));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
+            _attachmentPrompt = attachmentPrompt ?? throw new ArgumentNullException(nameof(attachmentPrompt));
+            _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
 
             Items = new ObservableCollection<LibrarySearchResult>();
         }
@@ -248,31 +256,70 @@ namespace LM.App.Wpf.ViewModels.Library
                 return;
             }
 
+            var metadata = await RequestAttachmentMetadataAsync(entry, candidates).ConfigureAwait(false);
+            if (metadata is null || metadata.Attachments.Count == 0)
+                return;
+
+            var metadataByPath = new Dictionary<string, AttachmentMetadataSelection>(StringComparer.OrdinalIgnoreCase);
+            foreach (var selection in metadata.Attachments)
+            {
+                if (selection is null)
+                    continue;
+                if (string.IsNullOrWhiteSpace(selection.SourcePath))
+                    continue;
+
+                metadataByPath[selection.SourcePath] = selection;
+            }
+
+            if (metadataByPath.Count == 0)
+                return;
+
             var attachments = entry.Attachments ??= new List<Attachment>();
             var existing = new HashSet<string>(attachments.Select(a => a.RelativePath), StringComparer.OrdinalIgnoreCase);
             var duplicates = new List<string>();
             var failures = new List<string>();
             var added = new List<Attachment>();
             var targetDir = Path.Combine("attachments", entryId);
+            var addedBy = GetCurrentUserName();
 
             foreach (var path in candidates)
             {
+                if (!metadataByPath.TryGetValue(path, out var selection))
+                    continue;
+
+                var display = string.IsNullOrWhiteSpace(selection.Title)
+                    ? DisplayNameForPath(path)
+                    : selection.Title.Trim();
+
                 try
                 {
                     var relative = await _storage.SaveNewAsync(path, targetDir).ConfigureAwait(false);
                     if (!existing.Add(relative))
                     {
-                        duplicates.Add(DisplayNameForPath(path));
+                        duplicates.Add(display);
                         continue;
                     }
 
-                    var attachment = new Attachment { RelativePath = relative };
+                    var tags = selection.Tags is { Count: > 0 }
+                        ? new List<string>(selection.Tags)
+                        : new List<string>();
+
+                    var attachment = new Attachment
+                    {
+                        RelativePath = relative,
+                        Title = display,
+                        Kind = selection.Kind,
+                        Tags = tags,
+                        AddedBy = addedBy,
+                        AddedUtc = DateTime.UtcNow
+                    };
+
                     attachments.Add(attachment);
                     added.Add(attachment);
                 }
                 catch (Exception ex)
                 {
-                    failures.Add($"{DisplayNameForPath(path)} — {ex.Message}");
+                    failures.Add($"{display} — {ex.Message}");
                 }
             }
 
@@ -298,6 +345,8 @@ namespace LM.App.Wpf.ViewModels.Library
                     System.Windows.MessageBoxImage.Error);
                 return;
             }
+
+            await PersistAttachmentHooksAsync(entry, added, entryId).ConfigureAwait(false);
 
             await RefreshSelectedEntryAsync(targetResult, entryId).ConfigureAwait(false);
 
@@ -386,6 +435,138 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 System.Diagnostics.Debug.WriteLine($"[LibraryResultsViewModel] RefreshSelectedEntryAsync failed: {ex}");
             }
+        }
+
+        private Task<AttachmentMetadataPromptResult?> RequestAttachmentMetadataAsync(Entry entry, IReadOnlyCollection<string> paths)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+            if (paths is null)
+                throw new ArgumentNullException(nameof(paths));
+
+            var label = !string.IsNullOrWhiteSpace(entry.DisplayName)
+                ? entry.DisplayName!
+                : (!string.IsNullOrWhiteSpace(entry.Title) ? entry.Title! : entry.Id ?? string.Empty);
+
+            var context = new AttachmentMetadataPromptContext(label, paths.ToList());
+            return _attachmentPrompt.RequestMetadataAsync(context);
+        }
+
+        private async Task PersistAttachmentHooksAsync(Entry entry, IReadOnlyList<Attachment> added, string entryId)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+            if (string.IsNullOrWhiteSpace(entryId))
+                return;
+
+            var ctx = new HookContext
+            {
+                Attachments = BuildAttachmentHook(entry),
+                ChangeLog = BuildChangeLogHook(added)
+            };
+
+            try
+            {
+                await _hookOrchestrator.ProcessAsync(entryId, ctx, System.Threading.CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[LibraryResultsViewModel] Failed to persist attachment hooks: {ex}");
+            }
+        }
+
+        private static HookM.AttachmentHook BuildAttachmentHook(Entry entry)
+        {
+            var hook = new HookM.AttachmentHook();
+            var items = new List<HookM.AttachmentHookItem>();
+
+            if (entry.Attachments is not null)
+            {
+                foreach (var attachment in entry.Attachments)
+                {
+                    if (attachment is null)
+                        continue;
+
+                    var title = string.IsNullOrWhiteSpace(attachment.Title)
+                        ? attachment.RelativePath
+                        : attachment.Title.Trim();
+
+                    var tags = attachment.Tags is { Count: > 0 }
+                        ? new List<string>(attachment.Tags)
+                        : new List<string>();
+
+                    items.Add(new HookM.AttachmentHookItem
+                    {
+                        AttachmentId = attachment.Id,
+                        Title = title,
+                        LibraryPath = attachment.RelativePath,
+                        Tags = tags,
+                        Notes = attachment.Notes,
+                        Purpose = attachment.Kind,
+                        AddedBy = string.IsNullOrWhiteSpace(attachment.AddedBy) ? "unknown" : attachment.AddedBy,
+                        AddedUtc = attachment.AddedUtc == default ? DateTime.UtcNow : attachment.AddedUtc
+                    });
+                }
+            }
+
+            hook.Attachments = items;
+            return hook;
+        }
+
+        private static HookM.EntryChangeLogHook? BuildChangeLogHook(IReadOnlyList<Attachment> added)
+        {
+            if (added is null || added.Count == 0)
+                return null;
+
+            var events = new List<HookM.EntryChangeLogEvent>();
+
+            foreach (var attachment in added)
+            {
+                if (attachment is null)
+                    continue;
+
+                var performedBy = string.IsNullOrWhiteSpace(attachment.AddedBy)
+                    ? "unknown"
+                    : attachment.AddedBy;
+
+                var title = string.IsNullOrWhiteSpace(attachment.Title)
+                    ? attachment.RelativePath
+                    : attachment.Title;
+
+                var tags = attachment.Tags is { Count: > 0 }
+                    ? new List<string>(attachment.Tags)
+                    : new List<string>();
+
+                events.Add(new HookM.EntryChangeLogEvent
+                {
+                    EventId = Guid.NewGuid().ToString("N"),
+                    TimestampUtc = attachment.AddedUtc == default ? DateTime.UtcNow : attachment.AddedUtc,
+                    PerformedBy = performedBy,
+                    Action = "AttachmentAdded",
+                    Details = new HookM.ChangeLogAttachmentDetails
+                    {
+                        AttachmentId = attachment.Id,
+                        Title = title,
+                        LibraryPath = attachment.RelativePath,
+                        Purpose = attachment.Kind,
+                        Tags = tags
+                    }
+                });
+            }
+
+            if (events.Count == 0)
+                return null;
+
+            return new HookM.EntryChangeLogHook
+            {
+                Events = events
+            };
+        }
+
+        private static string GetCurrentUserName()
+        {
+            var user = Environment.UserName;
+            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
         }
 
         private static void ExecuteOnDispatcher(Action action)

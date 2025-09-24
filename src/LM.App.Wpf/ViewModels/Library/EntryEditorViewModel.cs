@@ -177,7 +177,11 @@ namespace LM.App.Wpf.ViewModels.Library
                     Id = a.Id,
                     RelativePath = a.RelativePath,
                     Notes = a.Notes,
-                    Tags = a.Tags?.ToList() ?? new List<string>()
+                    Tags = a.Tags?.ToList() ?? new List<string>(),
+                    Title = a.Title,
+                    Kind = a.Kind,
+                    AddedBy = a.AddedBy,
+                    AddedUtc = a.AddedUtc
                 }).ToList() ?? new List<Attachment>(),
                 Relations = source.Relations?.Select(r => new Relation
                 {

@@ -335,6 +335,28 @@ LM.App.Wpf.Library.ILibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry
 LM.App.Wpf.Library.LibraryDocumentService
 LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.Library.LibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.IAttachmentMetadataPrompt
+LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.FilePaths.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.FilePaths.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.AttachmentMetadataPromptContext(string! EntryTitle, System.Collections.Generic.IReadOnlyList<string!>! FilePaths) -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptResult
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.Attachments.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.AttachmentMetadataSelection!>!
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.Attachments.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.AttachmentMetadataPromptResult(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.AttachmentMetadataSelection!>! Attachments) -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection
+LM.App.Wpf.Library.AttachmentMetadataSelection.AttachmentMetadataSelection(string! SourcePath, string! Title, LM.Core.Models.AttachmentKind Kind, System.Collections.Generic.IReadOnlyList<string!>! Tags) -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Kind.get -> LM.Core.Models.AttachmentKind
+LM.App.Wpf.Library.AttachmentMetadataSelection.Kind.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.SourcePath.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataSelection.SourcePath.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Library.AttachmentMetadataSelection.Tags.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Title.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataSelection.Title.init -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LibraryFiltersViewModel(LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt) -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.AddedByContains.get -> string?
@@ -398,7 +420,7 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() -> void
@@ -551,6 +573,9 @@ LM.App.Wpf.Views.LibraryPresetPickerDialog.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel! viewModel) -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel!
 LM.App.Wpf.Views.LibraryPresetPrompt.LibraryPresetPrompt(System.IServiceProvider! services) -> void
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog.AttachmentMetadataDialog(LM.App.Wpf.ViewModels.Library.AttachmentMetadataDialogViewModel! viewModel) -> void
 LM.App.Wpf.Views.LibraryPresetSaveDialog
 LM.App.Wpf.Views.LibraryPresetSaveDialog.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel! viewModel) -> void
@@ -573,6 +598,7 @@ LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
+override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
 LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
