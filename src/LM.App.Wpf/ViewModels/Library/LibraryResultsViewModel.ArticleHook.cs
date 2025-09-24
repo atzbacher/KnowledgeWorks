@@ -29,9 +29,12 @@ namespace LM.App.Wpf.ViewModels.Library
             if (existingHook is null)
                 return null;
 
-            existingHook.Assets ??= new List<HookM.ArticleAsset>();
+            var assets = existingHook.Assets;
+            if (assets is null)
+                return null;
+
             var existingPaths = new HashSet<string>(
-                existingHook.Assets.Select(a => NormalizeStoragePath(a.StoragePath)),
+                assets.Select(a => NormalizeStoragePath(a.StoragePath)),
                 StringComparer.OrdinalIgnoreCase);
 
             var addedAny = false;
@@ -52,7 +55,7 @@ namespace LM.App.Wpf.ViewModels.Library
                 if (asset is null)
                     continue;
 
-                existingHook.Assets.Add(asset);
+                assets.Add(asset);
                 addedAny = true;
             }
 
