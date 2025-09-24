@@ -31,6 +31,7 @@ namespace LM.App.Wpf.ViewModels
             Filters = filters ?? throw new ArgumentNullException(nameof(filters));
             Results = results ?? throw new ArgumentNullException(nameof(results));
 
+            _ = Filters.InitializeAsync();
         }
 
         public LibraryFiltersViewModel Filters { get; }
