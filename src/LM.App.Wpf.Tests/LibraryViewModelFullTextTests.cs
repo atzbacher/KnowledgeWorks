@@ -132,7 +132,6 @@ namespace LM.App.Wpf.Tests
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "demo");
-
             var articleHookPath = Path.Combine(temp.RootPath, "entries", entry.Id, "hooks", "article.json");
             Directory.CreateDirectory(Path.GetDirectoryName(articleHookPath)!);
             var existingHook = new ArticleHook
@@ -140,7 +139,6 @@ namespace LM.App.Wpf.Tests
                 Assets = new List<ArticleAsset>()
             };
             File.WriteAllText(articleHookPath, JsonSerializer.Serialize(existingHook, JsonStd.Options));
-
             prompt.Result = new AttachmentMetadataPromptResult(new[]
             {
                 new AttachmentMetadataSelection(filePath, "paper", AttachmentKind.Supplement, Array.Empty<string>())
@@ -176,7 +174,6 @@ namespace LM.App.Wpf.Tests
             Assert.NotNull(changeLog);
             Assert.Single(changeLog!.Events);
             Assert.Equal(expectedUser, changeLog.Events[0].PerformedBy);
-
             var articleHook = JsonSerializer.Deserialize<ArticleHook>(File.ReadAllText(articleHookPath), JsonStd.Options);
             Assert.NotNull(articleHook);
             Assert.Single(articleHook!.Assets);
@@ -185,6 +182,7 @@ namespace LM.App.Wpf.Tests
             Assert.Equal(ArticleAssetPurpose.Supplement, asset.Purpose);
             Assert.Equal("application/pdf", asset.ContentType);
             Assert.Equal(storage.SavedRelativePaths[0].Replace('\\', '/'), asset.StoragePath);
+
         }
 
         [Fact]
