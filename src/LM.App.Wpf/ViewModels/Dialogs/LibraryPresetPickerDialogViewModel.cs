@@ -35,6 +35,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs
 
             Title = context.Title;
             AllowLoad = context.AllowLoad;
+            _deleted.Clear();
+            SelectedPresetName = null;
 
             Presets.Clear();
             foreach (var preset in context.Presets.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))

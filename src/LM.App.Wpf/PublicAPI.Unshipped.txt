@@ -363,7 +363,9 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInTitle.get -> boo
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInTitle.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.HasSavedPresets.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.GetNormalizedFullTextQuery() -> string?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsInternal.get -> bool?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsInternal.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsMetadataSearch.get -> bool
@@ -373,6 +375,7 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PmidContains.get -> string
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PmidContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedPresets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagsCsv.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagsCsv.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TitleContains.get -> string?
@@ -549,10 +552,12 @@ LM.App.Wpf.Views.AddView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog
 LM.App.Wpf.Views.LibraryPresetPickerDialog.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel!
 LM.App.Wpf.Views.LibraryPresetPrompt.LibraryPresetPrompt(System.IServiceProvider! services) -> void
 LM.App.Wpf.Views.LibraryPresetSaveDialog
 LM.App.Wpf.Views.LibraryPresetSaveDialog.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel!
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void

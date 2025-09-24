@@ -17,6 +17,8 @@ namespace LM.App.Wpf.Views
             _viewModel.CloseRequested += OnCloseRequested;
         }
 
+        public LibraryPresetSaveDialogViewModel ViewModel => _viewModel;
+
         protected override void OnClosed(EventArgs e)
         {
             _viewModel.CloseRequested -= OnCloseRequested;

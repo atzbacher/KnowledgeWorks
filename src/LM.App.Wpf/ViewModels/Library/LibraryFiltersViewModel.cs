@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,6 +21,8 @@ namespace LM.App.Wpf.ViewModels.Library
     {
         private readonly LibraryFilterPresetStore _presetStore;
         private readonly ILibraryPresetPrompt _presetPrompt;
+        private readonly SemaphoreSlim _presetRefreshLock = new(1, 1);
+        private bool _presetsInitialized;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsMetadataSearch))]
@@ -96,6 +100,9 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private bool typeOther = true;
 
+        [ObservableProperty]
+        private IReadOnlyList<LibraryPresetSummary> savedPresets = Array.Empty<LibraryPresetSummary>();
+
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore, ILibraryPresetPrompt presetPrompt)
         {
             _presetStore = presetStore ?? throw new ArgumentNullException(nameof(presetStore));
@@ -104,6 +111,24 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         public bool IsMetadataSearch => !UseFullTextSearch;
+
+        public bool HasSavedPresets => SavedPresets.Count > 0;
+
+        public async Task InitializeAsync(CancellationToken ct = default)
+        {
+            if (_presetsInitialized)
+                return;
+
+            try
+            {
+                await RefreshSavedPresetsAsync(ct).ConfigureAwait(false);
+                _presetsInitialized = true;
+            }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                Debug.WriteLine($"[LibraryFiltersViewModel] Failed to initialize presets: {ex}");
+            }
+        }
 
         [RelayCommand]
         public void Clear()
@@ -298,11 +323,11 @@ namespace LM.App.Wpf.ViewModels.Library
 
                 if (existing.Any(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)))
                 {
-                    var confirm = System.Windows.MessageBox.Show(
+                    var confirm = await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                         $"Preset \"{name}\" already exists. Overwrite?",
                         "Save Library Preset",
                         System.Windows.MessageBoxButton.YesNo,
-                        System.Windows.MessageBoxImage.Question);
+                        System.Windows.MessageBoxImage.Question)).ConfigureAwait(false);
                     if (confirm != System.Windows.MessageBoxResult.Yes)
                         return;
                 }
@@ -314,14 +339,15 @@ namespace LM.App.Wpf.ViewModels.Library
                 };
 
                 await _presetStore.SavePresetAsync(preset).ConfigureAwait(false);
+                await RefreshSavedPresetsAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                     $"Failed to save preset:\n{ex.Message}",
                     "Save Library Preset",
                     System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                    System.Windows.MessageBoxImage.Error)).ConfigureAwait(false);
             }
         }
 
@@ -333,11 +359,11 @@ namespace LM.App.Wpf.ViewModels.Library
                 var presets = await _presetStore.ListPresetsAsync().ConfigureAwait(false);
                 if (presets.Count == 0)
                 {
-                    System.Windows.MessageBox.Show(
+                    await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                         "No presets saved yet.",
                         "Load Library Preset",
                         System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Information);
+                        System.Windows.MessageBoxImage.Information)).ConfigureAwait(false);
                     return;
                 }
 
@@ -360,23 +386,23 @@ namespace LM.App.Wpf.ViewModels.Library
                 var preset = await _presetStore.TryGetPresetAsync(result.SelectedPresetName!).ConfigureAwait(false);
                 if (preset is null)
                 {
-                    System.Windows.MessageBox.Show(
+                    await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                         $"Preset \"{result.SelectedPresetName}\" could not be found.",
                         "Load Library Preset",
                         System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Warning);
+                        System.Windows.MessageBoxImage.Warning)).ConfigureAwait(false);
                     return;
                 }
 
-                ApplyState(preset.State);
+                await InvokeOnDispatcherAsync(() => ApplyState(preset.State)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                     $"Failed to load preset:\n{ex.Message}",
                     "Load Library Preset",
                     System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                    System.Windows.MessageBoxImage.Error)).ConfigureAwait(false);
             }
         }
 
@@ -388,11 +414,11 @@ namespace LM.App.Wpf.ViewModels.Library
                 var presets = await _presetStore.ListPresetsAsync().ConfigureAwait(false);
                 if (presets.Count == 0)
                 {
-                    System.Windows.MessageBox.Show(
+                    await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                         "No presets saved yet.",
                         "Manage Library Presets",
                         System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Information);
+                        System.Windows.MessageBoxImage.Information)).ConfigureAwait(false);
                     return;
                 }
 
@@ -411,15 +437,47 @@ namespace LM.App.Wpf.ViewModels.Library
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
                     $"Failed to manage presets:\n{ex.Message}",
                     "Manage Library Presets",
                     System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                    System.Windows.MessageBoxImage.Error)).ConfigureAwait(false);
             }
         }
 
-        private async Task DeletePresetsAsync(IReadOnlyList<string> names)
+        [RelayCommand]
+        private async Task ApplyPresetAsync(LibraryPresetSummary summary)
+        {
+            if (summary is null)
+                return;
+
+            try
+            {
+                var preset = await _presetStore.TryGetPresetAsync(summary.Name).ConfigureAwait(false);
+                if (preset is null)
+                {
+                    await RefreshSavedPresetsAsync().ConfigureAwait(false);
+                    await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
+                        $"Preset \"{summary.Name}\" could not be found.",
+                        "Load Library Preset",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning)).ConfigureAwait(false);
+                    return;
+                }
+
+                await InvokeOnDispatcherAsync(() => ApplyState(preset.State)).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await InvokeOnDispatcherAsync(() => System.Windows.MessageBox.Show(
+                    $"Failed to load preset:\n{ex.Message}",
+                    "Load Library Preset",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error)).ConfigureAwait(false);
+            }
+        }
+
+        private async Task DeletePresetsAsync(IReadOnlyList<string> names, CancellationToken ct = default)
         {
             if (names is null || names.Count == 0)
                 return;
@@ -429,8 +487,10 @@ namespace LM.App.Wpf.ViewModels.Library
                 if (string.IsNullOrWhiteSpace(name))
                     continue;
 
-                await _presetStore.DeletePresetAsync(name).ConfigureAwait(false);
+                await _presetStore.DeletePresetAsync(name, ct).ConfigureAwait(false);
             }
+
+            await RefreshSavedPresetsAsync(ct).ConfigureAwait(false);
         }
 
         private string BuildDefaultPresetName(IReadOnlyList<LibraryFilterPreset> existing)
@@ -465,6 +525,64 @@ namespace LM.App.Wpf.ViewModels.Library
 
             return name;
         }
+
+        private async Task RefreshSavedPresetsAsync(CancellationToken ct = default)
+        {
+            await _presetRefreshLock.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                var presets = await _presetStore.ListPresetsAsync(ct).ConfigureAwait(false);
+                var summaries = presets
+                    .Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc))
+                    .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                await InvokeOnDispatcherAsync(() => SavedPresets = summaries).ConfigureAwait(false);
+            }
+            finally
+            {
+                _presetRefreshLock.Release();
+            }
+        }
+
+        private static Task InvokeOnDispatcherAsync(Action action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null)
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            if (dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+
+        private static Task<TResult> InvokeOnDispatcherAsync<TResult>(Func<TResult> callback)
+        {
+            if (callback is null)
+                throw new ArgumentNullException(nameof(callback));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null)
+                return Task.FromResult(callback());
+
+            if (dispatcher.CheckAccess())
+                return Task.FromResult(callback());
+
+            return dispatcher.InvokeAsync(callback).Task;
+        }
+
+        partial void OnSavedPresetsChanged(IReadOnlyList<LibraryPresetSummary> value)
+            => OnPropertyChanged(nameof(HasSavedPresets));
 
     }
 }
