@@ -9,7 +9,7 @@ using LM.App.Wpf.Common.Dialogs;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    internal sealed partial class SearchSaveDialogViewModel : DialogViewModelBase
+    public sealed partial class SearchSaveDialogViewModel : DialogViewModelBase
     {
         [ObservableProperty]
         private string query = string.Empty;

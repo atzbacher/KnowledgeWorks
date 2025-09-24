@@ -9,7 +9,7 @@ using LM.Infrastructure.Utils;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    internal sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
+    public sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
     {
         public StagingEditorViewModel(StagingListViewModel stagingList)
         {

@@ -10,7 +10,7 @@ using LM.App.Wpf.Common.Dialogs;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    internal sealed partial class LibraryPresetPickerDialogViewModel : DialogViewModelBase
+    public sealed partial class LibraryPresetPickerDialogViewModel : DialogViewModelBase
     {
         private readonly List<string> _deleted = new();
 

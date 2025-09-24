@@ -7,7 +7,7 @@ using LM.App.Wpf.Common.Dialogs;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    internal sealed partial class LibraryPresetSaveDialogViewModel : DialogViewModelBase
+    public sealed partial class LibraryPresetSaveDialogViewModel : DialogViewModelBase
     {
         [ObservableProperty]
         private string presetName = string.Empty;

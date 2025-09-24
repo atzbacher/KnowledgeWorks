@@ -8,7 +8,7 @@ using LM.App.Wpf.Diagnostics;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    internal sealed partial class WorkspaceChooserViewModel : DialogViewModelBase
+    public sealed partial class WorkspaceChooserViewModel : DialogViewModelBase
     {
         private readonly IDialogService _dialogService;
 
