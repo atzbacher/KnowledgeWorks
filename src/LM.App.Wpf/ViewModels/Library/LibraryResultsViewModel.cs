@@ -325,14 +325,18 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         [RelayCommand(CanExecute = nameof(CanModifySelected))]
-        private void Edit()
+        private async Task EditAsync()
         {
-            var entry = Selected?.Entry;
-            if (entry is null) return;
+            var previous = Selected;
+            var entry = previous?.Entry;
+            if (entry is null)
+                return;
 
             try
             {
-                _entryEditor.EditEntry(entry);
+                var saved = await _entryEditor.EditEntryAsync(entry).ConfigureAwait(false);
+                if (saved && !string.IsNullOrWhiteSpace(entry.Id))
+                    await RefreshSelectedEntryAsync(previous, entry.Id).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

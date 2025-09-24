@@ -10,6 +10,7 @@ using LM.HubSpoke.Indexing;
 using LM.HubSpoke.Storage;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -315,12 +316,14 @@ namespace LM.HubSpoke.Entries
 
         public async Task<Entry?> GetByIdAsync(string id, CancellationToken ct = default)
         {
-            var hub = await Hubs.HubJsonStore.LoadAsync(_ws, id, ct);
+            var hub = await Hubs.HubJsonStore.LoadAsync(_ws, id, ct).ConfigureAwait(false);
             if (hub is null) return null;
 
             var handler = PickHandler(hub);
-            var hook = await handler.LoadHookAsync(_ws, id, ct);
-            return handler.MapToEntry(hub, hook);
+            var hook = await handler.LoadHookAsync(_ws, id, ct).ConfigureAwait(false);
+            var entry = handler.MapToEntry(hub, hook);
+            await HydrateNotesAsync(entry, id, ct).ConfigureAwait(false);
+            return entry;
         }
 
         public async Task<IReadOnlyList<Entry>> SearchAsync(EntryFilter filter, CancellationToken ct = default)
@@ -387,6 +390,32 @@ namespace LM.HubSpoke.Entries
                     return legacy;
             }
             return _handlers.Values.First();
+        }
+
+        private async Task HydrateNotesAsync(Entry entry, string entryId, CancellationToken ct)
+        {
+            try
+            {
+                var notesPath = WorkspaceLayout.NotesHookPath(_ws, entryId);
+                if (!File.Exists(notesPath))
+                    return;
+
+                var json = await File.ReadAllTextAsync(notesPath, ct).ConfigureAwait(false);
+                var notes = JsonSerializer.Deserialize<EntryNotesHook>(json, JsonStd.Options);
+                if (notes is null)
+                    return;
+
+                if (!string.IsNullOrWhiteSpace(notes.UserNotes) && string.IsNullOrWhiteSpace(entry.UserNotes))
+                    entry.UserNotes = notes.UserNotes.Trim();
+
+                var summary = notes.SummaryText;
+                if (!string.IsNullOrWhiteSpace(summary) && string.IsNullOrWhiteSpace(entry.Notes))
+                    entry.Notes = summary.Trim();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[HubSpokeStore] Failed to hydrate notes for '{entryId}': {ex}");
+            }
         }
 
         private Task<CasResult> MoveToCasFromRelAsync(string rel, CancellationToken ct)
