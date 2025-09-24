@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Threading.Tasks;
-using System.Windows;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
@@ -38,9 +37,9 @@ namespace LM.App.Wpf.Views
             });
         }
 
-        private static void SetOwner(Window dialog)
+        private static void SetOwner(System.Windows.Window dialog)
         {
-            if (Application.Current?.MainWindow is Window owner && owner.IsVisible)
+            if (System.Windows.Application.Current?.MainWindow is System.Windows.Window owner && owner.IsVisible)
             {
                 dialog.Owner = owner;
             }
@@ -48,7 +47,7 @@ namespace LM.App.Wpf.Views
 
         private static Task<TResult?> InvokeOnDispatcherAsync<TResult>(Func<TResult?> callback)
         {
-            var app = Application.Current;
+            var app = System.Windows.Application.Current;
             if (app is null)
                 return Task.FromResult<TResult?>(default);
 

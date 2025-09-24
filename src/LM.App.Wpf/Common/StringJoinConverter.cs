@@ -3,11 +3,10 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
-using System.Windows.Data;
 
 namespace LM.App.Wpf.Common
 {
-    public sealed class StringJoinConverter : IValueConverter
+    public sealed class StringJoinConverter : System.Windows.Data.IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {

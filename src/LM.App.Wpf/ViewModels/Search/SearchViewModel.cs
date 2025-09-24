@@ -23,7 +23,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using System.Windows.Input;
 using LM.Infrastructure.Search;
 using LM.Infrastructure.Settings;
 
@@ -173,13 +172,13 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        public ICommand RunSearchCommand { get; }
-        public ICommand SaveSearchCommand { get; }
-        public ICommand LoadSearchCommand { get; }
-        public ICommand ExportSearchCommand { get; }
-        public ICommand StartPreviousRunCommand { get; }
-        public ICommand ToggleFavoriteCommand { get; }
-        public ICommand ShowRunDetailsCommand { get; }
+        public System.Windows.Input.ICommand RunSearchCommand { get; }
+        public System.Windows.Input.ICommand SaveSearchCommand { get; }
+        public System.Windows.Input.ICommand LoadSearchCommand { get; }
+        public System.Windows.Input.ICommand ExportSearchCommand { get; }
+        public System.Windows.Input.ICommand StartPreviousRunCommand { get; }
+        public System.Windows.Input.ICommand ToggleFavoriteCommand { get; }
+        public System.Windows.Input.ICommand ShowRunDetailsCommand { get; }
 
         private void RaiseCanExec()
         {

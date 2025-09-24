@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
@@ -55,10 +54,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                MessageBox.Show("Please enter a name for the search.",
-                                "Save search",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("Please enter a name for the search.",
+                                               "Save search",
+                                               System.Windows.MessageBoxButton.OK,
+                                               System.Windows.MessageBoxImage.Warning);
                 return;
             }
 

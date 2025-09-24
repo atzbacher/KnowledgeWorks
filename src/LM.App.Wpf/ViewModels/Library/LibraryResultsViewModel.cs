@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
@@ -117,7 +116,9 @@ namespace LM.App.Wpf.ViewModels.Library
             var dropTarget = request.DropTarget as LibrarySearchResult;
             var canAccept = CanAcceptFileDrop(request.Paths, dropTarget);
 
-            request.Args.Effects = canAccept ? DragDropEffects.Copy : DragDropEffects.None;
+            request.Args.Effects = canAccept
+                ? System.Windows.DragDropEffects.Copy
+                : System.Windows.DragDropEffects.None;
             request.Args.Handled = true;
         }
 
@@ -129,7 +130,7 @@ namespace LM.App.Wpf.ViewModels.Library
 
             if (request.Paths.Count == 0)
             {
-                request.Args.Effects = DragDropEffects.None;
+                request.Args.Effects = System.Windows.DragDropEffects.None;
                 request.Args.Handled = true;
                 return;
             }

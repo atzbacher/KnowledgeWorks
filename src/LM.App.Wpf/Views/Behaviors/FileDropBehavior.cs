@@ -1,36 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using Microsoft.Xaml.Behaviors;
 
 namespace LM.App.Wpf.Views.Behaviors
 {
-    internal sealed class FileDropBehavior : Behavior<FrameworkElement>
+    internal sealed class FileDropBehavior : Behavior<System.Windows.FrameworkElement>
     {
-        public static readonly DependencyProperty PreviewDragOverCommandProperty =
-            DependencyProperty.Register(nameof(PreviewDragOverCommand), typeof(ICommand), typeof(FileDropBehavior));
+        public static readonly System.Windows.DependencyProperty PreviewDragOverCommandProperty =
+            System.Windows.DependencyProperty.Register(
+                nameof(PreviewDragOverCommand),
+                typeof(System.Windows.Input.ICommand),
+                typeof(FileDropBehavior));
 
-        public static readonly DependencyProperty DropCommandProperty =
-            DependencyProperty.Register(nameof(DropCommand), typeof(ICommand), typeof(FileDropBehavior));
+        public static readonly System.Windows.DependencyProperty DropCommandProperty =
+            System.Windows.DependencyProperty.Register(
+                nameof(DropCommand),
+                typeof(System.Windows.Input.ICommand),
+                typeof(FileDropBehavior));
 
-        public ICommand? PreviewDragOverCommand
+        public System.Windows.Input.ICommand? PreviewDragOverCommand
         {
-            get => (ICommand?)GetValue(PreviewDragOverCommandProperty);
+            get => (System.Windows.Input.ICommand?)GetValue(PreviewDragOverCommandProperty);
             set => SetValue(PreviewDragOverCommandProperty, value);
         }
 
-        public ICommand? DropCommand
+        public System.Windows.Input.ICommand? DropCommand
         {
-            get => (ICommand?)GetValue(DropCommandProperty);
+            get => (System.Windows.Input.ICommand?)GetValue(DropCommandProperty);
             set => SetValue(DropCommandProperty, value);
         }
 
         /// <summary>
-        /// When <c>true</c>, attempts to resolve the drop target by walking the visual tree for a <see cref="DataGridRow"/>.
+        /// When <c>true</c>, attempts to resolve the drop target by walking the visual tree for a <see cref="System.Windows.Controls.DataGridRow"/>.
         /// </summary>
         public bool UseDataGridRowContext { get; set; }
 
@@ -50,7 +52,7 @@ namespace LM.App.Wpf.Views.Behaviors
             base.OnDetaching();
         }
 
-        private void OnPreviewDragOver(object sender, DragEventArgs e)
+        private void OnPreviewDragOver(object sender, System.Windows.DragEventArgs e)
         {
             var command = PreviewDragOverCommand;
             if (command is null)
@@ -63,12 +65,12 @@ namespace LM.App.Wpf.Views.Behaviors
             }
             else
             {
-                e.Effects = DragDropEffects.None;
+                e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
             }
         }
 
-        private void OnDrop(object sender, DragEventArgs e)
+        private void OnDrop(object sender, System.Windows.DragEventArgs e)
         {
             var command = DropCommand;
             if (command is null)
@@ -83,19 +85,21 @@ namespace LM.App.Wpf.Views.Behaviors
             e.Handled = true;
         }
 
-        private FileDropRequest CreateRequest(DragEventArgs e)
+        private FileDropRequest CreateRequest(System.Windows.DragEventArgs e)
         {
             var paths = ExtractPaths(e);
-            var target = UseDataGridRowContext ? ResolveRowContext(e.OriginalSource as DependencyObject) : null;
+            var target = UseDataGridRowContext
+                ? ResolveRowContext(e.OriginalSource as System.Windows.DependencyObject)
+                : null;
             return new FileDropRequest(paths, target, e);
         }
 
-        private static IReadOnlyList<string> ExtractPaths(DragEventArgs e)
+        private static IReadOnlyList<string> ExtractPaths(System.Windows.DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (!e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
                 return Array.Empty<string>();
 
-            if (e.Data.GetData(DataFormats.FileDrop) is not string[] raw || raw.Length == 0)
+            if (e.Data.GetData(System.Windows.DataFormats.FileDrop) is not string[] raw || raw.Length == 0)
                 return Array.Empty<string>();
 
             return raw
@@ -104,19 +108,22 @@ namespace LM.App.Wpf.Views.Behaviors
                 .ToArray();
         }
 
-        private object? ResolveRowContext(DependencyObject? source)
+        private object? ResolveRowContext(System.Windows.DependencyObject? source)
         {
             while (source is not null)
             {
-                if (source is DataGridRow row)
+                if (source is System.Windows.Controls.DataGridRow row)
                     return row.DataContext;
 
-                source = VisualTreeHelper.GetParent(source);
+                source = System.Windows.Media.VisualTreeHelper.GetParent(source);
             }
 
             return null;
         }
     }
 
-    internal sealed record FileDropRequest(IReadOnlyList<string> Paths, object? DropTarget, DragEventArgs Args);
+    internal sealed record FileDropRequest(
+        IReadOnlyList<string> Paths,
+        object? DropTarget,
+        System.Windows.DragEventArgs Args);
 }

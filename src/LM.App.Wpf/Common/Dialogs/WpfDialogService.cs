@@ -1,11 +1,9 @@
 #nullable enable
 using System;
 using System.Linq;
-using System.Windows;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.Views;
 using Microsoft.Extensions.DependencyInjection;
-using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.Common.Dialogs
 {
@@ -57,8 +55,8 @@ namespace LM.App.Wpf.Common.Dialogs
 
             using var scope = _services.CreateScope();
             var window = scope.ServiceProvider.GetRequiredService<StagingEditorWindow>();
-            var owner = WpfApplication.Current?.Windows
-                .OfType<Window>()
+            var owner = System.Windows.Application.Current?.Windows
+                .OfType<System.Windows.Window>()
                 .FirstOrDefault(static w => w.IsActive);
             if (owner is not null)
                 window.Owner = owner;

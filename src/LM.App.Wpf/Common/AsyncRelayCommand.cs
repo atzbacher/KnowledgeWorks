@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.Common
 {
@@ -9,7 +7,7 @@ namespace LM.App.Wpf.Common
     /// Async ICommand with re-entrancy guard.
     /// Supports both parameterless (Func<Task>) and parameterized (Func<object?, Task>) delegates.
     /// </summary>
-    public sealed class AsyncRelayCommand : ICommand
+    public sealed class AsyncRelayCommand : System.Windows.Input.ICommand
     {
         private readonly Func<object?, Task> _execute;
         private readonly Func<object?, bool>? _canExecute;
@@ -62,7 +60,7 @@ namespace LM.App.Wpf.Common
             if (handlers is null)
                 return;
 
-            var dispatcher = WpfApplication.Current?.Dispatcher;
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
             if (dispatcher is not null && !dispatcher.CheckAccess())
             {
                 dispatcher.Invoke(() => handlers(this, EventArgs.Empty));

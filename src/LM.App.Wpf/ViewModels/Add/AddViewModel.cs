@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
 using LM.Core.Abstractions;
@@ -15,7 +14,6 @@ using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Settings;
 using LM.HubSpoke.Abstractions;
-using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -168,7 +166,7 @@ namespace LM.App.Wpf.ViewModels
                 if (_isBusy == value)
                     return;
 
-                var dispatcher = WpfApplication.Current?.Dispatcher;
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
                 if (dispatcher is not null && !dispatcher.CheckAccess())
                 {
                     dispatcher.Invoke(() => IsBusy = value);
@@ -187,16 +185,16 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        public ICommand AddFilesCommand => _addFilesCommand;
-        public ICommand BulkAddFolderCommand => _bulkAddFolderCommand;
-        public ICommand CommitSelectedCommand => _commitSelectedCommand;
-        public ICommand ClearCommand => _clearCommand;
-        public ICommand ReviewStagedCommand => _reviewStagedCommand;
+        public System.Windows.Input.ICommand AddFilesCommand => _addFilesCommand;
+        public System.Windows.Input.ICommand BulkAddFolderCommand => _bulkAddFolderCommand;
+        public System.Windows.Input.ICommand CommitSelectedCommand => _commitSelectedCommand;
+        public System.Windows.Input.ICommand ClearCommand => _clearCommand;
+        public System.Windows.Input.ICommand ReviewStagedCommand => _reviewStagedCommand;
 
-        public ICommand AddWatchedFolderCommand => _watchedFolders.AddWatchedFolderCommand;
-        public ICommand RemoveWatchedFolderCommand => _watchedFolders.RemoveWatchedFolderCommand;
-        public ICommand ScanWatchedFolderCommand => _watchedFolders.ScanWatchedFolderCommand;
-        public ICommand ScanAllWatchedFoldersCommand => _watchedFolders.ScanAllWatchedFoldersCommand;
+        public System.Windows.Input.ICommand AddWatchedFolderCommand => _watchedFolders.AddWatchedFolderCommand;
+        public System.Windows.Input.ICommand RemoveWatchedFolderCommand => _watchedFolders.RemoveWatchedFolderCommand;
+        public System.Windows.Input.ICommand ScanWatchedFolderCommand => _watchedFolders.ScanWatchedFolderCommand;
+        public System.Windows.Input.ICommand ScanAllWatchedFoldersCommand => _watchedFolders.ScanAllWatchedFoldersCommand;
 
         public void SelectByOffset(int delta) => _stagingList.SelectByOffset(delta);
 

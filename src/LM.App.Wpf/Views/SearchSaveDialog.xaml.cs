@@ -1,12 +1,11 @@
 #nullable enable
 using System;
-using System.Windows;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
-    internal partial class SearchSaveDialog : Window
+    internal partial class SearchSaveDialog : System.Windows.Window
     {
         private readonly SearchSaveDialogViewModel _viewModel;
 

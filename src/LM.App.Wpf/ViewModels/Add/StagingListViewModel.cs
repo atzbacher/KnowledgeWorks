@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Models;
-using WpfApplication = System.Windows.Application;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -103,7 +102,7 @@ namespace LM.App.Wpf.ViewModels
                 OnPropertyChanged(nameof(HasItems));
             }
 
-            var dispatcher = WpfApplication.Current?.Dispatcher;
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
             if (dispatcher is null)
             {
                 Add();
@@ -139,7 +138,7 @@ namespace LM.App.Wpf.ViewModels
                 OnPropertyChanged(nameof(HasItems));
             }
 
-            var dispatcher = WpfApplication.Current?.Dispatcher;
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
             if (dispatcher is null)
             {
                 Remove();

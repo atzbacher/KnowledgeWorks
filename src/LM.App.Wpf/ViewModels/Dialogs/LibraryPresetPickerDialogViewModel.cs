@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
@@ -55,13 +54,13 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             if (SelectedPreset is null)
                 return;
 
-            var confirm = MessageBox.Show(
+            var confirm = System.Windows.MessageBox.Show(
                 $"Delete preset \"{SelectedPreset.Name}\"?",
                 Title,
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
 
-            if (confirm != MessageBoxResult.Yes)
+            if (confirm != System.Windows.MessageBoxResult.Yes)
                 return;
 
             _deleted.Add(SelectedPreset.Name);

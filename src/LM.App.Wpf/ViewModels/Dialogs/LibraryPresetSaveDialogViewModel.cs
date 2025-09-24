@@ -1,5 +1,4 @@
 using System;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
@@ -29,10 +28,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         {
             if (string.IsNullOrWhiteSpace(PresetName))
             {
-                MessageBox.Show("Please provide a name for the preset.",
-                                "Save Library Preset",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Please provide a name for the preset.",
+                                               "Save Library Preset",
+                                               System.Windows.MessageBoxButton.OK,
+                                               System.Windows.MessageBoxImage.Information);
                 return;
             }
 
