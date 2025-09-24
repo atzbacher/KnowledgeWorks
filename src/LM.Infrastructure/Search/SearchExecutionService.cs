@@ -36,17 +36,12 @@ namespace LM.Infrastructure.Search
             if (!_providers.TryGetValue(request.Database, out var provider))
                 throw new InvalidOperationException($"No provider registered for {request.Database}.");
 
-            var hitsTask = provider.SearchAsync(request.Query, request.From, request.To, ct);
-            var entriesTask = LoadEntriesAsync(ct);
-
-            await Task.WhenAll(hitsTask, entriesTask).ConfigureAwait(false);
-
-            var hits = hitsTask.Result;
-            var entries = entriesTask.Result;
+            var hits = await provider.SearchAsync(request.Query, request.From, request.To, ct)
+                .ConfigureAwait(false);
 
             foreach (var hit in hits)
             {
-                var match = FindExistingEntry(entries, hit);
+                var match = await TryMatchExistingEntryAsync(hit, ct).ConfigureAwait(false);
                 hit.AlreadyInDb = match is not null;
                 hit.ExistingEntryId = match?.Id;
             }
@@ -59,56 +54,58 @@ namespace LM.Infrastructure.Search
             };
         }
 
-        private async Task<List<Entry>> LoadEntriesAsync(CancellationToken ct)
+        private async Task<Entry?> TryMatchExistingEntryAsync(SearchHit hit, CancellationToken ct)
         {
-            var list = new List<Entry>();
-            try
+            Entry? match = null;
+
+            var doi = string.IsNullOrWhiteSpace(hit.Doi) ? null : hit.Doi;
+            var pmid = GetPmidCandidate(hit);
+
+            if (!string.IsNullOrWhiteSpace(doi) || !string.IsNullOrWhiteSpace(pmid))
             {
-                await foreach (var entry in _store.EnumerateAsync(ct).ConfigureAwait(false))
-                    list.Add(entry);
-            }
-            catch (Exception ex) when (!ct.IsCancellationRequested)
-            {
-                Trace.WriteLine($"[SearchExecutionService] Failed to enumerate entries: {ex}");
+                try
+                {
+                    match = await _store.FindByIdsAsync(doi, pmid, ct)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex) when (!ct.IsCancellationRequested)
+                {
+                    Trace.WriteLine($"[SearchExecutionService] FindByIdsAsync failed: {ex}");
+                }
             }
 
-            return list;
-        }
+            if (match is not null)
+                return match;
 
-        private static Entry? FindExistingEntry(IReadOnlyList<Entry> entries, SearchHit hit)
-        {
-            if (entries.Count == 0)
+            if (string.IsNullOrWhiteSpace(hit.Title))
                 return null;
 
-            if (!string.IsNullOrWhiteSpace(hit.Doi))
+            try
             {
-                var doiMatch = entries.FirstOrDefault(e =>
-                    !string.IsNullOrWhiteSpace(e.Doi) &&
-                    string.Equals(e.Doi, hit.Doi, StringComparison.OrdinalIgnoreCase));
-                if (doiMatch is not null)
-                    return doiMatch;
-            }
+                var candidates = await _store.FindSimilarByNameYearAsync(hit.Title, hit.Year, ct)
+                    .ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(hit.ExternalId))
-            {
-                var idMatch = entries.FirstOrDefault(e =>
-                    (!string.IsNullOrWhiteSpace(e.Pmid) && string.Equals(e.Pmid, hit.ExternalId, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrWhiteSpace(e.Nct) && string.Equals(e.Nct, hit.ExternalId, StringComparison.OrdinalIgnoreCase)));
-                if (idMatch is not null)
-                    return idMatch;
-            }
-
-            if (!string.IsNullOrWhiteSpace(hit.Title))
-            {
-                var titleMatch = entries.FirstOrDefault(e =>
+                return candidates.FirstOrDefault(e =>
                     !string.IsNullOrWhiteSpace(e.Title) &&
                     string.Equals(e.Title, hit.Title, StringComparison.OrdinalIgnoreCase) &&
                     e.Year == hit.Year);
-                if (titleMatch is not null)
-                    return titleMatch;
             }
+            catch (Exception ex) when (!ct.IsCancellationRequested)
+            {
+                Trace.WriteLine($"[SearchExecutionService] FindSimilarByNameYearAsync failed: {ex}");
+                return null;
+            }
+        }
 
-            return null;
+        private static string? GetPmidCandidate(SearchHit hit)
+        {
+            if (string.IsNullOrWhiteSpace(hit.ExternalId))
+                return null;
+
+            if (hit.Source == SearchDatabase.PubMed)
+                return hit.ExternalId;
+
+            return hit.ExternalId.All(char.IsDigit) ? hit.ExternalId : null;
         }
     }
 }
