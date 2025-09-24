@@ -1,10 +1,11 @@
 using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
 using System.Runtime.CompilerServices;
-
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
@@ -15,6 +16,8 @@ using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
 using LM.Core.Models.Search;
+using LM.HubSpoke.Models;
+using LM.Infrastructure.Hooks;
 using Xunit;
 
 namespace LM.App.Wpf.Tests
@@ -121,13 +124,27 @@ namespace LM.App.Wpf.Tests
             store.EntriesById[entry.Id] = entry;
 
             var storage = new RecordingFileStorageRepository();
-            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var prompt = new StubAttachmentPrompt();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage, attachmentPrompt: prompt);
             var result = new LibrarySearchResult(entry, null, null);
             vm.Results.Items.Add(result);
             vm.Results.Selected = result;
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "demo");
+
+            var articleHookPath = Path.Combine(temp.RootPath, "entries", entry.Id, "hooks", "article.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(articleHookPath)!);
+            var existingHook = new ArticleHook
+            {
+                Assets = new List<ArticleAsset>()
+            };
+            File.WriteAllText(articleHookPath, JsonSerializer.Serialize(existingHook, JsonStd.Options));
+
+            prompt.Result = new AttachmentMetadataPromptResult(new[]
+            {
+                new AttachmentMetadataSelection(filePath, "paper", AttachmentKind.Supplement, Array.Empty<string>())
+            });
 
             await vm.Results.HandleFileDropAsync(new[] { filePath });
 
@@ -140,6 +157,34 @@ namespace LM.App.Wpf.Tests
             Assert.Same(vm.Results.Selected, vm.Results.Items[0]);
             Assert.NotSame(result, vm.Results.Selected);
             Assert.Contains(vm.Results.Selected.Entry.Attachments, a => a.RelativePath == attachment.RelativePath);
+            Assert.Equal("paper", attachment.Title);
+            Assert.Equal(AttachmentKind.Supplement, attachment.Kind);
+            var expectedUser = string.IsNullOrWhiteSpace(Environment.UserName) ? "unknown" : Environment.UserName;
+            Assert.Equal(expectedUser, attachment.AddedBy);
+            Assert.NotEqual(default, attachment.AddedUtc);
+
+            var attachmentsHookPath = Path.Combine(temp.RootPath, "entries", entry.Id, "hooks", "attachments.json");
+            Assert.True(File.Exists(attachmentsHookPath));
+            var attachmentsHook = JsonSerializer.Deserialize<AttachmentHook>(File.ReadAllText(attachmentsHookPath));
+            Assert.NotNull(attachmentsHook);
+            Assert.Single(attachmentsHook!.Attachments);
+            Assert.Equal("paper", attachmentsHook.Attachments[0].Title);
+
+            var changelogPath = Path.Combine(temp.RootPath, "entries", entry.Id, "hooks", "changelog.json");
+            Assert.True(File.Exists(changelogPath));
+            var changeLog = JsonSerializer.Deserialize<EntryChangeLogHook>(File.ReadAllText(changelogPath));
+            Assert.NotNull(changeLog);
+            Assert.Single(changeLog!.Events);
+            Assert.Equal(expectedUser, changeLog.Events[0].PerformedBy);
+
+            var articleHook = JsonSerializer.Deserialize<ArticleHook>(File.ReadAllText(articleHookPath), JsonStd.Options);
+            Assert.NotNull(articleHook);
+            Assert.Single(articleHook!.Assets);
+            var asset = articleHook.Assets[0];
+            Assert.Equal("paper", asset.Title);
+            Assert.Equal(ArticleAssetPurpose.Supplement, asset.Purpose);
+            Assert.Equal("application/pdf", asset.ContentType);
+            Assert.Equal(storage.SavedRelativePaths[0].Replace('\\', '/'), asset.StoragePath);
         }
 
         [Fact]
@@ -153,7 +198,8 @@ namespace LM.App.Wpf.Tests
             store.EntriesById[entryB.Id] = entryB;
 
             var storage = new RecordingFileStorageRepository();
-            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var prompt = new StubAttachmentPrompt();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage, attachmentPrompt: prompt);
             var resultA = new LibrarySearchResult(entryA, null, null);
             var resultB = new LibrarySearchResult(entryB, null, null);
             vm.Results.Items.Add(resultA);
@@ -163,6 +209,11 @@ namespace LM.App.Wpf.Tests
             var filePath = Path.Combine(temp.RootPath, "paper.pdf");
             File.WriteAllText(filePath, "demo");
 
+            prompt.Result = new AttachmentMetadataPromptResult(new[]
+            {
+                new AttachmentMetadataSelection(filePath, "slides", AttachmentKind.Presentation, Array.Empty<string>())
+            });
+
             await vm.Results.HandleFileDropAsync(new[] { filePath }, resultB);
 
             Assert.Equal(Path.Combine("attachments", entryB.Id), storage.TargetDirs[0]);
@@ -170,6 +221,9 @@ namespace LM.App.Wpf.Tests
             Assert.Equal(entryB.Id, vm.Results.Items[1].Entry.Id);
             Assert.Equal(entryB.Id, vm.Results.Selected.Entry.Id);
             Assert.Contains(vm.Results.Selected.Entry.Attachments, a => a.RelativePath == storage.SavedRelativePaths[0]);
+            var added = vm.Results.Selected.Entry.Attachments.First(a => a.RelativePath == storage.SavedRelativePaths[0]);
+            Assert.Equal("slides", added.Title);
+            Assert.Equal(AttachmentKind.Presentation, added.Kind);
         }
 
         [Fact]
@@ -194,11 +248,17 @@ namespace LM.App.Wpf.Tests
                 PathFactory = _ => existingPath
             };
 
-            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage);
+            var prompt = new StubAttachmentPrompt();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, storage: storage, attachmentPrompt: prompt);
             vm.Results.Selected = new LibrarySearchResult(entry, null, null);
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "dup");
+
+            prompt.Result = new AttachmentMetadataPromptResult(new[]
+            {
+                new AttachmentMetadataSelection(filePath, "dup", AttachmentKind.Supplement, Array.Empty<string>())
+            });
 
             await vm.Results.HandleFileDropAsync(new[] { filePath });
 
@@ -256,16 +316,20 @@ namespace LM.App.Wpf.Tests
                                                        IFullTextSearchService search,
                                                        TempWorkspace workspace,
                                                        ILibraryEntryEditor? editor = null,
-                                                       IFileStorageRepository? storage = null)
+                                                       IFileStorageRepository? storage = null,
+                                                       IAttachmentMetadataPrompt? attachmentPrompt = null,
+                                                       HookOrchestrator? orchestrator = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
             var prompt = new StubPresetPrompt();
             editor ??= new NoopEntryEditor();
             storage ??= new RecordingFileStorageRepository();
+            attachmentPrompt ??= new NoopAttachmentPrompt();
+            orchestrator ??= new HookOrchestrator(ws);
             var filters = new LibraryFiltersViewModel(presetStore, prompt);
             var documents = new NoopDocumentService();
-            var results = new LibraryResultsViewModel(store, storage, editor, documents);
+            var results = new LibraryResultsViewModel(store, storage, editor, documents, attachmentPrompt, ws, orchestrator);
             return new LibraryViewModel(store, search, filters, results);
         }
 
@@ -288,6 +352,24 @@ namespace LM.App.Wpf.Tests
             {
                 LastEdited = entry;
                 return Task.FromResult(false);
+            }
+        }
+
+        private sealed class NoopAttachmentPrompt : IAttachmentMetadataPrompt
+        {
+            public Task<AttachmentMetadataPromptResult?> RequestMetadataAsync(AttachmentMetadataPromptContext context)
+                => Task.FromResult<AttachmentMetadataPromptResult?>(null);
+        }
+
+        private sealed class StubAttachmentPrompt : IAttachmentMetadataPrompt
+        {
+            public AttachmentMetadataPromptContext? LastContext { get; private set; }
+            public AttachmentMetadataPromptResult? Result { get; set; }
+
+            public Task<AttachmentMetadataPromptResult?> RequestMetadataAsync(AttachmentMetadataPromptContext context)
+            {
+                LastContext = context;
+                return Task.FromResult(Result);
             }
         }
 

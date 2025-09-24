@@ -9,5 +9,7 @@ namespace LM.Infrastructure.Hooks
     public sealed class HookContext
     {
         public HookM.ArticleHook? Article { get; init; }
+        public HookM.AttachmentHook? Attachments { get; init; }
+        public HookM.EntryChangeLogHook? ChangeLog { get; init; }
     }
 }

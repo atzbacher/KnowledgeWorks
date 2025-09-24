@@ -14,6 +14,14 @@ namespace LM.Core.Models
         LitSearch
     }
 
+    public enum AttachmentKind
+    {
+        Supplement,
+        Version,
+        Presentation,
+        ExternalNotes
+    }
+
     /// <summary>
     /// Source-of-truth entry, serialized as entries\{id}\entry.json (camelCase).
     /// </summary>
@@ -70,6 +78,10 @@ namespace LM.Core.Models
         public string RelativePath { get; set; } = string.Empty; // relative to workspace
         public List<string> Tags { get; set; } = new();
         public string? Notes { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public AttachmentKind Kind { get; set; } = AttachmentKind.Supplement;
+        public string AddedBy { get; set; } = string.Empty;
+        public DateTime AddedUtc { get; set; } = DateTime.UtcNow;
     }
 
     /// <summary>

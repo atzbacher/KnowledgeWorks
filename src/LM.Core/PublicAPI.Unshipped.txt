@@ -55,6 +55,19 @@ LM.Core.Models.Attachment.RelativePath.get -> string!
 LM.Core.Models.Attachment.RelativePath.set -> void
 LM.Core.Models.Attachment.Tags.get -> System.Collections.Generic.List<string!>!
 LM.Core.Models.Attachment.Tags.set -> void
+LM.Core.Models.Attachment.Title.get -> string!
+LM.Core.Models.Attachment.Title.set -> void
+LM.Core.Models.Attachment.Kind.get -> LM.Core.Models.AttachmentKind
+LM.Core.Models.Attachment.Kind.set -> void
+LM.Core.Models.Attachment.AddedBy.get -> string!
+LM.Core.Models.Attachment.AddedBy.set -> void
+LM.Core.Models.Attachment.AddedUtc.get -> System.DateTime
+LM.Core.Models.Attachment.AddedUtc.set -> void
+LM.Core.Models.AttachmentKind
+LM.Core.Models.AttachmentKind.Supplement = 0 -> LM.Core.Models.AttachmentKind
+LM.Core.Models.AttachmentKind.Version = 1 -> LM.Core.Models.AttachmentKind
+LM.Core.Models.AttachmentKind.Presentation = 2 -> LM.Core.Models.AttachmentKind
+LM.Core.Models.AttachmentKind.ExternalNotes = 3 -> LM.Core.Models.AttachmentKind
 LM.Core.Models.AuthorName
 LM.Core.Models.AuthorName.Affiliations.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.Core.Models.AuthorName.Affiliations.init -> void

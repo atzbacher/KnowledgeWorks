@@ -22,7 +22,9 @@ namespace LM.Infrastructure.Hooks
             var writer = new HookWriter(workspace);     // internal
             _composers = new List<IHookComposer>
             {
-                new ArticleHookComposer(writer)         // add more composers here later
+                new ArticleHookComposer(writer),
+                new AttachmentHookComposer(writer),
+                new ChangeLogHookComposer(writer)
             };
         }
 
