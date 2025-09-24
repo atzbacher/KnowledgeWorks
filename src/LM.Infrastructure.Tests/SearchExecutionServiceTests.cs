@@ -43,7 +43,7 @@ namespace LM.Infrastructure.Tests.Search
             {
                 Database = SearchDatabase.PubMed,
                 Query = "sample"
-            }).ConfigureAwait(false);
+            });
 
             var resolved = Assert.Single(result.Hits);
             Assert.True(resolved.AlreadyInDb);
@@ -85,7 +85,7 @@ namespace LM.Infrastructure.Tests.Search
             {
                 Database = SearchDatabase.ClinicalTrialsGov,
                 Query = "fallback"
-            }).ConfigureAwait(false);
+            });
 
             var resolved = Assert.Single(result.Hits);
             Assert.True(resolved.AlreadyInDb);
@@ -141,6 +141,7 @@ namespace LM.Infrastructure.Tests.Search
 
                 static async IAsyncEnumerable<Entry> ThrowEnumeration()
                 {
+                    await Task.Yield();
                     throw new InvalidOperationException("EnumerateAsync should not be called.");
 #pragma warning disable CS0162
                     yield break;

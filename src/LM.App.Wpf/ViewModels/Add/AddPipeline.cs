@@ -92,14 +92,14 @@ namespace LM.App.Wpf.ViewModels
                 if (!IsSupported(path)) continue;
                 try
                 {
-                
+
                     var item = await StageOneAsync(path, ct);
                     if (item is not null)
-                    {  
+                    {
                         items.Add(item);
                         LM.App.Wpf.Diagnostics.StagingDebugDumper.TryDump(_workspace, item);
                     }
-                       
+
                 }
                 catch (Exception ex)
                 {
@@ -178,11 +178,13 @@ namespace LM.App.Wpf.ViewModels
                         Authors = SplitList(r.AuthorsCsv),
                         Doi = r.Doi,
                         Pmid = r.Pmid,
+                        InternalId = string.IsNullOrWhiteSpace(r.InternalId) ? null : r.InternalId?.Trim(),
                         IsInternal = r.IsInternal,
                         Tags = SplitList(r.TagsCsv, distinct: true).Concat(relTags).Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
                         OriginalFileName = Path.GetFileName(r.FilePath),
                         MainFilePath = relativePath,
-                        MainFileHashSha256 = sha256
+                        MainFileHashSha256 = sha256,
+                        UserNotes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes?.Trim()
                     };
 
                     // 4) Persist entry
@@ -512,7 +514,7 @@ namespace LM.App.Wpf.ViewModels
 
             var isDup = kind is MatchKind.Hash or MatchKind.IdExact
             || score >= StagingItem.DuplicateThreshold;
-            
+
             var item = new StagingItem
             {
                 Selected = !isDup,
@@ -665,7 +667,7 @@ namespace LM.App.Wpf.ViewModels
             internal static readonly NullPmidNormalizer Instance = new();
             public string? Normalize(string? raw) => raw?.Trim(); // encourages DI to supply real impl
         }
-            internal sealed class NullDoiNormalizer : IDoiNormalizer
+        internal sealed class NullDoiNormalizer : IDoiNormalizer
         {
             internal static readonly NullDoiNormalizer Instance = new();
             public string? Normalize(string? raw) => raw?.Trim(); // encourage DI registration for real cleaning

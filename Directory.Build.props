@@ -8,14 +8,18 @@
   </PropertyGroup>
 
 	
-		<PropertyGroup>
-			<EnableNETAnalyzers>true</EnableNETAnalyzers>
-			<AnalysisLevel>latest</AnalysisLevel>
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
 
-			<!-- These two are the key for squiggles/lightbulb -->
-			<RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-			<RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-		</PropertyGroup>
-	
-	
+    <!-- These two are the key for squiggles/lightbulb -->
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.String]::Copy('$(MSBuildProjectName)').Contains('_wpftmp'))">
+    <!-- Skip PublicAPI diagnostics for the temporary WPF markup compilation projects. -->
+    <NoWarn>$(NoWarn);RS0016;RS0017</NoWarn>
+  </PropertyGroup>
+
 </Project>

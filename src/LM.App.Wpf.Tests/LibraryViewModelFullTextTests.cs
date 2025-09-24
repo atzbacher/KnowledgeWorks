@@ -271,7 +271,7 @@ namespace LM.App.Wpf.Tests
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
         {
-            public void EditEntry(Entry entry) { }
+            public Task<bool> EditEntryAsync(Entry entry) => Task.FromResult(false);
         }
 
 
@@ -284,7 +284,11 @@ namespace LM.App.Wpf.Tests
         {
             public Entry? LastEdited { get; private set; }
 
-            public void EditEntry(Entry entry) => LastEdited = entry;
+            public Task<bool> EditEntryAsync(Entry entry)
+            {
+                LastEdited = entry;
+                return Task.FromResult(false);
+            }
         }
 
         private sealed class FakeEntryStore : IEntryStore
