@@ -34,6 +34,11 @@
     <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- Temporary suppression for RS0017 until the analyzer recognizes EditEntryAsync in PublicAPI.Unshipped.txt -->
+    <NoWarn>$(NoWarn);RS0017</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <Folder Include="Application\" />
     <Folder Include="ViewModels\Library\" />

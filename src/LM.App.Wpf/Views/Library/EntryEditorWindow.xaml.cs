@@ -1,23 +1,21 @@
 #nullable enable
 using System;
 using LM.App.Wpf.Common.Dialogs;
-using LM.App.Wpf.ViewModels.Dialogs;
+using LM.App.Wpf.ViewModels.Library;
 
 namespace LM.App.Wpf.Views
 {
-    public partial class LibraryPresetPickerDialog : System.Windows.Window
+    internal partial class EntryEditorWindow : System.Windows.Window
     {
-        private readonly LibraryPresetPickerDialogViewModel _viewModel;
+        private readonly EntryEditorViewModel _viewModel;
 
-        public LibraryPresetPickerDialog(LibraryPresetPickerDialogViewModel viewModel)
+        public EntryEditorWindow(EntryEditorViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             DataContext = _viewModel;
             _viewModel.CloseRequested += OnCloseRequested;
         }
-
-        public LibraryPresetPickerDialogViewModel ViewModel => _viewModel;
 
         protected override void OnClosed(EventArgs e)
         {

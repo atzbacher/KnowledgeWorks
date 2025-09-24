@@ -129,10 +129,7 @@ LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.Ca
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.ILibraryEntryEditor
-LM.App.Wpf.Library.ILibraryEntryEditor.EditEntry(LM.Core.Models.Entry! entry) -> void
-LM.App.Wpf.Library.WorkspaceEntryEditor
-LM.App.Wpf.Library.WorkspaceEntryEditor.WorkspaceEntryEditor(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.App.Wpf.Library.WorkspaceEntryEditor.EditEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.ILibraryEntryEditor.EditEntryAsync(LM.Core.Models.Entry! entry) -> System.Threading.Tasks.Task<System.Boolean>!
 LM.App.Wpf.Library.LibraryFilterState
 LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.get -> bool
 LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.set -> void

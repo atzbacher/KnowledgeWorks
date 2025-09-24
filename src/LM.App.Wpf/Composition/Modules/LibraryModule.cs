@@ -22,7 +22,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<LibraryPresetSaveDialog>();
             services.AddTransient<LibraryPresetPickerDialogViewModel>();
             services.AddTransient<LibraryPresetPickerDialog>();
-            services.AddSingleton<ILibraryEntryEditor>(sp => new WorkspaceEntryEditor(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddTransient<EntryEditorViewModel>();
+            services.AddSingleton<ILibraryEntryEditor, LibraryEntryEditor>();
             services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
 
             services.AddSingleton(sp => new LibraryFiltersViewModel(
