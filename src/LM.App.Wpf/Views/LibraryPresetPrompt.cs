@@ -25,9 +25,9 @@ namespace LM.App.Wpf.Views
             return InvokeOnDispatcherAsync(() =>
             {
                 using var scope = _services.CreateScope();
-                var viewModel = scope.ServiceProvider.GetRequiredService<LibraryPresetSaveDialogViewModel>();
-                viewModel.Initialize(context);
                 var dialog = scope.ServiceProvider.GetRequiredService<LibraryPresetSaveDialog>();
+                var viewModel = dialog.ViewModel;
+                viewModel.Initialize(context);
                 SetOwner(dialog);
 
                 var ok = dialog.ShowDialog();
@@ -46,9 +46,9 @@ namespace LM.App.Wpf.Views
             return InvokeOnDispatcherAsync(() =>
             {
                 using var scope = _services.CreateScope();
-                var viewModel = scope.ServiceProvider.GetRequiredService<LibraryPresetPickerDialogViewModel>();
-                viewModel.Initialize(context);
                 var dialog = scope.ServiceProvider.GetRequiredService<LibraryPresetPickerDialog>();
+                var viewModel = dialog.ViewModel;
+                viewModel.Initialize(context);
                 SetOwner(dialog);
 
                 dialog.ShowDialog();

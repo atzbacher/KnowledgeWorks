@@ -20,6 +20,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
 
+            ResultName = string.Empty;
             PresetName = context.DefaultName ?? string.Empty;
         }
 
