@@ -1,8 +1,10 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -17,6 +19,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly IAddPipeline _pipeline;
         private readonly RangeObservableCollection<StagingItem> _items = new();
         private static readonly Array s_entryTypes = Enum.GetValues(typeof(EntryType));
+        private static readonly int s_maxStageConcurrency = Math.Max(1, Math.Min(Environment.ProcessorCount, 4));
         private bool _disposed;
         private StagingItem? _current;
         private EntryType _selectedType;
@@ -80,8 +83,84 @@ namespace LM.App.Wpf.ViewModels
             if (paths is null)
                 throw new ArgumentNullException(nameof(paths));
 
-            var staged = await _pipeline.StagePathsAsync(paths, ct).ConfigureAwait(false);
-            await AddStagedItemsAsync(staged).ConfigureAwait(false);
+            var orderedPaths = NormalizePaths(paths, ct);
+            if (orderedPaths.Count == 0)
+                return;
+
+            var pending = new Dictionary<int, IReadOnlyList<StagingItem>>();
+            var active = new List<Task<(int Index, IReadOnlyList<StagingItem> Items)>>();
+            var nextToPublish = 0;
+            var nextPathIndex = 0;
+
+            void ScheduleUntilFull()
+            {
+                while (nextPathIndex < orderedPaths.Count && active.Count < s_maxStageConcurrency)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var pathIndex = nextPathIndex;
+                    var path = orderedPaths[pathIndex];
+                    nextPathIndex++;
+
+                    active.Add(StagePathAsync(path, pathIndex, ct));
+                }
+            }
+
+            ScheduleUntilFull();
+
+            while (active.Count > 0)
+            {
+                var completed = await Task.WhenAny(active).ConfigureAwait(false);
+                active.Remove(completed);
+
+                var (index, items) = await completed.ConfigureAwait(false);
+                pending[index] = items;
+
+                while (pending.TryGetValue(nextToPublish, out var ready))
+                {
+                    pending.Remove(nextToPublish);
+                    if (ready.Count > 0)
+                    {
+                        await AddStagedItemsAsync(ready).ConfigureAwait(false);
+                    }
+
+                    nextToPublish++;
+                }
+
+                ScheduleUntilFull();
+            }
+        }
+
+        private async Task<(int Index, IReadOnlyList<StagingItem> Items)> StagePathAsync(string path, int index, CancellationToken ct)
+        {
+            var staged = await _pipeline.StagePathsAsync(new[] { path }, ct).ConfigureAwait(false);
+            return (index, staged);
+        }
+
+        private static List<string> NormalizePaths(System.Collections.Generic.IEnumerable<string> paths, CancellationToken ct)
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var ordered = new List<string>();
+
+            foreach (var candidate in paths)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                if (string.IsNullOrWhiteSpace(candidate))
+                    continue;
+
+                var path = candidate.Trim();
+                if (!File.Exists(path))
+                    continue;
+
+                if (!seen.Add(path))
+                    continue;
+
+                ordered.Add(path);
+            }
+
+            ordered.Sort(StringComparer.OrdinalIgnoreCase);
+            return ordered;
         }
 
         public Task AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<StagingItem> items)
