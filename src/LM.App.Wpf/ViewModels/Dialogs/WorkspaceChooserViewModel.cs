@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common.Dialogs;
@@ -45,10 +44,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             var path = WorkspacePath?.Trim();
             if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
             {
-                MessageBox.Show("Please choose an existing folder.",
-                                "Workspace",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("Please choose an existing folder.",
+                                               "Workspace",
+                                               System.Windows.MessageBoxButton.OK,
+                                               System.Windows.MessageBoxImage.Warning);
                 return;
             }
 

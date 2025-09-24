@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Threading.Tasks;
-using System.Windows;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
 using LM.App.Wpf.Common.Dialogs;
@@ -12,8 +11,6 @@ using LM.Core.Abstractions;
 using LM.Infrastructure.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
 
-using WpfMessageBox = System.Windows.MessageBox;
-
 namespace LM.App.Wpf
 {
     public partial class App : System.Windows.Application
@@ -21,25 +18,25 @@ namespace LM.App.Wpf
         private AppHost? _host;
         private AddViewModel? _addViewModel;
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(System.Windows.StartupEventArgs e)
         {
             base.OnStartup(e);
             // Show unhandled exceptions (helps catch XamlParseException on window init)
             this.DispatcherUnhandledException += (s, args) =>
             {
-                WpfMessageBox.Show(args.Exception.ToString(), "Dispatcher Unhandled Exception");
+                System.Windows.MessageBox.Show(args.Exception.ToString(), "Dispatcher Unhandled Exception");
                 // leave args.Handled = false so debugger still breaks
             };
 
             AppDomain.CurrentDomain.UnhandledException += (s, args) =>
             {
                 if (args.ExceptionObject is Exception ex)
-                    WpfMessageBox.Show(ex.ToString(), "AppDomain Unhandled Exception");
+                    System.Windows.MessageBox.Show(ex.ToString(), "AppDomain Unhandled Exception");
             };
 
             TaskScheduler.UnobservedTaskException += (s, args) =>
             {
-                WpfMessageBox.Show(args.Exception.ToString(), "TaskScheduler Unobserved Exception");
+                System.Windows.MessageBox.Show(args.Exception.ToString(), "TaskScheduler Unobserved Exception");
                 args.SetObserved();
             };
 
@@ -96,7 +93,7 @@ namespace LM.App.Wpf
 
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected override void OnExit(System.Windows.ExitEventArgs e)
         {
             _addViewModel?.Dispose();
             _host?.Dispose();

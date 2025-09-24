@@ -8,7 +8,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Common;
 using LM.Core.Abstractions.Configuration;
@@ -57,10 +56,10 @@ namespace LM.App.Wpf.ViewModels
 
         public ObservableCollection<WatchedFolder> Folders => _config.Folders;
 
-        public ICommand AddWatchedFolderCommand => _addCommand;
-        public ICommand RemoveWatchedFolderCommand => _removeCommand;
-        public ICommand ScanWatchedFolderCommand => _scanCommand;
-        public ICommand ScanAllWatchedFoldersCommand => _scanAllCommand;
+        public System.Windows.Input.ICommand AddWatchedFolderCommand => _addCommand;
+        public System.Windows.Input.ICommand RemoveWatchedFolderCommand => _removeCommand;
+        public System.Windows.Input.ICommand ScanWatchedFolderCommand => _scanCommand;
+        public System.Windows.Input.ICommand ScanAllWatchedFoldersCommand => _scanAllCommand;
 
         public async Task InitializeAsync(CancellationToken ct = default)
         {

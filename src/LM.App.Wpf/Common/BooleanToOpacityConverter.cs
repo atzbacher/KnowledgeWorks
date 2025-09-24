@@ -1,11 +1,10 @@
 #nullable enable
 using System.Globalization;
-using System.Windows.Data;
 
 namespace LM.App.Wpf.Common
 {
-    [ValueConversion(typeof(bool), typeof(double))]
-    public sealed class BooleanToOpacityConverter : IValueConverter
+    [System.Windows.Data.ValueConversion(typeof(bool), typeof(double))]
+    public sealed class BooleanToOpacityConverter : System.Windows.Data.IValueConverter
     {
         public double TrueOpacity { get; set; } = 1d;
         public double FalseOpacity { get; set; } = 0d;

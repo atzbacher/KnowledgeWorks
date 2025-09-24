@@ -1,12 +1,11 @@
 #nullable enable
 using System;
-using System.Windows;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
-    public partial class LibraryPresetSaveDialog : Window
+    public partial class LibraryPresetSaveDialog : System.Windows.Window
     {
         private readonly LibraryPresetSaveDialogViewModel _viewModel;
 

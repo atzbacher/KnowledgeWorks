@@ -1,12 +1,11 @@
 // src/LM.App.Wpf/Common/BusyStatusConverter.cs
 using System;
 using System.Globalization;
-using System.Windows.Data;
 
 namespace LM.App.Wpf.Common
 {
-    [ValueConversion(typeof(bool), typeof(string))]
-    internal sealed class BusyStatusConverter : IValueConverter
+    [System.Windows.Data.ValueConversion(typeof(bool), typeof(string))]
+    internal sealed class BusyStatusConverter : System.Windows.Data.IValueConverter
     {
         public string BusyText { get; init; } = "Working…";
         public string IdleText { get; init; } = "Ready";

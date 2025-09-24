@@ -1,5 +1,4 @@
 using System;
-using System.Windows;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
 

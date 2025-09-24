@@ -1,10 +1,8 @@
-using System.Windows.Controls;
-using System.Windows.Input;
 using Microsoft.Xaml.Behaviors;
 
 namespace LM.App.Wpf.Views.Behaviors
 {
-    internal sealed class SelectAllTextOnFocusBehavior : Behavior<TextBox>
+    internal sealed class SelectAllTextOnFocusBehavior : Behavior<System.Windows.Controls.TextBox>
     {
         protected override void OnAttached()
         {
@@ -27,12 +25,12 @@ namespace LM.App.Wpf.Views.Behaviors
             AssociatedObject.SelectAll();
         }
 
-        private void OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        private void OnGotKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
             AssociatedObject.SelectAll();
         }
 
-        private void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (AssociatedObject.IsKeyboardFocusWithin)
                 return;
