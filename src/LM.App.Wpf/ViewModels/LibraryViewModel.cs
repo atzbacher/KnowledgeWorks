@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
@@ -16,7 +16,7 @@ namespace LM.App.Wpf.ViewModels
     /// <summary>
     /// Coordinates Library filters, search execution, and result presentation.
     /// </summary>
-    public sealed class LibraryViewModel : ViewModelBase
+    public sealed partial class LibraryViewModel : ViewModelBase
     {
         private readonly IEntryStore _store;
         private readonly IFullTextSearchService _fullTextSearch;
@@ -31,14 +31,12 @@ namespace LM.App.Wpf.ViewModels
             Filters = filters ?? throw new ArgumentNullException(nameof(filters));
             Results = results ?? throw new ArgumentNullException(nameof(results));
 
-            SearchCommand = new AsyncRelayCommand(SearchAsync);
         }
 
         public LibraryFiltersViewModel Filters { get; }
         public LibraryResultsViewModel Results { get; }
 
-        public ICommand SearchCommand { get; }
-
+        [RelayCommand]
         private async Task SearchAsync()
         {
             try

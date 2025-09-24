@@ -1,43 +1,61 @@
 #nullable enable
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LM.App.Wpf.Views
 {
     public sealed class SearchSavePrompt : ISearchSavePrompt
     {
-        public Task<SearchSavePromptResult?> RequestAsync(SearchSavePromptContext context)
+        private readonly IServiceProvider _services;
+
+        public SearchSavePrompt(IServiceProvider services)
         {
-            var app = System.Windows.Application.Current;
-            if (app is null)
-            {
-                return Task.FromResult<SearchSavePromptResult?>(null);
-            }
-
-            if (app.Dispatcher.CheckAccess())
-            {
-                return Task.FromResult(ShowDialog(context));
-            }
-
-            return app.Dispatcher.InvokeAsync(() => ShowDialog(context)).Task;
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
-        private static SearchSavePromptResult? ShowDialog(SearchSavePromptContext context)
+        public Task<SearchSavePromptResult?> RequestAsync(SearchSavePromptContext context)
         {
-            var dialog = new SearchSaveDialog(context);
-            if (System.Windows.Application.Current?.MainWindow is Window owner && owner.IsVisible)
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            return InvokeOnDispatcherAsync(() =>
+            {
+                using var scope = _services.CreateScope();
+                var viewModel = scope.ServiceProvider.GetRequiredService<SearchSaveDialogViewModel>();
+                viewModel.Initialize(context);
+                var dialog = scope.ServiceProvider.GetRequiredService<SearchSaveDialog>();
+                SetOwner(dialog);
+
+                var ok = dialog.ShowDialog();
+                return ok == true
+                    ? new SearchSavePromptResult(viewModel.ResultName, viewModel.ResultNotes, viewModel.ResultTags)
+                    : null;
+            });
+        }
+
+        private static void SetOwner(Window dialog)
+        {
+            if (Application.Current?.MainWindow is Window owner && owner.IsVisible)
             {
                 dialog.Owner = owner;
             }
+        }
 
-            var ok = dialog.ShowDialog();
-            if (ok == true)
-            {
-                return new SearchSavePromptResult(dialog.ResultName, dialog.ResultNotes, dialog.ResultTagsRaw);
-            }
+        private static Task<TResult?> InvokeOnDispatcherAsync<TResult>(Func<TResult?> callback)
+        {
+            var app = Application.Current;
+            if (app is null)
+                return Task.FromResult<TResult?>(default);
 
-            return null;
+            if (app.Dispatcher.CheckAccess())
+                return Task.FromResult(callback());
+
+            return app.Dispatcher.InvokeAsync(callback).Task;
         }
     }
 }

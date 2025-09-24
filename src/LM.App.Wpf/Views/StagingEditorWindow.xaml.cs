@@ -1,38 +1,33 @@
 #nullable enable
 using System;
-using System.Linq;
 using System.Windows;
-using LM.App.Wpf.ViewModels;
-using LM.Infrastructure.Utils;
+using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
     public partial class StagingEditorWindow : Window
     {
-        private StagingListViewModel VM => (StagingListViewModel)DataContext;
+        private readonly StagingEditorViewModel _viewModel;
 
-        public StagingEditorWindow(StagingListViewModel vm)
+        public StagingEditorWindow(StagingEditorViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = vm ?? throw new ArgumentNullException(nameof(vm));
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            DataContext = _viewModel;
+            _viewModel.CloseRequested += OnCloseRequested;
         }
 
-        private void OnPrev(object sender, RoutedEventArgs e) => VM.SelectByOffset(-1);
-        private void OnNext(object sender, RoutedEventArgs e) => VM.SelectByOffset(+1);
-        private void OnClose(object sender, RoutedEventArgs e) => Close();
-
-        private void OnGenerateShortTitle(object sender, RoutedEventArgs e)
+        protected override void OnClosed(EventArgs e)
         {
-            var cur = VM.Current;
-            if (cur is null) return;
+            _viewModel.CloseRequested -= OnCloseRequested;
+            _viewModel.Dispose();
+            base.OnClosed(e);
+        }
 
-            var authors = (cur.AuthorsCsv ?? "")
-                          .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-                          .Select(a => a.Trim())
-                          .ToList();
-
-            cur.DisplayName = BibliographyHelper.GenerateShortTitle(
-                cur.Title, authors, cur.Source, cur.Year);
+        private void OnCloseRequested(object? sender, DialogCloseRequestedEventArgs e)
+        {
+            DialogResult = e.DialogResult;
         }
     }
 }

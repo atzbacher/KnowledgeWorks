@@ -2,6 +2,7 @@ using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,10 @@ namespace LM.App.Wpf.Composition.Modules
 
             services.AddSingleton<LibraryFilterPresetStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
+            services.AddTransient<LibraryPresetSaveDialogViewModel>();
+            services.AddTransient<LibraryPresetSaveDialog>();
+            services.AddTransient<LibraryPresetPickerDialogViewModel>();
+            services.AddTransient<LibraryPresetPickerDialog>();
             services.AddSingleton<ILibraryEntryEditor>(sp => new WorkspaceEntryEditor(sp.GetRequiredService<IWorkSpaceService>()));
             services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
 

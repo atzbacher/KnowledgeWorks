@@ -1,59 +1,32 @@
 #nullable enable
 using System;
-using System.Globalization;
 using System.Windows;
-using LM.App.Wpf.Common;
-using LM.Core.Models;
+using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
     internal partial class SearchSaveDialog : Window
     {
-        public string ResultName { get; private set; } = string.Empty;
-        public string ResultNotes { get; private set; } = string.Empty;
-        public string ResultTagsRaw { get; private set; } = string.Empty;
+        private readonly SearchSaveDialogViewModel _viewModel;
 
-        public SearchSaveDialog(SearchSavePromptContext context)
+        public SearchSaveDialog(SearchSaveDialogViewModel viewModel)
         {
             InitializeComponent();
-
-            QueryText.Text = context.Query;
-            DatabaseText.Text = context.Database == SearchDatabase.PubMed ? "PubMed" : "ClinicalTrials.gov";
-            RangeText.Text = FormatRange(context.From, context.To);
-            Loaded += (_, _) =>
-            {
-                NameBox.Focus();
-                NameBox.SelectAll();
-            };
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            DataContext = _viewModel;
+            _viewModel.CloseRequested += OnCloseRequested;
         }
 
-        private static string FormatRange(DateTime? from, DateTime? to)
+        protected override void OnClosed(EventArgs e)
         {
-            if (!from.HasValue && !to.HasValue)
-                return "–";
-
-            string Format(DateTime? date) => date?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "–";
-            return $"{Format(from)} → {Format(to)}";
+            _viewModel.CloseRequested -= OnCloseRequested;
+            base.OnClosed(e);
         }
 
-        private void OnSave(object sender, RoutedEventArgs e)
+        private void OnCloseRequested(object? sender, DialogCloseRequestedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(NameBox.Text))
-            {
-                System.Windows.MessageBox.Show(this, "Please enter a name for the search.", "Save search", MessageBoxButton.OK, MessageBoxImage.Warning);
-                NameBox.Focus();
-                return;
-            }
-
-            ResultName = NameBox.Text.Trim();
-            ResultNotes = NotesBox.Text.Trim();
-            ResultTagsRaw = TagsBox.Text?.Trim() ?? string.Empty;
-            DialogResult = true;
-        }
-
-        private void OnCancel(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
+            DialogResult = e.DialogResult;
         }
     }
 }

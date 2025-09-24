@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Array x:Key="LibraryResultsColumns" Type="DataGridColumn">
+    <DataGridTextColumn Header="Title" Binding="{Binding Entry.Title}" Width="3*" />
+    <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="0.8*" />
+    <DataGridTextColumn Header="Source" Binding="{Binding Entry.Source}" Width="2*" />
+    <DataGridTextColumn Header="Type" Binding="{Binding Entry.Type}" Width="1*" />
+    <DataGridTextColumn Header="Year" Binding="{Binding Entry.Year}" Width="0.8*" />
+    <DataGridTextColumn Header="Added on"
+                         Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                         Width="1.2*" />
+    <DataGridTextColumn Header="Added by" Binding="{Binding Entry.AddedBy}" Width="1.2*" />
+    <DataGridTextColumn Header="Internal ID" Binding="{Binding Entry.InternalId}" Width="1.5*" />
+    <DataGridTextColumn Header="DOI" Binding="{Binding Entry.Doi}" Width="2*" />
+    <DataGridTextColumn Header="PMID" Binding="{Binding Entry.Pmid}" Width="1.5*" />
+    <DataGridTextColumn Header="NCT" Binding="{Binding Entry.Nct}" Width="1.5*" />
+    <DataGridTextColumn Header="Authors" Width="2*">
+      <DataGridTextColumn.Binding>
+        <Binding Path="Entry.Authors" Converter="{StaticResource StringJoinConverter}" />
+      </DataGridTextColumn.Binding>
+    </DataGridTextColumn>
+    <DataGridTextColumn Header="Tags" Width="2*">
+      <DataGridTextColumn.Binding>
+        <Binding Path="Entry.Tags" Converter="{StaticResource StringJoinConverter}" />
+      </DataGridTextColumn.Binding>
+    </DataGridTextColumn>
+    <DataGridTextColumn Header="Internal" Binding="{Binding Entry.IsInternal}" Width="0.8*" />
+    <DataGridTemplateColumn Header="Snippet" Width="3*">
+      <DataGridTemplateColumn.CellTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding HighlightDisplay}"
+                     TextWrapping="Wrap"
+                     FontStyle="Italic"
+                     Foreground="DimGray" />
+        </DataTemplate>
+      </DataGridTemplateColumn.CellTemplate>
+    </DataGridTemplateColumn>
+  </x:Array>
+</ResourceDictionary>
