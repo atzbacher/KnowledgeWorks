@@ -133,7 +133,7 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 var normalized = relativePath
                     .Replace('/', Path.DirectorySeparatorChar)
-                    .Replace('\', Path.DirectorySeparatorChar);
+                    .Replace('\\', Path.DirectorySeparatorChar);
                 return _workspace.GetAbsolutePath(normalized);
             }
             catch (Exception ex)
@@ -148,7 +148,7 @@ namespace LM.App.Wpf.ViewModels.Library
             if (string.IsNullOrWhiteSpace(relativePath))
                 return string.Empty;
 
-            return relativePath.Replace('\', '/');
+            return relativePath.Replace('\\', '/');
         }
 
         private static string TryExtractHash(string storagePath)
