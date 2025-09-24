@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
@@ -114,22 +116,26 @@ namespace LM.App.Wpf.ViewModels.Search
             OnPropertyChanged(nameof(IsBusy));
             RaiseCommandState();
 
+            var request = new SearchExecutionRequest
+            {
+                Query = Query,
+                Database = SelectedDatabase,
+                From = From,
+                To = To
+            };
+
             try
             {
-                var request = new SearchExecutionRequest
-                {
-                    Query = Query,
-                    Database = SelectedDatabase,
-                    From = From,
-                    To = To
-                };
-
                 var result = await _executionService.ExecuteAsync(request, CancellationToken.None);
 
                 foreach (var hit in result.Hits)
                     Results.Add(hit);
 
                 SearchExecuted?.Invoke(this, new SearchExecutedEventArgs(result));
+            }
+            catch (Exception ex)
+            {
+                HandleSearchError(request.Database, ex);
             }
             finally
             {
@@ -141,6 +147,48 @@ namespace LM.App.Wpf.ViewModels.Search
 
         private void RaiseCommandState()
             => RunSearchCommand.RaiseCanExecuteChanged();
+
+        private void HandleSearchError(SearchDatabase database, Exception exception)
+        {
+            var providerName = GetProviderDisplayName(database);
+            string message;
+
+            if (exception is HttpRequestException httpException)
+            {
+                var statusSuffix = httpException.StatusCode is { } statusCode
+                    ? $" (HTTP {(int)statusCode} - {statusCode})"
+                    : string.Empty;
+
+                var detail = httpException.InnerException?.Message;
+                if (string.IsNullOrWhiteSpace(detail))
+                    detail = httpException.Message;
+
+                message = $"Could not reach {providerName}{statusSuffix}.{Environment.NewLine}{detail}";
+            }
+            else
+            {
+                message = $"Search against {providerName} failed.{Environment.NewLine}{exception.Message}";
+            }
+
+            Trace.WriteLine($"[SearchProvidersViewModel] {database} search failed: {exception}");
+
+            System.Windows.MessageBox.Show(
+                message,
+                "Search Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+
+        private string GetProviderDisplayName(SearchDatabase database)
+        {
+            foreach (var option in Databases)
+            {
+                if (option.Value == database)
+                    return option.DisplayName;
+            }
+
+            return database.ToString();
+        }
     }
 
     public sealed class SearchExecutedEventArgs : EventArgs
