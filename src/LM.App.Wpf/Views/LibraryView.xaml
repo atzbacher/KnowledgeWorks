@@ -11,6 +11,7 @@
   <UserControl.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Library/LibraryCommonResources.xaml" />
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
