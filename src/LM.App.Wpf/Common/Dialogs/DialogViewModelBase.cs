@@ -9,7 +9,6 @@ namespace LM.App.Wpf.Common.Dialogs
     public abstract class DialogViewModelBase : ObservableObject
     {
         public event EventHandler<DialogCloseRequestedEventArgs>? CloseRequested;
-
         /// <summary>
         /// Requests that the owning dialog close with the supplied result.
         /// </summary>
@@ -19,7 +18,6 @@ namespace LM.App.Wpf.Common.Dialogs
             CloseRequested?.Invoke(this, new DialogCloseRequestedEventArgs(dialogResult));
         }
     }
-
     /// <summary>
     /// Event arguments used when a dialog requests to close.
     /// </summary>
@@ -29,7 +27,6 @@ namespace LM.App.Wpf.Common.Dialogs
         {
             DialogResult = dialogResult;
         }
-
         public bool? DialogResult { get; }
     }
 }
