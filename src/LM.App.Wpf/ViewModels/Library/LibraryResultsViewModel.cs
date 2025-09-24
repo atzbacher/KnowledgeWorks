@@ -58,25 +58,54 @@ namespace LM.App.Wpf.ViewModels.Library
 
         public void Clear()
         {
-            Items.Clear();
-            Selected = null;
-            ResultsAreFullText = false;
+            ExecuteOnDispatcher(() =>
+            {
+                Items.Clear();
+                Selected = null;
+                ResultsAreFullText = false;
+            });
         }
 
         public void LoadMetadataResults(IEnumerable<Entry> entries)
         {
+            ArgumentNullException.ThrowIfNull(entries);
+
             Clear();
+
+            var results = new List<LibrarySearchResult>();
+
             foreach (var entry in entries)
             {
+                if (entry is null)
+                    continue;
+
                 PrepareEntry(entry);
-                Items.Add(new LibrarySearchResult(entry, null, null));
+                results.Add(new LibrarySearchResult(entry, null, null));
             }
+
+            if (results.Count == 0)
+                return;
+
+            ExecuteOnDispatcher(() =>
+            {
+                foreach (var result in results)
+                {
+                    Items.Add(result);
+                }
+            });
         }
 
         public async Task LoadFullTextResultsAsync(IReadOnlyList<FullTextSearchHit> hits)
         {
-            Clear();
-            ResultsAreFullText = true;
+            ArgumentNullException.ThrowIfNull(hits);
+
+            ExecuteOnDispatcher(() =>
+            {
+                Items.Clear();
+                Selected = null;
+                ResultsAreFullText = true;
+            });
+
             foreach (var hit in hits)
             {
                 var entry = await _store.GetByIdAsync(hit.EntryId).ConfigureAwait(false);
@@ -84,11 +113,16 @@ namespace LM.App.Wpf.ViewModels.Library
                     continue;
 
                 PrepareEntry(entry);
-                Items.Add(new LibrarySearchResult(entry, hit.Score, hit.Highlight));
+                var result = new LibrarySearchResult(entry, hit.Score, hit.Highlight);
+
+                ExecuteOnDispatcher(() => Items.Add(result));
             }
         }
 
-        public void MarkAsMetadataResults() => ResultsAreFullText = false;
+        public void MarkAsMetadataResults()
+        {
+            ExecuteOnDispatcher(() => ResultsAreFullText = false);
+        }
 
         public bool CanAcceptFileDrop(IEnumerable<string>? filePaths, LibrarySearchResult? dropTarget = null)
         {
@@ -328,25 +362,41 @@ namespace LM.App.Wpf.ViewModels.Library
 
                 PrepareEntry(updated);
 
-                LibrarySearchResult newResult;
-                if (previous is not null)
-                {
-                    newResult = new LibrarySearchResult(updated, previous.Score, previous.Highlight);
-                    var index = Items.IndexOf(previous);
-                    if (index >= 0)
-                        Items[index] = newResult;
-                }
-                else
-                {
-                    newResult = new LibrarySearchResult(updated, null, null);
-                }
+                var newResult = previous is not null
+                    ? new LibrarySearchResult(updated, previous.Score, previous.Highlight)
+                    : new LibrarySearchResult(updated, null, null);
 
-                Selected = newResult;
+                ExecuteOnDispatcher(() =>
+                {
+                    if (previous is not null)
+                    {
+                        var index = Items.IndexOf(previous);
+                        if (index >= 0)
+                            Items[index] = newResult;
+                    }
+
+                    Selected = newResult;
+                });
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[LibraryResultsViewModel] RefreshSelectedEntryAsync failed: {ex}");
             }
+        }
+
+        private static void ExecuteOnDispatcher(Action action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(action);
+                return;
+            }
+
+            action();
         }
 
         private static bool IsSupportedAttachment(string path)
