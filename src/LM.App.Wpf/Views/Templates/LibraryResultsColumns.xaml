@@ -1,5 +1,8 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="../Library/LibraryCommonResources.xaml" />
+  </ResourceDictionary.MergedDictionaries>
   <x:Array x:Key="LibraryResultsColumns" Type="DataGridColumn">
     <DataGridTextColumn Header="Title" Binding="{Binding Entry.Title}" Width="3*" />
     <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="0.8*" />
