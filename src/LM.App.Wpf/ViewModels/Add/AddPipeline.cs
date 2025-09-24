@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using DocumentFormat.OpenXml.Bibliography;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.HubSpoke.Abstractions;
@@ -11,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -167,6 +167,7 @@ namespace LM.App.Wpf.ViewModels
                         }
                     }
 
+                    var addedBy = GetCurrentUserName();
                     var entry = new Entry
                     {
                         Id = string.Empty,
@@ -184,7 +185,9 @@ namespace LM.App.Wpf.ViewModels
                         OriginalFileName = Path.GetFileName(r.FilePath),
                         MainFilePath = relativePath,
                         MainFileHashSha256 = sha256,
-                        UserNotes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes?.Trim()
+                        UserNotes = string.IsNullOrWhiteSpace(r.Notes) ? null : r.Notes?.Trim(),
+                        AddedBy = addedBy,
+                        AddedOnUtc = DateTime.UtcNow
                     };
 
                     // 4) Persist entry
@@ -199,8 +202,16 @@ namespace LM.App.Wpf.ViewModels
                     }
 
                     // 5) Run composers through orchestrator (article.json now, more later)
-                    var ctx = new HookContext { Article = r.ArticleHook };
-                    await _orchestrator.ProcessAsync(entryId, ctx, ct);
+                    if (!string.IsNullOrWhiteSpace(entryId))
+                    {
+                        var ctx = BuildHookContext(r, entry, relativePath, sha256, addedBy);
+                        if (ctx is not null)
+                        {
+                            await _orchestrator.ProcessAsync(entryId!, ctx, ct);
+                            if (ctx.Article is not null)
+                                r.ArticleHook = ctx.Article;
+                        }
+                    }
 
                     // Track created entry for pass 2 (attachments)
                     var key = r.Title ?? r.DisplayName ?? r.SimilarToTitle;
@@ -558,6 +569,230 @@ namespace LM.App.Wpf.ViewModels
             var title = string.IsNullOrWhiteSpace(r.Title) ? fallbackTitle : r.Title!;
             var display = string.IsNullOrWhiteSpace(r.DisplayName) ? title : r.DisplayName!;
             return (title, display);
+        }
+
+        private HookContext? BuildHookContext(StagingItem stagingItem,
+                                              Entry entry,
+                                              string relativePath,
+                                              string sha256,
+                                              string addedBy)
+        {
+            if (stagingItem is null)
+                throw new ArgumentNullException(nameof(stagingItem));
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+
+            var article = BuildArticleHook(stagingItem, entry, relativePath, sha256);
+            var changeLog = BuildEntryCreationChangeLog(entry, addedBy);
+
+            if (article is null && changeLog is null)
+                return null;
+
+            return new HookContext
+            {
+                Article = article,
+                ChangeLog = changeLog
+            };
+        }
+
+        private HookM.ArticleHook? BuildArticleHook(StagingItem stagingItem,
+                                                    Entry entry,
+                                                    string relativePath,
+                                                    string sha256)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                return stagingItem.ArticleHook;
+
+            var normalized = NormalizeStoragePath(relativePath);
+            if (string.IsNullOrWhiteSpace(normalized))
+                return stagingItem.ArticleHook;
+
+            var hook = stagingItem.ArticleHook ?? CreateMinimalArticleHook(entry);
+
+            var asset = CreatePrimaryAsset(normalized, stagingItem.FilePath, sha256);
+            if (asset is null)
+                return hook;
+
+            hook.Assets.RemoveAll(a => a?.Purpose == HookM.ArticleAssetPurpose.Manuscript);
+            hook.Assets.Add(asset);
+            return hook;
+        }
+
+        private static HookM.ArticleHook CreateMinimalArticleHook(Entry entry)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+
+            var authors = (entry.Authors ?? new List<string>())
+                .Where(a => !string.IsNullOrWhiteSpace(a))
+                .Select(a => new HookM.Author { LastName = a.Trim() })
+                .ToList();
+
+            var keywords = (entry.Tags ?? new List<string>())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Trim())
+                .ToList();
+
+            return new HookM.ArticleHook
+            {
+                Identifier = new HookM.ArticleIdentifier
+                {
+                    PMID = entry.Pmid ?? string.Empty,
+                    DOI = entry.Doi,
+                    OtherIds = new Dictionary<string, string>()
+                },
+                Journal = new HookM.JournalInfo
+                {
+                    Title = entry.Source ?? string.Empty,
+                    Issue = new HookM.JournalIssue
+                    {
+                        PubDate = entry.Year.HasValue
+                            ? new HookM.PartialDate { Year = entry.Year.Value }
+                            : null
+                    }
+                },
+                Article = new HookM.ArticleDetails
+                {
+                    Title = entry.Title ?? entry.DisplayName ?? entry.OriginalFileName ?? string.Empty,
+                    PublicationTypes = new List<string>(),
+                    Pagination = new HookM.Pagination(),
+                    Dates = new HookM.ArticleDates()
+                },
+                Authors = authors,
+                Keywords = keywords
+            };
+        }
+
+        private HookM.ArticleAsset? CreatePrimaryAsset(string storagePath, string originalPath, string sha256)
+        {
+            try
+            {
+                var bytes = TryGetFileSize(storagePath);
+                var title = Path.GetFileName(storagePath) ?? storagePath;
+                var originalFile = string.IsNullOrWhiteSpace(originalPath) ? null : Path.GetFileName(originalPath);
+                var originalFolder = string.IsNullOrWhiteSpace(originalPath) ? null : Path.GetDirectoryName(originalPath);
+
+                return new HookM.ArticleAsset
+                {
+                    Title = string.IsNullOrWhiteSpace(title) ? storagePath : title,
+                    OriginalFilename = originalFile,
+                    OriginalFolderPath = originalFolder,
+                    StoragePath = storagePath,
+                    Hash = string.IsNullOrWhiteSpace(sha256) ? string.Empty : $"sha256-{sha256}",
+                    ContentType = ResolveContentType(storagePath),
+                    Bytes = bytes,
+                    Purpose = HookM.ArticleAssetPurpose.Manuscript
+                };
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[AddPipeline] Failed to build primary asset for '{storagePath}': {ex}");
+                return null;
+            }
+        }
+
+        private HookM.EntryChangeLogHook? BuildEntryCreationChangeLog(Entry entry, string addedBy)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+
+            var normalized = NormalizeStoragePath(entry.MainFilePath);
+            if (string.IsNullOrWhiteSpace(normalized))
+                return null;
+
+            var performer = string.IsNullOrWhiteSpace(addedBy) ? "unknown" : addedBy;
+            var timestamp = entry.AddedOnUtc == default ? DateTime.UtcNow : entry.AddedOnUtc;
+
+            var title = entry.DisplayName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Title;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.OriginalFileName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = Path.GetFileName(normalized);
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Id;
+
+            var tags = entry.Tags is { Count: > 0 }
+                ? new List<string>(entry.Tags)
+                : new List<string>();
+
+            return new HookM.EntryChangeLogHook
+            {
+                Events = new List<HookM.EntryChangeLogEvent>
+                {
+                    new HookM.EntryChangeLogEvent
+                    {
+                        EventId = Guid.NewGuid().ToString("N"),
+                        TimestampUtc = timestamp,
+                        PerformedBy = performer,
+                        Action = "EntryCreated",
+                        Details = new HookM.ChangeLogAttachmentDetails
+                        {
+                            AttachmentId = entry.Id,
+                            Title = title,
+                            LibraryPath = normalized,
+                            Purpose = AttachmentKind.Supplement,
+                            Tags = tags
+                        }
+                    }
+                }
+            };
+        }
+
+        private long TryGetFileSize(string storagePath)
+        {
+            try
+            {
+                var relative = storagePath
+                    .Replace('/', Path.DirectorySeparatorChar)
+                    .Replace('\\', Path.DirectorySeparatorChar);
+
+                var absolute = _workspace.GetAbsolutePath(relative);
+                if (!string.IsNullOrWhiteSpace(absolute))
+                {
+                    var info = new FileInfo(absolute);
+                    if (info.Exists)
+                        return info.Length;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[AddPipeline] Unable to determine file size for '{storagePath}': {ex}");
+            }
+
+            return 0;
+        }
+
+        private static string NormalizeStoragePath(string? relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                return string.Empty;
+
+            return relativePath.Replace('\\', '/');
+        }
+
+        private static string ResolveContentType(string storagePath)
+        {
+            var ext = Path.GetExtension(storagePath)?.ToLowerInvariant();
+            return ext switch
+            {
+                ".pdf" => "application/pdf",
+                ".doc" => "application/msword",
+                ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ".ppt" => "application/vnd.ms-powerpoint",
+                ".pptx" => "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ".txt" => "text/plain",
+                ".md" => "text/markdown",
+                ".rtf" => "application/rtf",
+                _ => "application/octet-stream"
+            };
+        }
+
+        private static string GetCurrentUserName()
+        {
+            var user = Environment.UserName;
+            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
         }
 
         private static List<string> SplitList(string? csv, bool distinct = false)
