@@ -40,6 +40,7 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<ILibraryEntryEditor>(),
                 sp.GetRequiredService<ILibraryDocumentService>(),
                 sp.GetRequiredService<IAttachmentMetadataPrompt>(),
+                sp.GetRequiredService<IWorkSpaceService>(),
                 sp.GetRequiredService<HookOrchestrator>()));
 
             services.AddSingleton(sp => new LibraryViewModel(

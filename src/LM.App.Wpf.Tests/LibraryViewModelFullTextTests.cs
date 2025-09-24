@@ -132,7 +132,13 @@ namespace LM.App.Wpf.Tests
 
             var filePath = Path.Combine(temp.RootPath, "notes.pdf");
             File.WriteAllText(filePath, "demo");
-
+            var articleHookPath = Path.Combine(temp.RootPath, "entries", entry.Id, "hooks", "article.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(articleHookPath)!);
+            var existingHook = new ArticleHook
+            {
+                Assets = new List<ArticleAsset>()
+            };
+            File.WriteAllText(articleHookPath, JsonSerializer.Serialize(existingHook, JsonStd.Options));
             prompt.Result = new AttachmentMetadataPromptResult(new[]
             {
                 new AttachmentMetadataSelection(filePath, "paper", AttachmentKind.Supplement, Array.Empty<string>())
@@ -168,6 +174,15 @@ namespace LM.App.Wpf.Tests
             Assert.NotNull(changeLog);
             Assert.Single(changeLog!.Events);
             Assert.Equal(expectedUser, changeLog.Events[0].PerformedBy);
+            var articleHook = JsonSerializer.Deserialize<ArticleHook>(File.ReadAllText(articleHookPath), JsonStd.Options);
+            Assert.NotNull(articleHook);
+            Assert.Single(articleHook!.Assets);
+            var asset = articleHook.Assets[0];
+            Assert.Equal("paper", asset.Title);
+            Assert.Equal(ArticleAssetPurpose.Supplement, asset.Purpose);
+            Assert.Equal("application/pdf", asset.ContentType);
+            Assert.Equal(storage.SavedRelativePaths[0].Replace('\\', '/'), asset.StoragePath);
+
         }
 
         [Fact]
@@ -312,7 +327,7 @@ namespace LM.App.Wpf.Tests
             orchestrator ??= new HookOrchestrator(ws);
             var filters = new LibraryFiltersViewModel(presetStore, prompt);
             var documents = new NoopDocumentService();
-            var results = new LibraryResultsViewModel(store, storage, editor, documents, attachmentPrompt, orchestrator);
+            var results = new LibraryResultsViewModel(store, storage, editor, documents, attachmentPrompt, ws, orchestrator);
             return new LibraryViewModel(store, search, filters, results);
         }
 

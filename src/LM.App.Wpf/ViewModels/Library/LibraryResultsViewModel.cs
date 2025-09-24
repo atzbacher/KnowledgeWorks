@@ -32,6 +32,7 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly ILibraryEntryEditor _entryEditor;
         private readonly ILibraryDocumentService _documentService;
         private readonly IAttachmentMetadataPrompt _attachmentPrompt;
+        private readonly IWorkSpaceService _workspace;
         private readonly HookOrchestrator _hookOrchestrator;
 
         [ObservableProperty]
@@ -50,6 +51,7 @@ namespace LM.App.Wpf.ViewModels.Library
                                        ILibraryEntryEditor entryEditor,
                                        ILibraryDocumentService documentService,
                                        IAttachmentMetadataPrompt attachmentPrompt,
+                                       IWorkSpaceService workspace,
                                        HookOrchestrator hookOrchestrator)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -57,6 +59,7 @@ namespace LM.App.Wpf.ViewModels.Library
             _entryEditor = entryEditor ?? throw new ArgumentNullException(nameof(entryEditor));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
             _attachmentPrompt = attachmentPrompt ?? throw new ArgumentNullException(nameof(attachmentPrompt));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
 
             Items = new ObservableCollection<LibrarySearchResult>();
@@ -459,8 +462,11 @@ namespace LM.App.Wpf.ViewModels.Library
             if (string.IsNullOrWhiteSpace(entryId))
                 return;
 
+            var article = await TryMergeArticleHookAsync(entry, added, entryId).ConfigureAwait(false);
+
             var ctx = new HookContext
             {
+                Article = article,
                 Attachments = BuildAttachmentHook(entry),
                 ChangeLog = BuildChangeLogHook(added)
             };
