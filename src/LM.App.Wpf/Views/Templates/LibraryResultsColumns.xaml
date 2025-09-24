@@ -3,40 +3,93 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="../Library/LibraryCommonResources.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <x:Array x:Key="LibraryResultsColumns" Type="DataGridColumn">
-    <DataGridTextColumn Header="Title" Binding="{Binding Entry.Title}" Width="3*" />
-    <DataGridTextColumn Header="Score" Binding="{Binding ScoreDisplay}" Width="0.8*" />
-    <DataGridTextColumn Header="Source" Binding="{Binding Entry.Source}" Width="2*" />
-    <DataGridTextColumn Header="Type" Binding="{Binding Entry.Type}" Width="1*" />
-    <DataGridTextColumn Header="Year" Binding="{Binding Entry.Year}" Width="0.8*" />
-    <DataGridTextColumn Header="Added on"
-                         Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
-                         Width="1.2*" />
-    <DataGridTextColumn Header="Added by" Binding="{Binding Entry.AddedBy}" Width="1.2*" />
-    <DataGridTextColumn Header="Internal ID" Binding="{Binding Entry.InternalId}" Width="1.5*" />
-    <DataGridTextColumn Header="DOI" Binding="{Binding Entry.Doi}" Width="2*" />
-    <DataGridTextColumn Header="PMID" Binding="{Binding Entry.Pmid}" Width="1.5*" />
-    <DataGridTextColumn Header="NCT" Binding="{Binding Entry.Nct}" Width="1.5*" />
-    <DataGridTextColumn Header="Authors" Width="2*">
-      <DataGridTextColumn.Binding>
-        <Binding Path="Entry.Authors" Converter="{StaticResource StringJoinConverter}" />
-      </DataGridTextColumn.Binding>
-    </DataGridTextColumn>
-    <DataGridTextColumn Header="Tags" Width="2*">
-      <DataGridTextColumn.Binding>
-        <Binding Path="Entry.Tags" Converter="{StaticResource StringJoinConverter}" />
-      </DataGridTextColumn.Binding>
-    </DataGridTextColumn>
-    <DataGridTextColumn Header="Internal" Binding="{Binding Entry.IsInternal}" Width="0.8*" />
-    <DataGridTemplateColumn Header="Snippet" Width="3*">
-      <DataGridTemplateColumn.CellTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding HighlightDisplay}"
-                     TextWrapping="Wrap"
-                     FontStyle="Italic"
-                     Foreground="DimGray" />
-        </DataTemplate>
-      </DataGridTemplateColumn.CellTemplate>
-    </DataGridTemplateColumn>
-  </x:Array>
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Title"
+                      x:Shared="False"
+                      Header="Title"
+                      Binding="{Binding Entry.Title}"
+                      Width="3*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Score"
+                      x:Shared="False"
+                      Header="Score"
+                      Binding="{Binding ScoreDisplay}"
+                      Width="0.8*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Source"
+                      x:Shared="False"
+                      Header="Source"
+                      Binding="{Binding Entry.Source}"
+                      Width="2*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Type"
+                      x:Shared="False"
+                      Header="Type"
+                      Binding="{Binding Entry.Type}"
+                      Width="1*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Year"
+                      x:Shared="False"
+                      Header="Year"
+                      Binding="{Binding Entry.Year}"
+                      Width="0.8*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.AddedOn"
+                      x:Shared="False"
+                      Header="Added on"
+                      Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
+                      Width="1.2*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.AddedBy"
+                      x:Shared="False"
+                      Header="Added by"
+                      Binding="{Binding Entry.AddedBy}"
+                      Width="1.2*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.InternalId"
+                      x:Shared="False"
+                      Header="Internal ID"
+                      Binding="{Binding Entry.InternalId}"
+                      Width="1.5*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Doi"
+                      x:Shared="False"
+                      Header="DOI"
+                      Binding="{Binding Entry.Doi}"
+                      Width="2*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Pmid"
+                      x:Shared="False"
+                      Header="PMID"
+                      Binding="{Binding Entry.Pmid}"
+                      Width="1.5*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Nct"
+                      x:Shared="False"
+                      Header="NCT"
+                      Binding="{Binding Entry.Nct}"
+                      Width="1.5*" />
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Authors"
+                      x:Shared="False"
+                      Header="Authors"
+                      Width="2*">
+    <DataGridTextColumn.Binding>
+      <Binding Path="Entry.Authors" Converter="{StaticResource StringJoinConverter}" />
+    </DataGridTextColumn.Binding>
+  </DataGridTextColumn>
+  <DataGridTextColumn x:Key="LibraryResultsColumn.Tags"
+                      x:Shared="False"
+                      Header="Tags"
+                      Width="2*">
+    <DataGridTextColumn.Binding>
+      <Binding Path="Entry.Tags" Converter="{StaticResource StringJoinConverter}" />
+    </DataGridTextColumn.Binding>
+  </DataGridTextColumn>
+  <DataGridTextColumn x:Key="LibraryResultsColumn.IsInternal"
+                      x:Shared="False"
+                      Header="Internal"
+                      Binding="{Binding Entry.IsInternal}"
+                      Width="0.8*" />
+  <DataGridTemplateColumn x:Key="LibraryResultsColumn.Snippet"
+                          x:Shared="False"
+                          Header="Snippet"
+                          Width="3*">
+    <DataGridTemplateColumn.CellTemplate>
+      <DataTemplate>
+        <TextBlock Text="{Binding HighlightDisplay}"
+                   TextWrapping="Wrap"
+                   FontStyle="Italic"
+                   Foreground="DimGray" />
+      </DataTemplate>
+    </DataGridTemplateColumn.CellTemplate>
+  </DataGridTemplateColumn>
 </ResourceDictionary>
