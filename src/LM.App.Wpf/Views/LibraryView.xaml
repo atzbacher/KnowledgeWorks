@@ -118,6 +118,41 @@
           <Button Content="Manage presets"
                   Command="{Binding ManagePresetsCommand}"/>
         </StackPanel>
+        <StackPanel Margin="0,16,0,0">
+          <TextBlock Text="Saved presets" FontWeight="SemiBold"/>
+          <TextBlock Text="No saved presets yet."
+                     Margin="0,4,0,0"
+                     Foreground="DimGray"
+                     FontStyle="Italic">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock">
+                <Setter Property="Visibility" Value="Visible"/>
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasSavedPresets}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+          <ItemsControl ItemsSource="{Binding SavedPresets}"
+                        Margin="0,8,0,0"
+                        Visibility="{Binding HasSavedPresets, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding}"
+                        Margin="0,0,0,6"
+                        HorizontalContentAlignment="Stretch">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding SavedUtc, StringFormat='Saved {0:yyyy-MM-dd HH:mm}'}" FontSize="12" Opacity="0.7"/>
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
       </StackPanel>
     </ScrollViewer>
 
