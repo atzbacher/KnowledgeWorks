@@ -122,7 +122,7 @@ namespace LM.App.Wpf.Views.Behaviors
         }
     }
 
-    internal sealed record FileDropRequest(
+    public sealed record FileDropRequest(
         IReadOnlyList<string> Paths,
         object? DropTarget,
         System.Windows.DragEventArgs Args);

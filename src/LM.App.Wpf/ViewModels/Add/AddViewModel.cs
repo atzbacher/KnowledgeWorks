@@ -8,12 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.ViewModels.Dialogs;
+using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Settings;
 using LM.HubSpoke.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -25,6 +28,7 @@ namespace LM.App.Wpf.ViewModels
 
         private readonly IAddPipeline _pipeline;
         private readonly IDialogService _dialogService;
+        private readonly IServiceProvider? _dialogServiceProvider;
         private readonly StagingListViewModel _stagingList;
         private readonly WatchedFoldersViewModel _watchedFolders;
         private readonly bool _ownsStagingList;
@@ -51,11 +55,23 @@ namespace LM.App.Wpf.ViewModels
             if (workspace is null)
                 throw new ArgumentNullException(nameof(workspace));
 
-            _dialogService = dialogService ?? new WpfDialogService();
-
             _stagingList = stagingList ?? new StagingListViewModel(_pipeline);
             _ownsStagingList = stagingList is null;
             _stagingList.PropertyChanged += OnStagingListPropertyChanged;
+
+            if (dialogService is not null)
+            {
+                _dialogService = dialogService;
+            }
+            else
+            {
+                var services = new ServiceCollection();
+                services.AddSingleton(_stagingList);
+                services.AddTransient<StagingEditorViewModel>();
+                services.AddTransient<StagingEditorWindow>();
+                _dialogServiceProvider = services.BuildServiceProvider();
+                _dialogService = new WpfDialogService(_dialogServiceProvider);
+            }
 
             if (watchedFolders is null)
             {
@@ -211,6 +227,9 @@ namespace LM.App.Wpf.ViewModels
 
             if (_ownsWatchedFolders)
                 _watchedFolders.Dispose();
+
+            if (_dialogServiceProvider is IDisposable disposable)
+                disposable.Dispose();
         }
 
         private async Task AddFilesAsync()
