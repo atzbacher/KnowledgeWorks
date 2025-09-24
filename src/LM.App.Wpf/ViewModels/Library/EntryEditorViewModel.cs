@@ -101,9 +101,9 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 ApplyEdits(_entry, Item);
 
-                await _store.SaveAsync(_entry).ConfigureAwait(false);
+                await _store.SaveAsync(_entry).ConfigureAwait(true);
 
-                await UpdateArticleHookAsync(_entry).ConfigureAwait(false);
+                await UpdateArticleHookAsync(_entry).ConfigureAwait(true);
 
                 _originalAuthorsSignature = NormalizeAuthorsSignature(_entry.Authors);
                 WasSaved = true;
