@@ -113,6 +113,8 @@ LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! target
 LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
+LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
+LM.App.Wpf.Library.LibraryFilterPreset
 LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
 LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!
 LM.App.Wpf.Library.LibraryFilterPreset.Name.set -> void
@@ -534,6 +536,14 @@ LM.App.Wpf.ViewModels.StagingItem.Type.set -> void
 LM.App.Wpf.ViewModels.StagingItem.Year.get -> int?
 LM.App.Wpf.ViewModels.StagingItem.Year.set -> void
 LM.App.Wpf.Views.AddView
+LM.App.Wpf.Views.Behaviors.FileDropRequest
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Args.get -> System.Windows.DragEventArgs!
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Args.init -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.DropTarget.get -> object?
+LM.App.Wpf.Views.Behaviors.FileDropRequest.DropTarget.init -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.FileDropRequest(System.Collections.Generic.IReadOnlyList<string!>! Paths, object? DropTarget, System.Windows.DragEventArgs! Args) -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Paths.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Paths.init -> void
 LM.App.Wpf.Views.AddView.AddView() -> void
 LM.App.Wpf.Views.AddView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog

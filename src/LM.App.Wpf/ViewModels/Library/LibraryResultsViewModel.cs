@@ -33,8 +33,13 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private LibrarySearchResult? selected;
 
-        [ObservableProperty(SetterAccessModifier = AccessModifier.Private)]
-        private bool resultsAreFullText;
+        private bool _resultsAreFullText;
+
+        public bool ResultsAreFullText
+        {
+            get => _resultsAreFullText;
+            private set => SetProperty(ref _resultsAreFullText, value);
+        }
 
         public LibraryResultsViewModel(IEntryStore store,
                                        IFileStorageRepository storage,

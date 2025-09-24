@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
+using LM.Core.Models;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
