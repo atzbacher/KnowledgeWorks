@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using LM.App.Wpf.Common.Collections;
 using LM.Core.Models;
 
 namespace LM.App.Wpf.ViewModels
@@ -14,6 +15,7 @@ namespace LM.App.Wpf.ViewModels
     public sealed class StagingListViewModel : INotifyPropertyChanged, IDisposable
     {
         private readonly IAddPipeline _pipeline;
+        private readonly RangeObservableCollection<StagingItem> _items = new();
         private static readonly Array s_entryTypes = Enum.GetValues(typeof(EntryType));
         private bool _disposed;
         private StagingItem? _current;
@@ -24,10 +26,10 @@ namespace LM.App.Wpf.ViewModels
         public StagingListViewModel(IAddPipeline pipeline)
         {
             _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
-            Items.CollectionChanged += OnItemsCollectionChanged;
+            _items.CollectionChanged += OnItemsCollectionChanged;
         }
 
-        public ObservableCollection<StagingItem> Items { get; } = new();
+        public ObservableCollection<StagingItem> Items => _items;
 
         public Array EntryTypes => s_entryTypes;
 
@@ -65,13 +67,13 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        public string IndexLabel => Items.Count == 0 || Current is null
+        public string IndexLabel => _items.Count == 0 || Current is null
             ? "0 / 0"
-            : $"{Items.IndexOf(Current) + 1} / {Items.Count}";
+            : $"{_items.IndexOf(Current) + 1} / {_items.Count}";
 
-        public bool HasSelectedItems => Items.Any(static item => item.Selected);
+        public bool HasSelectedItems => _items.Any(static item => item.Selected);
 
-        public bool HasItems => Items.Count > 0;
+        public bool HasItems => _items.Count > 0;
 
         public async Task StagePathsAsync(System.Collections.Generic.IEnumerable<string> paths, CancellationToken ct)
         {
@@ -89,13 +91,10 @@ namespace LM.App.Wpf.ViewModels
 
             void Add()
             {
-                foreach (var item in items)
-                {
-                    Items.Add(item);
-                }
+                _items.AddRange(items);
 
                 if (Current is null)
-                    Current = Items.FirstOrDefault();
+                    Current = _items.FirstOrDefault();
 
                 OnPropertyChanged(nameof(IndexLabel));
                 OnPropertyChanged(nameof(HasSelectedItems));
@@ -120,7 +119,7 @@ namespace LM.App.Wpf.ViewModels
 
         public async Task CommitSelectedAsync(CancellationToken ct)
         {
-            var selected = Items.Where(static item => item.Selected).ToList();
+            var selected = _items.Where(static item => item.Selected).ToList();
             if (selected.Count == 0)
                 return;
 
@@ -129,9 +128,9 @@ namespace LM.App.Wpf.ViewModels
             void Remove()
             {
                 foreach (var item in committed)
-                    Items.Remove(item);
+                    _items.Remove(item);
 
-                Current = Items.FirstOrDefault();
+                Current = _items.FirstOrDefault();
 
                 OnPropertyChanged(nameof(IndexLabel));
                 OnPropertyChanged(nameof(HasSelectedItems));
@@ -156,7 +155,7 @@ namespace LM.App.Wpf.ViewModels
 
         public void Clear()
         {
-            Items.Clear();
+            _items.Clear();
             Current = null;
             OnPropertyChanged(nameof(IndexLabel));
             OnPropertyChanged(nameof(HasSelectedItems));
@@ -165,15 +164,15 @@ namespace LM.App.Wpf.ViewModels
 
         public void SelectByOffset(int delta)
         {
-            if (Items.Count == 0)
+            if (_items.Count == 0)
             {
                 Current = null;
                 return;
             }
 
-            var currentIndex = Current is null ? 0 : Items.IndexOf(Current);
-            var newIndex = Math.Clamp(currentIndex + delta, 0, Items.Count - 1);
-            Current = Items[newIndex];
+            var currentIndex = Current is null ? 0 : _items.IndexOf(Current);
+            var newIndex = Math.Clamp(currentIndex + delta, 0, _items.Count - 1);
+            Current = _items[newIndex];
         }
 
         public void Dispose()
@@ -182,9 +181,9 @@ namespace LM.App.Wpf.ViewModels
                 return;
 
             _disposed = true;
-            Items.CollectionChanged -= OnItemsCollectionChanged;
+            _items.CollectionChanged -= OnItemsCollectionChanged;
 
-            foreach (var item in Items)
+            foreach (var item in _items)
                 item.PropertyChanged -= OnItemPropertyChanged;
         }
 
@@ -202,13 +201,13 @@ namespace LM.App.Wpf.ViewModels
                     item.PropertyChanged -= OnItemPropertyChanged;
             }
 
-            if (Items.Count == 0)
+            if (_items.Count == 0)
             {
                 Current = null;
             }
-            else if (Current is not null && !Items.Contains(Current))
+            else if (Current is not null && !_items.Contains(Current))
             {
-                Current = Items.FirstOrDefault();
+                Current = _items.FirstOrDefault();
             }
 
             OnPropertyChanged(nameof(IndexLabel));
