@@ -19,8 +19,16 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogCloseRequestedEventArgs(bool? dialogResult) -> void
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogResult.get -> bool?
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.CloseRequested -> System.EventHandler<LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs!>?
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.DialogViewModelBase() -> void
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.RequestClose(bool? dialogResult) -> void
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService(System.IServiceProvider! services) -> void
 LM.App.Wpf.Common.ILibraryPresetPrompt
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
@@ -100,16 +108,11 @@ LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels
 LM.App.Wpf.Common.Dialogs.WpfDialogService
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
-LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService() -> void
 LM.App.Wpf.Common.StringJoinConverter
 LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
-LM.App.Wpf.Common.ViewModelBase.OnPropertyChanged(string? name = null) -> void
-LM.App.Wpf.Common.ViewModelBase.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
-LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
-LM.App.Wpf.Library.LibraryFilterPreset
 LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
 LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!
 LM.App.Wpf.Library.LibraryFilterPreset.Name.set -> void
@@ -213,6 +216,32 @@ LM.App.Wpf.ViewModels.AddViewModel.Staging.get -> System.Collections.ObjectModel
 LM.App.Wpf.ViewModels.AddViewModel.StagingListViewModel.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.AddViewModel.WatchedFolders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
 LM.App.Wpf.ViewModels.AddViewModel.WatchedFoldersViewModel.get -> LM.App.Wpf.ViewModels.WatchedFoldersViewModel!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.DeletedPresetNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Initialize(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.LibraryPresetPickerDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Presets.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.SelectedPresetName.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Initialize(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.LibraryPresetSaveDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.ResultName.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Initialize(LM.App.Wpf.Common.SearchSavePromptContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultName.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultNotes.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultTags.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.SearchSaveDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.WorkspaceChooserViewModel(LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InternalIdContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InternalIdContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.CanAcceptFileDrop(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> bool
@@ -322,7 +351,6 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.BuildEntryFilter() -> LM.C
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.BuildFullTextQuery(string! queryText) -> LM.Core.Models.Search.FullTextSearchQuery!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.CaptureState() -> LM.App.Wpf.Library.LibraryFilterState!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.Clear() -> void
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DoiContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DoiContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInAbstract.get -> bool
@@ -337,13 +365,10 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.GetNormalizedFullTextQuery
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsInternal.get -> bool?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsInternal.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsMetadataSearch.get -> bool
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LoadPresetCommand.get -> System.Windows.Input.ICommand!
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ManagePresetsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.NctContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.NctContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PmidContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PmidContains.set -> void
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavePresetCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagsCsv.get -> string?
@@ -370,13 +395,11 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.get -> int?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() -> void
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.OpenCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ResultsAreFullText.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.get -> LM.App.Wpf.ViewModels.LibrarySearchResult?
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.set -> void
@@ -384,7 +407,6 @@ LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.SearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchItemViewModel
 LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
 LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void
@@ -515,24 +537,21 @@ LM.App.Wpf.Views.AddView
 LM.App.Wpf.Views.AddView.AddView() -> void
 LM.App.Wpf.Views.AddView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryPresetPickerDialog
-LM.App.Wpf.Views.LibraryPresetPickerDialog.DeletedPresetNames.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.App.Wpf.Views.LibraryPresetPickerDialog.InitializeComponent() -> void
-LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> void
-LM.App.Wpf.Views.LibraryPresetPickerDialog.SelectedPresetName.get -> string?
+LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetPrompt.LibraryPresetPrompt(System.IServiceProvider! services) -> void
 LM.App.Wpf.Views.LibraryPresetSaveDialog
 LM.App.Wpf.Views.LibraryPresetSaveDialog.InitializeComponent() -> void
-LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> void
-LM.App.Wpf.Views.LibraryPresetSaveDialog.ResultName.get -> string!
+LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel! viewModel) -> void
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void
 LM.App.Wpf.Views.LibraryPresetPrompt
-LM.App.Wpf.Views.LibraryPresetPrompt.LibraryPresetPrompt() -> void
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
 LM.App.Wpf.Views.SearchSavePrompt
 LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
-LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt() -> void
+LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
 LM.App.Wpf.Views.SearchView
 LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
 LM.App.Wpf.Views.SearchView.SearchView() -> void
@@ -541,11 +560,15 @@ LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
-LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.StagingListViewModel! vm) -> void
+LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
 LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
-LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser() -> void
+LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser(LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel! viewModel) -> void
 override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void
 override LM.App.Wpf.App.OnStartup(System.Windows.StartupEventArgs! e) -> void
+override LM.App.Wpf.Views.LibraryPresetPickerDialog.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.LibraryPresetSaveDialog.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.StagingEditorWindow.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
