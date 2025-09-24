@@ -149,7 +149,21 @@
                                       DropCommand="{Binding DropCommand}" />
         </i:Interaction.Behaviors>
         <DataGrid.Columns>
-          <StaticResource ResourceKey="LibraryResultsColumns" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Title" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Score" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Source" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Type" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Year" />
+          <StaticResource ResourceKey="LibraryResultsColumn.AddedOn" />
+          <StaticResource ResourceKey="LibraryResultsColumn.AddedBy" />
+          <StaticResource ResourceKey="LibraryResultsColumn.InternalId" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Doi" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Pmid" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Nct" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Authors" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Tags" />
+          <StaticResource ResourceKey="LibraryResultsColumn.IsInternal" />
+          <StaticResource ResourceKey="LibraryResultsColumn.Snippet" />
         </DataGrid.Columns>
       </DataGrid>
 
