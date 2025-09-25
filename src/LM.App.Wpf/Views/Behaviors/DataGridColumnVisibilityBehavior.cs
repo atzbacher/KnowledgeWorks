@@ -22,7 +22,6 @@ namespace LM.App.Wpf.Views.Behaviors
             typeof(string),
             typeof(DataGridColumnVisibilityBehavior),
             new System.Windows.PropertyMetadata(null));
-
         public LibraryColumnVisibility? VisibilityMap
         {
             get => (LibraryColumnVisibility?)GetValue(VisibilityMapProperty);
