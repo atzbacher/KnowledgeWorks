@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using LM.App.Wpf.Library;
 using LM.Infrastructure.FileSystem;
-using LM.Core.Models.Filters;
 using Xunit;
 
 public class LibraryFilterPresetStoreTests
@@ -21,27 +20,12 @@ public class LibraryFilterPresetStoreTests
             Name = "My Preset",
             State = new LibraryFilterState
             {
-                TitleContains = "title",
-                AuthorContains = "author",
-                Tags = new List<string> { "tag1", "tag2" },
-                TagMatchMode = TagMatchMode.All,
-                IsInternal = true,
-                YearFrom = 2010,
-                YearTo = 2020,
-                SourceContains = "source",
-                InternalIdContains = "internal",
-                DoiContains = "doi",
-                PmidContains = "pmid",
-                NctContains = "nct",
-                AddedByContains = "adder",
-                AddedOnFrom = new DateTime(2024, 1, 1),
-                AddedOnTo = new DateTime(2024, 12, 31),
-                TypePublication = false,
-                TypePresentation = true,
-                TypeWhitePaper = false,
-                TypeSlideDeck = true,
-                TypeReport = false,
-                TypeOther = true
+                UseFullTextSearch = true,
+                UnifiedQuery = "title:heart",
+                FullTextQuery = "heart",
+                FullTextInTitle = false,
+                FullTextInAbstract = true,
+                FullTextInContent = false
             }
         };
 
@@ -52,27 +36,12 @@ public class LibraryFilterPresetStoreTests
         Assert.Equal("My Preset", loaded.Name);
         Assert.True((DateTime.UtcNow - loaded.SavedUtc) < TimeSpan.FromMinutes(1));
 
-        Assert.Equal(preset.State.TitleContains, loaded.State.TitleContains);
-        Assert.Equal(preset.State.AuthorContains, loaded.State.AuthorContains);
-        Assert.Equal(preset.State.Tags, loaded.State.Tags);
-        Assert.Equal(preset.State.TagMatchMode, loaded.State.TagMatchMode);
-        Assert.Equal(preset.State.IsInternal, loaded.State.IsInternal);
-        Assert.Equal(preset.State.YearFrom, loaded.State.YearFrom);
-        Assert.Equal(preset.State.YearTo, loaded.State.YearTo);
-        Assert.Equal(preset.State.SourceContains, loaded.State.SourceContains);
-        Assert.Equal(preset.State.InternalIdContains, loaded.State.InternalIdContains);
-        Assert.Equal(preset.State.DoiContains, loaded.State.DoiContains);
-        Assert.Equal(preset.State.PmidContains, loaded.State.PmidContains);
-        Assert.Equal(preset.State.NctContains, loaded.State.NctContains);
-        Assert.Equal(preset.State.AddedByContains, loaded.State.AddedByContains);
-        Assert.Equal(preset.State.AddedOnFrom, loaded.State.AddedOnFrom);
-        Assert.Equal(preset.State.AddedOnTo, loaded.State.AddedOnTo);
-        Assert.Equal(preset.State.TypePublication, loaded.State.TypePublication);
-        Assert.Equal(preset.State.TypePresentation, loaded.State.TypePresentation);
-        Assert.Equal(preset.State.TypeWhitePaper, loaded.State.TypeWhitePaper);
-        Assert.Equal(preset.State.TypeSlideDeck, loaded.State.TypeSlideDeck);
-        Assert.Equal(preset.State.TypeReport, loaded.State.TypeReport);
-        Assert.Equal(preset.State.TypeOther, loaded.State.TypeOther);
+        Assert.Equal(preset.State.UseFullTextSearch, loaded.State.UseFullTextSearch);
+        Assert.Equal(preset.State.UnifiedQuery, loaded.State.UnifiedQuery);
+        Assert.Equal(preset.State.FullTextQuery, loaded.State.FullTextQuery);
+        Assert.Equal(preset.State.FullTextInTitle, loaded.State.FullTextInTitle);
+        Assert.Equal(preset.State.FullTextInAbstract, loaded.State.FullTextInAbstract);
+        Assert.Equal(preset.State.FullTextInContent, loaded.State.FullTextInContent);
 
         var fetched = await store.TryGetPresetAsync("my preset");
         Assert.NotNull(fetched);

@@ -4,9 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
-             xmlns:libraryViews="clr-namespace:LM.App.Wpf.Views.Library"
-             xmlns:filters="clr-namespace:LM.Core.Models.Filters;assembly=LM.Core"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
+             xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
              mc:Ignorable="d"
@@ -18,11 +18,14 @@
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
-      <converters:EnumEqualsConverter x:Key="EnumEqualsConverter" />
     </ResourceDictionary>
 
   </UserControl.Resources>
   <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="310"/>
       <ColumnDefinition Width="5"/>
@@ -31,152 +34,109 @@
       <ColumnDefinition Width="360"/>
     </Grid.ColumnDefinitions>
 
-    <!-- Filters Panel -->
-    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
-      <StackPanel Margin="12">
-        <TextBlock Text="Library Filters" FontWeight="Bold" Margin="0,0,0,8"/>
-        <CheckBox Content="Use full-text search"
-                  IsChecked="{Binding UseFullTextSearch}"
-                  Margin="0,0,0,8"/>
-        <StackPanel Margin="0,0,0,12"
-                    Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
-          <TextBlock Text="Full-text query"/>
-          <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"/>
-          <TextBlock Text="Search within" Margin="0,6,0,0"/>
-          <UniformGrid Columns="3" Margin="0,4,0,0">
-            <CheckBox Content="Title" IsChecked="{Binding FullTextInTitle}"/>
-            <CheckBox Content="Abstract" IsChecked="{Binding FullTextInAbstract}"/>
-            <CheckBox Content="Content" IsChecked="{Binding FullTextInContent}"/>
-          </UniformGrid>
-        </StackPanel>
-        <TextBlock Text="Title contains"/>
-        <TextBox Text="{Binding TitleContains, UpdateSourceTrigger=PropertyChanged}"/>
+    <!-- Search header -->
+    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Background="#FFF7F7F7" BorderBrush="#FFE0E0E0" BorderThickness="0,0,0,1">
+      <Grid DataContext="{Binding Filters}" Margin="12">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
 
-        <TextBlock Text="Author contains"/>
-        <TextBox Text="{Binding AuthorContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="Tags"/>
-        <libraryViews:TagTokenSelector SelectedTags="{Binding SelectedTags}"
-                                       TagVocabulary="{Binding TagVocabulary}"/>
-        <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
-          <TextBlock Text="Match mode:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-          <RadioButton Content="Any"
-                       GroupName="TagMatchMode"
-                       Margin="0,0,6,0"
-                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.Any}}"/>
-          <RadioButton Content="All"
-                       GroupName="TagMatchMode"
-                       Margin="0,0,6,0"
-                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.All}}"/>
-          <RadioButton Content="Not"
-                       GroupName="TagMatchMode"
-                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.Not}}"/>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+          <TextBlock Text="Library search" FontWeight="SemiBold"/>
+          <TextBox Margin="0,6,0,0"
+                   Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}"
+                   ToolTip="Use field qualifiers like title:heart OR author:&quot;Doe&quot; to refine results."/>
+          <TextBlock Text="Examples: title:heart AND tags:aortic, author:nicolas, NOT internal:true"
+                     FontSize="11"
+                     Foreground="DimGray"
+                     Margin="0,4,0,0"/>
         </StackPanel>
 
-        <TextBlock Text="Source contains"/>
-        <TextBox Text="{Binding SourceContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="Internal ID contains"/>
-        <TextBox Text="{Binding InternalIdContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="DOI contains"/>
-        <TextBox Text="{Binding DoiContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="PMID contains"/>
-        <TextBox Text="{Binding PmidContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="NCT contains"/>
-        <TextBox Text="{Binding NctContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="Added by contains"/>
-        <TextBox Text="{Binding AddedByContains, UpdateSourceTrigger=PropertyChanged}"/>
-
-        <TextBlock Text="Type"/>
-        <UniformGrid Columns="2" Margin="0,6,0,0">
-          <CheckBox Content="Publication" IsChecked="{Binding TypePublication}"/>
-          <CheckBox Content="Presentation" IsChecked="{Binding TypePresentation}"/>
-          <CheckBox Content="White paper" IsChecked="{Binding TypeWhitePaper}"/>
-          <CheckBox Content="Slide deck" IsChecked="{Binding TypeSlideDeck}"/>
-          <CheckBox Content="Report" IsChecked="{Binding TypeReport}"/>
-          <CheckBox Content="Other" IsChecked="{Binding TypeOther}"/>
-        </UniformGrid>
-
-        <TextBlock Text="Year range"/>
-        <DockPanel>
-          <TextBox Width="60" Text="{Binding YearFrom, UpdateSourceTrigger=PropertyChanged}"/>
-          <TextBlock Text=" to " VerticalAlignment="Center" Margin="6,0,6,0"/>
-          <TextBox Width="60" Text="{Binding YearTo, UpdateSourceTrigger=PropertyChanged}"/>
-        </DockPanel>
-
-        <TextBlock Text="Added on range"/>
-        <DockPanel>
-          <DatePicker Width="120" SelectedDate="{Binding AddedOnFrom, UpdateSourceTrigger=PropertyChanged}"/>
-          <TextBlock Text=" to " VerticalAlignment="Center" Margin="6,0,6,0"/>
-          <DatePicker Width="120" SelectedDate="{Binding AddedOnTo, UpdateSourceTrigger=PropertyChanged}"/>
-        </DockPanel>
-
-        <TextBlock Text="Visibility"/>
-        <ComboBox SelectedValue="{Binding IsInternal}">
-          <ComboBoxItem Content="Either" Tag="{x:Null}" IsSelected="True"/>
-          <ComboBoxItem Content="External" Tag="False"/>
-          <ComboBoxItem Content="Internal" Tag="True"/>
-        </ComboBox>
-
-        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,8,0,0">
           <Button Content="Search"
                   Margin="0,0,8,0"
                   Command="{Binding DataContext.SearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
           <Button Content="Clear"
                   Margin="0,0,8,0"
                   Command="{Binding ClearCommand}"/>
-          <Button Content="Save preset"
+          <Button Content="Save search"
                   Margin="0,0,8,0"
                   Command="{Binding SavePresetCommand}"/>
-          <Button Content="Load preset"
+          <Button Content="Manage saved"
                   Margin="0,0,8,0"
-                  Command="{Binding LoadPresetCommand}"/>
-          <Button Content="Manage presets"
                   Command="{Binding ManagePresetsCommand}"/>
+          <Button Content="Load saved"
+                  Command="{Binding LoadPresetCommand}"/>
         </StackPanel>
-        <StackPanel Margin="0,16,0,0">
-          <TextBlock Text="Saved presets" FontWeight="SemiBold"/>
-          <TextBlock Text="No saved presets yet."
-                     Margin="0,4,0,0"
-                     Foreground="DimGray"
-                     FontStyle="Italic">
-            <TextBlock.Style>
-              <Style TargetType="TextBlock">
-                <Setter Property="Visibility" Value="Visible"/>
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding HasSavedPresets}" Value="True">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </TextBlock.Style>
-          </TextBlock>
-          <ItemsControl ItemsSource="{Binding SavedPresets}"
-                        Margin="0,8,0,0"
-                        Visibility="{Binding HasSavedPresets, Converter={StaticResource BoolToVisibilityConverter}}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Button Command="{Binding DataContext.ApplyPresetCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                        CommandParameter="{Binding}"
-                        Margin="0,0,0,6"
-                        HorizontalContentAlignment="Stretch">
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding SavedUtc, StringFormat='Saved {0:yyyy-MM-dd HH:mm}'}" FontSize="12" Opacity="0.7"/>
-                  </StackPanel>
-                </Button>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </StackPanel>
-      </StackPanel>
-    </ScrollViewer>
 
-    <GridSplitter Grid.Column="1"
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,8,0,0">
+          <CheckBox Content="Full-text search" IsChecked="{Binding UseFullTextSearch}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                    Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
+          <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"/>
+          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+            <TextBlock Text="Search within:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <CheckBox Content="Title" Margin="0,0,8,0" IsChecked="{Binding FullTextInTitle}"/>
+            <CheckBox Content="Abstract" Margin="0,0,8,0" IsChecked="{Binding FullTextInAbstract}"/>
+            <CheckBox Content="Content" IsChecked="{Binding FullTextInContent}"/>
+          </StackPanel>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Navigation tree -->
+    <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFE0E0E0" BorderThickness="0,1,0,0">
+      <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
+        <StackPanel Margin="12">
+          <TextBlock Text="Saved searches" FontWeight="SemiBold" Margin="0,0,0,8"/>
+          <TreeView ItemsSource="{Binding NavigationRoots}" SelectedItemChanged="OnNavigationSelected">
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="FontWeight" Value="Normal"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding Kind}" Value="{x:Static viewModels:LibraryNavigationNodeKind.Category}">
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                  <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="DimGray">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding Subtitle}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding Subtitle}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </StackPanel>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+
+    <GridSplitter Grid.Row="1" Grid.Column="1"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   Background="#FFE0E0E0"
@@ -184,7 +144,7 @@
                   Width="5"/>
 
     <!-- Results -->
-    <Grid Grid.Column="2" DataContext="{Binding Results}">
+    <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -287,14 +247,14 @@
       </StackPanel>
     </Grid>
 
-    <GridSplitter Grid.Column="3"
+    <GridSplitter Grid.Row="1" Grid.Column="3"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   Background="#FFE0E0E0"
                   ShowsPreview="True"
                   Width="5"/>
 
-    <Border Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
+    <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
                     AllowDrop="True"
                     DataContext="{Binding Results}">

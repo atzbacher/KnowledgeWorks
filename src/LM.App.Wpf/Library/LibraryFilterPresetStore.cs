@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
-using LM.Core.Models.Filters;
 
 namespace LM.App.Wpf.Library
 {
@@ -135,37 +134,13 @@ namespace LM.App.Wpf.Library
     public sealed class LibraryFilterState
     {
         public bool UseFullTextSearch { get; set; }
+        public string? UnifiedQuery { get; set; }
         public string? FullTextQuery { get; set; }
         public bool FullTextInTitle { get; set; } = true;
         public bool FullTextInAbstract { get; set; } = true;
         public bool FullTextInContent { get; set; } = true;
-        public string? TitleContains { get; set; }
-        public string? AuthorContains { get; set; }
-        public List<string> Tags { get; set; } = new();
-        public TagMatchMode TagMatchMode { get; set; } = TagMatchMode.Any;
-        public bool? IsInternal { get; set; }
-        public int? YearFrom { get; set; }
-        public int? YearTo { get; set; }
-        public string? SourceContains { get; set; }
-        public string? InternalIdContains { get; set; }
-        public string? DoiContains { get; set; }
-        public string? PmidContains { get; set; }
-        public string? NctContains { get; set; }
-        public string? AddedByContains { get; set; }
-        public DateTime? AddedOnFrom { get; set; }
-        public DateTime? AddedOnTo { get; set; }
-        public bool TypePublication { get; set; } = true;
-        public bool TypePresentation { get; set; } = true;
-        public bool TypeWhitePaper { get; set; } = true;
-        public bool TypeSlideDeck { get; set; } = true;
-        public bool TypeReport { get; set; } = true;
-        public bool TypeOther { get; set; } = true;
 
         internal LibraryFilterState Clone()
-        {
-            var clone = (LibraryFilterState)MemberwiseClone();
-            clone.Tags = Tags is null ? new List<string>() : new List<string>(Tags);
-            return clone;
-        }
+            => (LibraryFilterState)MemberwiseClone();
     }
 }

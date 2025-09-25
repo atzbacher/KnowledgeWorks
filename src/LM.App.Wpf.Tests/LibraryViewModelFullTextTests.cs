@@ -35,7 +35,7 @@ namespace LM.App.Wpf.Tests
                 Title = "Test title",
                 AddedOnUtc = new DateTime(2024, 3, 15, 10, 30, 0, DateTimeKind.Utc)
             };
-            store.SearchResults.Add(entry);
+            store.EntriesById[entry.Id!] = entry;
 
             var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
             await InvokeSearchAsync(vm);
@@ -49,32 +49,43 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
-        public async Task MetadataSearch_PreservesSelectedTagsAndMode()
+        public async Task MetadataSearch_KeepsUnifiedQuery()
         {
             using var temp = new TempWorkspace();
             var store = new FakeEntryStore();
-            store.SearchResults.Add(new Entry { Id = "persist-1", Title = "Tagged" });
-            var tagProvider = new StubTagVocabularyProvider();
-            tagProvider.Tags.Add("alpha");
-            tagProvider.Tags.Add("beta");
+            store.EntriesById["persist-1"] = new Entry { Id = "persist-1", Title = "Tagged", Tags = new List<string> { "alpha" } };
 
-            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, vocabulary: tagProvider);
-            await vm.TagVocabularyInitialization;
-
-            Assert.Contains("alpha", vm.Filters.TagVocabulary);
-
-            vm.Filters.SelectedTags.Add("alpha");
-            vm.Filters.TagMatchMode = TagMatchMode.Not;
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
+            vm.Filters.UnifiedQuery = "tags:alpha";
 
             await InvokeSearchAsync(vm);
 
-            Assert.Contains("alpha", vm.Filters.SelectedTags);
-            Assert.Equal(TagMatchMode.Not, vm.Filters.TagMatchMode);
+            Assert.Equal("tags:alpha", vm.Filters.UnifiedQuery);
+            Assert.Single(vm.Results.Items);
+        }
 
-            var filter = store.LastFilter;
-            Assert.NotNull(filter);
-            Assert.Equal(TagMatchMode.Not, filter!.TagMatchMode);
-            Assert.Contains("alpha", filter.Tags);
+        [Fact]
+        public async Task MetadataSearch_HonorsBooleanOperators()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            store.EntriesById["entry-1"] = new Entry { Id = "entry-1", Title = "Heart Health", Tags = new List<string> { "cardio" } };
+            store.EntriesById["entry-2"] = new Entry { Id = "entry-2", Title = "Diabetes", Tags = new List<string> { "metabolic" } };
+
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
+            vm.Filters.UnifiedQuery = "title:heart OR tags:metabolic";
+
+            await InvokeSearchAsync(vm);
+
+            Assert.Equal(2, vm.Results.Items.Count);
+
+            vm.Results.Clear();
+            vm.Filters.UnifiedQuery = "title:heart NOT tags:metabolic";
+
+            await InvokeSearchAsync(vm);
+
+            Assert.Single(vm.Results.Items);
+            Assert.Equal("entry-1", vm.Results.Items[0].Entry.Id);
         }
 
         [Fact]
@@ -483,8 +494,7 @@ namespace LM.App.Wpf.Tests
                                                        ILibraryDocumentService? documentService = null,
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
-                                                       IUserPreferencesStore? preferencesStore = null,
-                                                       ITagVocabularyProvider? vocabulary = null)
+                                                       IUserPreferencesStore? preferencesStore = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -493,14 +503,13 @@ namespace LM.App.Wpf.Tests
             storage ??= new RecordingFileStorageRepository();
             attachmentPrompt ??= new NoopAttachmentPrompt();
             orchestrator ??= new HookOrchestrator(ws);
-            var filters = new LibraryFiltersViewModel(presetStore, prompt);
+            var filters = new LibraryFiltersViewModel(presetStore, prompt, store, ws);
             documentService ??= new NoopDocumentService();
             var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator);
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
-            vocabulary ??= new StubTagVocabularyProvider();
-            return new LibraryViewModel(store, search, vocabulary, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
+            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
@@ -584,12 +593,9 @@ namespace LM.App.Wpf.Tests
 
         private sealed class FakeEntryStore : IEntryStore
         {
-            public List<Entry> SearchResults { get; } = new();
-
             public Dictionary<string, Entry> EntriesById { get; } = new(StringComparer.OrdinalIgnoreCase);
 
             public int SaveCallCount { get; private set; }
-            public EntryFilter? LastFilter { get; private set; }
 
             public Task InitializeAsync(CancellationToken ct = default) => Task.CompletedTask;
 
@@ -605,20 +611,17 @@ namespace LM.App.Wpf.Tests
             public Task<Entry?> GetByIdAsync(string id, CancellationToken ct = default)
                 => Task.FromResult(EntriesById.TryGetValue(id, out var entry) ? entry : null);
 
-
             public async IAsyncEnumerable<Entry> EnumerateAsync([EnumeratorCancellation] CancellationToken ct = default)
-
             {
                 foreach (var entry in EntriesById.Values)
+                {
                     yield return entry;
-                await Task.CompletedTask;
+                    await Task.Yield();
+                }
             }
 
             public Task<IReadOnlyList<Entry>> SearchAsync(EntryFilter filter, CancellationToken ct = default)
-            {
-                LastFilter = filter;
-                return Task.FromResult((IReadOnlyList<Entry>)SearchResults);
-            }
+                => Task.FromResult<IReadOnlyList<Entry>>(EntriesById.Values.ToList());
 
             public Task<Entry?> FindByHashAsync(string sha256, CancellationToken ct = default) => throw new NotImplementedException();
 
@@ -652,14 +655,6 @@ namespace LM.App.Wpf.Tests
 
             public Task<IReadOnlyList<FullTextSearchHit>> SearchAsync(FullTextSearchQuery query, CancellationToken ct = default)
                 => Task.FromResult(Hits);
-        }
-
-        private sealed class StubTagVocabularyProvider : ITagVocabularyProvider
-        {
-            public List<string> Tags { get; } = new();
-
-            public Task<IReadOnlyList<string>> GetAllTagsAsync(CancellationToken ct = default)
-                => Task.FromResult<IReadOnlyList<string>>(Tags.ToArray());
         }
 
         private sealed class StubPresetPrompt : ILibraryPresetPrompt

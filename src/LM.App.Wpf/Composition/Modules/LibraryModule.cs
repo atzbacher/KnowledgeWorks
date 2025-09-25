@@ -38,7 +38,9 @@ namespace LM.App.Wpf.Composition.Modules
 
             services.AddSingleton(sp => new LibraryFiltersViewModel(
                 sp.GetRequiredService<LibraryFilterPresetStore>(),
-                sp.GetRequiredService<ILibraryPresetPrompt>()));
+                sp.GetRequiredService<ILibraryPresetPrompt>(),
+                sp.GetRequiredService<IEntryStore>(),
+                sp.GetRequiredService<IWorkSpaceService>()));
 
             services.AddSingleton(sp => new LibraryResultsViewModel(
                 sp.GetRequiredService<IEntryStore>(),
@@ -52,7 +54,6 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFullTextSearchService>(),
-                sp.GetRequiredService<ITagVocabularyProvider>(),
                 sp.GetRequiredService<LibraryFiltersViewModel>(),
                 sp.GetRequiredService<LibraryResultsViewModel>(),
                 sp.GetRequiredService<IWorkSpaceService>(),
