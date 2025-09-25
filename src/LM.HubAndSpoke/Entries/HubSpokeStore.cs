@@ -322,6 +322,8 @@ namespace LM.HubSpoke.Entries
             var handler = PickHandler(hub);
             var hook = await handler.LoadHookAsync(_ws, id, ct).ConfigureAwait(false);
             var entry = handler.MapToEntry(hub, hook);
+            PopulateLegacyAttachments(entry, hook);
+            await HydrateAttachmentsAsync(entry, id, ct).ConfigureAwait(false);
             await HydrateNotesAsync(entry, id, ct).ConfigureAwait(false);
             return entry;
         }
@@ -416,6 +418,207 @@ namespace LM.HubSpoke.Entries
             {
                 Trace.WriteLine($"[HubSpokeStore] Failed to hydrate notes for '{entryId}': {ex}");
             }
+        }
+
+        private async Task HydrateAttachmentsAsync(Entry entry, string entryId, CancellationToken ct)
+        {
+            try
+            {
+                var attachmentsPath = WorkspaceLayout.AttachmentsHookPath(_ws, entryId);
+                if (!File.Exists(attachmentsPath))
+                {
+                    entry.Attachments ??= new List<Attachment>();
+                    return;
+                }
+
+                var json = await File.ReadAllTextAsync(attachmentsPath, ct).ConfigureAwait(false);
+                var hook = JsonSerializer.Deserialize<AttachmentHook>(json, JsonStd.Options);
+                if (hook?.Attachments is null || hook.Attachments.Count == 0)
+                {
+                    entry.Attachments = new List<Attachment>();
+                    return;
+                }
+
+                var items = new List<Attachment>();
+                foreach (var item in hook.Attachments)
+                {
+                    if (item is null)
+                        continue;
+
+                    var title = string.IsNullOrWhiteSpace(item.Title)
+                        ? Path.GetFileName(item.LibraryPath)
+                        : item.Title.Trim();
+
+                    var relativePath = string.IsNullOrWhiteSpace(item.LibraryPath)
+                        ? string.Empty
+                        : item.LibraryPath.Replace('\\', '/');
+
+                    var tags = item.Tags is { Count: > 0 }
+                        ? item.Tags.Where(t => !string.IsNullOrWhiteSpace(t))
+                                   .Select(t => t.Trim())
+                                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                                   .ToList()
+                        : new List<string>();
+
+                    items.Add(new Attachment
+                    {
+                        Id = string.IsNullOrWhiteSpace(item.AttachmentId)
+                            ? Guid.NewGuid().ToString("N")
+                            : item.AttachmentId,
+                        Title = string.IsNullOrWhiteSpace(title)
+                            ? Path.GetFileName(relativePath)
+                            : title!,
+                        RelativePath = relativePath,
+                        Notes = string.IsNullOrWhiteSpace(item.Notes) ? null : item.Notes.Trim(),
+                        Tags = tags,
+                        Kind = item.Purpose,
+                        AddedBy = string.IsNullOrWhiteSpace(item.AddedBy) ? "unknown" : item.AddedBy,
+                        AddedUtc = item.AddedUtc == default ? DateTime.UtcNow : item.AddedUtc
+                    });
+                }
+
+                entry.Attachments = items;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[HubSpokeStore] Failed to hydrate attachments for '{entryId}': {ex}");
+                entry.Attachments ??= new List<Attachment>();
+            }
+        }
+
+        private static void PopulateLegacyAttachments(Entry entry, object? hook)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+
+            if (hook is ArticleHook articleHook)
+            {
+                entry.Attachments ??= new List<Attachment>();
+                AddArticleAssets(entry, articleHook);
+            }
+            else if (hook is DocumentHook documentHook)
+            {
+                entry.Attachments ??= new List<Attachment>();
+                AddDocumentAssets(entry, documentHook);
+            }
+        }
+
+        private static void AddArticleAssets(Entry entry, ArticleHook hook)
+        {
+            if (hook.Assets is null || hook.Assets.Count == 0)
+                return;
+
+            var attachments = entry.Attachments ??= new List<Attachment>();
+            var existing = new HashSet<string>(attachments.Select(a => NormalizePath(a.RelativePath)), StringComparer.OrdinalIgnoreCase);
+            var primaryPath = NormalizePath(entry.MainFilePath);
+
+            foreach (var asset in hook.Assets)
+            {
+                if (asset is null)
+                    continue;
+
+                var relativePath = NormalizePath(asset.StoragePath);
+                if (string.IsNullOrWhiteSpace(relativePath))
+                    continue;
+
+                if (!string.IsNullOrWhiteSpace(primaryPath) && string.Equals(relativePath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!existing.Add(relativePath))
+                    continue;
+
+                var kind = asset.Purpose == ArticleAssetPurpose.Supplement
+                    ? AttachmentKind.Supplement
+                    : AttachmentKind.Version;
+
+                var attachment = new Attachment
+                {
+                    Id = relativePath,
+                    RelativePath = relativePath,
+                    Title = ChooseAttachmentTitle(asset.OriginalFilename, asset.Title, relativePath),
+                    Kind = kind,
+                    Notes = null,
+                    Tags = new List<string>(),
+                    AddedBy = string.IsNullOrWhiteSpace(entry.AddedBy) ? "unknown" : entry.AddedBy!,
+                    AddedUtc = entry.AddedOnUtc == default ? DateTime.UtcNow : entry.AddedOnUtc
+                };
+
+                attachments.Add(attachment);
+
+                if (!string.IsNullOrWhiteSpace(asset.OriginalFolderPath))
+                {
+                    entry.Links ??= new List<string>();
+                    if (!entry.Links.Any(link => string.Equals(link, asset.OriginalFolderPath, StringComparison.OrdinalIgnoreCase)))
+                        entry.Links.Add(asset.OriginalFolderPath);
+                }
+            }
+        }
+
+        private static void AddDocumentAssets(Entry entry, DocumentHook hook)
+        {
+            if (hook.Assets is null || hook.Assets.Count == 0)
+                return;
+
+            var attachments = entry.Attachments ??= new List<Attachment>();
+            var existing = new HashSet<string>(attachments.Select(a => NormalizePath(a.RelativePath)), StringComparer.OrdinalIgnoreCase);
+            var primaryPath = NormalizePath(entry.MainFilePath);
+
+            foreach (var asset in hook.Assets)
+            {
+                if (asset is null)
+                    continue;
+
+                var relativePath = NormalizePath(asset.StoragePath);
+                if (string.IsNullOrWhiteSpace(relativePath))
+                    continue;
+
+                if (!string.IsNullOrWhiteSpace(primaryPath) && string.Equals(relativePath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (IsPrimaryDocumentRole(asset.Role))
+                    continue;
+
+                if (!existing.Add(relativePath))
+                    continue;
+
+                var attachment = new Attachment
+                {
+                    Id = relativePath,
+                    RelativePath = relativePath,
+                    Title = ChooseAttachmentTitle(asset.OriginalFilename, null, relativePath),
+                    Kind = AttachmentKind.Supplement,
+                    Notes = null,
+                    Tags = new List<string>(),
+                    AddedBy = string.IsNullOrWhiteSpace(entry.AddedBy) ? "unknown" : entry.AddedBy!,
+                    AddedUtc = entry.AddedOnUtc == default ? DateTime.UtcNow : entry.AddedOnUtc
+                };
+
+                attachments.Add(attachment);
+            }
+        }
+
+        private static string NormalizePath(string? path)
+            => string.IsNullOrWhiteSpace(path) ? string.Empty : path.Replace('\\', '/');
+
+        private static bool IsPrimaryDocumentRole(string? role)
+        {
+            if (string.IsNullOrWhiteSpace(role))
+                return false;
+
+            var trimmed = role.Trim();
+            return trimmed.StartsWith("primary", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string ChooseAttachmentTitle(string? originalFileName, string? fallbackTitle, string relativePath)
+        {
+            if (!string.IsNullOrWhiteSpace(originalFileName))
+                return originalFileName!.Trim();
+
+            if (!string.IsNullOrWhiteSpace(fallbackTitle))
+                return fallbackTitle!.Trim();
+
+            var name = Path.GetFileName(relativePath);
+            return string.IsNullOrWhiteSpace(name) ? relativePath : name!;
         }
 
         private Task<CasResult> MoveToCasFromRelAsync(string rel, CancellationToken ct)

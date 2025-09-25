@@ -23,6 +23,7 @@ namespace LM.HubSpoke.FileSystem
         public static string ArticleHookPath(IWorkSpaceService ws, string id) => Path.Combine(EntryDir(ws, id), "hooks", "article.json");
         public static string DocumentHookPath(IWorkSpaceService ws, string id) => Path.Combine(EntryDir(ws, id), "hooks", "document.json");
         public static string LitSearchHookPath(IWorkSpaceService ws, string id) => Path.Combine(EntryDir(ws, id), "hooks", "litsearch.json");
+        public static string AttachmentsHookPath(IWorkSpaceService ws, string id) => Path.Combine(EntryDir(ws, id), "hooks", "attachments.json");
         public static string NotesHookPath(IWorkSpaceService ws, string id) => Path.Combine(EntryDir(ws, id), "hooks", "notes.json");
     }
 }

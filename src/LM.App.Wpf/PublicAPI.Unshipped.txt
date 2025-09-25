@@ -264,6 +264,18 @@ LM.App.Wpf.ViewModels.LibrarySearchResult.IsFullText.get -> bool
 LM.App.Wpf.ViewModels.LibrarySearchResult.LibrarySearchResult(LM.Core.Models.Entry! entry, double? score, string? highlight) -> void
 LM.App.Wpf.ViewModels.LibrarySearchResult.Score.get -> double?
 LM.App.Wpf.ViewModels.LibrarySearchResult.ScoreDisplay.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.LibraryLinkItem(string! DisplayText, string! Target, LM.App.Wpf.ViewModels.Library.LinkItemKind Kind) -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.DisplayText.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.DisplayText.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Target.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Target.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Kind.get -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Kind.init -> void
+LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.Url = 0 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.File = 1 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.Folder = 2 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
 LM.App.Wpf.ViewModels.StagingListViewModel
 LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.StagingListViewModel.Clear() -> void
@@ -332,9 +344,11 @@ LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnume
 LM.App.Wpf.ViewModels.IAddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.Library.ILibraryDocumentService
 LM.App.Wpf.Library.ILibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.ILibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
 LM.App.Wpf.Library.LibraryDocumentService
 LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.Library.LibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.LibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
 LM.App.Wpf.Library.IAttachmentMetadataPrompt
 LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
 LM.App.Wpf.Library.AttachmentMetadataPromptContext
@@ -427,6 +441,9 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() ->
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ResultsAreFullText.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.get -> LM.App.Wpf.ViewModels.LibrarySearchResult?
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LinkItems.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryLinkItem!>!
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results) -> void

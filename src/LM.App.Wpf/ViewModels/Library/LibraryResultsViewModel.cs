@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,6 +39,11 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private LibrarySearchResult? selected;
 
+        [ObservableProperty]
+        private bool hasLinkItems;
+
+        public ObservableCollection<LibraryLinkItem> LinkItems { get; }
+
         private bool _resultsAreFullText;
 
         public bool ResultsAreFullText
@@ -63,6 +69,7 @@ namespace LM.App.Wpf.ViewModels.Library
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
 
             Items = new ObservableCollection<LibrarySearchResult>();
+            LinkItems = new ObservableCollection<LibraryLinkItem>();
         }
 
         public ObservableCollection<LibrarySearchResult> Items { get; }
@@ -356,6 +363,98 @@ namespace LM.App.Wpf.ViewModels.Library
             ShowDropWarnings(unsupported, duplicates, failures);
         }
 
+        [RelayCommand]
+        private void OpenAttachment(Attachment? attachment)
+        {
+            if (attachment is null)
+                return;
+
+            if (string.IsNullOrWhiteSpace(attachment.RelativePath))
+            {
+                System.Windows.MessageBox.Show(
+                    "Attachment does not have an associated file path.",
+                    "Open Attachment",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            var absolutePath = _workspace.GetAbsolutePath(attachment.RelativePath);
+            if (string.IsNullOrWhiteSpace(absolutePath) || !File.Exists(absolutePath))
+            {
+                System.Windows.MessageBox.Show(
+                    $"Attachment not found:\n{attachment.RelativePath}",
+                    "Open Attachment",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                _documentService.OpenAttachment(attachment);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open attachment:\n{ex.Message}",
+                    "Open Attachment",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        [RelayCommand]
+        private void OpenLink(LibraryLinkItem? link)
+        {
+            if (link is null)
+                return;
+
+            try
+            {
+                if (link.Kind == LinkItemKind.Folder)
+                {
+                    if (!Directory.Exists(link.Target))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"Folder not found:\n{link.Target}",
+                            "Open Link",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                else if (link.Kind == LinkItemKind.File)
+                {
+                    if (!File.Exists(link.Target))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"File not found:\n{link.Target}",
+                            "Open Link",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                var info = new ProcessStartInfo
+                {
+                    FileName = link.Target,
+                    UseShellExecute = true
+                };
+
+                Process.Start(info);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open link:\n{ex.Message}",
+                    "Open Link",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
         [RelayCommand(CanExecute = nameof(CanModifySelected))]
         private void Open()
         {
@@ -406,6 +505,7 @@ namespace LM.App.Wpf.ViewModels.Library
         {
             OpenCommand.NotifyCanExecuteChanged();
             EditCommand.NotifyCanExecuteChanged();
+            UpdateLinkItems();
         }
 
         private async Task RefreshSelectedEntryAsync(LibrarySearchResult? previous, string entryId)
@@ -602,6 +702,113 @@ namespace LM.App.Wpf.ViewModels.Library
             return string.IsNullOrWhiteSpace(name) ? path : name!;
         }
 
+        private void UpdateLinkItems()
+        {
+            LinkItems.Clear();
+
+            var entry = Selected?.Entry;
+            if (entry is null)
+            {
+                HasLinkItems = false;
+                return;
+            }
+
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddLink(string display, string target, LinkItemKind kind)
+            {
+                if (string.IsNullOrWhiteSpace(target))
+                    return;
+
+                var normalizedTarget = target.Trim();
+                if (normalizedTarget.Length == 0)
+                    return;
+
+                if (!seen.Add(normalizedTarget))
+                    return;
+
+                var normalizedDisplay = string.IsNullOrWhiteSpace(display)
+                    ? normalizedTarget
+                    : display.Trim();
+
+                LinkItems.Add(new LibraryLinkItem(normalizedDisplay, normalizedTarget, kind));
+            }
+
+            if (entry.Links is { Count: > 0 })
+            {
+                foreach (var raw in entry.Links)
+                {
+                    var trimmed = raw?.Trim();
+                    if (string.IsNullOrWhiteSpace(trimmed))
+                        continue;
+
+                    var kind = DetermineLinkKind(trimmed);
+                    var target = trimmed;
+
+                    if (kind != LinkItemKind.Url && !Path.IsPathRooted(trimmed))
+                    {
+                        var absolute = _workspace.GetAbsolutePath(trimmed);
+                        if (!string.IsNullOrWhiteSpace(absolute))
+                            target = absolute;
+                    }
+
+                    AddLink(trimmed, target, kind);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.Pmid))
+            {
+                var pmid = entry.Pmid.Trim();
+                if (pmid.Length > 0)
+                {
+                    var url = $"https://pubmed.ncbi.nlm.nih.gov/{pmid.TrimEnd('/')}/";
+                    AddLink(url, url, LinkItemKind.Url);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.Doi))
+            {
+                var doi = entry.Doi.Trim();
+                if (doi.Length > 0)
+                {
+                    var url = doi.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                              doi.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                        ? doi
+                        : $"https://doi.org/{doi}";
+                    AddLink(url, url, LinkItemKind.Url);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.Id))
+            {
+                var folderRelative = Path.Combine("entries", entry.Id);
+                var folderAbsolute = _workspace.GetAbsolutePath(folderRelative);
+                if (!string.IsNullOrWhiteSpace(folderAbsolute))
+                    AddLink(folderAbsolute, folderAbsolute, LinkItemKind.Folder);
+            }
+
+            HasLinkItems = LinkItems.Count > 0;
+        }
+
+        private static LinkItemKind DetermineLinkKind(string candidate)
+        {
+            if (Uri.TryCreate(candidate, UriKind.Absolute, out var uri))
+            {
+                if (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
+                    uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                {
+                    return LinkItemKind.Url;
+                }
+
+                if (uri.IsFile)
+                    return LinkItemKind.File;
+            }
+
+            return candidate.Contains("://", StringComparison.Ordinal)
+                ? LinkItemKind.Url
+                : LinkItemKind.File;
+        }
+
         private static void ShowDropWarnings(IReadOnlyCollection<string> unsupported,
                                              IReadOnlyCollection<string> duplicates,
                                              IReadOnlyCollection<string> failures)
@@ -641,6 +848,21 @@ namespace LM.App.Wpf.ViewModels.Library
                 displayName += $" — {string.Join(", ", entry.Authors)}";
 
             entry.DisplayName = displayName;
+
+            entry.Source = string.IsNullOrWhiteSpace(entry.Source) ? null : entry.Source.Trim();
+
+            if (entry.Links is null || entry.Links.Count == 0)
+            {
+                entry.Links = entry.Links ?? new List<string>();
+            }
+            else
+            {
+                entry.Links = entry.Links
+                    .Where(link => !string.IsNullOrWhiteSpace(link))
+                    .Select(link => link.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
         }
     }
 }

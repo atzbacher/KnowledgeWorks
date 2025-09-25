@@ -310,9 +310,40 @@ namespace LM.App.Wpf.Tests
             await task.ConfigureAwait(false);
         }
 
+        [Fact]
+        public void SelectingEntryBuildsLinkItems()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var entry = new Entry
+            {
+                Id = "link-entry",
+                Title = "Entry",
+                Pmid = "12345",
+                Doi = "10.1000/test",
+                Links = new List<string> { "https://existing.example/path" }
+            };
+            store.EntriesById[entry.Id] = entry;
+
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
+
+            var targets = vm.Results.LinkItems.Select(l => l.Target).ToList();
+
+            Assert.Contains("https://existing.example/path", targets);
+            Assert.Contains("https://pubmed.ncbi.nlm.nih.gov/12345/", targets);
+            Assert.Contains("https://doi.org/10.1000/test", targets);
+
+            var folderPath = Path.Combine(temp.RootPath, "entries", entry.Id);
+            Assert.Contains(folderPath, targets);
+            Assert.True(vm.Results.HasLinkItems);
+        }
+
         private static LibraryViewModel CreateViewModel(IEntryStore store,
-                                                       IFullTextSearchService search,
-                                                       TempWorkspace workspace,
+                                                        IFullTextSearchService search,
+                                                        TempWorkspace workspace,
                                                        ILibraryEntryEditor? editor = null,
                                                        IFileStorageRepository? storage = null,
                                                        IAttachmentMetadataPrompt? attachmentPrompt = null,
@@ -340,6 +371,7 @@ namespace LM.App.Wpf.Tests
         private sealed class NoopDocumentService : ILibraryDocumentService
         {
             public void OpenEntry(Entry entry) { }
+            public void OpenAttachment(Attachment attachment) { }
         }
 
         private sealed class RecordingEntryEditor : ILibraryEntryEditor
