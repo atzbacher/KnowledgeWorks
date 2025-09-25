@@ -643,6 +643,9 @@ LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromp
 LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
 LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior
 LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.DataGridColumnVisibilityBehavior() -> void
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.ColumnKeyProperty -> System.Windows.DependencyProperty
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.GetColumnKey(System.Windows.DependencyObject element) -> string?
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.SetColumnKey(System.Windows.DependencyObject element, string? value) -> void
 LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility?
 LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.set -> void
 LM.App.Wpf.Views.SearchView

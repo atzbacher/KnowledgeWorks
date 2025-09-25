@@ -17,6 +17,11 @@ namespace LM.App.Wpf.Views.Behaviors
             typeof(DataGridColumnVisibilityBehavior),
             new System.Windows.PropertyMetadata(null, OnVisibilityMapChanged));
 
+        public static readonly System.Windows.DependencyProperty ColumnKeyProperty = System.Windows.DependencyProperty.RegisterAttached(
+            "ColumnKey",
+            typeof(string),
+            typeof(DataGridColumnVisibilityBehavior),
+            new System.Windows.PropertyMetadata(null));
         public LibraryColumnVisibility? VisibilityMap
         {
             get => (LibraryColumnVisibility?)GetValue(VisibilityMapProperty);
@@ -30,7 +35,6 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 return;
             }
-
 
             AssociatedObject.Loaded += OnLoaded;
             AssociatedObject.Columns.CollectionChanged += OnColumnsChanged;
@@ -100,8 +104,24 @@ namespace LM.App.Wpf.Views.Behaviors
             }
         }
 
+        public static void SetColumnKey(System.Windows.DependencyObject element, string? value)
+        {
+            element?.SetValue(ColumnKeyProperty, value);
+        }
+
+        public static string? GetColumnKey(System.Windows.DependencyObject element)
+        {
+            return element is null ? null : (string?)element.GetValue(ColumnKeyProperty);
+        }
+
         private static string? ResolveColumnKey(System.Windows.Controls.DataGridColumn column)
         {
+            var explicitKey = GetColumnKey(column);
+            if (!string.IsNullOrWhiteSpace(explicitKey))
+            {
+                return explicitKey;
+            }
+
             if (column.Header is null)
             {
                 return null;
@@ -145,4 +165,3 @@ namespace LM.App.Wpf.Views.Behaviors
         }
     }
 }
-
