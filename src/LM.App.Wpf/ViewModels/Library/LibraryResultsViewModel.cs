@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -42,7 +43,15 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private bool hasLinkItems;
 
+        private readonly List<LibrarySearchResult> _selectedItems = new();
+
+        public event EventHandler? SelectionChanged;
+
         public ObservableCollection<LibraryLinkItem> LinkItems { get; }
+
+        public IReadOnlyList<LibrarySearchResult> SelectedItems => _selectedItems;
+
+        public bool HasSelection => _selectedItems.Count > 0;
 
         private bool _resultsAreFullText;
 
@@ -73,6 +82,28 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         public ObservableCollection<LibrarySearchResult> Items { get; }
+
+        [RelayCommand]
+        private void HandleSelectionChanged(IList? selectedItems)
+        {
+            _selectedItems.Clear();
+
+            if (selectedItems is not null)
+            {
+                foreach (var item in selectedItems)
+                {
+                    if (item is LibrarySearchResult result && !_selectedItems.Contains(result))
+                        _selectedItems.Add(result);
+                }
+            }
+
+            if (_selectedItems.Count == 0 && Selected is not null)
+                _selectedItems.Add(Selected);
+
+            OnPropertyChanged(nameof(SelectedItems));
+            OnPropertyChanged(nameof(HasSelection));
+            RaiseSelectionChanged();
+        }
 
         public void Clear()
         {
@@ -476,28 +507,7 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         [RelayCommand(CanExecute = nameof(CanModifySelected))]
-        private async Task EditAsync()
-        {
-            var previous = Selected;
-            var entry = previous?.Entry;
-            if (entry is null)
-                return;
-
-            try
-            {
-                var saved = await _entryEditor.EditEntryAsync(entry).ConfigureAwait(false);
-                if (saved && !string.IsNullOrWhiteSpace(entry.Id))
-                    await RefreshSelectedEntryAsync(previous, entry.Id).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(
-                    $"Failed to open entry editor:\n{ex.Message}",
-                    "Edit Entry",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
-            }
-        }
+        private Task EditAsync() => EditEntryAsync(Selected);
 
         private bool CanModifySelected() => Selected?.Entry is not null;
 
@@ -506,6 +516,8 @@ namespace LM.App.Wpf.ViewModels.Library
             OpenCommand.NotifyCanExecuteChanged();
             EditCommand.NotifyCanExecuteChanged();
             UpdateLinkItems();
+            SyncSelectionList(value);
+            RaiseSelectionChanged();
         }
 
         private async Task RefreshSelectedEntryAsync(LibrarySearchResult? previous, string entryId)
@@ -702,6 +714,42 @@ namespace LM.App.Wpf.ViewModels.Library
             return string.IsNullOrWhiteSpace(name) ? path : name!;
         }
 
+        private LibrarySearchResult? EnsureSelection(LibrarySearchResult? candidate)
+        {
+            if (candidate is not null && !ReferenceEquals(Selected, candidate))
+                Selected = candidate;
+
+            return candidate ?? Selected;
+        }
+
+        private void SyncSelectionList(LibrarySearchResult? value)
+        {
+            if (value is null)
+            {
+                if (_selectedItems.Count > 0)
+                {
+                    _selectedItems.Clear();
+                    OnPropertyChanged(nameof(SelectedItems));
+                    OnPropertyChanged(nameof(HasSelection));
+                }
+                return;
+            }
+
+            if (_selectedItems.Count == 0 || !_selectedItems.Contains(value))
+            {
+                _selectedItems.Clear();
+                _selectedItems.Add(value);
+                OnPropertyChanged(nameof(SelectedItems));
+            }
+
+            OnPropertyChanged(nameof(HasSelection));
+        }
+
+        private void RaiseSelectionChanged()
+        {
+            SelectionChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         private void UpdateLinkItems()
         {
             LinkItems.Clear();
@@ -862,6 +910,29 @@ namespace LM.App.Wpf.ViewModels.Library
                     .Select(link => link.Trim())
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
+            }
+        }
+
+        public async Task EditEntryAsync(LibrarySearchResult? target)
+        {
+            var resolved = EnsureSelection(target);
+            var entry = resolved?.Entry;
+            if (entry is null)
+                return;
+
+            try
+            {
+                var saved = await _entryEditor.EditEntryAsync(entry).ConfigureAwait(false);
+                if (saved && !string.IsNullOrWhiteSpace(entry.Id))
+                    await RefreshSelectedEntryAsync(resolved, entry.Id!).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open entry editor:\n{ex.Message}",
+                    "Edit Entry",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
     }

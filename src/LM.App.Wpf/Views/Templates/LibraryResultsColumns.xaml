@@ -1,66 +1,79 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors">
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="../Library/LibraryCommonResources.xaml" />
   </ResourceDictionary.MergedDictionaries>
   <DataGridTextColumn x:Key="LibraryResultsColumn.Title"
                       x:Shared="False"
                       Header="Title"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Title"
                       Binding="{Binding Entry.Title}"
                       Width="3*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Score"
                       x:Shared="False"
                       Header="Score"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Score"
                       Binding="{Binding ScoreDisplay}"
                       Width="0.8*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Source"
                       x:Shared="False"
                       Header="Source"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Source"
                       Binding="{Binding Entry.Source}"
                       Width="2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Type"
                       x:Shared="False"
                       Header="Type"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Type"
                       Binding="{Binding Entry.Type}"
                       Width="1*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Year"
                       x:Shared="False"
                       Header="Year"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Year"
                       Binding="{Binding Entry.Year}"
                       Width="0.8*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.AddedOn"
                       x:Shared="False"
                       Header="Added on"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AddedOn"
                       Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                       Width="1.2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.AddedBy"
                       x:Shared="False"
                       Header="Added by"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AddedBy"
                       Binding="{Binding Entry.AddedBy}"
                       Width="1.2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.InternalId"
                       x:Shared="False"
                       Header="Internal ID"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="InternalId"
                       Binding="{Binding Entry.InternalId}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Doi"
                       x:Shared="False"
                       Header="DOI"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Doi"
                       Binding="{Binding Entry.Doi}"
                       Width="2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Pmid"
                       x:Shared="False"
                       Header="PMID"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Pmid"
                       Binding="{Binding Entry.Pmid}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Nct"
                       x:Shared="False"
                       Header="NCT"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Nct"
                       Binding="{Binding Entry.Nct}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Authors"
                       x:Shared="False"
                       Header="Authors"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Authors"
                       Width="2*">
     <DataGridTextColumn.Binding>
       <Binding Path="Entry.Authors" Converter="{StaticResource StringJoinConverter}" />
@@ -69,6 +82,7 @@
   <DataGridTextColumn x:Key="LibraryResultsColumn.Tags"
                       x:Shared="False"
                       Header="Tags"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Tags"
                       Width="2*">
     <DataGridTextColumn.Binding>
       <Binding Path="Entry.Tags" Converter="{StaticResource StringJoinConverter}" />
@@ -77,11 +91,13 @@
   <DataGridTextColumn x:Key="LibraryResultsColumn.IsInternal"
                       x:Shared="False"
                       Header="Internal"
+                      behaviors:DataGridColumnVisibilityBehavior.ColumnKey="IsInternal"
                       Binding="{Binding Entry.IsInternal}"
                       Width="0.8*" />
   <DataGridTemplateColumn x:Key="LibraryResultsColumn.Snippet"
                           x:Shared="False"
                           Header="Snippet"
+                          behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Snippet"
                           Width="3*">
     <DataGridTemplateColumn.CellTemplate>
       <DataTemplate>
