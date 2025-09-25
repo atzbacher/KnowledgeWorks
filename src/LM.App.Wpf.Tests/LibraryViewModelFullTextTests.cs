@@ -1,5 +1,4 @@
 using System;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -13,6 +12,7 @@ using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
+using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
 using LM.Core.Models.Search;
@@ -113,6 +113,109 @@ namespace LM.App.Wpf.Tests
             vm.Results.EditCommand.Execute(null);
 
             Assert.Same(entry, editor.LastEdited);
+        }
+
+        [Fact]
+        public void OpenEntryCommand_CanExecuteRequiresSelection()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
+
+            Assert.False(vm.OpenEntryCommand.CanExecute(null));
+
+            var entry = new Entry { Id = "open-1", Title = "Document" };
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
+
+            Assert.True(vm.OpenEntryCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public void CopyMetadataCommand_PushesCitationAndDoiToClipboard()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var clipboard = new RecordingClipboardService();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, clipboard: clipboard);
+
+            var entry = new Entry
+            {
+                Id = "cite-1",
+                Title = "Deep Learning",
+                Authors = new List<string> { "Smith, John" },
+                Source = "Journal of AI",
+                Year = 2024,
+                Doi = "10.1000/test-doi"
+            };
+
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
+
+            vm.CopyMetadataCommand.Execute(result);
+
+            Assert.NotNull(clipboard.LastText);
+            Assert.Contains("Smith", clipboard.LastText, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("https://doi.org/10.1000/test-doi", clipboard.LastText, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void CopyWorkspacePathCommand_UsesAbsoluteWorkspacePath()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var clipboard = new RecordingClipboardService();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, clipboard: clipboard);
+
+            var entry = new Entry { Id = "path-1", Title = "Doc", MainFilePath = Path.Combine("library", "doc.pdf") };
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
+
+            vm.CopyWorkspacePathCommand.Execute(result);
+
+            var expected = Path.Combine(temp.RootPath, "library", "doc.pdf");
+            Assert.Equal(expected, clipboard.LastText);
+        }
+
+        [Fact]
+        public void OpenContainingFolderCommand_PassesAbsolutePathToExplorer()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var explorer = new RecordingFileExplorerService();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, fileExplorer: explorer);
+
+            var entry = new Entry { Id = "folder-1", Title = "Doc", MainFilePath = Path.Combine("library", "doc.pdf") };
+            var result = new LibrarySearchResult(entry, null, null);
+            vm.Results.Items.Add(result);
+            vm.Results.Selected = result;
+
+            vm.OpenContainingFolderCommand.Execute(result);
+
+            var expected = Path.Combine(temp.RootPath, "library", "doc.pdf");
+            Assert.Equal(expected, explorer.LastPath);
+        }
+
+        [Fact]
+        public async Task ColumnPreferences_TogglePersistsVisibleColumns()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var prefs = new InMemoryPreferencesStore();
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, preferencesStore: prefs);
+
+            vm.ColumnOptions[0].IsVisible = false;
+            vm.ColumnOptions[1].IsVisible = false;
+
+            await prefs.WaitForSaveAsync();
+
+            var saved = prefs.Current.Library.VisibleColumns;
+            Assert.DoesNotContain("Title", saved);
+            Assert.DoesNotContain("Score", saved);
+            Assert.Contains("Source", saved);
         }
 
         [Fact]
@@ -347,7 +450,11 @@ namespace LM.App.Wpf.Tests
                                                        ILibraryEntryEditor? editor = null,
                                                        IFileStorageRepository? storage = null,
                                                        IAttachmentMetadataPrompt? attachmentPrompt = null,
-                                                       HookOrchestrator? orchestrator = null)
+                                                       HookOrchestrator? orchestrator = null,
+                                                       ILibraryDocumentService? documentService = null,
+                                                       IClipboardService? clipboard = null,
+                                                       IFileExplorerService? fileExplorer = null,
+                                                       IUserPreferencesStore? preferencesStore = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -357,9 +464,12 @@ namespace LM.App.Wpf.Tests
             attachmentPrompt ??= new NoopAttachmentPrompt();
             orchestrator ??= new HookOrchestrator(ws);
             var filters = new LibraryFiltersViewModel(presetStore, prompt);
-            var documents = new NoopDocumentService();
-            var results = new LibraryResultsViewModel(store, storage, editor, documents, attachmentPrompt, ws, orchestrator);
-            return new LibraryViewModel(store, search, filters, results);
+            documentService ??= new NoopDocumentService();
+            var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator);
+            clipboard ??= new RecordingClipboardService();
+            fileExplorer ??= new RecordingFileExplorerService();
+            preferencesStore ??= new InMemoryPreferencesStore();
+            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
@@ -367,6 +477,44 @@ namespace LM.App.Wpf.Tests
             public Task<bool> EditEntryAsync(Entry entry) => Task.FromResult(false);
         }
 
+        private sealed class RecordingClipboardService : IClipboardService
+        {
+            public string? LastText { get; private set; }
+
+            public void SetText(string text)
+            {
+                LastText = text;
+            }
+        }
+
+        private sealed class RecordingFileExplorerService : IFileExplorerService
+        {
+            public string? LastPath { get; private set; }
+
+            public void RevealInExplorer(string path)
+            {
+                LastPath = path;
+            }
+        }
+
+        private sealed class InMemoryPreferencesStore : IUserPreferencesStore
+        {
+            private UserPreferences _preferences = new();
+            private readonly TaskCompletionSource<bool> _saveCompletion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public UserPreferences Current => _preferences;
+
+            public Task<UserPreferences> LoadAsync(CancellationToken ct = default) => Task.FromResult(_preferences);
+
+            public Task SaveAsync(UserPreferences preferences, CancellationToken ct = default)
+            {
+                _preferences = preferences;
+                _saveCompletion.TrySetResult(true);
+                return Task.CompletedTask;
+            }
+
+            public Task WaitForSaveAsync() => _saveCompletion.Task;
+        }
 
         private sealed class NoopDocumentService : ILibraryDocumentService
         {

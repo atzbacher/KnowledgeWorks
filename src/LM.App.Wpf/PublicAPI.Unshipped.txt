@@ -32,6 +32,16 @@ LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService(System.IServiceProvi
 LM.App.Wpf.Common.ILibraryPresetPrompt
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
+LM.App.Wpf.Common.IClipboardService
+LM.App.Wpf.Common.IClipboardService.SetText(string! text) -> void
+LM.App.Wpf.Common.ClipboardService
+LM.App.Wpf.Common.ClipboardService.ClipboardService() -> void
+LM.App.Wpf.Common.ClipboardService.SetText(string! text) -> void
+LM.App.Wpf.Common.IFileExplorerService
+LM.App.Wpf.Common.IFileExplorerService.RevealInExplorer(string! path) -> void
+LM.App.Wpf.Common.FileExplorerService
+LM.App.Wpf.Common.FileExplorerService.FileExplorerService() -> void
+LM.App.Wpf.Common.FileExplorerService.RevealInExplorer(string! path) -> void
 LM.App.Wpf.Common.ISearchSavePrompt
 LM.App.Wpf.Common.ISearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
 LM.App.Wpf.Common.SearchSavePromptContext
@@ -431,6 +441,19 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearFrom.get -> int?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearFrom.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.get -> int?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.YearTo.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.IsVisible.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.IsVisible.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.Key.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.LibraryColumnOption(string! key, string! displayName, bool isVisible) -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LibraryColumnVisibility() -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LoadFrom(System.Collections.Generic.IReadOnlyDictionary<string!, bool>! source) -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Snapshot() -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
@@ -444,10 +467,22 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LinkItems.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryLinkItem!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditEntryAsync(LM.App.Wpf.ViewModels.LibrarySearchResult? target) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleSelectionChangedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelection.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
+LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
+LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
+LM.App.Wpf.ViewModels.LibraryViewModel.CopyMetadataCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.CopyWorkspacePathCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.EditEntryCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.OpenContainingFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.OpenEntryCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchItemViewModel
 LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
 LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void
@@ -606,6 +641,10 @@ LM.App.Wpf.Views.LibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.Lib
 LM.App.Wpf.Views.SearchSavePrompt
 LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
 LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.DataGridColumnVisibilityBehavior() -> void
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility?
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.set -> void
 LM.App.Wpf.Views.SearchView
 LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
 LM.App.Wpf.Views.SearchView.SearchView() -> void

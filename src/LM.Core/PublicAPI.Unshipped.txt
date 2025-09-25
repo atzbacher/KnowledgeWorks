@@ -408,11 +408,18 @@ LM.Core.Models.Search.SearchExecutionResult.Request.init -> void
 LM.Core.Models.UserPreferences
 LM.Core.Models.UserPreferences.Search.get -> LM.Core.Models.SearchPreferences!
 LM.Core.Models.UserPreferences.Search.init -> void
+LM.Core.Models.UserPreferences.Library.get -> LM.Core.Models.LibraryPreferences!
+LM.Core.Models.UserPreferences.Library.init -> void
 LM.Core.Models.SearchPreferences
 LM.Core.Models.SearchPreferences.LastSelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.Core.Models.SearchPreferences.LastSelectedDatabase.init -> void
 LM.Core.Models.SearchPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
 LM.Core.Models.SearchPreferences.LastUpdatedUtc.init -> void
+LM.Core.Models.LibraryPreferences
+LM.Core.Models.LibraryPreferences.VisibleColumns.get -> string![]!
+LM.Core.Models.LibraryPreferences.VisibleColumns.init -> void
+LM.Core.Models.LibraryPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
+LM.Core.Models.LibraryPreferences.LastUpdatedUtc.init -> void
 LM.Core.Models.WatchedFolderSettings
 LM.Core.Models.WatchedFolderSettings.Folders.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.WatchedFolderSettingsFolder!>!
 LM.Core.Models.WatchedFolderSettings.Folders.init -> void
