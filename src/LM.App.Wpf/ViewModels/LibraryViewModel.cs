@@ -22,9 +22,12 @@ namespace LM.App.Wpf.ViewModels
     {
         private readonly IEntryStore _store;
         private readonly IFullTextSearchService _fullTextSearch;
+        private readonly ITagVocabularyProvider _tagVocabularyProvider;
+        private readonly Task _tagVocabularyInitialization;
 
         public LibraryViewModel(IEntryStore store,
                                 IFullTextSearchService fullTextSearch,
+                                ITagVocabularyProvider tagVocabularyProvider,
                                 LibraryFiltersViewModel filters,
                                 LibraryResultsViewModel results,
                                 IWorkSpaceService workspace,
@@ -35,6 +38,7 @@ namespace LM.App.Wpf.ViewModels
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
+            _tagVocabularyProvider = tagVocabularyProvider ?? throw new ArgumentNullException(nameof(tagVocabularyProvider));
             Filters = filters ?? throw new ArgumentNullException(nameof(filters));
             Results = results ?? throw new ArgumentNullException(nameof(results));
 
@@ -47,12 +51,15 @@ namespace LM.App.Wpf.ViewModels
             Results.SelectionChanged += OnResultsSelectionChanged;
 
             _ = Filters.InitializeAsync();
+            _tagVocabularyInitialization = LoadTagVocabularyAsync();
             InitializeColumns();
             _ = LoadPreferencesAsync();
         }
 
         public LibraryFiltersViewModel Filters { get; }
         public LibraryResultsViewModel Results { get; }
+
+        internal Task TagVocabularyInitialization => _tagVocabularyInitialization;
 
         [RelayCommand]
         private async Task SearchAsync()
@@ -72,13 +79,37 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
+        private async Task LoadTagVocabularyAsync()
+        {
+            try
+            {
+                var tags = await _tagVocabularyProvider.GetAllTagsAsync().ConfigureAwait(false);
+
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                if (dispatcher is not null)
+                {
+                    await dispatcher
+                        .InvokeAsync(() => Filters.UpdateTagVocabulary(tags))
+                        .Task.ConfigureAwait(false);
+                }
+                else
+                {
+                    Filters.UpdateTagVocabulary(tags);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LibraryViewModel] Failed to load tag vocabulary: {ex}");
+            }
+        }
+
         private async Task RunMetadataSearchAsync()
         {
             var filter = Filters.BuildEntryFilter();
 
             Debug.WriteLine(
                 $"Filter: Title='{filter.TitleContains}', Author='{filter.AuthorContains}', " +
-                $"Tags=[{string.Join(",", filter.TagsAny ?? new List<string>())}], " +
+                $"Tags=[{string.Join(",", filter.Tags ?? new List<string>())}] ({filter.TagMatchMode}), " +
                 $"Types=[{string.Join(",", filter.TypesAny ?? Array.Empty<EntryType>())}], " +
                 $"YearFrom={filter.YearFrom}, YearTo={filter.YearTo}, IsInternal={filter.IsInternal}");
 

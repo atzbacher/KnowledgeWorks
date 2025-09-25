@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -46,8 +47,13 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private string? authorContains;
 
+        public ObservableCollection<string> SelectedTags { get; } = new();
+
         [ObservableProperty]
-        private string? tagsCsv;
+        private IReadOnlyList<string> tagVocabulary = Array.Empty<string>();
+
+        [ObservableProperty]
+        private TagMatchMode tagMatchMode = TagMatchMode.Any;
 
         [ObservableProperty]
         private bool? isInternal;
@@ -130,6 +136,22 @@ namespace LM.App.Wpf.ViewModels.Library
             }
         }
 
+        public void UpdateTagVocabulary(IEnumerable<string> tags)
+        {
+            if (tags is null)
+                throw new ArgumentNullException(nameof(tags));
+
+            var normalized = tags
+                .Where(static t => !string.IsNullOrWhiteSpace(t))
+                .Select(static t => t.Trim())
+                .Where(static t => t.Length > 0)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(static t => t, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            TagVocabulary = normalized;
+        }
+
         [RelayCommand]
         public void Clear()
         {
@@ -140,7 +162,8 @@ namespace LM.App.Wpf.ViewModels.Library
             FullTextInContent = true;
             TitleContains = null;
             AuthorContains = null;
-            TagsCsv = null;
+            SelectedTags.Clear();
+            TagMatchMode = TagMatchMode.Any;
             IsInternal = null;
             YearFrom = null;
             YearTo = null;
@@ -183,9 +206,13 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 TitleContains = TrimOrNull(TitleContains),
                 AuthorContains = TrimOrNull(AuthorContains),
-                TagsAny = string.IsNullOrWhiteSpace(TagsCsv)
-                    ? new List<string>()
-                    : TagsCsv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).ToList(),
+                Tags = SelectedTags
+                    .Where(static t => !string.IsNullOrWhiteSpace(t))
+                    .Select(static t => t.Trim())
+                    .Where(static t => t.Length > 0)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList(),
+                TagMatchMode = TagMatchMode,
                 TypesAny = GetSelectedTypesOrNull(),
                 YearFrom = YearFrom,
                 YearTo = YearTo,
@@ -230,7 +257,8 @@ namespace LM.App.Wpf.ViewModels.Library
                 FullTextInContent = FullTextInContent,
                 TitleContains = TitleContains,
                 AuthorContains = AuthorContains,
-                TagsCsv = TagsCsv,
+                Tags = SelectedTags.ToList(),
+                TagMatchMode = TagMatchMode,
                 IsInternal = IsInternal,
                 YearFrom = YearFrom,
                 YearTo = YearTo,
@@ -261,7 +289,29 @@ namespace LM.App.Wpf.ViewModels.Library
             FullTextInContent = state.FullTextInContent;
             TitleContains = state.TitleContains;
             AuthorContains = state.AuthorContains;
-            TagsCsv = state.TagsCsv;
+            SelectedTags.Clear();
+            if (state.Tags is { Count: > 0 })
+            {
+                foreach (var tag in state.Tags)
+                {
+                    if (string.IsNullOrWhiteSpace(tag))
+                    {
+                        continue;
+                    }
+
+                    var trimmed = tag.Trim();
+                    if (trimmed.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (!SelectedTags.Any(t => string.Equals(t, trimmed, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        SelectedTags.Add(trimmed);
+                    }
+                }
+            }
+            TagMatchMode = state.TagMatchMode;
             IsInternal = state.IsInternal;
             YearFrom = state.YearFrom;
             YearTo = state.YearTo;
@@ -508,7 +558,7 @@ namespace LM.App.Wpf.ViewModels.Library
                 Trimmed(TitleContains),
                 Trimmed(AuthorContains),
                 Trimmed(SourceContains),
-                Trimmed(TagsCsv)
+                Trimmed(SelectedTags.FirstOrDefault())
             };
 
             var first = candidates.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c));

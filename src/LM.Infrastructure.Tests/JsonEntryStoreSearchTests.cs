@@ -117,6 +117,71 @@ namespace LM.Infrastructure.Tests.Entries
             Assert.Equal(new[] { "alpha-early", "alpha-late", "beta" }, results.Select(r => r.Id).ToArray());
         }
 
+        [Fact]
+        public async Task SearchAsync_TagMatchModeAny_ReturnsEntriesContainingAnySelectedTag()
+        {
+            using var temp = new TempWorkspace();
+            var store = await CreateStoreAsync(temp.Path);
+
+            await store.SaveAsync(new Entry { Id = "any-1", Title = "Alpha", Tags = new List<string> { "alpha" }, AddedOnUtc = DateTime.UtcNow });
+            await store.SaveAsync(new Entry { Id = "any-2", Title = "Beta", Tags = new List<string> { "beta", "gamma" }, AddedOnUtc = DateTime.UtcNow });
+            await store.SaveAsync(new Entry { Id = "any-3", Title = "Gamma", Tags = new List<string> { "delta" }, AddedOnUtc = DateTime.UtcNow });
+
+            var filter = new EntryFilter
+            {
+                Tags = new List<string> { "beta", "alpha" },
+                TagMatchMode = TagMatchMode.Any
+            };
+
+            var results = await store.SearchAsync(filter);
+
+            Assert.Equal(2, results.Count);
+            Assert.Contains(results, e => e.Id == "any-1");
+            Assert.Contains(results, e => e.Id == "any-2");
+        }
+
+        [Fact]
+        public async Task SearchAsync_TagMatchModeAll_ReturnsEntriesContainingAllTags()
+        {
+            using var temp = new TempWorkspace();
+            var store = await CreateStoreAsync(temp.Path);
+
+            await store.SaveAsync(new Entry { Id = "all-1", Title = "Match", Tags = new List<string> { "alpha", "beta", "delta" }, AddedOnUtc = DateTime.UtcNow });
+            await store.SaveAsync(new Entry { Id = "all-2", Title = "Partial", Tags = new List<string> { "alpha" }, AddedOnUtc = DateTime.UtcNow });
+
+            var filter = new EntryFilter
+            {
+                Tags = new List<string> { "alpha", "beta" },
+                TagMatchMode = TagMatchMode.All
+            };
+
+            var results = await store.SearchAsync(filter);
+
+            var entry = Assert.Single(results);
+            Assert.Equal("all-1", entry.Id);
+        }
+
+        [Fact]
+        public async Task SearchAsync_TagMatchModeNot_ExcludesEntriesContainingTags()
+        {
+            using var temp = new TempWorkspace();
+            var store = await CreateStoreAsync(temp.Path);
+
+            await store.SaveAsync(new Entry { Id = "not-1", Title = "Safe", Tags = new List<string> { "alpha" }, AddedOnUtc = DateTime.UtcNow });
+            await store.SaveAsync(new Entry { Id = "not-2", Title = "Exclude", Tags = new List<string> { "beta" }, AddedOnUtc = DateTime.UtcNow });
+
+            var filter = new EntryFilter
+            {
+                Tags = new List<string> { "beta" },
+                TagMatchMode = TagMatchMode.Not
+            };
+
+            var results = await store.SearchAsync(filter);
+
+            var entry = Assert.Single(results);
+            Assert.Equal("not-1", entry.Id);
+        }
+
         private static async Task<JsonEntryStore> CreateStoreAsync(string workspacePath)
         {
             var ws = new WorkspaceService();
