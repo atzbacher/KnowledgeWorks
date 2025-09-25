@@ -31,6 +31,7 @@ namespace LM.App.Wpf.Views.Behaviors
                 return;
             }
 
+
             AssociatedObject.Loaded += OnLoaded;
             AssociatedObject.Columns.CollectionChanged += OnColumnsChanged;
             ApplyBindings();
@@ -144,3 +145,4 @@ namespace LM.App.Wpf.Views.Behaviors
         }
     }
 }
+
