@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
+using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
 using LM.Core.Models.Search;
@@ -24,14 +26,29 @@ namespace LM.App.Wpf.ViewModels
         public LibraryViewModel(IEntryStore store,
                                 IFullTextSearchService fullTextSearch,
                                 LibraryFiltersViewModel filters,
-                                LibraryResultsViewModel results)
+                                LibraryResultsViewModel results,
+                                IWorkSpaceService workspace,
+                                IUserPreferencesStore preferencesStore,
+                                IClipboardService clipboard,
+                                IFileExplorerService fileExplorer,
+                                ILibraryDocumentService documentService)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
             Filters = filters ?? throw new ArgumentNullException(nameof(filters));
             Results = results ?? throw new ArgumentNullException(nameof(results));
 
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _preferencesStore = preferencesStore ?? throw new ArgumentNullException(nameof(preferencesStore));
+            _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
+            _fileExplorer = fileExplorer ?? throw new ArgumentNullException(nameof(fileExplorer));
+            _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
+
+            Results.SelectionChanged += OnResultsSelectionChanged;
+
             _ = Filters.InitializeAsync();
+            InitializeColumns();
+            _ = LoadPreferencesAsync();
         }
 
         public LibraryFiltersViewModel Filters { get; }

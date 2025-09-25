@@ -6,9 +6,12 @@ using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
+using LM.Core.Abstractions.Configuration;
 using LM.Infrastructure.Hooks;
+using LM.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace LM.App.Wpf.Composition.Modules
 {
@@ -18,6 +21,9 @@ namespace LM.App.Wpf.Composition.Modules
         {
             var services = builder.Services;
 
+            services.TryAddSingleton<IUserPreferencesStore, JsonUserPreferencesStore>();
+            services.AddSingleton<IClipboardService, ClipboardService>();
+            services.AddSingleton<IFileExplorerService, FileExplorerService>();
             services.AddSingleton<LibraryFilterPresetStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
             services.AddTransient<LibraryPresetSaveDialogViewModel>();
@@ -47,7 +53,12 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFullTextSearchService>(),
                 sp.GetRequiredService<LibraryFiltersViewModel>(),
-                sp.GetRequiredService<LibraryResultsViewModel>()));
+                sp.GetRequiredService<LibraryResultsViewModel>(),
+                sp.GetRequiredService<IWorkSpaceService>(),
+                sp.GetRequiredService<IUserPreferencesStore>(),
+                sp.GetRequiredService<IClipboardService>(),
+                sp.GetRequiredService<IFileExplorerService>(),
+                sp.GetRequiredService<ILibraryDocumentService>()));
         }
     }
 }

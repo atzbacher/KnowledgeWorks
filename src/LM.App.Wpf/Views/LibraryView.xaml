@@ -21,6 +21,7 @@
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="310"/>
+      <ColumnDefinition Width="5"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="5"/>
       <ColumnDefinition Width="360"/>
@@ -156,8 +157,15 @@
       </StackPanel>
     </ScrollViewer>
 
+    <GridSplitter Grid.Column="1"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="#FFE0E0E0"
+                  ShowsPreview="True"
+                  Width="5"/>
+
     <!-- Results -->
-    <Grid Grid.Column="1" DataContext="{Binding Results}">
+    <Grid Grid.Column="2" DataContext="{Binding Results}">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
@@ -170,6 +178,20 @@
                    Margin="8,0,0,0"
                    Foreground="DimGray"
                    Visibility="{Binding ResultsAreFullText, Converter={StaticResource BoolToVisibilityConverter}}"/>
+        <Menu Margin="12,0,0,0"
+              VerticalAlignment="Center"
+              DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+          <MenuItem Header="Columns"
+                    ItemsSource="{Binding ColumnOptions}">
+            <MenuItem.ItemContainerStyle>
+              <Style TargetType="MenuItem">
+                <Setter Property="Header" Value="{Binding DisplayName}" />
+                <Setter Property="IsCheckable" Value="True" />
+                <Setter Property="IsChecked" Value="{Binding IsVisible, Mode=TwoWay}" />
+              </Style>
+            </MenuItem.ItemContainerStyle>
+          </MenuItem>
+        </Menu>
       </StackPanel>
 
       <DataGrid Grid.Row="1"
@@ -177,12 +199,50 @@
                 SelectedItem="{Binding Selected}"
                 Margin="12"
                 IsReadOnly="True"
-                AllowDrop="True">
+                AllowDrop="True"
+                CanUserReorderColumns="True"
+                CanUserResizeColumns="True"
+                SelectionMode="Extended"
+                SelectionUnit="FullRow">
+        <DataGrid.Resources>
+          <Style TargetType="DataGridRow">
+            <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <Setter Property="ContextMenu">
+              <Setter.Value>
+                <ContextMenu>
+                  <MenuItem Header="Open"
+                            Command="{Binding PlacementTarget.Tag.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="Open containing folder"
+                            Command="{Binding PlacementTarget.Tag.OpenContainingFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="Copy citation / DOI"
+                            Command="{Binding PlacementTarget.Tag.CopyMetadataCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="Copy workspace path"
+                            Command="{Binding PlacementTarget.Tag.CopyWorkspacePathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <Separator />
+                  <MenuItem Header="Edit entry"
+                            Command="{Binding PlacementTarget.Tag.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                </ContextMenu>
+              </Setter.Value>
+            </Setter>
+          </Style>
+        </DataGrid.Resources>
         <i:Interaction.Behaviors>
           <behaviors:FileDropBehavior UseDataGridRowContext="True"
                                       PreviewDragOverCommand="{Binding PreviewDropCommand}"
                                       DropCommand="{Binding DropCommand}" />
+          <behaviors:DataGridColumnVisibilityBehavior VisibilityMap="{Binding DataContext.ColumnVisibility, RelativeSource={RelativeSource AncestorType=UserControl}}" />
         </i:Interaction.Behaviors>
+        <i:Interaction.Triggers>
+          <i:EventTrigger EventName="SelectionChanged">
+            <i:InvokeCommandAction Command="{Binding HandleSelectionChangedCommand}"
+                                   CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+          </i:EventTrigger>
+        </i:Interaction.Triggers>
         <DataGrid.Columns>
           <StaticResource ResourceKey="LibraryResultsColumn.Title" />
           <StaticResource ResourceKey="LibraryResultsColumn.Score" />
@@ -203,18 +263,19 @@
       </DataGrid>
 
       <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
-        <Button Content="Open" Command="{Binding OpenCommand}"/>
+        <Button Content="Open"
+                Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </StackPanel>
     </Grid>
 
-    <GridSplitter Grid.Column="2"
+    <GridSplitter Grid.Column="3"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   Background="#FFE0E0E0"
                   ShowsPreview="True"
                   Width="5"/>
 
-    <Border Grid.Column="3" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
+    <Border Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
                     AllowDrop="True"
                     DataContext="{Binding Results}">
