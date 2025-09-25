@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -36,12 +37,16 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IAttachmentMetadataPrompt _attachmentPrompt;
         private readonly IWorkSpaceService _workspace;
         private readonly HookOrchestrator _hookOrchestrator;
+        private CancellationTokenSource? _abstractLoadCts;
 
         [ObservableProperty]
         private LibrarySearchResult? selected;
 
         [ObservableProperty]
         private bool hasLinkItems;
+
+        [ObservableProperty]
+        private string? selectedAbstract;
 
         private readonly List<LibrarySearchResult> _selectedItems = new();
 
@@ -52,6 +57,8 @@ namespace LM.App.Wpf.ViewModels.Library
         public IReadOnlyList<LibrarySearchResult> SelectedItems => _selectedItems;
 
         public bool HasSelection => _selectedItems.Count > 0;
+
+        public bool HasSelectedAbstract => !string.IsNullOrWhiteSpace(SelectedAbstract);
 
         private bool _resultsAreFullText;
 
@@ -518,6 +525,7 @@ namespace LM.App.Wpf.ViewModels.Library
             UpdateLinkItems();
             SyncSelectionList(value);
             RaiseSelectionChanged();
+            _ = LoadSelectedAbstractAsync(value);
         }
 
         private async Task RefreshSelectedEntryAsync(LibrarySearchResult? previous, string entryId)
@@ -911,6 +919,109 @@ namespace LM.App.Wpf.ViewModels.Library
                     .Distinct(StringComparer.OrdinalIgnoreCase)
                     .ToList();
             }
+        }
+
+        partial void OnSelectedAbstractChanged(string? value)
+        {
+            OnPropertyChanged(nameof(HasSelectedAbstract));
+        }
+
+        private async Task LoadSelectedAbstractAsync(LibrarySearchResult? result)
+        {
+            _abstractLoadCts?.Cancel();
+            _abstractLoadCts?.Dispose();
+
+            if (result is null || string.IsNullOrWhiteSpace(result.Entry?.Id))
+            {
+                ExecuteOnDispatcher(() => SelectedAbstract = null);
+                return;
+            }
+
+            ExecuteOnDispatcher(() => SelectedAbstract = null);
+
+            var cts = new CancellationTokenSource();
+            _abstractLoadCts = cts;
+            var token = cts.Token;
+
+            try
+            {
+                var entryId = result.Entry!.Id!;
+                var article = await LoadArticleHookAsync(entryId).ConfigureAwait(false);
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var text = ComposeAbstractText(article?.Abstract);
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    text = result.Entry.Notes;
+                }
+
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var normalized = NormalizeAbstract(text);
+                ExecuteOnDispatcher(() => SelectedAbstract = normalized);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LibraryResultsViewModel] Failed to load abstract: {ex}");
+                if (!token.IsCancellationRequested)
+                {
+                    var fallback = NormalizeAbstract(result.Entry?.Notes);
+                    ExecuteOnDispatcher(() => SelectedAbstract = fallback);
+                }
+            }
+        }
+
+        private static string? NormalizeAbstract(string? text)
+        {
+            return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+        }
+
+        private static string? ComposeAbstractText(HookM.ArticleAbstract? abstractHook)
+        {
+            if (abstractHook is null)
+            {
+                return null;
+            }
+
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(abstractHook.Text))
+            {
+                parts.Add(abstractHook.Text.Trim());
+            }
+
+            if (abstractHook.Sections is { Count: > 0 })
+            {
+                foreach (var section in abstractHook.Sections)
+                {
+                    if (section is null)
+                    {
+                        continue;
+                    }
+
+                    var content = string.IsNullOrWhiteSpace(section.Text) ? null : section.Text.Trim();
+                    if (string.IsNullOrWhiteSpace(content))
+                    {
+                        continue;
+                    }
+
+                    var label = string.IsNullOrWhiteSpace(section.Label) ? null : section.Label.Trim();
+                    parts.Add(label is null ? content! : string.Concat(label, ": ", content));
+                }
+            }
+
+            if (parts.Count == 0)
+            {
+                return null;
+            }
+
+            return string.Join(Environment.NewLine + Environment.NewLine, parts);
         }
 
         public async Task EditEntryAsync(LibrarySearchResult? target)

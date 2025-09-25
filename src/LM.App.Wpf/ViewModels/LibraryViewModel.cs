@@ -70,6 +70,8 @@ namespace LM.App.Wpf.ViewModels
                     await RunFullTextSearchAsync().ConfigureAwait(false);
                 else
                     await RunMetadataSearchAsync().ConfigureAwait(false);
+
+                await Filters.RefreshNavigationAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
