@@ -351,6 +351,10 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyPresetAsync(LM.App.Wp
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyState(LM.App.Wpf.Library.LibraryFilterState! state) -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.CaptureState() -> LM.App.Wpf.Library.LibraryFilterState!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.Clear() -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.KeywordTooltip.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.KeywordTokens.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.BuildFullTextQuery(string! normalizedQuery) -> LM.Core.Models.Search.FullTextSearchQuery!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInAbstract.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInAbstract.set -> void
@@ -366,6 +370,14 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.GetNormalizedFullTextQuery
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.NavigationRoots.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel!>!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RefreshNavigationAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedPresets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsLeftPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsLeftPanelCollapsed.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsRightPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsRightPanelCollapsed.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ToggleLeftPanelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ToggleRightPanelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UseFullTextSearch.get -> bool
@@ -416,6 +428,14 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleSelectionChangedComm
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelection.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelectedAbstract.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.set -> void
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasPrimaryAttachment.get -> bool
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.LibrarySearchQueryBox() -> void
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.get -> string!
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void

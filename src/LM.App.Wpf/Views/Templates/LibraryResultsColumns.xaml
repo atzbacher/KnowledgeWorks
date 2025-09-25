@@ -4,6 +4,33 @@
   <ResourceDictionary.MergedDictionaries>
     <ResourceDictionary Source="../Library/LibraryCommonResources.xaml" />
   </ResourceDictionary.MergedDictionaries>
+  <DataGridTemplateColumn x:Key="LibraryResultsColumn.AttachmentIndicator"
+                          x:Shared="False"
+                          Header="📎"
+                          Width="40"
+                          behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AttachmentIndicator">
+    <DataGridTemplateColumn.CellTemplate>
+      <DataTemplate>
+        <TextBlock FontFamily="Segoe MDL2 Assets"
+                   FontSize="14"
+                   Text="&#xE16C;"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   ToolTip="Entry has attachments">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasPrimaryAttachment}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </DataTemplate>
+    </DataGridTemplateColumn.CellTemplate>
+  </DataGridTemplateColumn>
   <DataGridTextColumn x:Key="LibraryResultsColumn.Title"
                       x:Shared="False"
                       Header="Title"

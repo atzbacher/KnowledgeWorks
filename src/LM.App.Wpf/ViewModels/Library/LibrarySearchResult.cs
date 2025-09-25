@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using LM.Core.Models;
 
 namespace LM.App.Wpf.ViewModels
@@ -38,5 +39,28 @@ namespace LM.App.Wpf.ViewModels
         public bool HasLinks => Entry.Links is { Count: > 0 };
         public bool HasAttachments => Entry.Attachments is { Count: > 0 };
         public bool HasRelations => Entry.Relations is { Count: > 0 };
+
+        public bool HasPrimaryAttachment => HasAttachmentWithSupportedExtension(Entry.MainFilePath)
+            || (Entry.Attachments is { Count: > 0 } && Entry.Attachments.Exists(static attachment => attachment is not null && HasAttachmentWithSupportedExtension(attachment.RelativePath)));
+
+        private static bool HasAttachmentWithSupportedExtension(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            var extension = Path.GetExtension(path);
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                return false;
+            }
+
+            return extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".doc", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".docx", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".ppt", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
