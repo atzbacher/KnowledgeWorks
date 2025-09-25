@@ -34,5 +34,27 @@ namespace LM.App.Wpf.Library
 
             Process.Start(info);
         }
+
+        public void OpenAttachment(Attachment attachment)
+        {
+            if (attachment is null)
+                throw new ArgumentNullException(nameof(attachment));
+
+            var relativePath = attachment.RelativePath;
+            if (string.IsNullOrWhiteSpace(relativePath))
+                throw new InvalidOperationException("Attachment does not have an associated document path.");
+
+            var absolutePath = _workspace.GetAbsolutePath(relativePath);
+            if (string.IsNullOrWhiteSpace(absolutePath))
+                throw new InvalidOperationException("Unable to resolve attachment path in workspace.");
+
+            var info = new ProcessStartInfo
+            {
+                FileName = absolutePath,
+                UseShellExecute = true
+            };
+
+            Process.Start(info);
+        }
     }
 }

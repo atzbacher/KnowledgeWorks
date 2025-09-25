@@ -8,5 +8,6 @@ namespace LM.App.Wpf.Library
     public interface ILibraryDocumentService
     {
         void OpenEntry(Entry entry);
+        void OpenAttachment(Attachment attachment);
     }
 }
