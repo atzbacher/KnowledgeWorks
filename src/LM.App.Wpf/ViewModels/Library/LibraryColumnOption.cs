@@ -9,7 +9,7 @@ namespace LM.App.Wpf.ViewModels.Library
         {
             Key = key;
             DisplayName = displayName;
-            _isVisible = isVisible;
+            this.isVisible = isVisible;
         }
 
         public string Key { get; }

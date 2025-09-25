@@ -416,7 +416,7 @@ LM.Core.Models.SearchPreferences.LastSelectedDatabase.init -> void
 LM.Core.Models.SearchPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
 LM.Core.Models.SearchPreferences.LastUpdatedUtc.init -> void
 LM.Core.Models.LibraryPreferences
-LM.Core.Models.LibraryPreferences.VisibleColumns.get -> string![]
+LM.Core.Models.LibraryPreferences.VisibleColumns.get -> string![]!
 LM.Core.Models.LibraryPreferences.VisibleColumns.init -> void
 LM.Core.Models.LibraryPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
 LM.Core.Models.LibraryPreferences.LastUpdatedUtc.init -> void

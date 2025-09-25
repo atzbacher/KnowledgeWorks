@@ -448,8 +448,9 @@ LM.App.Wpf.ViewModels.Library.LibraryColumnOption.IsVisible.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryColumnOption.Key.get -> string!
 LM.App.Wpf.ViewModels.Library.LibraryColumnOption.LibraryColumnOption(string! key, string! displayName, bool isVisible) -> void
 LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility
-LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Item[string! key].get -> bool
-LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Item[string! key].set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].set -> void
 LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LibraryColumnVisibility() -> void
 LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LoadFrom(System.Collections.Generic.IReadOnlyDictionary<string!, bool>! source) -> void
 LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Snapshot() -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>!
