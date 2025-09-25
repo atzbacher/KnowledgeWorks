@@ -202,10 +202,17 @@ namespace LM.Infrastructure.Entries
                 var flag = f.IsInternal.Value;
                 q = q.Where(e => e.IsInternal == flag);
             }
-            if (f.TagsAny.Count > 0)
+            if (f.Tags.Count > 0)
             {
-                var tags = new HashSet<string>(f.TagsAny, StringComparer.OrdinalIgnoreCase);
-                q = q.Where(e => e.Tags?.Any(t => tags.Contains(t)) ?? false);
+                var tags = new HashSet<string>(f.Tags, StringComparer.OrdinalIgnoreCase);
+                q = f.TagMatchMode switch
+                {
+                    TagMatchMode.All => q.Where(e =>
+                        e.Tags is not null && tags.All(tag => e.Tags.Any(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase)))),
+                    TagMatchMode.Not => q.Where(e =>
+                        !(e.Tags?.Any(t => tags.Contains(t)) ?? false)),
+                    _ => q.Where(e => e.Tags?.Any(t => tags.Contains(t)) ?? false)
+                };
             }
 
             if (!string.IsNullOrWhiteSpace(f.InternalIdContains))

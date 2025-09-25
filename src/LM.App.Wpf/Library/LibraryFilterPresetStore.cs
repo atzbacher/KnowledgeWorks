@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
+using LM.Core.Models.Filters;
 
 namespace LM.App.Wpf.Library
 {
@@ -140,7 +141,8 @@ namespace LM.App.Wpf.Library
         public bool FullTextInContent { get; set; } = true;
         public string? TitleContains { get; set; }
         public string? AuthorContains { get; set; }
-        public string? TagsCsv { get; set; }
+        public List<string> Tags { get; set; } = new();
+        public TagMatchMode TagMatchMode { get; set; } = TagMatchMode.Any;
         public bool? IsInternal { get; set; }
         public int? YearFrom { get; set; }
         public int? YearTo { get; set; }
@@ -160,6 +162,10 @@ namespace LM.App.Wpf.Library
         public bool TypeOther { get; set; } = true;
 
         internal LibraryFilterState Clone()
-            => (LibraryFilterState)MemberwiseClone();
+        {
+            var clone = (LibraryFilterState)MemberwiseClone();
+            clone.Tags = Tags is null ? new List<string>() : new List<string>(Tags);
+            return clone;
+        }
     }
 }

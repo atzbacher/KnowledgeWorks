@@ -6,6 +6,7 @@ using LM.HubSpoke.Entries;
 using LM.HubSpoke.Indexing;
 using LM.HubSpoke.Spokes;
 using LM.Infrastructure.Content;
+using LM.Infrastructure.Entries;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Metadata;
@@ -60,6 +61,7 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IContentExtractor>()));
 
             services.AddSingleton<IEntryStore>(sp => sp.GetRequiredService<HubSpokeStore>());
+            services.AddSingleton<ITagVocabularyProvider, EntryTagVocabularyProvider>();
             services.AddSingleton<IFullTextSearchService>(sp => sp.GetRequiredService<HubSpokeStore>().FullTextSearch);
 
             services.AddSingleton<IWatchedFolderSettingsStore>(sp => new JsonWatchedFolderSettingsStore(sp.GetRequiredService<IWorkSpaceService>()));

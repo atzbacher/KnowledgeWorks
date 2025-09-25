@@ -32,6 +32,8 @@ LM.Core.Abstractions.IPmidNormalizer
 LM.Core.Abstractions.IPmidNormalizer.Normalize(string? raw) -> string?
 LM.Core.Abstractions.ISimilarityService
 LM.Core.Abstractions.ISimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
+LM.Core.Abstractions.ITagVocabularyProvider
+LM.Core.Abstractions.ITagVocabularyProvider.GetAllTagsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
 LM.Core.Abstractions.IWorkSpaceService
 LM.Core.Abstractions.IWorkSpaceService.EnsureWorkspaceAsync(string! absoluteWorkspacePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IWorkSpaceService.GetAbsolutePath(string! relativePath) -> string!
@@ -205,8 +207,14 @@ LM.Core.Models.Filters.EntryFilter.AuthorContains.set -> void
 LM.Core.Models.Filters.EntryFilter.EntryFilter() -> void
 LM.Core.Models.Filters.EntryFilter.IsInternal.get -> bool?
 LM.Core.Models.Filters.EntryFilter.IsInternal.set -> void
-LM.Core.Models.Filters.EntryFilter.TagsAny.get -> System.Collections.Generic.List<string!>!
-LM.Core.Models.Filters.EntryFilter.TagsAny.set -> void
+LM.Core.Models.Filters.EntryFilter.TagMatchMode.get -> LM.Core.Models.Filters.TagMatchMode
+LM.Core.Models.Filters.EntryFilter.TagMatchMode.set -> void
+LM.Core.Models.Filters.EntryFilter.Tags.get -> System.Collections.Generic.List<string!>!
+LM.Core.Models.Filters.EntryFilter.Tags.set -> void
+LM.Core.Models.Filters.TagMatchMode
+LM.Core.Models.Filters.TagMatchMode.Any = 0 -> LM.Core.Models.Filters.TagMatchMode
+LM.Core.Models.Filters.TagMatchMode.All = 1 -> LM.Core.Models.Filters.TagMatchMode
+LM.Core.Models.Filters.TagMatchMode.Not = 2 -> LM.Core.Models.Filters.TagMatchMode
 LM.Core.Models.Filters.EntryFilter.TitleContains.get -> string?
 LM.Core.Models.Filters.EntryFilter.TitleContains.set -> void
 LM.Core.Models.Filters.EntryFilter.TypesAny.get -> LM.Core.Models.EntryType[]?

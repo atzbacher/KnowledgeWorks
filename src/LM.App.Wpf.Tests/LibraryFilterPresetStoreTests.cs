@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using LM.App.Wpf.Library;
 using LM.Infrastructure.FileSystem;
+using LM.Core.Models.Filters;
 using Xunit;
 
 public class LibraryFilterPresetStoreTests
@@ -21,7 +23,8 @@ public class LibraryFilterPresetStoreTests
             {
                 TitleContains = "title",
                 AuthorContains = "author",
-                TagsCsv = "tag1,tag2",
+                Tags = new List<string> { "tag1", "tag2" },
+                TagMatchMode = TagMatchMode.All,
                 IsInternal = true,
                 YearFrom = 2010,
                 YearTo = 2020,
@@ -51,7 +54,8 @@ public class LibraryFilterPresetStoreTests
 
         Assert.Equal(preset.State.TitleContains, loaded.State.TitleContains);
         Assert.Equal(preset.State.AuthorContains, loaded.State.AuthorContains);
-        Assert.Equal(preset.State.TagsCsv, loaded.State.TagsCsv);
+        Assert.Equal(preset.State.Tags, loaded.State.Tags);
+        Assert.Equal(preset.State.TagMatchMode, loaded.State.TagMatchMode);
         Assert.Equal(preset.State.IsInternal, loaded.State.IsInternal);
         Assert.Equal(preset.State.YearFrom, loaded.State.YearFrom);
         Assert.Equal(preset.State.YearTo, loaded.State.YearTo);

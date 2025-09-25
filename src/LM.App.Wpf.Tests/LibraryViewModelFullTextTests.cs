@@ -49,6 +49,35 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+        public async Task MetadataSearch_PreservesSelectedTagsAndMode()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            store.SearchResults.Add(new Entry { Id = "persist-1", Title = "Tagged" });
+            var tagProvider = new StubTagVocabularyProvider();
+            tagProvider.Tags.Add("alpha");
+            tagProvider.Tags.Add("beta");
+
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp, vocabulary: tagProvider);
+            await vm.TagVocabularyInitialization;
+
+            Assert.Contains("alpha", vm.Filters.TagVocabulary);
+
+            vm.Filters.SelectedTags.Add("alpha");
+            vm.Filters.TagMatchMode = TagMatchMode.Not;
+
+            await InvokeSearchAsync(vm);
+
+            Assert.Contains("alpha", vm.Filters.SelectedTags);
+            Assert.Equal(TagMatchMode.Not, vm.Filters.TagMatchMode);
+
+            var filter = store.LastFilter;
+            Assert.NotNull(filter);
+            Assert.Equal(TagMatchMode.Not, filter!.TagMatchMode);
+            Assert.Contains("alpha", filter.Tags);
+        }
+
+        [Fact]
         public async Task FullTextSearch_UsesServiceAndHydratesEntries()
         {
             using var temp = new TempWorkspace();
@@ -454,7 +483,8 @@ namespace LM.App.Wpf.Tests
                                                        ILibraryDocumentService? documentService = null,
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
-                                                       IUserPreferencesStore? preferencesStore = null)
+                                                       IUserPreferencesStore? preferencesStore = null,
+                                                       ITagVocabularyProvider? vocabulary = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -469,7 +499,8 @@ namespace LM.App.Wpf.Tests
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
-            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
+            vocabulary ??= new StubTagVocabularyProvider();
+            return new LibraryViewModel(store, search, vocabulary, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
@@ -558,6 +589,7 @@ namespace LM.App.Wpf.Tests
             public Dictionary<string, Entry> EntriesById { get; } = new(StringComparer.OrdinalIgnoreCase);
 
             public int SaveCallCount { get; private set; }
+            public EntryFilter? LastFilter { get; private set; }
 
             public Task InitializeAsync(CancellationToken ct = default) => Task.CompletedTask;
 
@@ -583,7 +615,10 @@ namespace LM.App.Wpf.Tests
             }
 
             public Task<IReadOnlyList<Entry>> SearchAsync(EntryFilter filter, CancellationToken ct = default)
-                => Task.FromResult((IReadOnlyList<Entry>)SearchResults);
+            {
+                LastFilter = filter;
+                return Task.FromResult((IReadOnlyList<Entry>)SearchResults);
+            }
 
             public Task<Entry?> FindByHashAsync(string sha256, CancellationToken ct = default) => throw new NotImplementedException();
 
@@ -617,6 +652,14 @@ namespace LM.App.Wpf.Tests
 
             public Task<IReadOnlyList<FullTextSearchHit>> SearchAsync(FullTextSearchQuery query, CancellationToken ct = default)
                 => Task.FromResult(Hits);
+        }
+
+        private sealed class StubTagVocabularyProvider : ITagVocabularyProvider
+        {
+            public List<string> Tags { get; } = new();
+
+            public Task<IReadOnlyList<string>> GetAllTagsAsync(CancellationToken ct = default)
+                => Task.FromResult<IReadOnlyList<string>>(Tags.ToArray());
         }
 
         private sealed class StubPresetPrompt : ILibraryPresetPrompt

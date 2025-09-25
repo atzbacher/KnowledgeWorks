@@ -19,6 +19,10 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Views.Converters.EnumEqualsConverter
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.EnumEqualsConverter() -> void
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogCloseRequestedEventArgs(bool? dialogResult) -> void
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogResult.get -> bool?
@@ -170,8 +174,10 @@ LM.App.Wpf.Library.LibraryFilterState.PmidContains.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.PmidContains.set -> void
 LM.App.Wpf.Library.LibraryFilterState.SourceContains.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.SourceContains.set -> void
-LM.App.Wpf.Library.LibraryFilterState.TagsCsv.get -> string?
-LM.App.Wpf.Library.LibraryFilterState.TagsCsv.set -> void
+LM.App.Wpf.Library.LibraryFilterState.TagMatchMode.get -> LM.Core.Models.Filters.TagMatchMode
+LM.App.Wpf.Library.LibraryFilterState.TagMatchMode.set -> void
+LM.App.Wpf.Library.LibraryFilterState.Tags.get -> System.Collections.Generic.List<string!>!
+LM.App.Wpf.Library.LibraryFilterState.Tags.set -> void
 LM.App.Wpf.Library.LibraryFilterState.TitleContains.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.TitleContains.set -> void
 LM.App.Wpf.Library.LibraryFilterState.TypeOther.get -> bool
@@ -419,8 +425,12 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PmidContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SourceContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedPresets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagsCsv.get -> string?
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagsCsv.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagMatchMode.get -> LM.Core.Models.Filters.TagMatchMode
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagMatchMode.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagVocabulary.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TagVocabulary.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UpdateTagVocabulary(System.Collections.Generic.IEnumerable<string!>! tags) -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TitleContains.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TitleContains.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.TypeOther.get -> bool
@@ -474,7 +484,7 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> Syste
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.Core.Abstractions.ITagVocabularyProvider! tagVocabularyProvider, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
@@ -635,6 +645,16 @@ LM.App.Wpf.Views.LibraryPresetSaveDialog.ViewModel.get -> LM.App.Wpf.ViewModels.
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector
+LM.App.Wpf.Views.Library.TagTokenSelector.InitializeComponent() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.FilteredSuggestions.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
+LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>?
+LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTags.set -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.TagTokenSelector() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabulary.get -> System.Collections.Generic.IEnumerable<string!>!
+LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabulary.set -> void
+field System.Windows.DependencyProperty! LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTagsProperty
+field System.Windows.DependencyProperty! LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabularyProperty
 LM.App.Wpf.Views.LibraryPresetPrompt
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!

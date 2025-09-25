@@ -21,6 +21,9 @@ LM.Infrastructure.Entries.JsonEntryStore.InitializeAsync(System.Threading.Cancel
 LM.Infrastructure.Entries.JsonEntryStore.JsonEntryStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IDoiNormalizer? doiNormalizer = null, LM.Core.Abstractions.IPmidNormalizer? pmidNormalizer = null) -> void
 LM.Infrastructure.Entries.JsonEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! f, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Infrastructure.Entries.EntryTagVocabularyProvider
+LM.Infrastructure.Entries.EntryTagVocabularyProvider.EntryTagVocabularyProvider(LM.Core.Abstractions.IEntryStore! store) -> void
+LM.Infrastructure.Entries.EntryTagVocabularyProvider.GetAllTagsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
 LM.Infrastructure.Export.MetadataDebugSlideExporter
 LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void

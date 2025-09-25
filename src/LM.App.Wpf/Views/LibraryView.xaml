@@ -4,6 +4,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
+             xmlns:libraryViews="clr-namespace:LM.App.Wpf.Views.Library"
+             xmlns:filters="clr-namespace:LM.Core.Models.Filters;assembly=LM.Core"
+             xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
              mc:Ignorable="d"
@@ -15,6 +18,7 @@
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
+      <converters:EnumEqualsConverter x:Key="EnumEqualsConverter" />
     </ResourceDictionary>
 
   </UserControl.Resources>
@@ -51,8 +55,23 @@
         <TextBlock Text="Author contains"/>
         <TextBox Text="{Binding AuthorContains, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <TextBlock Text="Tags (comma-separated)"/>
-        <TextBox Text="{Binding TagsCsv, UpdateSourceTrigger=PropertyChanged}"/>
+        <TextBlock Text="Tags"/>
+        <libraryViews:TagTokenSelector SelectedTags="{Binding SelectedTags}"
+                                       TagVocabulary="{Binding TagVocabulary}"/>
+        <StackPanel Orientation="Horizontal" Margin="0,6,0,6">
+          <TextBlock Text="Match mode:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+          <RadioButton Content="Any"
+                       GroupName="TagMatchMode"
+                       Margin="0,0,6,0"
+                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.Any}}"/>
+          <RadioButton Content="All"
+                       GroupName="TagMatchMode"
+                       Margin="0,0,6,0"
+                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.All}}"/>
+          <RadioButton Content="Not"
+                       GroupName="TagMatchMode"
+                       IsChecked="{Binding TagMatchMode, Mode=TwoWay, Converter={StaticResource EnumEqualsConverter}, ConverterParameter={x:Static filters:TagMatchMode.Not}}"/>
+        </StackPanel>
 
         <TextBlock Text="Source contains"/>
         <TextBox Text="{Binding SourceContains, UpdateSourceTrigger=PropertyChanged}"/>
