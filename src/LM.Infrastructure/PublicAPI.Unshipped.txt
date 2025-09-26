@@ -132,3 +132,10 @@ LM.Infrastructure.Export.DataExtractionExportLoader
 LM.Infrastructure.Export.DataExtractionExportLoader.DataExtractionExportLoader(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Export.DataExtractionExportLoader.HasExtractionAsync(string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<bool>!
 LM.Infrastructure.Export.DataExtractionExportLoader.LoadAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Infrastructure.Export.DataExtractionExportContext?>!
+LM.Infrastructure.Export.DataExtractionExportContext
+LM.Infrastructure.Export.DataExtractionExportContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
+LM.Infrastructure.Export.DataExtractionExportContext.DataExtractionExportContext(string! entryId, LM.HubSpoke.Models.EntryHub! hub, LM.HubSpoke.Models.DataExtractionHook! extraction, LM.HubSpoke.Models.ArticleHook? article, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Export.DataExtractionExportContext.EntryId.get -> string!
+LM.Infrastructure.Export.DataExtractionExportContext.Extraction.get -> LM.HubSpoke.Models.DataExtractionHook!
+LM.Infrastructure.Export.DataExtractionExportContext.Hub.get -> LM.HubSpoke.Models.EntryHub!
+LM.Infrastructure.Export.DataExtractionExportContext.TryResolveAbsolutePath(string? relativePath) -> string?

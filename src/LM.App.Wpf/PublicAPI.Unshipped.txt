@@ -577,6 +577,8 @@ LM.App.Wpf.ViewModels.StagingItem.AttachToEntryId.get -> string?
 LM.App.Wpf.ViewModels.StagingItem.AttachToEntryId.set -> void
 LM.App.Wpf.ViewModels.StagingItem.AttachToTitle.get -> string?
 LM.App.Wpf.ViewModels.StagingItem.AttachToTitle.set -> void
+LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.set -> void
 LM.App.Wpf.ViewModels.StagingItem.AuthorsCsv.get -> string?
 LM.App.Wpf.ViewModels.StagingItem.AuthorsCsv.set -> void
 LM.App.Wpf.ViewModels.StagingItem.DisplayName.get -> string?

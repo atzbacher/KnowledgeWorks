@@ -492,6 +492,7 @@ LM.Core.Models.WatchedFolderState.WatchedFolderState(string! Path, System.DateTi
 LM.Core.Utils.Hashes
 LM.Core.Utils.IdGen
 LM.Core.Utils.JsonEx
+LM.Core.Utils.SystemUser
 static LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Empty.get -> LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!
 static LM.Core.Utils.Hashes.Sha1(string! input) -> string!
 static LM.Core.Utils.Hashes.Sha256File(string! path) -> string!
