@@ -251,14 +251,6 @@ namespace LM.App.Wpf.Views.Library.Controls
             {
                 return;
             }
-        }
-
-        private void AddParenthesisDepthSegments(string text, List<HighlightSegment> segments, bool[] occupied)
-        {
-            if (text.Length == 0)
-            {
-                return;
-            }
 
             var paletteStack = new Stack<ParenthesisPalette>();
             var rangeStart = -1;
@@ -272,8 +264,8 @@ namespace LM.App.Wpf.Views.Library.Controls
                 if (character == '(')
                 {
                     FlushRange(i);
-                    var palette = ParenthesisPalettes[paletteStack.Count % ParenthesisPalettes.Length];
-                    paletteStack.Push(palette);
+                    var openingPalette = ParenthesisPalettes[paletteStack.Count % ParenthesisPalettes.Length];
+                    paletteStack.Push(openingPalette);
                     continue;
                 }
 
@@ -293,20 +285,20 @@ namespace LM.App.Wpf.Views.Library.Controls
                     continue;
                 }
 
-                var palette = paletteStack.Peek();
+                var activePalette = paletteStack.Peek();
                 if (rangeStart < 0)
                 {
                     rangeStart = i;
-                    currentPalette = palette;
+                    currentPalette = activePalette;
                     hasPalette = true;
                     continue;
                 }
 
-                if (!ReferenceEquals(currentPalette.RegionBackground, palette.RegionBackground))
+                if (!ReferenceEquals(currentPalette.RegionBackground, activePalette.RegionBackground))
                 {
                     FlushRange(i);
                     rangeStart = i;
-                    currentPalette = palette;
+                    currentPalette = activePalette;
                     hasPalette = true;
                 }
             }
