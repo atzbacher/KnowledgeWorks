@@ -120,13 +120,13 @@
                            IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                            ClickMode="Press"
                            Background="Transparent"
-                           BorderThickness="0">
+                           BorderThickness="0"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="10"
+                           Foreground="{StaticResource SearchGlyphBrush}">
                 <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
-                                  FontFamily="Segoe MDL2 Assets"
-                                  FontSize="10"
-                                  Content="&#xE70D;"
-                                  Foreground="{StaticResource SearchGlyphBrush}" />
+                                  Content="&#xE70D;" />
               </ToggleButton>
               <ContentPresenter x:Name="ContentSite"
                                 Margin="6,0,0,0"

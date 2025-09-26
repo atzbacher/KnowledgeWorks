@@ -470,6 +470,8 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedResult.get -> LM.Core.Models.Searc
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedResult.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleLeftPanelCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleRightPanelCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel! providers, LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel! history, LM.Infrastructure.Search.PubMedSearchProvider! pubMedProvider, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
 LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
@@ -478,6 +480,12 @@ LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.ShowRunDetailsCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.LeftPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.SearchViewModel.LeftPanelWidth.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.RightPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.SearchViewModel.RightPanelWidth.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.IsLeftPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.SearchViewModel.IsRightPanelCollapsed.get -> bool
 LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
 LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
 LM.App.Wpf.ViewModels.SearchViewModel.History.get -> LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel!
