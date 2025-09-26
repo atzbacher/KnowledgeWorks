@@ -121,3 +121,4 @@ LM.Infrastructure.Export.DataExtractionExcelExporter
 LM.Infrastructure.Export.DataExtractionExcelExporter.DataExtractionExcelExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
 LM.Infrastructure.Export.DataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
 LM.Infrastructure.Export.DataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
+

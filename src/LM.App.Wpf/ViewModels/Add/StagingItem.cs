@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using LM.Core.Models;
 using HookM = LM.HubSpoke.Models;
 
+
 namespace LM.App.Wpf.ViewModels
 {
     public sealed class StagingItem : INotifyPropertyChanged
@@ -86,13 +87,11 @@ namespace LM.App.Wpf.ViewModels
         }
 
         public bool Internal { get => IsInternal; set => IsInternal = value; }
-
         // NEW: the fully-populated hooks built at staging
         public HookM.ArticleHook? ArticleHook { get; set; }
         public HookM.DataExtractionHook? DataExtractionHook { get; set; }
         public List<HookM.EntryChangeLogEvent> PendingChangeLogEvents { get; } = new();
         public StagingEvidencePreview? EvidencePreview { get; set; }
-
-        public bool CommitMetadataOnly { get; set; }
     }
 }
+
