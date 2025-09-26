@@ -233,8 +233,7 @@
                     VerticalAlignment="Top"
                     HorizontalAlignment="Right">
           <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource LibraryHeaderButtonStyle}"
-                    Command="{Binding ToggleLeftPanelCommand}"
+            <Button Command="{Binding ToggleLeftPanelCommand}"
                     ToolTip="Show or hide the saved searches panel">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
@@ -247,8 +246,7 @@
                 </Style>
               </Button.Style>
             </Button>
-            <Button Style="{StaticResource LibraryHeaderButtonStyle}"
-                    Command="{Binding ToggleRightPanelCommand}"
+            <Button Command="{Binding ToggleRightPanelCommand}"
                     ToolTip="Show or hide the entry details panel">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
