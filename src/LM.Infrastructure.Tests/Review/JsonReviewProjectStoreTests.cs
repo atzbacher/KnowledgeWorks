@@ -280,7 +280,7 @@ public sealed class JsonReviewProjectStoreTests
         return StageDefinition.Create(
             "definition-1",
             "Title Screening",
-            ReviewStageType.Screening,
+            ReviewStageType.TitleScreening,
             requirement,
             StageConsensusPolicy.RequireAgreement(1, false, null));
     }
