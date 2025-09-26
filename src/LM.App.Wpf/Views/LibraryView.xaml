@@ -204,7 +204,6 @@
             </Button>
           </StackPanel>
         </StackPanel>
-
         <WrapPanel Grid.Row="1"
                    Grid.Column="0"
                    Grid.ColumnSpan="2"
@@ -236,7 +235,6 @@
                   AutomationProperties.Name="Load saved search"
                   Command="{Binding LoadPresetCommand}" />
         </WrapPanel>
-
         <Border Grid.Row="2"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
