@@ -134,6 +134,22 @@
         </TextBlock.Style>
       </TextBlock>
 
+      <TextBlock Text="Abstract" Style="{StaticResource SectionHeaderTextStyle}" />
+      <TextBlock Text="{Binding DataContext.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                 Style="{StaticResource SectionTextStyle}"
+                 Visibility="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}" />
+      <TextBlock Text="No abstract available.">
+        <TextBlock.Style>
+          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </TextBlock.Style>
+      </TextBlock>
+
       <TextBlock Text="Notes" Style="{StaticResource SectionHeaderTextStyle}" />
       <TextBlock Text="{Binding Entry.Notes}" Style="{StaticResource OptionalSectionTextStyle}" />
       <TextBlock Text="No notes recorded.">
