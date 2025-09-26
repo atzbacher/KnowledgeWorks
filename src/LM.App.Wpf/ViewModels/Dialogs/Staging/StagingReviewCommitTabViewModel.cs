@@ -4,31 +4,53 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Input;
 
 namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 {
     internal sealed class StagingReviewCommitTabViewModel : StagingTabViewModel
     {
+        private readonly StagingListViewModel _stagingList;
+        private readonly IDataExtractionCommitBuilder _builder;
+        private readonly AsyncRelayCommand _commitExtractionCommand;
+        private readonly AsyncRelayCommand _commitMetadataOnlyCommand;
         private IReadOnlyList<StagingTabViewModel>? _tabs;
+        private StagingTablesTabViewModel? _tablesTab;
+        private StagingEndpointsTabViewModel? _endpointsTab;
 
-        public StagingReviewCommitTabViewModel()
+        public StagingReviewCommitTabViewModel(StagingListViewModel stagingList,
+                                               IDataExtractionCommitBuilder builder)
             : base("Review & Commit")
         {
+            _stagingList = stagingList ?? throw new ArgumentNullException(nameof(stagingList));
+            _builder = builder ?? throw new ArgumentNullException(nameof(builder));
+
+            _commitExtractionCommand = new AsyncRelayCommand(CommitExtractionAsync, CanCommit);
+            _commitMetadataOnlyCommand = new AsyncRelayCommand(CommitMetadataOnlyAsync, CanCommit);
         }
 
         public ObservableCollection<string> Messages { get; } = new();
 
         public bool IsReady => Messages.Count == 0;
 
+        public IAsyncRelayCommand CommitExtractionCommand => _commitExtractionCommand;
+
+        public IAsyncRelayCommand CommitMetadataOnlyCommand => _commitMetadataOnlyCommand;
+
         public void Sync(StagingItem? item, IReadOnlyList<StagingTabViewModel> tabs)
         {
             _tabs = tabs ?? Array.Empty<StagingTabViewModel>();
+            _tablesTab = _tabs.OfType<StagingTablesTabViewModel>().FirstOrDefault();
+            _endpointsTab = _tabs.OfType<StagingEndpointsTabViewModel>().FirstOrDefault();
             Update(item);
         }
 
         protected override void OnItemUpdated(StagingItem? item)
         {
             // nothing extra; validation covers summary state.
+            UpdateCommandStates();
         }
 
         protected override void RefreshValidation()
@@ -55,6 +77,66 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
             SetValidationMessages(collected);
             OnPropertyChanged(nameof(IsReady));
+            UpdateCommandStates();
+        }
+
+        private bool CanCommit()
+            => Item is not null && IsReady;
+
+        private async Task CommitExtractionAsync()
+        {
+            if (Item is null)
+                return;
+
+            var current = Item;
+            var existingHook = current.DataExtractionHook;
+            try
+            {
+                var tables = _tablesTab?.Tables ?? Array.Empty<StagingTableRowViewModel>();
+                var endpoints = _endpointsTab?.Endpoints ?? Array.Empty<StagingEndpointViewModel>();
+                var built = _builder.Build(current, tables, endpoints);
+                if (built is not null)
+                    current.DataExtractionHook = built;
+
+                current.CommitMetadataOnly = false;
+                await _stagingList.CommitAsync(new[] { current }, CancellationToken.None).ConfigureAwait(false);
+            }
+            finally
+            {
+                current.CommitMetadataOnly = false;
+                if (_stagingList.Items.Contains(current))
+                {
+                    current.DataExtractionHook = existingHook;
+                }
+            }
+        }
+
+        private async Task CommitMetadataOnlyAsync()
+        {
+            if (Item is null)
+                return;
+
+            var current = Item;
+            var existingHook = current.DataExtractionHook;
+            try
+            {
+                current.CommitMetadataOnly = true;
+                await _stagingList.CommitAsync(new[] { current }, CancellationToken.None).ConfigureAwait(false);
+            }
+            finally
+            {
+                current.CommitMetadataOnly = false;
+                if (_stagingList.Items.Contains(current))
+                {
+                    current.DataExtractionHook = existingHook;
+                }
+            }
+        }
+
+        private void UpdateCommandStates()
+        {
+            _commitExtractionCommand.NotifyCanExecuteChanged();
+            _commitMetadataOnlyCommand.NotifyCanExecuteChanged();
         }
     }
 }

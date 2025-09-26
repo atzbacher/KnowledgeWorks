@@ -11,6 +11,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using HookM = LM.HubSpoke.Models;
@@ -772,7 +775,18 @@ namespace LM.App.Wpf.ViewModels
                 throw new ArgumentNullException(nameof(entry));
 
             var article = BuildArticleHook(stagingItem, entry, relativePath, sha256);
+            var normalizedPath = NormalizeStoragePath(relativePath);
+            var articleHash = string.IsNullOrWhiteSpace(sha256) ? null : $"sha256-{sha256}";
+            var dataExtraction = stagingItem.CommitMetadataOnly ? null : stagingItem.DataExtractionHook;
+            var extractionHash = TryComputeDataExtractionHash(dataExtraction);
             var changeLog = BuildEntryCreationChangeLog(entry, addedBy);
+            var extractionEvent = BuildDataExtractionChangeLog(stagingItem,
+                                                               entry,
+                                                               normalizedPath,
+                                                               articleHash,
+                                                               extractionHash,
+                                                               addedBy,
+                                                               stagingItem.CommitMetadataOnly);
 
             if (stagingItem.PendingChangeLogEvents.Count > 0)
             {
@@ -785,6 +799,12 @@ namespace LM.App.Wpf.ViewModels
                 }
             }
 
+            if (extractionEvent is not null)
+            {
+                changeLog ??= new HookM.EntryChangeLogHook();
+                changeLog.Events.Add(extractionEvent);
+            }
+
             if (article is null && changeLog is null)
                 return null;
 
@@ -792,7 +812,7 @@ namespace LM.App.Wpf.ViewModels
             {
                 Article = article,
                 ChangeLog = changeLog,
-                DataExtraction = stagingItem.DataExtractionHook
+                DataExtraction = dataExtraction
             };
         }
 
@@ -941,6 +961,71 @@ namespace LM.App.Wpf.ViewModels
             };
         }
 
+        private HookM.EntryChangeLogEvent? BuildDataExtractionChangeLog(StagingItem stagingItem,
+                                                                        Entry entry,
+                                                                        string normalizedPath,
+                                                                        string? articleHash,
+                                                                        string? extractionHash,
+                                                                        string performer,
+                                                                        bool metadataOnly)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+            if (stagingItem is null)
+                throw new ArgumentNullException(nameof(stagingItem));
+
+            var tags = BuildExtractionTags(articleHash, extractionHash, metadataOnly);
+            if (tags.Count == 0)
+                return null;
+
+            var title = entry.DisplayName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Title;
+            if (string.IsNullOrWhiteSpace(title))
+                title = stagingItem.Title;
+            if (string.IsNullOrWhiteSpace(title))
+                title = stagingItem.DisplayName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.OriginalFileName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Id;
+
+            return new HookM.EntryChangeLogEvent
+            {
+                EventId = Guid.NewGuid().ToString("N"),
+                TimestampUtc = DateTime.UtcNow,
+                PerformedBy = string.IsNullOrWhiteSpace(performer) ? GetCurrentUserName() : performer,
+                Action = metadataOnly ? "DataExtractionSkipped" : "DataExtractionCommitted",
+                Details = new HookM.ChangeLogAttachmentDetails
+                {
+                    AttachmentId = entry.Id,
+                    Title = title!,
+                    LibraryPath = normalizedPath,
+                    Purpose = AttachmentKind.Supplement,
+                    Tags = tags
+                }
+            };
+        }
+
+        private static List<string> BuildExtractionTags(string? articleHash, string? extractionHash, bool metadataOnly)
+        {
+            var tags = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(articleHash))
+                tags.Add($"asset:article:{articleHash}");
+
+            if (metadataOnly)
+            {
+                tags.Add("asset:data-extraction:none");
+            }
+            else if (!string.IsNullOrWhiteSpace(extractionHash))
+            {
+                tags.Add($"asset:data-extraction:{extractionHash}");
+            }
+
+            return tags;
+        }
+
         private long TryGetFileSize(string storagePath)
         {
             try
@@ -985,6 +1070,25 @@ namespace LM.App.Wpf.ViewModels
             return normalized.StartsWith("sha256-", StringComparison.OrdinalIgnoreCase)
                 ? normalized
                 : $"sha256-{normalized.ToLowerInvariant()}";
+        }
+
+        private static string? TryComputeDataExtractionHash(HookM.DataExtractionHook? hook)
+        {
+            if (hook is null)
+                return null;
+
+            try
+            {
+                var json = JsonSerializer.Serialize(hook, HookM.JsonStd.Options);
+                using var sha = SHA256.Create();
+                var bytes = Encoding.UTF8.GetBytes(json);
+                var hash = sha.ComputeHash(bytes);
+                return $"sha256-{Convert.ToHexString(hash).ToLowerInvariant()}";
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private static string Truncate(string value, int maxLength)

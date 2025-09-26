@@ -20,6 +20,16 @@
         </swc:ItemsControl.ItemTemplate>
       </swc:ItemsControl>
 
+      <swc:StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+        <swc:Button Content="Commit Extraction"
+                    Command="{Binding CommitExtractionCommand}"
+                    Margin="0,0,8,0"
+                    Padding="12,4" />
+        <swc:Button Content="Commit Metadata Only"
+                    Command="{Binding CommitMetadataOnlyCommand}"
+                    Padding="12,4" />
+      </swc:StackPanel>
+
       <swc:TextBlock Margin="0,12,0,0"
                      Text="All validations passed. You can proceed to commit."
                      Foreground="Green"
