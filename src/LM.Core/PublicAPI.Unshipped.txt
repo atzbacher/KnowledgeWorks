@@ -498,6 +498,7 @@ static LM.Core.Utils.Hashes.Sha256File(string! path) -> string!
 static LM.Core.Utils.IdGen.NewId() -> string!
 static LM.Core.Utils.JsonEx.Deserialize<T>(string! s) -> T?
 static LM.Core.Utils.JsonEx.Serialize<T>(T v) -> string!
+static LM.Core.Utils.SystemUser.GetCurrent() -> string!
 LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
 LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.Configuration.ISearchHistoryStore

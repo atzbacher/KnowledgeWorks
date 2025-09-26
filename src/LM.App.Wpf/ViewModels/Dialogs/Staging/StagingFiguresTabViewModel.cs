@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using LM.App.Wpf.ViewModels;
+using LM.Core.Utils;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Dialogs.Staging
@@ -36,7 +37,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             item.DataExtractionHook ??= new HookM.DataExtractionHook
             {
                 ExtractedAtUtc = DateTime.UtcNow,
-                ExtractedBy = Environment.UserName ?? "unknown"
+                ExtractedBy = SystemUser.GetCurrent()
             };
 
             var hookFigures = item.DataExtractionHook.Figures;

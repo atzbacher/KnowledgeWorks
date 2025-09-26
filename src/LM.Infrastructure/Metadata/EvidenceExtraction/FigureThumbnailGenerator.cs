@@ -3,8 +3,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using SkiaSharp;
 
 namespace LM.Infrastructure.Metadata.EvidenceExtraction
 {
@@ -20,8 +19,33 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
             Directory.CreateDirectory(figuresRoot);
             var path = Path.Combine(figuresRoot, $"{figureId}.png");
 
-            using var image = new Image<Rgba32>(400, 300, new Rgba32(240, 244, 248));
-            await image.SaveAsync(path, ct).ConfigureAwait(false);
+            using var surface = SKSurface.Create(new SKImageInfo(400, 300));
+            if (surface is null)
+                throw new InvalidOperationException("Failed to create placeholder thumbnail surface.");
+
+            var canvas = surface.Canvas;
+            if (canvas is null)
+                throw new InvalidOperationException("Failed to access placeholder thumbnail canvas.");
+
+            canvas.Clear(new SKColor(240, 244, 248));
+
+            using var snapshot = surface.Snapshot();
+            using var data = snapshot.Encode(SKEncodedImageFormat.Png, quality: 100);
+
+            await using var stream = new FileStream(
+                path,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: 4096,
+                useAsync: true);
+
+            if (data is null)
+                throw new InvalidOperationException("Failed to encode placeholder thumbnail.");
+
+            var bytes = data.ToArray();
+            await stream.WriteAsync(bytes, ct).ConfigureAwait(false);
+            await stream.FlushAsync(ct).ConfigureAwait(false);
             return path;
         }
     }

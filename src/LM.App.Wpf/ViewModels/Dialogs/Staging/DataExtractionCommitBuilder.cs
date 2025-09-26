@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using LM.App.Wpf.ViewModels;
+using LM.Core.Utils;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Dialogs.Staging
@@ -131,8 +132,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
         private static string GetCurrentUserName()
         {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+            return SystemUser.GetCurrent();
         }
     }
 }

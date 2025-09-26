@@ -1,5 +1,6 @@
 using System;
 using System.Security.Principal;
+using LM.Core.Utils;
 
 namespace LM.Review.Core.Models.Forms;
 
@@ -28,10 +29,10 @@ internal static class FormUserContext
             // Ignore failures and fallback to environment values.
         }
 
-        var environmentUser = Environment.UserName;
-        if (!string.IsNullOrWhiteSpace(environmentUser))
+        var environmentUser = SystemUser.GetCurrent();
+        if (!string.Equals(environmentUser, "unknown", StringComparison.OrdinalIgnoreCase))
         {
-            return environmentUser.Trim();
+            return environmentUser;
         }
 
         var machineName = Environment.MachineName;
@@ -40,6 +41,6 @@ internal static class FormUserContext
             return machineName.Trim();
         }
 
-        return "unknown";
+        return environmentUser;
     }
 }
