@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.App.Wpf.Library.Search;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
@@ -30,12 +31,32 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly SemaphoreSlim _presetLock = new(1, 1);
         private readonly SemaphoreSlim _navigationLock = new(1, 1);
         private bool _initialized;
+        private bool _suppressLeftPanelSync;
+        private bool _suppressRightPanelSync;
+        private double _lastLeftPanelWidth = DefaultLeftPanelWidth;
+        private double _lastRightPanelWidth = DefaultRightPanelWidth;
+
+        private const double DefaultLeftPanelWidth = 310;
+        private const double DefaultRightPanelWidth = 360;
+        private const double CollapsedPanelWidth = 0;
 
         [ObservableProperty]
         private bool useFullTextSearch;
 
         [ObservableProperty]
         private string? unifiedQuery;
+
+        [ObservableProperty]
+        private System.Windows.GridLength leftPanelWidth = new System.Windows.GridLength(DefaultLeftPanelWidth);
+
+        [ObservableProperty]
+        private System.Windows.GridLength rightPanelWidth = new System.Windows.GridLength(DefaultRightPanelWidth);
+
+        [ObservableProperty]
+        private bool isLeftPanelCollapsed;
+
+        [ObservableProperty]
+        private bool isRightPanelCollapsed;
 
         [ObservableProperty]
         private string? fullTextQuery;
@@ -56,6 +77,10 @@ namespace LM.App.Wpf.ViewModels.Library
 
         public bool HasSavedPresets => SavedPresets.Count > 0;
 
+        public IReadOnlyList<string> KeywordTokens { get; } = LibrarySearchFieldMap.GetDisplayTokens();
+
+        public string KeywordTooltip { get; } = BuildKeywordTooltip();
+
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore,
                                        ILibraryPresetPrompt presetPrompt,
                                        IEntryStore store,
@@ -65,6 +90,132 @@ namespace LM.App.Wpf.ViewModels.Library
             _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+        }
+
+        private static string BuildKeywordTooltip()
+        {
+            var tokens = LibrarySearchFieldMap.GetDisplayTokens();
+            if (tokens.Count == 0)
+            {
+                return "Supported keywords: (none)";
+            }
+
+            var formatted = tokens.Select(static token => string.Concat(token, ":"));
+            return "Supported keywords: " + string.Join(", ", formatted);
+        }
+
+        partial void OnLeftPanelWidthChanged(System.Windows.GridLength value)
+        {
+            if (_suppressLeftPanelSync)
+            {
+                return;
+            }
+
+            var numeric = value.IsAbsolute ? value.Value : DefaultLeftPanelWidth;
+            if (numeric > 1)
+            {
+                _lastLeftPanelWidth = numeric;
+                if (IsLeftPanelCollapsed)
+                {
+                    _suppressLeftPanelSync = true;
+                    IsLeftPanelCollapsed = false;
+                    _suppressLeftPanelSync = false;
+                }
+            }
+            else if (!IsLeftPanelCollapsed)
+            {
+                _suppressLeftPanelSync = true;
+                IsLeftPanelCollapsed = true;
+                _suppressLeftPanelSync = false;
+            }
+        }
+
+        partial void OnRightPanelWidthChanged(System.Windows.GridLength value)
+        {
+            if (_suppressRightPanelSync)
+            {
+                return;
+            }
+
+            var numeric = value.IsAbsolute ? value.Value : DefaultRightPanelWidth;
+            if (numeric > 1)
+            {
+                _lastRightPanelWidth = numeric;
+                if (IsRightPanelCollapsed)
+                {
+                    _suppressRightPanelSync = true;
+                    IsRightPanelCollapsed = false;
+                    _suppressRightPanelSync = false;
+                }
+            }
+            else if (!IsRightPanelCollapsed)
+            {
+                _suppressRightPanelSync = true;
+                IsRightPanelCollapsed = true;
+                _suppressRightPanelSync = false;
+            }
+        }
+
+        partial void OnIsLeftPanelCollapsedChanged(bool value)
+        {
+            if (_suppressLeftPanelSync)
+            {
+                return;
+            }
+
+            _suppressLeftPanelSync = true;
+            try
+            {
+                if (value)
+                {
+                    if (LeftPanelWidth.Value > 1)
+                    {
+                        _lastLeftPanelWidth = LeftPanelWidth.Value;
+                    }
+
+                    LeftPanelWidth = new System.Windows.GridLength(CollapsedPanelWidth);
+                }
+                else
+                {
+                    var width = _lastLeftPanelWidth > 1 ? _lastLeftPanelWidth : DefaultLeftPanelWidth;
+                    LeftPanelWidth = new System.Windows.GridLength(width);
+                }
+            }
+            finally
+            {
+                _suppressLeftPanelSync = false;
+            }
+        }
+
+        partial void OnIsRightPanelCollapsedChanged(bool value)
+        {
+            if (_suppressRightPanelSync)
+            {
+                return;
+            }
+
+            _suppressRightPanelSync = true;
+            try
+            {
+                if (value)
+                {
+                    if (RightPanelWidth.Value > 1)
+                    {
+                        _lastRightPanelWidth = RightPanelWidth.Value;
+                    }
+
+                    RightPanelWidth = new System.Windows.GridLength(CollapsedPanelWidth);
+                }
+                else
+                {
+                    var width = _lastRightPanelWidth > 1 ? _lastRightPanelWidth : DefaultRightPanelWidth;
+                    RightPanelWidth = new System.Windows.GridLength(width);
+                }
+            }
+            finally
+            {
+                _suppressRightPanelSync = false;
+            }
         }
 
         public async Task InitializeAsync(CancellationToken ct = default)
@@ -94,6 +245,18 @@ namespace LM.App.Wpf.ViewModels.Library
             FullTextInTitle = true;
             FullTextInAbstract = true;
             FullTextInContent = true;
+        }
+
+        [RelayCommand]
+        private void ToggleLeftPanel()
+        {
+            IsLeftPanelCollapsed = !IsLeftPanelCollapsed;
+        }
+
+        [RelayCommand]
+        private void ToggleRightPanel()
+        {
+            IsRightPanelCollapsed = !IsRightPanelCollapsed;
         }
 
         public string GetNormalizedFullTextQuery()
@@ -449,6 +612,7 @@ namespace LM.App.Wpf.ViewModels.Library
                     }
                 }
             }
+
             catch
             {
                 // workspace not ready or enumeration failed; ignore for now

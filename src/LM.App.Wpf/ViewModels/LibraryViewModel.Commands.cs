@@ -20,6 +20,7 @@ namespace LM.App.Wpf.ViewModels
     {
         private static readonly (string Key, string Display)[] s_columnDefinitions =
         {
+            ("AttachmentIndicator", "Attachments"),
             ("Title", "Title"),
             ("Score", "Score"),
             ("Source", "Source"),

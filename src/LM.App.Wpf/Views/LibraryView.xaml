@@ -1,4 +1,5 @@
 <UserControl x:Class="LM.App.Wpf.Views.LibraryView"
+             x:Name="LibraryViewControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,6 +8,7 @@
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 
              mc:Ignorable="d"
@@ -27,11 +29,11 @@
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="310"/>
-      <ColumnDefinition Width="5"/>
+      <ColumnDefinition Width="{Binding DataContext.Filters.LeftPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
+      <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="5"/>
-      <ColumnDefinition Width="360"/>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="{Binding DataContext.Filters.RightPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
     </Grid.ColumnDefinitions>
 
     <!-- Search header -->
@@ -47,11 +49,12 @@
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+        <StackPanel Grid.Row="0" Grid.Column="0">
           <TextBlock Text="Library search" FontWeight="SemiBold"/>
-          <TextBox Margin="0,6,0,0"
-                   Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}"
-                   ToolTip="Use field qualifiers like title:heart OR author:&quot;Doe&quot; to refine results."/>
+          <controls:LibrarySearchQueryBox Margin="0,6,0,0"
+                                          Text="{Binding UnifiedQuery}"
+                                          ToolTip="{Binding KeywordTooltip}"
+                                          ToolTipService.ShowDuration="60000"/>
           <TextBlock Text="Examples: title:heart AND tags:aortic, author:nicolas, NOT internal:true"
                      FontSize="11"
                      Foreground="DimGray"
@@ -136,12 +139,57 @@
       </ScrollViewer>
     </Border>
 
-    <GridSplitter Grid.Row="1" Grid.Column="1"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Background="#FFE0E0E0"
-                  ShowsPreview="True"
-                  Width="5"/>
+    <Grid Grid.Row="1" Grid.Column="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="5" />
+      </Grid.ColumnDefinitions>
+      <Button Grid.Column="0"
+              Command="{Binding DataContext.Filters.ToggleLeftPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Padding="0"
+              Width="20"
+              Height="48"
+              Margin="0"
+              Background="#FFF4F4F4"
+              BorderBrush="#FFBEBEBE"
+              BorderThickness="1">
+        <Button.Style>
+          <Style TargetType="Button">
+            <Setter Property="Content" Value="«" />
+            <Setter Property="ToolTip" Value="Hide saved searches panel" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="DimGray" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <Setter Property="Content" Value="»" />
+                <Setter Property="ToolTip" Value="Show saved searches panel" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Button.Style>
+      </Button>
+      <GridSplitter Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#FFE0E0E0"
+                    ShowsPreview="True"
+                    Width="5">
+        <GridSplitter.Style>
+          <Style TargetType="GridSplitter">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </GridSplitter.Style>
+      </GridSplitter>
+    </Grid>
 
     <!-- Results -->
     <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}">
@@ -223,6 +271,7 @@
           </i:EventTrigger>
         </i:Interaction.Triggers>
         <DataGrid.Columns>
+          <StaticResource ResourceKey="LibraryResultsColumn.AttachmentIndicator" />
           <StaticResource ResourceKey="LibraryResultsColumn.Title" />
           <StaticResource ResourceKey="LibraryResultsColumn.Score" />
           <StaticResource ResourceKey="LibraryResultsColumn.Source" />
@@ -247,12 +296,57 @@
       </StackPanel>
     </Grid>
 
-    <GridSplitter Grid.Row="1" Grid.Column="3"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  Background="#FFE0E0E0"
-                  ShowsPreview="True"
-                  Width="5"/>
+    <Grid Grid.Row="1" Grid.Column="3">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="5" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <GridSplitter Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#FFE0E0E0"
+                    ShowsPreview="True"
+                    Width="5">
+        <GridSplitter.Style>
+          <Style TargetType="GridSplitter">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </GridSplitter.Style>
+      </GridSplitter>
+      <Button Grid.Column="1"
+              Command="{Binding DataContext.Filters.ToggleRightPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Padding="0"
+              Width="20"
+              Height="48"
+              Margin="0"
+              Background="#FFF4F4F4"
+              BorderBrush="#FFBEBEBE"
+              BorderThickness="1">
+        <Button.Style>
+          <Style TargetType="Button">
+            <Setter Property="Content" Value="»" />
+            <Setter Property="ToolTip" Value="Hide entry details panel" />
+            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="DimGray" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+                <Setter Property="Content" Value="«" />
+                <Setter Property="ToolTip" Value="Show entry details panel" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Button.Style>
+      </Button>
+    </Grid>
 
     <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"

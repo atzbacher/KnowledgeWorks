@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using LM.Core.Models;
 
 namespace LM.App.Wpf.Library.Search
@@ -54,6 +55,24 @@ namespace LM.App.Wpf.Library.Search
             ["summary"] = LibrarySearchField.Notes
         };
 
+        private static readonly IReadOnlyDictionary<LibrarySearchField, string> s_displayTokens = new Dictionary<LibrarySearchField, string>
+        {
+            [LibrarySearchField.Title] = "title",
+            [LibrarySearchField.Author] = "author",
+            [LibrarySearchField.Tags] = "tags",
+            [LibrarySearchField.Source] = "source",
+            [LibrarySearchField.InternalId] = "internalid",
+            [LibrarySearchField.Doi] = "doi",
+            [LibrarySearchField.Pmid] = "pmid",
+            [LibrarySearchField.Nct] = "nct",
+            [LibrarySearchField.Type] = "type",
+            [LibrarySearchField.Year] = "year",
+            [LibrarySearchField.AddedBy] = "addedby",
+            [LibrarySearchField.AddedOn] = "addedon",
+            [LibrarySearchField.Internal] = "internal",
+            [LibrarySearchField.Notes] = "notes"
+        };
+
         public static LibrarySearchField Resolve(string? token)
         {
             if (string.IsNullOrWhiteSpace(token))
@@ -72,6 +91,16 @@ namespace LM.App.Wpf.Library.Search
             }
 
             return LibrarySearchField.Any;
+        }
+
+        public static IReadOnlyList<string> GetDisplayTokens()
+        {
+            return s_displayTokens.Values.ToArray();
+        }
+
+        public static IReadOnlyCollection<string> GetAllTokens()
+        {
+            return _map.Keys.ToArray();
         }
     }
 }
