@@ -12,7 +12,7 @@ namespace LM.App.Wpf.Views.Library.Controls
         private static readonly System.Windows.Media.Brush KeywordBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(72, 118, 214));
         private static readonly System.Windows.Media.Brush OperatorBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(176, 88, 35));
         private static readonly Regex KeywordRegex = BuildKeywordRegex();
-        private static readonly Regex OperatorRegex = new("(?<!\\w)(AND|OR|NOT)(?!\\w)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex OperatorRegex = new("(?<!\\w)(AND|OR|NOT)(?!\\w)", RegexOptions.Compiled);
 
         private bool _suppressTextSync;
         private bool _suppressHighlight;
@@ -152,12 +152,16 @@ namespace LM.App.Wpf.Views.Library.Controls
                     continue;
                 }
 
-                segments.Add(new HighlightSegment(match.Index, match.Length, KeywordBrush, System.Windows.FontWeights.SemiBold));
+                var length = match.Length;
                 var colonIndex = match.Index + match.Length;
                 if (colonIndex < text.Length && text[colonIndex] == ':')
                 {
-                    segments.Add(new HighlightSegment(colonIndex, 1, KeywordBrush, System.Windows.FontWeights.SemiBold));
+                    length += 1;
                 }
+
+                segments.Add(new HighlightSegment(match.Index, length, KeywordBrush, System.Windows.FontWeights.SemiBold));
+
+
             }
 
             foreach (Match match in OperatorRegex.Matches(text))
@@ -222,48 +226,31 @@ namespace LM.App.Wpf.Views.Library.Controls
 
         private void RestoreSelection(int start, int length)
         {
-            var startPointer = GetTextPointerAtOffset(start) ?? Document.ContentStart;
-            var endPointer = GetTextPointerAtOffset(start + length) ?? startPointer;
+            var clampedStart = Math.Max(0, start);
+            var clampedEnd = Math.Max(clampedStart, start + length);
+            var startPointer = GetTextPointerAtOffset(clampedStart) ?? Document.ContentStart;
+            var endPointer = GetTextPointerAtOffset(clampedEnd) ?? startPointer;
+
             Selection.Select(startPointer, endPointer);
         }
 
         private int GetCharacterOffset(System.Windows.Documents.TextPointer pointer)
         {
-            var range = new System.Windows.Documents.TextRange(Document.ContentStart, pointer ?? Document.ContentStart);
-            var text = range.Text ?? string.Empty;
-            return text.Length;
+            if (pointer is null)
+            {
+                return 0;
+            }
+
+            return Document.ContentStart.GetOffsetToPosition(pointer);
+
         }
 
         private System.Windows.Documents.TextPointer? GetTextPointerAtOffset(int offset)
         {
-            if (offset <= 0)
-            {
-                return Document.ContentStart;
-            }
 
-            var navigator = Document.ContentStart;
-            var remaining = offset;
+            var clamped = Math.Max(0, offset);
+            return Document.ContentStart.GetPositionAtOffset(clamped, System.Windows.Documents.LogicalDirection.Forward);
 
-            while (navigator is not null)
-            {
-                var next = navigator.GetNextInsertionPosition(System.Windows.Documents.LogicalDirection.Forward);
-                if (next is null)
-                {
-                    return Document.ContentEnd;
-                }
-
-                var segment = new System.Windows.Documents.TextRange(navigator, next);
-                var length = segment.Text?.Length ?? 0;
-                if (length >= remaining)
-                {
-                    return navigator.GetPositionAtOffset(remaining, System.Windows.Documents.LogicalDirection.Forward);
-                }
-
-                remaining -= length;
-                navigator = next;
-            }
-
-            return Document.ContentEnd;
         }
 
         private System.Windows.Documents.Run CreateRun(string text, System.Windows.Media.Brush? foreground, System.Windows.FontWeight fontWeight)
