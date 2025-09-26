@@ -32,16 +32,23 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IDataExtractionPreprocessor>(),
                 sp.GetRequiredService<ISimilarityLog>()));
 
+
             services.AddSingleton<WatchedFolderScanner>(sp => new WatchedFolderScanner(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddSingleton<IDataExtractionCommitBuilder, DataExtractionCommitBuilder>();
+
             services.AddTransient<StagingMetadataTabViewModel>();
             services.AddTransient<StagingTablesTabViewModel>();
             services.AddTransient<StagingFiguresTabViewModel>();
             services.AddTransient<StagingEndpointsTabViewModel>();
             services.AddTransient<StagingPopulationTabViewModel>();
-            services.AddTransient<StagingReviewCommitTabViewModel>();
+
+            services.AddTransient<StagingReviewCommitTabViewModel>(sp => new StagingReviewCommitTabViewModel(
+                sp.GetRequiredService<StagingListViewModel>(),
+                sp.GetRequiredService<IDataExtractionCommitBuilder>()));
             services.AddTransient<StagingEditorViewModel>();
             services.AddTransient<StagingEditorWindow>();
+
             services.AddSingleton<StagingListViewModel>(sp => new StagingListViewModel(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<WatchedFoldersViewModel>(sp => new WatchedFoldersViewModel(
                 sp.GetRequiredService<StagingListViewModel>(),
