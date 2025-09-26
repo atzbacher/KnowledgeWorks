@@ -1,0 +1,43 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging">
+  <DataTemplate DataType="{x:Type vm:StagingTablesTabViewModel}">
+    <swc:DockPanel>
+      <swc:StackPanel Orientation="Horizontal"
+                      DockPanel.Dock="Bottom"
+                      HorizontalAlignment="Right"
+                      Margin="0,8,0,0">
+        <swc:Button Content="Launch digitizer"
+                    Margin="0,0,8,0"
+                    Command="{Binding LaunchDigitizerCommand}"
+                    CommandParameter="{Binding SelectedTable}" />
+        <swc:Button Content="Re-upload CSV"
+                    Command="{Binding ReuploadDigitizedCommand}"
+                    CommandParameter="{Binding SelectedTable}" />
+      </swc:StackPanel>
+
+      <swc:DataGrid ItemsSource="{Binding Tables}"
+                    SelectedItem="{Binding SelectedTable, Mode=TwoWay}"
+                    AutoGenerateColumns="False"
+                    HeadersVisibility="Column"
+                    CanUserAddRows="False"
+                    IsReadOnly="False">
+        <swc:DataGrid.Columns>
+          <swc:DataGridTextColumn Header="Title" Binding="{Binding Title}" IsReadOnly="True" Width="200" />
+          <swc:DataGridComboBoxColumn Header="Classification"
+                                      SelectedItemBinding="{Binding Classification, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding DataContext.ClassificationOptions, RelativeSource={RelativeSource AncestorType={x:Type swc:DataGrid}}}"
+                                      Width="150" />
+          <swc:DataGridTextColumn Header="Populations" Binding="{Binding PopulationSummary}" IsReadOnly="True" Width="200" />
+          <swc:DataGridTextColumn Header="Endpoints" Binding="{Binding EndpointSummary}" IsReadOnly="True" Width="200" />
+          <swc:DataGridTextColumn Header="Pages" Binding="{Binding PageSummary}" IsReadOnly="True" Width="80" />
+          <swc:DataGridTextColumn Header="Source"
+                                  Binding="{Binding SourcePath}"
+                                  Width="*"
+                                  IsReadOnly="True" />
+        </swc:DataGrid.Columns>
+      </swc:DataGrid>
+    </swc:DockPanel>
+  </DataTemplate>
+</ResourceDictionary>

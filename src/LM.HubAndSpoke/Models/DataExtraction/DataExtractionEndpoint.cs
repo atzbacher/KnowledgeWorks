@@ -37,5 +37,8 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("notes")]
         public string? Notes { get; init; }
+
+        [JsonPropertyName("confirmed")]
+        public bool Confirmed { get; init; }
     }
 }

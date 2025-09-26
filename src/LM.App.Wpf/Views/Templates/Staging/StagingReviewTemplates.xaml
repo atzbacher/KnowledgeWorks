@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging">
+  <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+  <DataTemplate DataType="{x:Type vm:StagingReviewCommitTabViewModel}">
+    <swc:StackPanel>
+      <swc:TextBlock Text="Review staged evidence before committing." FontWeight="Bold" />
+      <swc:ItemsControl ItemsSource="{Binding Messages}" Margin="0,8,0,0">
+        <swc:ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <swc:TextBlock Margin="0,2,0,0">
+              <swc:TextBlock.Inlines>
+                <Run Text="• " />
+                <Run Text="{Binding .}" />
+              </swc:TextBlock.Inlines>
+            </swc:TextBlock>
+          </DataTemplate>
+        </swc:ItemsControl.ItemTemplate>
+      </swc:ItemsControl>
+
+      <swc:TextBlock Margin="0,12,0,0"
+                     Text="All validations passed. You can proceed to commit."
+                     Foreground="Green"
+                     Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}" />
+    </swc:StackPanel>
+  </DataTemplate>
+</ResourceDictionary>
