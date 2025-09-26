@@ -1,0 +1,201 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <SolidColorBrush x:Key="SearchSurfaceBrush" Color="#FF101216" />
+  <SolidColorBrush x:Key="SearchPanelBrush" Color="#FF171A1F" />
+  <SolidColorBrush x:Key="SearchPanelBorderBrush" Color="#FF2A3039" />
+  <SolidColorBrush x:Key="SearchPanelSubtleBrush" Color="#FF1F232B" />
+  <SolidColorBrush x:Key="SearchPrimaryTextBrush" Color="#FFF3F4F6" />
+  <SolidColorBrush x:Key="SearchSecondaryTextBrush" Color="#FFA0A7B4" />
+  <SolidColorBrush x:Key="SearchDividerBrush" Color="#FF2F3540" />
+  <SolidColorBrush x:Key="SearchAccentBrush" Color="#FF3B82F6" />
+  <SolidColorBrush x:Key="SearchAccentForegroundBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="SearchGlyphBrush" Color="#FFD1D5DB" />
+  <SolidColorBrush x:Key="SearchDangerBrush" Color="#FFEF4444" />
+
+  <Thickness x:Key="SearchPanelPadding">12</Thickness>
+
+  <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+  <Style x:Key="SearchSectionHeader" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource SearchSecondaryTextBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+  </Style>
+
+  <Style x:Key="SearchIconButtonStyle" TargetType="Button">
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Background" Value="{StaticResource SearchPanelSubtleBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource SearchGlyphBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              RecognizesAccessKey="True" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="#FF1F2731" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="#FF24303D" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF4B5666" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="SearchAccentButtonStyle" BasedOn="{StaticResource SearchIconButtonStyle}" TargetType="Button">
+    <Setter Property="Background" Value="{StaticResource SearchAccentBrush}" />
+    <Setter Property="Foreground" Value="{StaticResource SearchAccentForegroundBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource SearchAccentBrush}" />
+    <Setter Property="FontSize" Value="16" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="#FF2563EB" />
+        <Setter Property="BorderBrush" Value="#FF1D4ED8" />
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Background" Value="#FF1E3A8A" />
+        <Setter Property="BorderBrush" Value="#FF1E3A8A" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
+    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="CaretBrush" Value="{StaticResource SearchAccentBrush}" />
+  </Style>
+
+  <Style x:Key="SearchComboBoxStyle" TargetType="ComboBox">
+    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
+    <Setter Property="Padding" Value="6,4" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBox">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="32" />
+              </Grid.ColumnDefinitions>
+              <ToggleButton x:Name="ToggleButton"
+                           Grid.Column="1"
+                           Focusable="False"
+                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                           ClickMode="Press"
+                           Background="Transparent"
+                           BorderThickness="0"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="10"
+                           Foreground="{StaticResource SearchGlyphBrush}">
+                <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Content="&#xE70D;" />
+              </ToggleButton>
+              <ContentPresenter x:Name="ContentSite"
+                                Margin="6,0,0,0"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Left"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+            </Trigger>
+            <Trigger Property="IsDropDownOpen" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource SearchAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="SearchDatePickerStyle" TargetType="DatePicker">
+    <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
+    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="DatePicker">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="4">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="32" />
+              </Grid.ColumnDefinitions>
+              <DatePickerTextBox x:Name="TextBox"
+                                 Grid.Column="0"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{TemplateBinding Foreground}" />
+              <Button x:Name="PART_Button"
+                      Grid.Column="1"
+                      Style="{StaticResource SearchIconButtonStyle}"
+                      Content="&#xE787;"
+                      Focusable="False"
+                      Padding="0" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+            </Trigger>
+            <Trigger Property="IsDropDownOpen" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource SearchAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>
