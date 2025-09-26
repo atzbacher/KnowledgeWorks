@@ -812,7 +812,7 @@ namespace LM.App.Wpf.ViewModels
             {
                 Article = article,
                 ChangeLog = changeLog,
-                DataExtraction = dataExtraction
+                DataExtraction = stagingItem.DataExtractionHook
             };
         }
 
@@ -1072,6 +1072,7 @@ namespace LM.App.Wpf.ViewModels
                 : $"sha256-{normalized.ToLowerInvariant()}";
         }
 
+
         private static string? TryComputeDataExtractionHash(HookM.DataExtractionHook? hook)
         {
             if (hook is null)
@@ -1090,6 +1091,7 @@ namespace LM.App.Wpf.ViewModels
                 return null;
             }
         }
+
 
         private static string Truncate(string value, int maxLength)
         {
