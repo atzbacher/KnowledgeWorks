@@ -1,0 +1,54 @@
+<UserControl x:Class="LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:syswinControls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:reviewModels="clr-namespace:LM.Review.Core.Models;assembly=LM.Review.Core"
+             xmlns:reviewVm="clr-namespace:LM.App.Wpf.ViewModels.Review"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=reviewVm:ScreeningQueueViewModel}">
+  <syswinControls:Border Style="{StaticResource ReviewSectionBorderStyle}">
+    <Grid>
+      <Grid.RowDefinitions>
+        <syswinControls:RowDefinition Height="Auto" />
+        <syswinControls:RowDefinition Height="Auto" />
+        <syswinControls:RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <syswinControls:StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <syswinControls:TextBlock Text="Screening queue" Style="{StaticResource ReviewSectionHeaderStyle}" />
+        <syswinControls:TextBlock Text="{Binding Stage.Definition.Name, TargetNullValue=Select a stage}" Margin="12,0,0,0" />
+      </syswinControls:StackPanel>
+
+      <syswinControls:StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,8">
+        <syswinControls:TextBlock Text="Assignments" FontWeight="SemiBold" />
+        <syswinControls:TextBlock Text="{Binding Assignments.Count}" Margin="6,0,0,0" />
+        <syswinControls:TextBlock Text="•" Margin="6,0,6,0" />
+        <syswinControls:TextBlock Text="Last refreshed:" />
+        <syswinControls:TextBlock Text="{Binding LastRefreshedUtc, StringFormat={}{0:yyyy-MM-dd HH:mm}, TargetNullValue=Not loaded}" Margin="6,0,0,0" />
+      </syswinControls:StackPanel>
+
+      <syswinControls:ScrollViewer Grid.Row="2"
+                                   VerticalScrollBarVisibility="Auto"
+                                   HorizontalScrollBarVisibility="Disabled"
+                                   CanContentScroll="True">
+        <syswinControls:ItemsControl ItemsSource="{Binding Assignments}"
+                                     ItemTemplate="{StaticResource ScreeningAssignmentItemTemplate}">
+          <syswinControls:ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel />
+            </ItemsPanelTemplate>
+          </syswinControls:ItemsControl.ItemsPanel>
+          <syswinControls:ItemsControl.Style>
+            <Style TargetType="{x:Type syswinControls:ItemsControl}">
+              <Setter Property="VirtualizingStackPanel.IsVirtualizing" Value="True" />
+              <Setter Property="VirtualizingStackPanel.VirtualizationMode" Value="Recycling" />
+              <Setter Property="Margin" Value="0" />
+            </Style>
+          </syswinControls:ItemsControl.Style>
+        </syswinControls:ItemsControl>
+      </syswinControls:ScrollViewer>
+    </Grid>
+  </syswinControls:Border>
+</UserControl>

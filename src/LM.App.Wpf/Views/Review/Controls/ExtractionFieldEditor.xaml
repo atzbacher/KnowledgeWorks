@@ -1,0 +1,81 @@
+<UserControl x:Class="LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:syswinControls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:reviewVm="clr-namespace:LM.App.Wpf.ViewModels.Review"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=reviewVm:ExtractionWorkspaceViewModel}">
+  <syswinControls:Border Style="{StaticResource ReviewSectionBorderStyle}">
+    <Grid>
+      <Grid.RowDefinitions>
+        <syswinControls:RowDefinition Height="Auto" />
+        <syswinControls:RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <syswinControls:TextBlock Text="Extraction workspace"
+                                Style="{StaticResource ReviewSectionHeaderStyle}" />
+
+      <syswinControls:StackPanel Grid.Row="1" Margin="0,12,0,0">
+        <syswinControls:StackPanel.Style>
+          <Style TargetType="{x:Type syswinControls:StackPanel}">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Stage}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </syswinControls:StackPanel.Style>
+
+        <syswinControls:TextBlock Text="{Binding Stage.Definition.Name}" FontSize="16" FontWeight="SemiBold" />
+        <syswinControls:TextBlock Text="{Binding Stage.Definition.StageType}" Margin="0,4,0,0" />
+        <syswinControls:TextBlock Text="{Binding Stage.ConflictState}" Margin="0,2,0,0" Foreground="{StaticResource ReviewCardSubduedBrush}" />
+        <syswinControls:TextBlock Text="{Binding LastEnteredUtc, StringFormat={}{0:yyyy-MM-dd HH:mm}, TargetNullValue=Workspace not entered}" Margin="0,8,0,0" />
+
+        <syswinControls:Separator Margin="0,12,0,12" />
+
+        <syswinControls:TextBlock Text="Reviewer workload" FontWeight="SemiBold" />
+        <syswinControls:ItemsControl ItemsSource="{Binding Stage.Definition.ReviewerRequirement.Requirements}">
+          <syswinControls:ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <syswinControls:StackPanel Orientation="Horizontal">
+                <syswinControls:TextBlock Text="{Binding Key}" FontWeight="SemiBold" />
+                <syswinControls:TextBlock Text="{Binding Value}" Margin="8,0,0,0" />
+              </syswinControls:StackPanel>
+            </DataTemplate>
+          </syswinControls:ItemsControl.ItemTemplate>
+          <syswinControls:ItemsControl.Style>
+            <Style TargetType="{x:Type syswinControls:ItemsControl}">
+              <Setter Property="Margin" Value="0,6,0,0" />
+            </Style>
+          </syswinControls:ItemsControl.Style>
+        </syswinControls:ItemsControl>
+      </syswinControls:StackPanel>
+
+      <syswinControls:Border Grid.Row="1"
+                              Padding="12"
+                              CornerRadius="6"
+                              Background="#F9FAFB">
+        <syswinControls:Border.Style>
+          <Style TargetType="{x:Type syswinControls:Border}">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Stage}" Value="{x:Null}">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </syswinControls:Border.Style>
+        <syswinControls:StackPanel>
+          <syswinControls:TextBlock Text="No extraction stage active"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource ReviewCardSubduedBrush}" />
+          <syswinControls:TextBlock Text="Select a project stage to review extraction fields and capture data."
+                                    Margin="0,6,0,0" />
+        </syswinControls:StackPanel>
+      </syswinControls:Border>
+    </Grid>
+  </syswinControls:Border>
+</UserControl>
