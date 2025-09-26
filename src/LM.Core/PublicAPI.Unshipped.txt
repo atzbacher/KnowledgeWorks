@@ -201,6 +201,125 @@ LM.Core.Models.FileMetadata.Title.get -> string?
 LM.Core.Models.FileMetadata.Title.set -> void
 LM.Core.Models.FileMetadata.Year.get -> int?
 LM.Core.Models.FileMetadata.Year.set -> void
+LM.Core.Abstractions.IDataExtractionPreprocessor
+LM.Core.Abstractions.IDataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.DataExtractionPreprocessRequest(string! sourcePdfPath) -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.PreferredCacheKey.get -> string?
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.PreferredCacheKey.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.SourcePdfPath.get -> string!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.SourceXmlPath.get -> string?
+LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.SourceXmlPath.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.DataExtractionPreprocessResult() -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Empty.get -> LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Figures.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedFigure!>!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Figures.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.IsEmpty.get -> bool
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Provenance.get -> LM.Core.Models.DataExtraction.EvidenceProvenance!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Provenance.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Sections.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.StructuredSection!>!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Sections.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Tables.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Tables.init -> void
+LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.WithProvenance(LM.Core.Models.DataExtraction.EvidenceProvenance! provenance) -> LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!
+LM.Core.Models.DataExtraction.EvidenceProvenance
+LM.Core.Models.DataExtraction.EvidenceProvenance.EvidenceProvenance() -> void
+LM.Core.Models.DataExtraction.EvidenceProvenance.AdditionalMetadata.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string!>!
+LM.Core.Models.DataExtraction.EvidenceProvenance.AdditionalMetadata.init -> void
+LM.Core.Models.DataExtraction.EvidenceProvenance.ExtractedAtUtc.get -> System.DateTime
+LM.Core.Models.DataExtraction.EvidenceProvenance.ExtractedAtUtc.init -> void
+LM.Core.Models.DataExtraction.EvidenceProvenance.ExtractedBy.get -> string!
+LM.Core.Models.DataExtraction.EvidenceProvenance.ExtractedBy.init -> void
+LM.Core.Models.DataExtraction.EvidenceProvenance.SourceFileName.get -> string!
+LM.Core.Models.DataExtraction.EvidenceProvenance.SourceFileName.init -> void
+LM.Core.Models.DataExtraction.EvidenceProvenance.SourceSha256.get -> string!
+LM.Core.Models.DataExtraction.EvidenceProvenance.SourceSha256.init -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure
+LM.Core.Models.DataExtraction.PreprocessedFigure.Caption.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedFigure.Caption.init -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure.Id.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedFigure.Id.init -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure.PageNumbers.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.Core.Models.DataExtraction.PreprocessedFigure.PageNumbers.init -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure.PreprocessedFigure() -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure.ProvenanceHash.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedFigure.ProvenanceHash.init -> void
+LM.Core.Models.DataExtraction.PreprocessedFigure.ThumbnailRelativePath.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedFigure.ThumbnailRelativePath.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable
+LM.Core.Models.DataExtraction.PreprocessedTable.Classification.get -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.PreprocessedTable.Classification.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Columns.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TableColumnMapping!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.Columns.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.CsvRelativePath.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.CsvRelativePath.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.DetectedEndpoints.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.DetectedEndpoints.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.DetectedPopulations.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.DetectedPopulations.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Id.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.Id.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.PageNumbers.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.Core.Models.DataExtraction.PreprocessedTable.PageNumbers.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.PreprocessedTable() -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.ProvenanceHash.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.ProvenanceHash.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Rows.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TableRowMapping!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.Rows.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Title.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.Title.init -> void
+LM.Core.Models.DataExtraction.StructuredSection
+LM.Core.Models.DataExtraction.StructuredSection.StructuredSection() -> void
+LM.Core.Models.DataExtraction.StructuredSection.Body.get -> string!
+LM.Core.Models.DataExtraction.StructuredSection.Body.init -> void
+LM.Core.Models.DataExtraction.StructuredSection.Heading.get -> string!
+LM.Core.Models.DataExtraction.StructuredSection.Heading.init -> void
+LM.Core.Models.DataExtraction.StructuredSection.Level.get -> int
+LM.Core.Models.DataExtraction.StructuredSection.Level.init -> void
+LM.Core.Models.DataExtraction.StructuredSection.PageNumbers.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.Core.Models.DataExtraction.StructuredSection.PageNumbers.init -> void
+LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.TableClassificationKind.Baseline = 1 -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.TableClassificationKind.Mixed = 3 -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.TableClassificationKind.Outcome = 2 -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.TableClassificationKind.Unknown = 0 -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Core.Models.DataExtraction.TableColumnMapping
+LM.Core.Models.DataExtraction.TableColumnMapping.TableColumnMapping() -> void
+LM.Core.Models.DataExtraction.TableColumnMapping.ColumnIndex.get -> int
+LM.Core.Models.DataExtraction.TableColumnMapping.ColumnIndex.init -> void
+LM.Core.Models.DataExtraction.TableColumnMapping.Header.get -> string!
+LM.Core.Models.DataExtraction.TableColumnMapping.Header.init -> void
+LM.Core.Models.DataExtraction.TableColumnMapping.NormalizedHeader.get -> string!
+LM.Core.Models.DataExtraction.TableColumnMapping.NormalizedHeader.init -> void
+LM.Core.Models.DataExtraction.TableColumnMapping.Role.get -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnMapping.Role.init -> void
+LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Intervention = 2 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Measure = 6 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Outcome = 3 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Population = 1 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Timepoint = 4 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Unknown = 0 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableColumnRole.Value = 5 -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Core.Models.DataExtraction.TableRowMapping
+LM.Core.Models.DataExtraction.TableRowMapping.TableRowMapping() -> void
+LM.Core.Models.DataExtraction.TableRowMapping.Label.get -> string!
+LM.Core.Models.DataExtraction.TableRowMapping.Label.init -> void
+LM.Core.Models.DataExtraction.TableRowMapping.Role.get -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowMapping.Role.init -> void
+LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.get -> int
+LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.init -> void
+LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowRole.Baseline = 2 -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowRole.Footnote = 4 -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowRole.Header = 1 -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowRole.Outcome = 3 -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Models.DataExtraction.TableRowRole.Unknown = 0 -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Core.Utils.NullDataExtractionPreprocessor
+LM.Core.Utils.NullDataExtractionPreprocessor.Instance.get -> LM.Core.Utils.NullDataExtractionPreprocessor!
+LM.Core.Utils.NullDataExtractionPreprocessor.NullDataExtractionPreprocessor() -> void
+LM.Core.Utils.NullDataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
 LM.Core.Models.Filters.EntryFilter
 LM.Core.Models.Filters.EntryFilter.AuthorContains.get -> string?
 LM.Core.Models.Filters.EntryFilter.AuthorContains.set -> void

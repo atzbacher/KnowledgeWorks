@@ -28,6 +28,7 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IDoiNormalizer>(),
                 sp.GetRequiredService<HookOrchestrator>(),
                 sp.GetRequiredService<IPmidNormalizer>(),
+                sp.GetRequiredService<IDataExtractionPreprocessor>(),
                 sp.GetRequiredService<ISimilarityLog>()));
 
             services.AddSingleton<WatchedFolderScanner>(sp => new WatchedFolderScanner(sp.GetRequiredService<IAddPipeline>()));
