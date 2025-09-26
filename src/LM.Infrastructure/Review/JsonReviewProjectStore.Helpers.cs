@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LM.Infrastructure.Review.Dto;
+using LM.Infrastructure.Review.Mappers;
 using LM.Review.Core.Models;
 
 namespace LM.Infrastructure.Review;
@@ -23,7 +25,7 @@ internal sealed partial class JsonReviewProjectStore
         {
             ct.ThrowIfCancellationRequested();
 
-            var doc = await ReadJsonAsync<AssignmentDocument>(file, ct).ConfigureAwait(false);
+            var doc = await ReadJsonAsync<ScreeningAssignmentDto>(file, ct).ConfigureAwait(false);
             if (doc is null || string.IsNullOrWhiteSpace(doc.Id))
             {
                 continue;
@@ -36,8 +38,8 @@ internal sealed partial class JsonReviewProjectStore
 
             try
             {
-                var assignment = AssignmentMapper.ToDomain(doc);
-                _assignmentDocs[assignment.Id] = doc;
+                var assignment = ScreeningAssignmentMapper.ToDomain(doc);
+                _assignmentDtos[assignment.Id] = doc;
                 _assignments[assignment.Id] = assignment;
                 if (!_assignmentIdsByStage.ContainsKey(assignment.StageId))
                 {
@@ -64,7 +66,7 @@ internal sealed partial class JsonReviewProjectStore
         foreach (var file in Directory.EnumerateFiles(stageDir, "*.json", SearchOption.TopDirectoryOnly))
         {
             ct.ThrowIfCancellationRequested();
-            var doc = await ReadJsonAsync<StageDocument>(file, ct).ConfigureAwait(false);
+            var doc = await ReadJsonAsync<ReviewStageDto>(file, ct).ConfigureAwait(false);
             if (doc is null || string.IsNullOrWhiteSpace(doc.Id))
             {
                 continue;
@@ -82,8 +84,8 @@ internal sealed partial class JsonReviewProjectStore
 
             try
             {
-                var stage = StageMapper.ToDomain(doc, definition, CollectAssignments(doc.Id));
-                _stageDocs[doc.Id] = doc;
+                var stage = ReviewStageMapper.ToDomain(doc, definition, CollectAssignments(doc.Id));
+                _stageDtos[doc.Id] = doc;
                 _stages[doc.Id] = stage;
                 _stageIdsByProject.TryAdd(project.Id, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
                 _stageIdsByProject[project.Id].Add(doc.Id);
@@ -146,7 +148,7 @@ internal sealed partial class JsonReviewProjectStore
 
     private void RebuildStage(string stageId)
     {
-        if (!_stageDocs.TryGetValue(stageId, out var doc))
+        if (!_stageDtos.TryGetValue(stageId, out var doc))
         {
             return;
         }
@@ -165,7 +167,7 @@ internal sealed partial class JsonReviewProjectStore
         var assignments = CollectAssignments(stageId);
         try
         {
-            var stage = StageMapper.ToDomain(doc, definition, assignments);
+            var stage = ReviewStageMapper.ToDomain(doc, definition, assignments);
             _stages[stageId] = stage;
         }
         catch

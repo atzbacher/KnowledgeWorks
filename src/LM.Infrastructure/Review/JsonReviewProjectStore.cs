@@ -6,6 +6,8 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
+using LM.Infrastructure.Review.Dto;
+using LM.Infrastructure.Review.Mappers;
 using LM.Review.Core.Models;
 using LM.Review.Core.Models.Forms;
 
@@ -19,9 +21,9 @@ internal sealed partial class JsonReviewProjectStore
     private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(5);
 
     private readonly Dictionary<string, ReviewProject> _projects = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, StageDocument> _stageDocs = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ReviewStageDto> _stageDtos = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ReviewStage> _stages = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, AssignmentDocument> _assignmentDocs = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ScreeningAssignmentDto> _assignmentDtos = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ScreeningAssignment> _assignments = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FormResponseDocument> _formDocs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, FormResponse> _formResponses = new(StringComparer.OrdinalIgnoreCase);
@@ -52,9 +54,9 @@ internal sealed partial class JsonReviewProjectStore
             Directory.CreateDirectory(_reviewsRoot);
 
             _projects.Clear();
-            _stageDocs.Clear();
+            _stageDtos.Clear();
             _stages.Clear();
-            _assignmentDocs.Clear();
+            _assignmentDtos.Clear();
             _assignments.Clear();
             _formDocs.Clear();
             _formResponses.Clear();
@@ -72,13 +74,13 @@ internal sealed partial class JsonReviewProjectStore
                     continue;
                 }
 
-                var projectDoc = await ReadJsonAsync<ProjectDocument>(projectPath, ct).ConfigureAwait(false);
-                if (projectDoc is null || string.IsNullOrWhiteSpace(projectDoc.Id))
+                var projectDto = await ReadJsonAsync<ReviewProjectDto>(projectPath, ct).ConfigureAwait(false);
+                if (projectDto is null || string.IsNullOrWhiteSpace(projectDto.Id))
                 {
                     continue;
                 }
 
-                var project = ProjectMapper.ToDomain(projectDoc);
+                var project = ReviewProjectMapper.ToDomain(projectDto);
                 _projects[project.Id] = project;
                 _stageIdsByProject[project.Id] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 _formIdsByProject[project.Id] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -107,9 +109,9 @@ internal sealed partial class JsonReviewProjectStore
         try
         {
             EnsureInitialized();
-            var doc = ProjectMapper.FromDomain(project);
+            var dto = ReviewProjectMapper.ToDto(project);
             var path = GetProjectPath(project.Id);
-            await WriteJsonAsync(path, doc, ct).ConfigureAwait(false);
+            await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
             _projects[project.Id] = project;
             _stageIdsByProject.TryAdd(project.Id, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
             _formIdsByProject.TryAdd(project.Id, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
@@ -168,13 +170,13 @@ internal sealed partial class JsonReviewProjectStore
                 {
                     foreach (var stageId in stageIds)
                     {
-                        _stageDocs.Remove(stageId);
+                        _stageDtos.Remove(stageId);
                         _stages.Remove(stageId);
                         if (_assignmentIdsByStage.TryGetValue(stageId, out var assignmentIds))
                         {
                             foreach (var assignmentId in assignmentIds)
                             {
-                                _assignmentDocs.Remove(assignmentId);
+                                _assignmentDtos.Remove(assignmentId);
                                 _assignments.Remove(assignmentId);
                             }
                             _assignmentIdsByStage.Remove(stageId);
@@ -212,11 +214,11 @@ internal sealed partial class JsonReviewProjectStore
                 throw new InvalidOperationException($"Project '{stage.ProjectId}' must be saved before stages can be persisted.");
             }
 
-            var doc = StageMapper.FromDomain(stage);
+            var dto = ReviewStageMapper.ToDto(stage);
             var path = GetStagePath(stage.ProjectId, stage.Id);
-            await WriteJsonAsync(path, doc, ct).ConfigureAwait(false);
+            await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
 
-            _stageDocs[stage.Id] = doc;
+            _stageDtos[stage.Id] = dto;
             _stageIdsByProject.TryAdd(stage.ProjectId, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
             _stageIdsByProject[stage.ProjectId].Add(stage.Id);
             _stages[stage.Id] = stage;
@@ -277,7 +279,7 @@ internal sealed partial class JsonReviewProjectStore
             var path = GetStagePath(projectId, stageId);
             DeleteFileIfExists(path);
 
-            if (_stageDocs.Remove(stageId))
+            if (_stageDtos.Remove(stageId))
             {
                 _stages.Remove(stageId);
             }
@@ -297,7 +299,7 @@ internal sealed partial class JsonReviewProjectStore
                 {
                     var assignmentPath = GetAssignmentPath(projectId, assignmentId);
                     DeleteFileIfExists(assignmentPath);
-                    _assignmentDocs.Remove(assignmentId);
+                    _assignmentDtos.Remove(assignmentId);
                     _assignments.Remove(assignmentId);
                 }
 
@@ -318,16 +320,16 @@ internal sealed partial class JsonReviewProjectStore
         try
         {
             EnsureInitialized();
-            if (!_stageDocs.TryGetValue(assignment.StageId, out var stageDoc) || !string.Equals(stageDoc.ProjectId, projectId, StringComparison.Ordinal))
+            if (!_stageDtos.TryGetValue(assignment.StageId, out var stageDto) || !string.Equals(stageDto.ProjectId, projectId, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException($"Stage '{assignment.StageId}' must be saved before assignments can be persisted.");
             }
 
-            var doc = AssignmentMapper.FromDomain(projectId, assignment);
+            var dto = ScreeningAssignmentMapper.ToDto(projectId, assignment);
             var path = GetAssignmentPath(projectId, assignment.Id);
-            await WriteJsonAsync(path, doc, ct).ConfigureAwait(false);
+            await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
 
-            _assignmentDocs[assignment.Id] = doc;
+            _assignmentDtos[assignment.Id] = dto;
             _assignments[assignment.Id] = assignment;
             if (!_assignmentIdsByStage.ContainsKey(assignment.StageId))
             {
@@ -389,7 +391,7 @@ internal sealed partial class JsonReviewProjectStore
             var path = GetAssignmentPath(projectId, assignmentId);
             DeleteFileIfExists(path);
 
-            if (_assignmentDocs.Remove(assignmentId, out var doc))
+            if (_assignmentDtos.Remove(assignmentId, out var doc))
             {
                 _assignments.Remove(assignmentId);
                 if (_assignmentIdsByStage.TryGetValue(doc.StageId, out var ids))
