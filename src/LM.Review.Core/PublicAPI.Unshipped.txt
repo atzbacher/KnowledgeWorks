@@ -100,4 +100,3 @@ LM.Review.Core.DataExtraction.TableVocabulary.ClassifyTitle(string? title) -> LM
 LM.Review.Core.DataExtraction.TableVocabulary.NormalizeHeader(string header) -> string!
 LM.Review.Core.DataExtraction.TableVocabulary.TryDetectEndpoint(string? token) -> string?
 LM.Review.Core.DataExtraction.TableVocabulary.TryDetectPopulation(string? token) -> string?
-
