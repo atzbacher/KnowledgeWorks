@@ -6,7 +6,9 @@ using LM.App.Wpf.Composition.Modules;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
+using LM.App.Wpf.ViewModels.Review;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.Views.Review;
 using LM.Core.Abstractions;
 using LM.Infrastructure.FileSystem;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,6 +82,7 @@ namespace LM.App.Wpf
             await addVm.InitializeAsync();
             _addViewModel = addVm;
             var searchVm = host.GetRequiredService<SearchViewModel>();
+            var reviewVm = host.GetRequiredService<ReviewViewModel>();
 
             // Bind – resolve the views by name because the generated fields are not
             // available when building from the command line (designer-only feature).
@@ -91,6 +94,9 @@ namespace LM.App.Wpf
 
             if (shell.FindName("SearchViewControl") is SearchView searchView)
                 searchView.DataContext = searchVm;
+
+            if (shell.FindName("ReviewViewControl") is ReviewView reviewView)
+                reviewView.DataContext = reviewVm;
 
         }
 
