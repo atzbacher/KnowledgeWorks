@@ -11,5 +11,8 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("thumbnail_path")]
         public string? ThumbnailPath { get; init; }
+
+        [JsonPropertyName("image_path")]
+        public string? ImagePath { get; init; }
     }
 }

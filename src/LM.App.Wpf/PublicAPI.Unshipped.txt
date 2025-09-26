@@ -175,6 +175,7 @@ LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.init -> void
 LM.App.Wpf.Common.Dialogs.IDialogService
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowDataExtractionWorkspace(LM.App.Wpf.ViewModels.StagingItem! stagingItem) -> bool?
 LM.App.Wpf.Common.Dialogs.WpfDialogService
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?

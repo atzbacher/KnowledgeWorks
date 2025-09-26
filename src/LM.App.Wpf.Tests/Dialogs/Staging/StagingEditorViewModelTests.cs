@@ -38,7 +38,8 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
                 new StagingFiguresTabViewModel(),
                 new StagingEndpointsTabViewModel(),
                 new StagingPopulationTabViewModel(),
-                new StagingReviewCommitTabViewModel(list, new DataExtractionCommitBuilder()));
+                new StagingReviewCommitTabViewModel(list, new DataExtractionCommitBuilder()),
+                dialogService);
 
             Assert.Equal(6, editor.Tabs.Count);
             Assert.Equal("Metadata", editor.SelectedTab?.Header);
@@ -48,6 +49,33 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
 
             var metadata = editor.Tabs.OfType<StagingMetadataTabViewModel>().First();
             Assert.Equal(item, metadata.Current);
+
+            editor.Dispose();
+        }
+
+        [Fact]
+        public void OpenDataExtractionCommand_Disabled_When_No_Pdf()
+        {
+            var list = new StagingListViewModel(new StubPipeline());
+            var dialogService = new StubDialogService();
+            var tables = new StagingTablesTabViewModel(_workspace, dialogService, _orchestrator);
+
+            var editor = new StagingEditorViewModel(
+                list,
+                new StagingMetadataTabViewModel(list),
+                tables,
+                new StagingFiguresTabViewModel(),
+                new StagingEndpointsTabViewModel(),
+                new StagingPopulationTabViewModel(),
+                new StagingReviewCommitTabViewModel(list, new DataExtractionCommitBuilder()),
+                dialogService);
+
+            Assert.False(editor.OpenDataExtractionCommand.CanExecute(null));
+
+            var item = new StagingItem { FilePath = "/tmp/example.pdf" };
+            list.Current = item;
+
+            Assert.True(editor.OpenDataExtractionCommand.CanExecute(null));
 
             editor.Dispose();
         }
@@ -79,6 +107,7 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
             public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
+            public bool? ShowDataExtractionWorkspace(StagingItem stagingItem) => true;
         }
     }
 }

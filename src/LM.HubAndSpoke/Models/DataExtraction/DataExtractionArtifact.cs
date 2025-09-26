@@ -23,6 +23,9 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("pages")]
         public List<string> Pages { get; init; } = new();
 
+        [JsonPropertyName("regions")]
+        public List<DataExtractionRegion> Regions { get; init; } = new();
+
         [JsonPropertyName("linked_endpoint_ids")]
         public List<string> LinkedEndpointIds { get; init; } = new();
 
@@ -34,5 +37,8 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("notes")]
         public string? Notes { get; init; }
+
+        [JsonPropertyName("tags")]
+        public List<string> Tags { get; init; } = new();
     }
 }

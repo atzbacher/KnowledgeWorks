@@ -335,8 +335,12 @@ LM.HubSpoke.Models.DataExtractionArtifact.Pages.get -> System.Collections.Generi
 LM.HubSpoke.Models.DataExtractionArtifact.Pages.init -> void
 LM.HubSpoke.Models.DataExtractionArtifact.ProvenanceHash.get -> string!
 LM.HubSpoke.Models.DataExtractionArtifact.ProvenanceHash.init -> void
+LM.HubSpoke.Models.DataExtractionArtifact.Regions.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionRegion!>!
+LM.HubSpoke.Models.DataExtractionArtifact.Regions.init -> void
 LM.HubSpoke.Models.DataExtractionArtifact.SourcePath.get -> string?
 LM.HubSpoke.Models.DataExtractionArtifact.SourcePath.init -> void
+LM.HubSpoke.Models.DataExtractionArtifact.Tags.get -> System.Collections.Generic.List<string!>!
+LM.HubSpoke.Models.DataExtractionArtifact.Tags.init -> void
 LM.HubSpoke.Models.DataExtractionArtifact.Title.get -> string!
 LM.HubSpoke.Models.DataExtractionArtifact.Title.init -> void
 LM.HubSpoke.Models.DataExtractionFigure
@@ -345,6 +349,22 @@ LM.HubSpoke.Models.DataExtractionFigure.FigureLabel.get -> string?
 LM.HubSpoke.Models.DataExtractionFigure.FigureLabel.init -> void
 LM.HubSpoke.Models.DataExtractionFigure.ThumbnailPath.get -> string?
 LM.HubSpoke.Models.DataExtractionFigure.ThumbnailPath.init -> void
+LM.HubSpoke.Models.DataExtractionFigure.ImagePath.get -> string?
+LM.HubSpoke.Models.DataExtractionFigure.ImagePath.init -> void
+LM.HubSpoke.Models.DataExtractionRegion
+LM.HubSpoke.Models.DataExtractionRegion.DataExtractionRegion() -> void
+LM.HubSpoke.Models.DataExtractionRegion.Height.get -> double
+LM.HubSpoke.Models.DataExtractionRegion.Height.init -> void
+LM.HubSpoke.Models.DataExtractionRegion.Label.get -> string?
+LM.HubSpoke.Models.DataExtractionRegion.Label.init -> void
+LM.HubSpoke.Models.DataExtractionRegion.PageNumber.get -> int
+LM.HubSpoke.Models.DataExtractionRegion.PageNumber.init -> void
+LM.HubSpoke.Models.DataExtractionRegion.Width.get -> double
+LM.HubSpoke.Models.DataExtractionRegion.Width.init -> void
+LM.HubSpoke.Models.DataExtractionRegion.X.get -> double
+LM.HubSpoke.Models.DataExtractionRegion.X.init -> void
+LM.HubSpoke.Models.DataExtractionRegion.Y.get -> double
+LM.HubSpoke.Models.DataExtractionRegion.Y.init -> void
 LM.HubSpoke.Models.DataExtractionHook
 LM.HubSpoke.Models.DataExtractionHook.DataExtractionHook() -> void
 LM.HubSpoke.Models.DataExtractionHook.Endpoints.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionEndpoint!>!
@@ -359,6 +379,10 @@ LM.HubSpoke.Models.DataExtractionHook.Interventions.get -> System.Collections.Ge
 LM.HubSpoke.Models.DataExtractionHook.Interventions.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Notes.get -> string?
 LM.HubSpoke.Models.DataExtractionHook.Notes.init -> void
+LM.HubSpoke.Models.DataExtractionHook.StudyDesign.get -> string?
+LM.HubSpoke.Models.DataExtractionHook.StudyDesign.init -> void
+LM.HubSpoke.Models.DataExtractionHook.StudySetting.get -> string?
+LM.HubSpoke.Models.DataExtractionHook.StudySetting.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Populations.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionPopulation!>!
 LM.HubSpoke.Models.DataExtractionHook.Populations.init -> void
 LM.HubSpoke.Models.DataExtractionHook.SchemaVersion.get -> string!
@@ -429,6 +453,10 @@ LM.HubSpoke.Models.DataExtractionTable.Summary.get -> string?
 LM.HubSpoke.Models.DataExtractionTable.Summary.init -> void
 LM.HubSpoke.Models.DataExtractionTable.TableLabel.get -> string?
 LM.HubSpoke.Models.DataExtractionTable.TableLabel.init -> void
+LM.HubSpoke.Models.DataExtractionTable.ColumnCountHint.get -> int?
+LM.HubSpoke.Models.DataExtractionTable.ColumnCountHint.init -> void
+LM.HubSpoke.Models.DataExtractionTable.DictionaryPath.get -> string?
+LM.HubSpoke.Models.DataExtractionTable.DictionaryPath.init -> void
 LM.HubSpoke.Models.EntryHub
 LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.get -> string!
 LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.init -> void
