@@ -9,8 +9,12 @@ namespace LM.App.Wpf.Views.Library.Controls
 {
     public sealed class LibrarySearchQueryBox : System.Windows.Controls.RichTextBox
     {
-        private static readonly System.Windows.Media.Brush KeywordBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(72, 118, 214));
-        private static readonly System.Windows.Media.Brush OperatorBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(176, 88, 35));
+        private static readonly System.Windows.Media.Brush KeywordForegroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+        private static readonly System.Windows.Media.Brush KeywordBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(16, 76, 121));
+        private static readonly System.Windows.Media.Brush OperatorForegroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+        private static readonly System.Windows.Media.Brush OperatorBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(55, 118, 54));
+        private static readonly System.Windows.Media.Brush AccentBorderBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(196, 202, 208));
+        private static readonly System.Windows.Media.Brush AccentBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(236, 239, 242));
         private static readonly Regex KeywordRegex = BuildKeywordRegex();
         private static readonly Regex OperatorRegex = new("(?<!\\w)(AND|OR|NOT)(?!\\w)", RegexOptions.Compiled);
 
@@ -29,7 +33,9 @@ namespace LM.App.Wpf.Views.Library.Controls
             VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Hidden;
             BorderThickness = new System.Windows.Thickness(1);
-            Padding = new System.Windows.Thickness(6, 4, 6, 4);
+            BorderBrush = AccentBorderBrush;
+            Background = AccentBackgroundBrush;
+            Padding = new System.Windows.Thickness(10, 6, 10, 6);
             Document.Blocks.Clear();
             Document.Blocks.Add(new System.Windows.Documents.Paragraph { Margin = new System.Windows.Thickness(0) });
             Document.PagePadding = new System.Windows.Thickness(0);
@@ -109,7 +115,7 @@ namespace LM.App.Wpf.Views.Library.Controls
 
             if (string.IsNullOrEmpty(text))
             {
-                inlines.Add(CreateRun(string.Empty, Foreground, System.Windows.FontWeights.Normal));
+                inlines.Add(CreateInline(string.Empty, Foreground, null, System.Windows.FontWeights.Normal));
                 return;
             }
 
@@ -121,18 +127,18 @@ namespace LM.App.Wpf.Views.Library.Controls
                 if (segment.Start > index)
                 {
                     var plain = text.Substring(index, segment.Start - index);
-                    inlines.Add(CreateRun(plain, Foreground, System.Windows.FontWeights.Normal));
+                    inlines.Add(CreateInline(plain, Foreground, null, System.Windows.FontWeights.Normal));
                 }
 
                 var highlightText = text.Substring(segment.Start, segment.Length);
-                inlines.Add(CreateRun(highlightText, segment.Foreground, segment.FontWeight));
+                inlines.Add(CreateInline(highlightText, segment.Foreground, segment.Background, segment.FontWeight));
                 index = segment.Start + segment.Length;
             }
 
             if (index < text.Length)
             {
                 var remainder = text.Substring(index);
-                inlines.Add(CreateRun(remainder, Foreground, System.Windows.FontWeights.Normal));
+                inlines.Add(CreateInline(remainder, Foreground, null, System.Windows.FontWeights.Normal));
             }
         }
 
@@ -159,7 +165,12 @@ namespace LM.App.Wpf.Views.Library.Controls
                     length += 1;
                 }
 
-                segments.Add(new HighlightSegment(match.Index, length, KeywordBrush, System.Windows.FontWeights.SemiBold));
+                segments.Add(new HighlightSegment(
+                    match.Index,
+                    length,
+                    KeywordForegroundBrush,
+                    KeywordBackgroundBrush,
+                    System.Windows.FontWeights.SemiBold));
 
 
             }
@@ -171,7 +182,12 @@ namespace LM.App.Wpf.Views.Library.Controls
                     continue;
                 }
 
-                segments.Add(new HighlightSegment(match.Index, match.Length, OperatorBrush, System.Windows.FontWeights.SemiBold));
+                segments.Add(new HighlightSegment(
+                    match.Index,
+                    match.Length,
+                    OperatorForegroundBrush,
+                    OperatorBackgroundBrush,
+                    System.Windows.FontWeights.SemiBold));
             }
 
             if (segments.Count == 0)
@@ -253,14 +269,26 @@ namespace LM.App.Wpf.Views.Library.Controls
 
         }
 
-        private System.Windows.Documents.Run CreateRun(string text, System.Windows.Media.Brush? foreground, System.Windows.FontWeight fontWeight)
+        private System.Windows.Documents.Inline CreateInline(string text, System.Windows.Media.Brush? foreground, System.Windows.Media.Brush? background, System.Windows.FontWeight fontWeight)
         {
             var run = new System.Windows.Documents.Run(text ?? string.Empty)
             {
                 Foreground = foreground ?? Foreground,
                 FontWeight = fontWeight
             };
-            return run;
+            if (background is null)
+            {
+                return run;
+            }
+
+            var span = new System.Windows.Documents.Span(run)
+            {
+                Foreground = foreground ?? Foreground,
+                Background = background,
+                FontWeight = fontWeight
+            };
+
+            return span;
         }
 
         private static System.Windows.Media.Brush CreateFrozenBrush(System.Windows.Media.Color color)
@@ -289,17 +317,24 @@ namespace LM.App.Wpf.Views.Library.Controls
 
         private readonly struct HighlightSegment
         {
-            public HighlightSegment(int start, int length, System.Windows.Media.Brush foreground, System.Windows.FontWeight fontWeight)
+            public HighlightSegment(
+                int start,
+                int length,
+                System.Windows.Media.Brush foreground,
+                System.Windows.Media.Brush background,
+                System.Windows.FontWeight fontWeight)
             {
                 Start = start;
                 Length = length;
                 Foreground = foreground;
+                Background = background;
                 FontWeight = fontWeight;
             }
 
             public int Start { get; }
             public int Length { get; }
             public System.Windows.Media.Brush Foreground { get; }
+            public System.Windows.Media.Brush Background { get; }
             public System.Windows.FontWeight FontWeight { get; }
         }
     }
