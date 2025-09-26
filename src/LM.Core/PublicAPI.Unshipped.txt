@@ -4,6 +4,12 @@ IPublicationLookup.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Thr
 LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore
 LM.Core.Abstractions.IContentExtractor
 LM.Core.Abstractions.IContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Core.Abstractions.IDataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Core.Abstractions.IDataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Core.Abstractions.IDataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Core.Abstractions.IDataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Core.Abstractions.IDataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Core.Abstractions.IDataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IEntryStore
 LM.Core.Abstractions.IEntryStore.EnumerateAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.Entry!>!
 LM.Core.Abstractions.IEntryStore.FindByHashAsync(string! sha256, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
@@ -212,7 +218,6 @@ LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.SourceXmlPath.get 
 LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest.SourceXmlPath.init -> void
 LM.Core.Models.DataExtraction.DataExtractionPreprocessResult
 LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.DataExtractionPreprocessResult() -> void
-LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Empty.get -> LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!
 LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Figures.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedFigure!>!
 LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Figures.init -> void
 LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.IsEmpty.get -> bool
@@ -317,8 +322,6 @@ LM.Core.Models.DataExtraction.TableRowRole.Header = 1 -> LM.Core.Models.DataExtr
 LM.Core.Models.DataExtraction.TableRowRole.Outcome = 3 -> LM.Core.Models.DataExtraction.TableRowRole
 LM.Core.Models.DataExtraction.TableRowRole.Unknown = 0 -> LM.Core.Models.DataExtraction.TableRowRole
 LM.Core.Utils.NullDataExtractionPreprocessor
-LM.Core.Utils.NullDataExtractionPreprocessor.Instance.get -> LM.Core.Utils.NullDataExtractionPreprocessor!
-LM.Core.Utils.NullDataExtractionPreprocessor.NullDataExtractionPreprocessor() -> void
 LM.Core.Utils.NullDataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
 LM.Core.Models.Filters.EntryFilter
 LM.Core.Models.Filters.EntryFilter.AuthorContains.get -> string?
@@ -489,6 +492,7 @@ LM.Core.Models.WatchedFolderState.WatchedFolderState(string! Path, System.DateTi
 LM.Core.Utils.Hashes
 LM.Core.Utils.IdGen
 LM.Core.Utils.JsonEx
+static LM.Core.Models.DataExtraction.DataExtractionPreprocessResult.Empty.get -> LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!
 static LM.Core.Utils.Hashes.Sha1(string! input) -> string!
 static LM.Core.Utils.Hashes.Sha256File(string! path) -> string!
 static LM.Core.Utils.IdGen.NewId() -> string!
@@ -566,13 +570,8 @@ LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.get -> bool
 LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.init -> void
 LM.Core.Models.WatchedFolderState.Path.get -> string!
 LM.Core.Models.WatchedFolderState.Path.init -> void
+static LM.Core.Utils.NullDataExtractionPreprocessor.Instance.get -> LM.Core.Utils.NullDataExtractionPreprocessor!
 static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!
 LM.Core.Abstractions.IDataExtractionPowerPointExporter
-LM.Core.Abstractions.IDataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Core.Abstractions.IDataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
 LM.Core.Abstractions.IDataExtractionExcelExporter
-LM.Core.Abstractions.IDataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Core.Abstractions.IDataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
 LM.Core.Abstractions.IDataExtractionWordExporter
-LM.Core.Abstractions.IDataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Core.Abstractions.IDataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>

@@ -19,6 +19,67 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Common.Dialogs.FileSavePickerOptions
+LM.App.Wpf.Common.Dialogs.FileSavePickerOptions.DefaultFileName.get -> string?
+LM.App.Wpf.Common.Dialogs.FileSavePickerOptions.DefaultFileName.init -> void
+LM.App.Wpf.Common.Dialogs.FileSavePickerOptions.Filter.get -> string?
+LM.App.Wpf.Common.Dialogs.FileSavePickerOptions.Filter.init -> void
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowSaveFileDialog(LM.App.Wpf.Common.Dialogs.FileSavePickerOptions! options) -> string?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowSaveFileDialog(LM.App.Wpf.Common.Dialogs.FileSavePickerOptions! options) -> string?
+LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.Core.Abstractions.IDataExtractionPreprocessor! preprocessor, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.Core.Abstractions.IDataExtractionPreprocessor! preprocessor, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.HasValidationErrors.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.SelectedTab.get -> LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTabViewModel?
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.SelectedTab.set -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingMetadataTabViewModel! metadataTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTablesTabViewModel! tablesTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingFiguresTabViewModel! figuresTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingEndpointsTabViewModel! endpointsTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingPopulationTabViewModel! populationTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingReviewCommitTabViewModel! reviewTab) -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Tabs.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTabViewModel!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToExcelCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToPowerPointCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToWordCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.App.Wpf.Common.Dialogs.IDialogService! dialogs, LM.Core.Abstractions.IDataExtractionPowerPointExporter! powerPointExporter, LM.Core.Abstractions.IDataExtractionWordExporter! wordExporter, LM.Core.Abstractions.IDataExtractionExcelExporter! excelExporter) -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.Caption.get -> string!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.Caption.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.FigurePreview() -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.Pages.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.Pages.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.ThumbnailPath.get -> string!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview.ThumbnailPath.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Figures.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingEvidencePreview.FigurePreview!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Figures.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Provenance.get -> LM.Core.Models.DataExtraction.EvidenceProvenance!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Provenance.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Body.get -> string!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Body.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Heading.get -> string!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Heading.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Pages.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.Pages.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview.SectionPreview() -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Sections.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingEvidencePreview.SectionPreview!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Sections.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.StagingEvidencePreview() -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Classification.get -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Classification.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Endpoints.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Endpoints.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Pages.get -> System.Collections.Generic.IReadOnlyList<int>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Pages.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Populations.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Populations.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.TablePreview() -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Title.get -> string!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Title.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Tables.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.Tables.init -> void
+LM.App.Wpf.ViewModels.StagingItem.DataExtractionHook.get -> LM.HubSpoke.Models.DataExtractionHook?
+LM.App.Wpf.ViewModels.StagingItem.DataExtractionHook.set -> void
+LM.App.Wpf.ViewModels.StagingItem.EvidencePreview.get -> LM.App.Wpf.ViewModels.StagingEvidencePreview?
+LM.App.Wpf.ViewModels.StagingItem.EvidencePreview.set -> void
+LM.App.Wpf.ViewModels.StagingItem.PendingChangeLogEvents.get -> System.Collections.Generic.List<LM.HubSpoke.Models.EntryChangeLogEvent!>!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
@@ -159,7 +220,6 @@ LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.set -> void
 LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.get -> bool
 LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.set -> void
 LM.App.Wpf.ViewModels.AddPipeline
-LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.AddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
@@ -167,7 +227,6 @@ LM.App.Wpf.ViewModels.AddViewModel
 LM.App.Wpf.ViewModels.AddViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore? watchedFolderSettings = null, LM.App.Wpf.ViewModels.StagingListViewModel? stagingList = null, LM.App.Wpf.ViewModels.WatchedFoldersViewModel? watchedFolders = null, LM.App.Wpf.Common.Dialogs.IDialogService? dialogService = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
-LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.BulkAddFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
@@ -211,7 +270,6 @@ LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.SearchSaveDialogViewMode
 LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Title.get -> string!
 LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel
 LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Dispose() -> void
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> void
 LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
@@ -414,7 +472,6 @@ LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Snapshot() -> System.Colle
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() -> void
@@ -425,7 +482,6 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LinkItems.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryLinkItem!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditEntryAsync(LM.App.Wpf.ViewModels.LibrarySearchResult? target) -> System.Threading.Tasks.Task!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleSelectionChangedCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelection.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?
@@ -564,8 +620,6 @@ LM.App.Wpf.ViewModels.StagingItem.SimilarToTitle.set -> void
 LM.App.Wpf.ViewModels.StagingItem.Source.get -> string?
 LM.App.Wpf.ViewModels.StagingItem.Source.set -> void
 LM.App.Wpf.ViewModels.StagingItem.StagingItem() -> void
-LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.get -> bool
-LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.set -> void
 LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.get -> string!
 LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.set -> void
 LM.App.Wpf.ViewModels.StagingItem.TagsCsv.get -> string?

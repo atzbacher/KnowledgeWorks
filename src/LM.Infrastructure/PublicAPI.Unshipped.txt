@@ -24,6 +24,12 @@ LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.Entr
 LM.Infrastructure.Entries.EntryTagVocabularyProvider
 LM.Infrastructure.Entries.EntryTagVocabularyProvider.EntryTagVocabularyProvider(LM.Core.Abstractions.IEntryStore! store) -> void
 LM.Infrastructure.Entries.EntryTagVocabularyProvider.GetAllTagsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
+LM.Infrastructure.Export.DataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.DataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.DataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Export.MetadataDebugSlideExporter
 LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void
@@ -57,6 +63,13 @@ LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absol
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
+LM.Infrastructure.Review.ReviewHookContextFactory
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateProjectCreated(LM.Review.Core.Models.ReviewProject! project) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateReviewerDecisionRecorded(LM.Review.Core.Models.ScreeningAssignment! assignment, LM.Review.Core.Models.ReviewerDecision! decision) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateStageTransition(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConflictState previousState, LM.Review.Core.Models.ConflictState currentState) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.ReviewHookContextFactory() -> void
 LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider
 LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
 LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
@@ -111,14 +124,7 @@ LM.Infrastructure.Settings.JsonUserPreferencesStore.SaveAsync(LM.Core.Models.Use
 static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!
 LM.Infrastructure.Export.DataExtractionPowerPointExporter
 LM.Infrastructure.Export.DataExtractionPowerPointExporter.DataExtractionPowerPointExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Infrastructure.Export.DataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
 LM.Infrastructure.Export.DataExtractionWordExporter
 LM.Infrastructure.Export.DataExtractionWordExporter.DataExtractionWordExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Infrastructure.Export.DataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
 LM.Infrastructure.Export.DataExtractionExcelExporter
 LM.Infrastructure.Export.DataExtractionExcelExporter.DataExtractionExcelExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
-LM.Infrastructure.Export.DataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
-
