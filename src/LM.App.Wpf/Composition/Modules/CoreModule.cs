@@ -15,6 +15,7 @@ using LM.Infrastructure.Settings;
 using LM.Infrastructure.Storage;
 using LM.Infrastructure.Text;
 using LM.Infrastructure.Utils;
+using LM.Review.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -50,6 +51,7 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<ISpokeHandler>(sp => new LitSearchSpokeHandler(sp.GetRequiredService<IWorkSpaceService>()));
 
             services.AddSingleton<HookOrchestrator>(sp => new HookOrchestrator(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddSingleton<IReviewHookOrchestrator>(static sp => sp.GetRequiredService<HookOrchestrator>());
             services.AddSingleton<ISimilarityLog>(sp => new SimilarityLog(sp.GetRequiredService<IWorkSpaceService>()));
 
             services.AddSingleton<HubSpokeStore>(sp => new HubSpokeStore(
