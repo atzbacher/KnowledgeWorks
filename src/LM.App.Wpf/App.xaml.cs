@@ -67,6 +67,7 @@ namespace LM.App.Wpf
                                      .AddModule(new CoreModule(ws))
                                      .AddModule(new AddModule())
                                      .AddModule(new LibraryModule())
+                                     .AddModule(new ReviewModule())
                                      .AddModule(new SearchModule())
                                      .Build();
             _host = host;

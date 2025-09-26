@@ -1,9 +1,12 @@
+using System;
 using System.Threading.Tasks;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Review;
 using LM.Core.Abstractions;
 using LM.Infrastructure.FileSystem;
+using LM.Review.Core.Services;
 using Xunit;
 
 public class AppHostBuilderTests
@@ -19,14 +22,23 @@ public class AppHostBuilderTests
             .AddModule(new CoreModule(workspace))
             .AddModule(new AddModule())
             .AddModule(new LibraryModule())
+            .AddModule(new ReviewModule())
             .AddModule(new SearchModule())
             .Build();
 
         var entryStore = host.GetRequiredService<IEntryStore>();
         var pipeline = host.GetRequiredService<IAddPipeline>();
+        var workflowService = host.GetRequiredService<IReviewWorkflowService>();
+        var analyticsService = host.GetRequiredService<IReviewAnalyticsService>();
+        var dashboardFactory = host.GetRequiredService<Func<ReviewDashboardViewModel>>();
+        var stageFactory = host.GetRequiredService<Func<ReviewStageViewModel>>();
 
         Assert.NotNull(entryStore);
         Assert.NotNull(pipeline);
+        Assert.NotNull(workflowService);
+        Assert.NotNull(analyticsService);
+        Assert.NotNull(dashboardFactory());
+        Assert.NotNull(stageFactory());
 
         await entryStore.InitializeAsync();
     }
