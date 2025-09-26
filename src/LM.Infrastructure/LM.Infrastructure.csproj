@@ -15,6 +15,7 @@
     <!-- Versions are supplied centrally -->
     <PackageReference Include="UglyToad.PdfPig" />
     <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
 
 

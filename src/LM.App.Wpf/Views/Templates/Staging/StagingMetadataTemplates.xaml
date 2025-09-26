@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging"
+                    xmlns:core="clr-namespace:LM.Core.Models;assembly=LM.Core">
+  <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+  <DataTemplate DataType="{x:Type vm:StagingMetadataTabViewModel}">
+    <swc:ScrollViewer VerticalScrollBarVisibility="Auto">
+      <swc:Grid Margin="0,4,0,0">
+        <swc:Grid.ColumnDefinitions>
+          <swc:ColumnDefinition Width="*" />
+          <swc:ColumnDefinition Width="*" />
+        </swc:Grid.ColumnDefinitions>
+
+        <swc:StackPanel Grid.Column="0">
+          <swc:TextBlock Text="Title" />
+          <swc:TextBox Text="{Binding Current.Title, UpdateSourceTrigger=PropertyChanged}" />
+
+          <swc:TextBlock Text="Display name" Margin="0,12,0,0" />
+          <swc:DockPanel>
+            <swc:TextBox Text="{Binding Current.DisplayName, UpdateSourceTrigger=PropertyChanged}" />
+            <swc:Button Content="Generate"
+                        Margin="8,0,0,0"
+                        Command="{Binding DataContext.GenerateShortTitleCommand, RelativeSource={RelativeSource AncestorType={x:Type swc:Window}}}" />
+          </swc:DockPanel>
+
+          <swc:TextBlock Text="Authors (comma-separated)" Margin="0,12,0,0" />
+          <swc:TextBox Text="{Binding Current.AuthorsCsv, UpdateSourceTrigger=PropertyChanged}" />
+
+          <swc:DockPanel Margin="0,12,0,0">
+            <swc:StackPanel Width="160">
+              <swc:TextBlock Text="Year" />
+              <swc:TextBox Text="{Binding Current.Year, UpdateSourceTrigger=PropertyChanged}" />
+            </swc:StackPanel>
+            <swc:StackPanel Margin="12,0,0,0">
+              <swc:TextBlock Text="Source (journal/venue)" />
+              <swc:TextBox Text="{Binding Current.Source, UpdateSourceTrigger=PropertyChanged}" />
+            </swc:StackPanel>
+          </swc:DockPanel>
+
+          <swc:TextBlock Text="Tags (comma-separated)" Margin="0,12,0,0" />
+          <swc:TextBox Text="{Binding Current.TagsCsv, UpdateSourceTrigger=PropertyChanged}" />
+
+          <swc:CheckBox Content="Internal"
+                         Margin="0,12,0,0"
+                         IsChecked="{Binding Current.IsInternal, Mode=TwoWay}" />
+        </swc:StackPanel>
+
+        <swc:StackPanel Grid.Column="1" Margin="12,0,0,0">
+          <swc:StackPanel Orientation="Horizontal">
+            <swc:TextBlock Text="Type:" VerticalAlignment="Center" />
+            <swc:ComboBox ItemsSource="{Binding EntryTypes}"
+                          SelectedItem="{Binding Current.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Width="150"
+                          Margin="8,0,0,0" />
+          </swc:StackPanel>
+
+          <swc:Border Background="#FFE0E0E0"
+                      CornerRadius="4"
+                      Padding="6,2"
+                      Margin="0,12,0,0"
+                      Visibility="{Binding IsDuplicate, Converter={StaticResource BoolToVis}}">
+            <swc:TextBlock Text="Exact duplicate in library" FontWeight="SemiBold" />
+          </swc:Border>
+
+          <swc:Border Background="#FFFDEEB5"
+                      CornerRadius="4"
+                      Padding="6,2"
+                      Margin="0,8,0,0"
+                      Visibility="{Binding IsNearMatch, Converter={StaticResource BoolToVis}}">
+            <swc:TextBlock>
+              <Run Text="Near match: " />
+              <Run Text="{Binding Current.MatchedTitle}" FontStyle="Italic" />
+            </swc:TextBlock>
+          </swc:Border>
+
+          <swc:StackPanel Margin="0,12,0,0">
+            <swc:TextBlock Text="Internal ID" />
+            <swc:TextBox Text="{Binding Current.InternalId, UpdateSourceTrigger=PropertyChanged}" />
+          </swc:StackPanel>
+
+          <swc:StackPanel Margin="0,12,0,0">
+            <swc:TextBlock Text="DOI" />
+            <swc:TextBox Text="{Binding Current.Doi, UpdateSourceTrigger=PropertyChanged}" />
+          </swc:StackPanel>
+
+          <swc:StackPanel Margin="0,12,0,0">
+            <swc:TextBlock Text="PMID" />
+            <swc:TextBox Text="{Binding Current.Pmid, UpdateSourceTrigger=PropertyChanged}" />
+          </swc:StackPanel>
+
+          <swc:TextBlock Text="Notes" Margin="0,12,0,0" />
+          <swc:TextBox Text="{Binding Current.Notes, UpdateSourceTrigger=PropertyChanged}"
+                       AcceptsReturn="True"
+                       Height="120" />
+        </swc:StackPanel>
+      </swc:Grid>
+    </swc:ScrollViewer>
+  </DataTemplate>
+</ResourceDictionary>

@@ -25,6 +25,7 @@ namespace LM.Infrastructure.Hooks
             {
                 new ArticleHookComposer(writer),
                 new AttachmentHookComposer(writer),
+                new DataExtractionHookComposer(writer),
                 new ChangeLogHookComposer(writer)
             };
         }

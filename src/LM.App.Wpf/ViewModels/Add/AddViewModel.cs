@@ -13,6 +13,7 @@ using LM.App.Wpf.Views;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
+using LM.Core.Utils;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Settings;
 using LM.HubSpoke.Abstractions;
@@ -106,11 +107,13 @@ namespace LM.App.Wpf.ViewModels
                             IDoiNormalizer doiNormalizer,
                             HookOrchestrator orchestrator,
                             IPmidNormalizer pmidNormalizer,
+                            IDataExtractionPreprocessor preprocessor,
                             ISimilarityLog? simLog = null)
             : this(new AddPipeline(store, storage, hasher, similarity, workspace, metadata,
                                    publicationLookup, doiNormalizer,
                                    orchestrator,
                                    pmidNormalizer,
+                                   preprocessor,
                                    simLog),
                    workspace)
         {
@@ -129,6 +132,7 @@ namespace LM.App.Wpf.ViewModels
                    publicationLookup, doiNormalizer,
                    new HookOrchestrator(workspace),
                    new LM.Infrastructure.Text.PmidNormalizer(),
+                   NullDataExtractionPreprocessor.Instance,
                    simLog)
         {
         }

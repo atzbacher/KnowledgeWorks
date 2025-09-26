@@ -2,6 +2,7 @@ using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.HubSpoke.Abstractions;
@@ -28,10 +29,20 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IDoiNormalizer>(),
                 sp.GetRequiredService<HookOrchestrator>(),
                 sp.GetRequiredService<IPmidNormalizer>(),
+                sp.GetRequiredService<IDataExtractionPreprocessor>(),
                 sp.GetRequiredService<ISimilarityLog>()));
 
             services.AddSingleton<WatchedFolderScanner>(sp => new WatchedFolderScanner(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<IDialogService, WpfDialogService>();
+            services.AddSingleton<IDataExtractionCommitBuilder, DataExtractionCommitBuilder>();
+            services.AddTransient<StagingMetadataTabViewModel>();
+            services.AddTransient<StagingTablesTabViewModel>();
+            services.AddTransient<StagingFiguresTabViewModel>();
+            services.AddTransient<StagingEndpointsTabViewModel>();
+            services.AddTransient<StagingPopulationTabViewModel>();
+            services.AddTransient<StagingReviewCommitTabViewModel>(sp => new StagingReviewCommitTabViewModel(
+                sp.GetRequiredService<StagingListViewModel>(),
+                sp.GetRequiredService<IDataExtractionCommitBuilder>()));
             services.AddTransient<StagingEditorViewModel>();
             services.AddTransient<StagingEditorWindow>();
             services.AddSingleton<StagingListViewModel>(sp => new StagingListViewModel(sp.GetRequiredService<IAddPipeline>()));

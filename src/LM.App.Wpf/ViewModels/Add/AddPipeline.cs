@@ -1,13 +1,19 @@
 ﻿#nullable enable
 using LM.Core.Abstractions;
 using LM.Core.Models;
+using LM.Core.Models.DataExtraction;
+using LM.Core.Utils;
 using LM.HubSpoke.Abstractions;
 using LM.Infrastructure.Hooks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using HookM = LM.HubSpoke.Models;
@@ -25,6 +31,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly IPublicationLookup _pubs;
         private readonly IDoiNormalizer _doi;
         private readonly IPmidNormalizer _pmid;
+        private readonly IDataExtractionPreprocessor _preprocessor;
         private readonly ISimilarityLog? _simLog = null;
         private readonly HookOrchestrator _orchestrator;
 
@@ -46,6 +53,7 @@ namespace LM.App.Wpf.ViewModels
                    NullDoiNormalizer.Instance,
                    new LM.Infrastructure.Hooks.HookOrchestrator(workspace),
                    new NullPmidNormalizer(),
+                   NullDataExtractionPreprocessor.Instance,
                    simLog)
         { }
 
@@ -61,6 +69,7 @@ namespace LM.App.Wpf.ViewModels
                            IDoiNormalizer doiNormalizer,
                            LM.Infrastructure.Hooks.HookOrchestrator orchestrator,
                            IPmidNormalizer pmidNormalizer,
+                           IDataExtractionPreprocessor preprocessor,
                            ISimilarityLog? simLog = null)
         {
             _store = store;
@@ -73,6 +82,7 @@ namespace LM.App.Wpf.ViewModels
             _doi = doiNormalizer;
             _orchestrator = orchestrator;
             _pmid = pmidNormalizer;
+            _preprocessor = preprocessor ?? NullDataExtractionPreprocessor.Instance;
             _simLog = simLog;
         }
 
@@ -364,6 +374,7 @@ namespace LM.App.Wpf.ViewModels
                 {
                     var itemId = BuildItem(path, meta, match.Score, match.EntryId, match.Title, match.Kind);
                     PopulateFromRecordOrMeta(itemId, rec, meta);
+                    await TryPopulateEvidenceAsync(itemId, path, sha256, ext, ct).ConfigureAwait(false);
                     return itemId;
                 }
             }
@@ -372,6 +383,7 @@ namespace LM.App.Wpf.ViewModels
             var best = await ComputeBestContentSimilarityAsync(sessionId, path, meta, ct);
             var item = BuildItem(path, meta, best.Score, best.EntryId, best.Title, best.Kind);
             PopulateFromRecordOrMeta(item, rec, meta);
+            await TryPopulateEvidenceAsync(item, path, sha256, ext, ct).ConfigureAwait(false);
             return item;
         }
 
@@ -563,6 +575,186 @@ namespace LM.App.Wpf.ViewModels
             return item;
         }
 
+        private async Task TryPopulateEvidenceAsync(StagingItem item, string path, string sha256, string extension, CancellationToken ct)
+        {
+            if (item is null)
+                throw new ArgumentNullException(nameof(item));
+            if (item.IsDuplicate)
+                return;
+            if (!string.Equals(extension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            try
+            {
+                var request = new DataExtractionPreprocessRequest(path)
+                {
+                    PreferredCacheKey = sha256
+                };
+
+                var result = await _preprocessor.PreprocessAsync(request, ct).ConfigureAwait(false);
+                if (result is null || result.IsEmpty)
+                    return;
+
+                item.EvidencePreview = BuildEvidencePreview(result);
+                item.DataExtractionHook = BuildDataExtractionHook(result);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[AddPipeline] Data extraction preprocessing failed for '{path}': {ex.Message}");
+            }
+        }
+
+        private static StagingEvidencePreview BuildEvidencePreview(DataExtractionPreprocessResult result)
+        {
+            var sections = result.Sections.Select(s => new StagingEvidencePreview.SectionPreview
+            {
+                Heading = s.Heading,
+                Body = Truncate(s.Body, 800),
+                Pages = s.PageNumbers
+            }).ToList();
+
+            var tables = result.Tables.Select(t => new StagingEvidencePreview.TablePreview
+            {
+                Title = string.IsNullOrWhiteSpace(t.Title) ? "Table" : t.Title,
+                Classification = t.Classification,
+                Populations = t.DetectedPopulations,
+                Endpoints = t.DetectedEndpoints,
+                Pages = t.PageNumbers
+            }).ToList();
+
+            var figures = result.Figures.Select(f => new StagingEvidencePreview.FigurePreview
+            {
+                Caption = f.Caption,
+                Pages = f.PageNumbers,
+                ThumbnailPath = NormalizeWorkspacePath(f.ThumbnailRelativePath)
+            }).ToList();
+
+            return new StagingEvidencePreview
+            {
+                Sections = sections,
+                Tables = tables,
+                Figures = figures,
+                Provenance = result.Provenance
+            };
+        }
+
+        private HookM.DataExtractionHook BuildDataExtractionHook(DataExtractionPreprocessResult result)
+        {
+            var populations = new Dictionary<string, HookM.DataExtractionPopulation>(StringComparer.OrdinalIgnoreCase);
+            var interventions = new Dictionary<string, HookM.DataExtractionIntervention>(StringComparer.OrdinalIgnoreCase);
+            var endpoints = new Dictionary<string, HookM.DataExtractionEndpoint>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var table in result.Tables)
+            {
+                foreach (var pop in table.DetectedPopulations)
+                {
+                    if (string.IsNullOrWhiteSpace(pop))
+                        continue;
+                    if (!populations.ContainsKey(pop))
+                    {
+                        populations[pop] = new HookM.DataExtractionPopulation
+                        {
+                            Label = pop
+                        };
+                    }
+                }
+
+                foreach (var endpoint in table.DetectedEndpoints)
+                {
+                    if (string.IsNullOrWhiteSpace(endpoint))
+                        continue;
+                    if (!endpoints.ContainsKey(endpoint))
+                    {
+                        endpoints[endpoint] = new HookM.DataExtractionEndpoint
+                        {
+                            Name = endpoint
+                        };
+                    }
+                }
+
+                foreach (var column in table.Columns.Where(c => c.Role == TableColumnRole.Intervention))
+                {
+                    var label = string.IsNullOrWhiteSpace(column.Header) ? column.NormalizedHeader : column.Header;
+                    if (string.IsNullOrWhiteSpace(label))
+                        continue;
+                    if (!interventions.ContainsKey(label))
+                    {
+                        interventions[label] = new HookM.DataExtractionIntervention
+                        {
+                            Name = label
+                        };
+                    }
+                }
+            }
+
+            foreach (var intervention in interventions.Values)
+            {
+                foreach (var population in populations.Values)
+                {
+                    if (intervention.Name.Contains(population.Label, StringComparison.OrdinalIgnoreCase))
+                    {
+                        intervention.PopulationIds.Add(population.Id);
+                    }
+                }
+            }
+
+            var tableHooks = new List<HookM.DataExtractionTable>();
+            foreach (var table in result.Tables)
+            {
+                var linkedEndpoints = table.DetectedEndpoints
+                    .Where(e => endpoints.ContainsKey(e))
+                    .Select(e => endpoints[e].Id)
+                    .Distinct()
+                    .ToList();
+
+                var linkedInterventions = table.Columns
+                    .Where(c => c.Role == TableColumnRole.Intervention)
+                    .Select(c => string.IsNullOrWhiteSpace(c.Header) ? c.NormalizedHeader : c.Header)
+                    .Where(label => !string.IsNullOrWhiteSpace(label) && interventions.ContainsKey(label))
+                    .Select(label => interventions[label!].Id)
+                    .Distinct()
+                    .ToList();
+
+                var hookTable = new HookM.DataExtractionTable
+                {
+                    Title = string.IsNullOrWhiteSpace(table.Title) ? "Table" : table.Title,
+                    Caption = table.Classification.ToString(),
+                    SourcePath = NormalizeWorkspacePath(table.CsvRelativePath),
+                    Pages = table.PageNumbers.Select(p => p.ToString(CultureInfo.InvariantCulture)).ToList(),
+                    ProvenanceHash = FormatProvenanceHash(table.ProvenanceHash)
+                };
+
+                hookTable.LinkedEndpointIds.AddRange(linkedEndpoints);
+                hookTable.LinkedInterventionIds.AddRange(linkedInterventions);
+                tableHooks.Add(hookTable);
+            }
+
+            var figureHooks = result.Figures.Select(f => new HookM.DataExtractionFigure
+            {
+                Title = string.IsNullOrWhiteSpace(f.Caption) ? "Figure" : f.Caption,
+                Caption = f.Caption,
+                SourcePath = NormalizeWorkspacePath(f.ThumbnailRelativePath),
+                Pages = f.PageNumbers.Select(p => p.ToString(CultureInfo.InvariantCulture)).ToList(),
+                ProvenanceHash = FormatProvenanceHash(f.ProvenanceHash)
+            }).ToList();
+
+            return new HookM.DataExtractionHook
+            {
+                ExtractedAtUtc = result.Provenance.ExtractedAtUtc,
+                ExtractedBy = string.IsNullOrWhiteSpace(result.Provenance.ExtractedBy) ? GetCurrentUserName() : result.Provenance.ExtractedBy,
+                Populations = populations.Values.ToList(),
+                Interventions = interventions.Values.ToList(),
+                Endpoints = endpoints.Values.ToList(),
+                Figures = figureHooks,
+                Tables = tableHooks,
+                Notes = null
+            };
+        }
+
         private static (string Title, string DisplayName) ComputeTitles(StagingItem r)
         {
             var fallbackTitle = Path.GetFileNameWithoutExtension(r.FilePath);
@@ -583,7 +775,35 @@ namespace LM.App.Wpf.ViewModels
                 throw new ArgumentNullException(nameof(entry));
 
             var article = BuildArticleHook(stagingItem, entry, relativePath, sha256);
+            var normalizedPath = NormalizeStoragePath(relativePath);
+            var articleHash = string.IsNullOrWhiteSpace(sha256) ? null : $"sha256-{sha256}";
+            var dataExtraction = stagingItem.CommitMetadataOnly ? null : stagingItem.DataExtractionHook;
+            var extractionHash = TryComputeDataExtractionHash(dataExtraction);
             var changeLog = BuildEntryCreationChangeLog(entry, addedBy);
+            var extractionEvent = BuildDataExtractionChangeLog(stagingItem,
+                                                               entry,
+                                                               normalizedPath,
+                                                               articleHash,
+                                                               extractionHash,
+                                                               addedBy,
+                                                               stagingItem.CommitMetadataOnly);
+
+            if (stagingItem.PendingChangeLogEvents.Count > 0)
+            {
+                changeLog ??= new HookM.EntryChangeLogHook();
+                foreach (var evt in stagingItem.PendingChangeLogEvents)
+                {
+                    if (evt is null)
+                        continue;
+                    changeLog.Events.Add(evt);
+                }
+            }
+
+            if (extractionEvent is not null)
+            {
+                changeLog ??= new HookM.EntryChangeLogHook();
+                changeLog.Events.Add(extractionEvent);
+            }
 
             if (article is null && changeLog is null)
                 return null;
@@ -591,7 +811,8 @@ namespace LM.App.Wpf.ViewModels
             return new HookContext
             {
                 Article = article,
-                ChangeLog = changeLog
+                ChangeLog = changeLog,
+                DataExtraction = dataExtraction
             };
         }
 
@@ -740,6 +961,71 @@ namespace LM.App.Wpf.ViewModels
             };
         }
 
+        private HookM.EntryChangeLogEvent? BuildDataExtractionChangeLog(StagingItem stagingItem,
+                                                                        Entry entry,
+                                                                        string normalizedPath,
+                                                                        string? articleHash,
+                                                                        string? extractionHash,
+                                                                        string performer,
+                                                                        bool metadataOnly)
+        {
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+            if (stagingItem is null)
+                throw new ArgumentNullException(nameof(stagingItem));
+
+            var tags = BuildExtractionTags(articleHash, extractionHash, metadataOnly);
+            if (tags.Count == 0)
+                return null;
+
+            var title = entry.DisplayName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Title;
+            if (string.IsNullOrWhiteSpace(title))
+                title = stagingItem.Title;
+            if (string.IsNullOrWhiteSpace(title))
+                title = stagingItem.DisplayName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.OriginalFileName;
+            if (string.IsNullOrWhiteSpace(title))
+                title = entry.Id;
+
+            return new HookM.EntryChangeLogEvent
+            {
+                EventId = Guid.NewGuid().ToString("N"),
+                TimestampUtc = DateTime.UtcNow,
+                PerformedBy = string.IsNullOrWhiteSpace(performer) ? GetCurrentUserName() : performer,
+                Action = metadataOnly ? "DataExtractionSkipped" : "DataExtractionCommitted",
+                Details = new HookM.ChangeLogAttachmentDetails
+                {
+                    AttachmentId = entry.Id,
+                    Title = title!,
+                    LibraryPath = normalizedPath,
+                    Purpose = AttachmentKind.Supplement,
+                    Tags = tags
+                }
+            };
+        }
+
+        private static List<string> BuildExtractionTags(string? articleHash, string? extractionHash, bool metadataOnly)
+        {
+            var tags = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(articleHash))
+                tags.Add($"asset:article:{articleHash}");
+
+            if (metadataOnly)
+            {
+                tags.Add("asset:data-extraction:none");
+            }
+            else if (!string.IsNullOrWhiteSpace(extractionHash))
+            {
+                tags.Add($"asset:data-extraction:{extractionHash}");
+            }
+
+            return tags;
+        }
+
         private long TryGetFileSize(string storagePath)
         {
             try
@@ -770,6 +1056,49 @@ namespace LM.App.Wpf.ViewModels
                 return string.Empty;
 
             return relativePath.Replace('\\', '/');
+        }
+
+        private static string NormalizeWorkspacePath(string? relativePath)
+            => NormalizeStoragePath(relativePath);
+
+        private static string FormatProvenanceHash(string? hash)
+        {
+            if (string.IsNullOrWhiteSpace(hash))
+                return string.Empty;
+
+            var normalized = hash.Trim();
+            return normalized.StartsWith("sha256-", StringComparison.OrdinalIgnoreCase)
+                ? normalized
+                : $"sha256-{normalized.ToLowerInvariant()}";
+        }
+
+        private static string? TryComputeDataExtractionHash(HookM.DataExtractionHook? hook)
+        {
+            if (hook is null)
+                return null;
+
+            try
+            {
+                var json = JsonSerializer.Serialize(hook, HookM.JsonStd.Options);
+                using var sha = SHA256.Create();
+                var bytes = Encoding.UTF8.GetBytes(json);
+                var hash = sha.ComputeHash(bytes);
+                return $"sha256-{Convert.ToHexString(hash).ToLowerInvariant()}";
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static string Truncate(string value, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            return value.Length <= maxLength
+                ? value
+                : string.Concat(value.AsSpan(0, maxLength), '…');
         }
 
         private static string ResolveContentType(string storagePath)
