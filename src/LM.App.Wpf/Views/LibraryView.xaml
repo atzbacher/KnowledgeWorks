@@ -29,7 +29,7 @@
       <SolidColorBrush x:Key="LibraryPanelBorderBrush" Color="#FFE2E8F0" />
       <SolidColorBrush x:Key="LibraryAccentBrush" Color="#FF2563EB" />
       <SolidColorBrush x:Key="LibraryMutedForegroundBrush" Color="#FF64748B" />
-      <SolidColorBrush x:Key="LibraryCardShadowColor" Color="#11000000" />
+      <Color x:Key="LibraryCardShadowColor">#11000000</Color>
       <CornerRadius x:Key="LibraryCardCornerRadius">16</CornerRadius>
       <Style x:Key="LibraryHeaderButtonStyle" TargetType="Button">
         <Setter Property="Padding" Value="14,8" />
