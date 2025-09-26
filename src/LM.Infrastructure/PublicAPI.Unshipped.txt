@@ -109,3 +109,10 @@ LM.Infrastructure.Settings.JsonUserPreferencesStore.JsonUserPreferencesStore() -
 LM.Infrastructure.Settings.JsonUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
 LM.Infrastructure.Settings.JsonUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!
+LM.Infrastructure.Review.ReviewHookContextFactory
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateProjectCreated(LM.Review.Core.Models.ReviewProject! project) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateReviewerDecisionRecorded(LM.Review.Core.Models.ScreeningAssignment! assignment, LM.Review.Core.Models.ReviewerDecision! decision) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateStageTransition(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConflictState previousState, LM.Review.Core.Models.ConflictState currentState) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.ReviewHookContextFactory() -> void
