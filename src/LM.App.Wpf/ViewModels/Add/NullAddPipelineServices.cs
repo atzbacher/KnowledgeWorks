@@ -3,6 +3,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
+using LM.Core.Models;
 
 namespace LM.App.Wpf.ViewModels
 {

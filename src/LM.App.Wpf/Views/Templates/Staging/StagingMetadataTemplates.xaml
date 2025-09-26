@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                     xmlns:sw="clr-namespace:System.Windows;assembly=PresentationFramework"
+                     xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
                     xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging"
                     xmlns:core="clr-namespace:LM.Core.Models;assembly=LM.Core">
   <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -22,7 +23,7 @@
             <swc:TextBox Text="{Binding Current.DisplayName, UpdateSourceTrigger=PropertyChanged}" />
             <swc:Button Content="Generate"
                         Margin="8,0,0,0"
-                        Command="{Binding DataContext.GenerateShortTitleCommand, RelativeSource={RelativeSource AncestorType={x:Type swc:Window}}}" />
+                         Command="{Binding DataContext.GenerateShortTitleCommand, RelativeSource={RelativeSource AncestorType={x:Type sw:Window}}}" />
           </swc:DockPanel>
 
           <swc:TextBlock Text="Authors (comma-separated)" Margin="0,12,0,0" />

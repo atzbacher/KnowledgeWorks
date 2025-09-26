@@ -98,8 +98,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             var existingHook = current.DataExtractionHook;
             try
             {
-                var tables = _tablesTab?.Tables ?? Array.Empty<StagingTableRowViewModel>();
-                var endpoints = _endpointsTab?.Endpoints ?? Array.Empty<StagingEndpointViewModel>();
+                var tables = (IEnumerable<StagingTableRowViewModel>?)_tablesTab?.Tables
+                             ?? Array.Empty<StagingTableRowViewModel>();
+                var endpoints = (IEnumerable<StagingEndpointViewModel>?)_endpointsTab?.Endpoints
+                                ?? Array.Empty<StagingEndpointViewModel>();
                 var built = _builder.Build(current, tables, endpoints);
                 if (built is not null)
                     current.DataExtractionHook = built;
