@@ -59,7 +59,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Endpoints = endpointSnapshots,
                 Figures = source.Figures.Select(CloneFigure).ToList(),
                 Tables = tableSnapshots,
-                Notes = source.Notes
+                Notes = source.Notes,
+                StudyDesign = source.StudyDesign,
+                StudySetting = source.StudySetting
             };
         }
 
@@ -109,12 +111,16 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Caption = table.Caption,
                 SourcePath = table.SourcePath,
                 Pages = new List<string>(table.Pages),
+                Regions = table.Regions.Select(CloneRegion).ToList(),
                 LinkedEndpointIds = new List<string>(table.LinkedEndpointIds),
                 LinkedInterventionIds = new List<string>(table.LinkedInterventionIds),
                 ProvenanceHash = table.ProvenanceHash,
                 Notes = table.Notes,
                 TableLabel = table.TableLabel,
-                Summary = table.Summary
+                Summary = table.Summary,
+                Tags = new List<string>(table.Tags),
+                ColumnCountHint = table.ColumnCountHint,
+                DictionaryPath = table.DictionaryPath
             };
 
         private static HookM.DataExtractionFigure CloneFigure(HookM.DataExtractionFigure figure)
@@ -125,9 +131,23 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Caption = figure.Caption,
                 SourcePath = figure.SourcePath,
                 Pages = new List<string>(figure.Pages),
+                Regions = figure.Regions.Select(CloneRegion).ToList(),
                 ProvenanceHash = figure.ProvenanceHash,
                 Notes = figure.Notes,
-                ThumbnailPath = figure.ThumbnailPath
+                ThumbnailPath = figure.ThumbnailPath,
+                Tags = new List<string>(figure.Tags),
+                ImagePath = figure.ImagePath
+            };
+
+        private static HookM.DataExtractionRegion CloneRegion(HookM.DataExtractionRegion region)
+            => new()
+            {
+                PageNumber = region.PageNumber,
+                X = region.X,
+                Y = region.Y,
+                Width = region.Width,
+                Height = region.Height,
+                Label = region.Label
             };
 
         private static string GetCurrentUserName()

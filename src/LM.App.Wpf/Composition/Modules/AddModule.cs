@@ -2,6 +2,7 @@ using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.Views.Dialogs.Staging;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
@@ -46,6 +47,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<StagingReviewCommitTabViewModel>(sp => new StagingReviewCommitTabViewModel(
                 sp.GetRequiredService<StagingListViewModel>(),
                 sp.GetRequiredService<IDataExtractionCommitBuilder>()));
+            services.AddTransient<DataExtractionWorkspaceViewModel>();
+            services.AddTransient<DataExtractionWorkspaceWindow>();
             services.AddTransient<StagingEditorViewModel>();
             services.AddTransient<StagingEditorWindow>();
 

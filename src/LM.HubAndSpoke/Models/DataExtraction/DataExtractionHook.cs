@@ -38,5 +38,11 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("notes")]
         public string? Notes { get; init; }
+
+        [JsonPropertyName("study_design")]
+        public string? StudyDesign { get; init; }
+
+        [JsonPropertyName("study_setting")]
+        public string? StudySetting { get; init; }
     }
 }

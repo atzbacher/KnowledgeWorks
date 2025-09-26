@@ -1,0 +1,285 @@
+<Window x:Class="LM.App.Wpf.Views.Dialogs.Staging.DataExtractionWorkspaceWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+        xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging"
+        Title="Data extraction workspace"
+        Width="1100"
+        Height="720"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+  <swc:Grid Margin="12">
+    <swc:Grid.RowDefinitions>
+      <swc:RowDefinition Height="Auto" />
+      <swc:RowDefinition Height="*" />
+      <swc:RowDefinition Height="Auto" />
+    </swc:Grid.RowDefinitions>
+
+    <swc:StackPanel Orientation="Horizontal"
+                    Margin="0,0,0,12"
+                    VerticalAlignment="Center">
+      <swc:TextBlock Text="PDF:" FontWeight="SemiBold" />
+      <swc:TextBlock Text="{Binding PdfDisplayName}" Margin="6,0,0,0" />
+      <swc:TextBlock Text="(preview unavailable)"
+                     Margin="12,0,0,0"
+                     Foreground="Gray" />
+    </swc:StackPanel>
+
+    <swc:Grid Grid.Row="1" ColumnSpacing="12">
+      <swc:Grid.ColumnDefinitions>
+        <swc:ColumnDefinition Width="3*" />
+        <swc:ColumnDefinition Width="2*" />
+      </swc:Grid.ColumnDefinitions>
+
+      <swc:Border Background="#FFEFF2F5"
+                  BorderBrush="#FFCBD5E1"
+                  BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="12">
+        <swc:StackPanel>
+          <swc:TextBlock Text="PDF region viewer coming soon"
+                         FontWeight="SemiBold"
+                         Margin="0,0,0,4" />
+          <swc:TextBlock Text="Use the controls on the right to describe table and figure selections."
+                         TextWrapping="Wrap" />
+        </swc:StackPanel>
+      </swc:Border>
+
+      <swc:TabControl Grid.Column="1">
+        <swc:TabItem Header="Assets">
+          <swc:Grid Margin="0,4,0,0">
+            <swc:Grid.ColumnDefinitions>
+              <swc:ColumnDefinition Width="240" />
+              <swc:ColumnDefinition Width="*" />
+            </swc:Grid.ColumnDefinitions>
+            <swc:Grid.RowDefinitions>
+              <swc:RowDefinition Height="Auto" />
+              <swc:RowDefinition Height="*" />
+            </swc:Grid.RowDefinitions>
+
+            <swc:StackPanel Orientation="Horizontal"
+                            Grid.ColumnSpan="2"
+                            Margin="0,0,0,8">
+              <swc:Button Content="Add table"
+                          Margin="0,0,8,0"
+                          Command="{Binding AddTableCommand}" />
+              <swc:Button Content="Add figure"
+                          Margin="0,0,8,0"
+                          Command="{Binding AddFigureCommand}" />
+              <swc:Button Content="Remove"
+                          Command="{Binding RemoveAssetCommand}"
+                          CommandParameter="{Binding SelectedAsset}" />
+            </swc:StackPanel>
+
+            <swc:ListBox Grid.Row="1"
+                          ItemsSource="{Binding Assets}"
+                          SelectedItem="{Binding SelectedAsset, Mode=TwoWay}"
+                          DisplayMemberPath="DisplayName" />
+
+            <swc:ContentControl Grid.Row="1"
+                                Grid.Column="1"
+                                Margin="12,0,0,0"
+                                Content="{Binding SelectedAsset}">
+              <swc:ContentControl.Resources>
+                <DataTemplate DataType="{x:Type vm:DataExtractionAssetViewModel}">
+                  <swc:ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <swc:StackPanel>
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Title" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Caption" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding Caption, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Pages" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding Pages, UpdateSourceTrigger=PropertyChanged}" Width="180" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Source path" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Provenance" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding ProvenanceHash, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Tags" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal"
+                                      Margin="0,0,0,8">
+                        <swc:TextBlock Text="Figure label" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding FigureLabel, UpdateSourceTrigger=PropertyChanged}" Width="180">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Figure">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Thumbnail" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding ThumbnailPath, UpdateSourceTrigger=PropertyChanged}" Width="250">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Figure">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="High-res" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding ImagePath, UpdateSourceTrigger=PropertyChanged}" Width="250">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Figure">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Column hint" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding ColumnHint, UpdateSourceTrigger=PropertyChanged}" Width="80">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <swc:TextBlock Text="Dictionary" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding DictionaryPath, UpdateSourceTrigger=PropertyChanged}" Width="250">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+                        <swc:TextBlock Text="Regions" Width="120" />
+                        <swc:Button Content="Add region"
+                                    Command="{Binding AddRegionCommand}" />
+                      </swc:StackPanel>
+
+                      <swc:ItemsControl ItemsSource="{Binding Regions}">
+                        <swc:ItemsControl.ItemTemplate>
+                          <DataTemplate DataType="{x:Type vm:DataExtractionRegionViewModel}">
+                            <swc:Border BorderBrush="#FFD0D5DD"
+                                        BorderThickness="1"
+                                        CornerRadius="6"
+                                        Padding="8"
+                                        Margin="0,0,0,8">
+                              <swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="Page" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding PageNumber, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+                                </swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="X" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding X, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                                </swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="Y" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding Y, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                                </swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="Width" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                                </swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="Height" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding Height, UpdateSourceTrigger=PropertyChanged}" Width="80" />
+                                </swc:StackPanel>
+                                <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                  <swc:TextBlock Text="Label" Width="80" VerticalAlignment="Center" />
+                                  <swc:TextBox Text="{Binding Label, UpdateSourceTrigger=PropertyChanged}" Width="160" />
+                                </swc:StackPanel>
+                                <swc:Button Content="Remove"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding DataContext.RemoveRegionCommand, RelativeSource={RelativeSource AncestorType=swc:ContentControl}}"
+                                            CommandParameter="{Binding}" />
+                              </swc:StackPanel>
+                            </swc:Border>
+                          </DataTemplate>
+                        </swc:ItemsControl.ItemTemplate>
+                      </swc:ItemsControl>
+                    </swc:StackPanel>
+                  </swc:ScrollViewer>
+                </DataTemplate>
+              </swc:ContentControl.Resources>
+            </swc:ContentControl>
+          </swc:Grid>
+        </swc:TabItem>
+
+        <swc:TabItem Header="Study details">
+          <swc:StackPanel Margin="0,8,0,0">
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Study design" Width="140" VerticalAlignment="Center" />
+              <swc:ComboBox Width="240"
+                             ItemsSource="{Binding StudyDetails.StudyDesignOptions}"
+                             SelectedItem="{Binding StudyDetails.StudyDesign, Mode=TwoWay}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Setting" Width="140" VerticalAlignment="Center" />
+              <swc:ComboBox Width="240"
+                             ItemsSource="{Binding StudyDetails.StudySettingOptions}"
+                             SelectedItem="{Binding StudyDetails.StudySetting, Mode=TwoWay}" />
+            </swc:StackPanel>
+          </swc:StackPanel>
+        </swc:TabItem>
+      </swc:TabControl>
+    </swc:Grid>
+
+    <swc:StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+      <swc:Button Content="Cancel"
+                  Margin="0,0,8,0"
+                  Command="{Binding CancelCommand}" />
+      <swc:Button Content="Save selections"
+                  Command="{Binding SaveAsyncCommand}" />
+    </swc:StackPanel>
+  </swc:Grid>
+</Window>

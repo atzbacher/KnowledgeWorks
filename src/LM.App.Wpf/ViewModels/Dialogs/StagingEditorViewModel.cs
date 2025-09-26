@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,6 +15,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
 {
     internal sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
     {
+        private readonly IDialogService _dialogs;
         private readonly StagingReviewCommitTabViewModel _reviewTab;
         private StagingTabViewModel? _selectedTab;
 
@@ -23,7 +25,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs
                                       StagingFiguresTabViewModel figuresTab,
                                       StagingEndpointsTabViewModel endpointsTab,
                                       StagingPopulationTabViewModel populationTab,
-                                      StagingReviewCommitTabViewModel reviewTab)
+                                      StagingReviewCommitTabViewModel reviewTab,
+                                      IDialogService dialogs)
         {
             StagingList = stagingList ?? throw new ArgumentNullException(nameof(stagingList));
             StagingList.PropertyChanged += OnStagingListPropertyChanged;
@@ -34,6 +37,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             if (endpointsTab is null) throw new ArgumentNullException(nameof(endpointsTab));
             if (populationTab is null) throw new ArgumentNullException(nameof(populationTab));
             _reviewTab = reviewTab ?? throw new ArgumentNullException(nameof(reviewTab));
+            _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
 
             Tabs = new ObservableCollection<StagingTabViewModel>
             {
@@ -107,6 +111,32 @@ namespace LM.App.Wpf.ViewModels.Dialogs
 
         private bool CanGenerateShortTitle() => StagingList.Current is not null;
 
+        [RelayCommand(CanExecute = nameof(CanOpenDataExtraction))]
+        private void OpenDataExtraction()
+        {
+            var current = StagingList.Current;
+            if (current is null)
+                return;
+
+            var result = _dialogs.ShowDataExtractionWorkspace(current);
+            if (result == true)
+            {
+                UpdateActiveItem();
+            }
+        }
+
+        private bool CanOpenDataExtraction()
+        {
+            var current = StagingList.Current;
+            if (current is null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(current.FilePath))
+                return false;
+
+            return string.Equals(Path.GetExtension(current.FilePath), ".pdf", StringComparison.OrdinalIgnoreCase);
+        }
+
         public void Dispose()
         {
             StagingList.PropertyChanged -= OnStagingListPropertyChanged;
@@ -122,6 +152,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             else if (e.PropertyName == nameof(StagingListViewModel.Current))
             {
                 GenerateShortTitleCommand.NotifyCanExecuteChanged();
+                OpenDataExtractionCommand.NotifyCanExecuteChanged();
                 UpdateActiveItem();
             }
             else if (e.PropertyName == nameof(StagingListViewModel.IndexLabel))
@@ -141,6 +172,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             _reviewTab.Sync(current, Tabs.ToList());
             UpdateActiveTabState();
             OnPropertyChanged(nameof(HasValidationErrors));
+            OpenDataExtractionCommand.NotifyCanExecuteChanged();
         }
 
         private void UpdateActiveTabState()

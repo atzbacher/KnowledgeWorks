@@ -11,5 +11,11 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("summary")]
         public string? Summary { get; init; }
+
+        [JsonPropertyName("column_hint")]
+        public int? ColumnCountHint { get; init; }
+
+        [JsonPropertyName("dictionary_path")]
+        public string? DictionaryPath { get; init; }
     }
 }

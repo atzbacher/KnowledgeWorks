@@ -306,7 +306,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Endpoints = hook.Endpoints,
                 Figures = hook.Figures,
                 Tables = hook.Tables,
-                Notes = hook.Notes
+                Notes = hook.Notes,
+                StudyDesign = hook.StudyDesign,
+                StudySetting = hook.StudySetting
             };
         }
 

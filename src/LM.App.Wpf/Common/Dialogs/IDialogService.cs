@@ -26,5 +26,6 @@ namespace LM.App.Wpf.Common.Dialogs
         string? ShowFolderBrowserDialog(FolderPickerOptions options);
         string? ShowSaveFileDialog(FileSavePickerOptions options);
         bool? ShowStagingEditor(StagingListViewModel stagingList);
+        bool? ShowDataExtractionWorkspace(StagingItem stagingItem);
     }
 }
