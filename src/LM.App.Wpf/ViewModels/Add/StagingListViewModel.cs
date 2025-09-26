@@ -196,13 +196,36 @@ namespace LM.App.Wpf.ViewModels
             return dispatcher.InvokeAsync(Add).Task;
         }
 
-        public async Task CommitSelectedAsync(CancellationToken ct)
+        public Task CommitSelectedAsync(CancellationToken ct)
         {
             var selected = _items.Where(static item => item.Selected).ToList();
             if (selected.Count == 0)
+                return Task.CompletedTask;
+
+            return CommitAsync(selected, ct);
+        }
+
+        public async Task CommitAsync(IEnumerable<StagingItem> items, CancellationToken ct)
+        {
+            if (items is null)
+                throw new ArgumentNullException(nameof(items));
+
+            var pending = items
+                .Where(static item => item is not null)
+                .Distinct()
+                .ToList();
+
+            if (pending.Count == 0)
                 return;
 
-            var committed = await _pipeline.CommitAsync(selected, ct).ConfigureAwait(false);
+            var committed = await _pipeline.CommitAsync(pending, ct).ConfigureAwait(false);
+            await RemoveCommittedAsync(committed).ConfigureAwait(false);
+        }
+
+        private async Task RemoveCommittedAsync(IReadOnlyList<StagingItem> committed)
+        {
+            if (committed is null || committed.Count == 0)
+                return;
 
             void Remove()
             {

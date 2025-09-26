@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging">
+  <DataTemplate DataType="{x:Type vm:StagingFiguresTabViewModel}">
+    <swc:Grid>
+      <swc:Grid.RowDefinitions>
+        <swc:RowDefinition Height="*" />
+        <swc:RowDefinition Height="Auto" />
+      </swc:Grid.RowDefinitions>
+
+      <swc:ListView ItemsSource="{Binding Figures}"
+                    SelectedItem="{Binding Selected, Mode=TwoWay}">
+        <swc:ListView.View>
+          <swc:GridView>
+            <swc:GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="200" />
+            <swc:GridViewColumn Header="Caption" DisplayMemberBinding="{Binding Caption}" Width="250" />
+            <swc:GridViewColumn Header="Pages" DisplayMemberBinding="{Binding Pages}" Width="120" />
+            <swc:GridViewColumn Header="Source" DisplayMemberBinding="{Binding SourcePath}" Width="200" />
+          </swc:GridView>
+        </swc:ListView.View>
+      </swc:ListView>
+
+      <swc:TextBlock Grid.Row="1"
+                     Margin="0,8,0,0"
+                     Text="Figures are extracted automatically. Use table re-upload to refresh thumbnails." />
+    </swc:Grid>
+  </DataTemplate>
+</ResourceDictionary>

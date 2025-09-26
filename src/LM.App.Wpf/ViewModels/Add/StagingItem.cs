@@ -1,10 +1,10 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using LM.Core.Models;
-// NEW:
-using LM.HubSpoke.Models;
+using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -93,3 +93,4 @@ namespace LM.App.Wpf.ViewModels
         public StagingEvidencePreview? EvidencePreview { get; set; }
     }
 }
+

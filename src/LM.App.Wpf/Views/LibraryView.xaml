@@ -17,144 +17,288 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Library/LibraryCommonResources.xaml" />
+        <ResourceDictionary Source="Library/LibraryThemeResources.xaml" />
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
-      <Style TargetType="controls:LibrarySearchQueryBox">
-        <Setter Property="Background" Value="#FFECEFF2" />
-        <Setter Property="BorderBrush" Value="#FFC4CAD0" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="10,6" />
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="controls:LibrarySearchQueryBox">
-              <Border Background="{TemplateBinding Background}"
-                      BorderBrush="{TemplateBinding BorderBrush}"
-                      BorderThickness="{TemplateBinding BorderThickness}"
-                      CornerRadius="18"
-                      Padding="{TemplateBinding Padding}">
-                <ScrollViewer x:Name="PART_ContentHost"
-                              Focusable="false"
-                              HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
-                              VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
-              </Border>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
-      </Style>
     </ResourceDictionary>
 
   </UserControl.Resources>
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="{Binding DataContext.Filters.LeftPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="{Binding DataContext.Filters.RightPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
-    </Grid.ColumnDefinitions>
-
-    <!-- Search header -->
-    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Background="#FFF7F7F7" BorderBrush="#FFE0E0E0" BorderThickness="0,0,0,1">
-      <Grid DataContext="{Binding Filters}" Margin="12">
+  <Grid Background="{StaticResource LibrarySurfaceBackgroundBrush}">
+    <Border Margin="16"
+            Background="{StaticResource LibraryPanelBackgroundBrush}"
+            CornerRadius="{StaticResource LibraryCardCornerRadius}">
+      <Border.Effect>
+        <DropShadowEffect Color="{StaticResource LibraryCardShadowColor}"
+                          BlurRadius="20"
+                          ShadowDepth="4"
+                          Direction="270" />
+      </Border.Effect>
+      <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="{Binding DataContext.Filters.LeftPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
+          <ColumnDefinition Width="Auto"/>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="{Binding DataContext.Filters.RightPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0">
-          <TextBlock Text="Library search" FontWeight="SemiBold"/>
-          <controls:LibrarySearchQueryBox Margin="0,6,0,0"
-                                          Text="{Binding UnifiedQuery}"
-                                          ToolTip="{Binding KeywordTooltip}"
-                                          ToolTipService.ShowDuration="60000"/>
-          <TextBlock Text="Examples: title:heart AND tags:aortic, author:nicolas, NOT internal:true"
-                     FontSize="11"
-                     Foreground="DimGray"
-                     Margin="0,4,0,0"/>
+    <!-- Search header -->
+    <Border Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="5"
+            BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+            BorderThickness="0,0,0,1"
+            CornerRadius="16,16,0,0"
+            Padding="32,28,32,24">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#FFF9FAFF" Offset="0" />
+          <GradientStop Color="#FFE9EDFB" Offset="1" />
+        </LinearGradientBrush>
+      </Border.Background>
+      <Grid DataContext="{Binding Filters}">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,24,0">
+          <TextBlock Text="Explore the knowledge library"
+                     FontSize="28"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+          <TextBlock Text="Compose rich queries with field keywords, saved presets, and semantic ranking to pinpoint the right entry."
+                     Margin="0,8,0,14"
+                     Foreground="{StaticResource LibrarySecondaryForegroundBrush}"
+                     TextWrapping="Wrap" />
+          <Border Background="{StaticResource LibraryPanelBackgroundBrush}"
+                  BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+                  BorderThickness="1"
+                  CornerRadius="18"
+                  Padding="18"
+                  SnapsToDevicePixels="True">
+            <Border.Effect>
+              <DropShadowEffect Color="{StaticResource LibraryCardShadowColor}"
+                                BlurRadius="14"
+                                ShadowDepth="0" />
+            </Border.Effect>
+            <StackPanel>
+              <TextBlock Text="Search query"
+                         Margin="0,0,0,6"
+                         FontSize="12"
+                         FontWeight="SemiBold"
+                         Foreground="{StaticResource LibrarySecondaryForegroundBrush}" />
+              <controls:LibrarySearchQueryBox Text="{Binding UnifiedQuery}"
+                                              MinHeight="48"
+                                              ToolTip="{Binding KeywordTooltip}"
+                                              ToolTipService.ShowDuration="60000"
+                                              AutomationProperties.Name="Library search query" />
+              <StackPanel Margin="0,14,0,0">
+                <TextBlock FontSize="11"
+                           Foreground="{StaticResource LibraryMutedForegroundBrush}">
+                  <Run Text="Sample:" />
+                  <Run Text=" title:&quot;heart failure&quot; AND tags:cardiology AND (year&gt;2020)" />
+                </TextBlock>
+                <TextBlock Margin="0,6,0,0"
+                           FontSize="11"
+                           Foreground="{StaticResource LibraryMutedForegroundBrush}"
+                           Text="Use quotes for phrases, colon for field filters, and parentheses to group logic." />
+              </StackPanel>
+            </StackPanel>
+          </Border>
         </StackPanel>
 
-        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
-          <Button Margin="0,0,8,0"
-                  Padding="10,4"
-                  Command="{Binding ToggleLeftPanelCommand}"
-                  ToolTip="Show or hide the saved searches panel">
-            <Button.Style>
-              <Style TargetType="Button">
-                <Setter Property="Content" Value="Hide saved" />
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
-                    <Setter Property="Content" Value="Show saved" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
-          <Button Padding="10,4"
-                  Command="{Binding ToggleRightPanelCommand}"
-                  ToolTip="Show or hide the entry details panel">
-            <Button.Style>
-              <Style TargetType="Button">
-                <Setter Property="Content" Value="Hide details" />
-                <Style.Triggers>
-                  <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
-                    <Setter Property="Content" Value="Show details" />
-                  </DataTrigger>
-                </Style.Triggers>
-              </Style>
-            </Button.Style>
-          </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,8,0,0">
-          <Button Content="Search"
-                  Margin="0,0,8,0"
-                  Command="{Binding DataContext.SearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
-          <Button Content="Clear"
-                  Margin="0,0,8,0"
-                  Command="{Binding ClearCommand}"/>
-          <Button Content="Save search"
-                  Margin="0,0,8,0"
-                  Command="{Binding SavePresetCommand}"/>
-          <Button Content="Manage saved"
-                  Margin="0,0,8,0"
-                  Command="{Binding ManagePresetsCommand}"/>
-          <Button Content="Load saved"
-                  Command="{Binding LoadPresetCommand}"/>
-        </StackPanel>
-
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="8,8,0,0">
-          <CheckBox Content="Full-text search" IsChecked="{Binding UseFullTextSearch}"/>
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
-                    Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
-          <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"/>
-          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-            <TextBlock Text="Search within:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-            <CheckBox Content="Title" Margin="0,0,8,0" IsChecked="{Binding FullTextInTitle}"/>
-            <CheckBox Content="Abstract" Margin="0,0,8,0" IsChecked="{Binding FullTextInAbstract}"/>
-            <CheckBox Content="Content" IsChecked="{Binding FullTextInContent}"/>
+        <StackPanel Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    MinWidth="240">
+          <Border Background="#FF1D4ED8"
+                  BorderBrush="#FF1E3A8A"
+                  BorderThickness="1"
+                  CornerRadius="18"
+                  Padding="18"
+                  SnapsToDevicePixels="True">
+            <StackPanel>
+              <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="Full-text ranking"
+                             FontWeight="SemiBold"
+                             Foreground="{StaticResource LibraryAccentForegroundBrush}" />
+                  <TextBlock Margin="0,4,0,0"
+                             FontSize="11"
+                             Foreground="#CCF4F6FF">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="Off – exact field matches only." />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding UseFullTextSearch}" Value="True">
+                            <Setter Property="Text" Value="On – semantic scores influence ordering." />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </StackPanel>
+                <ToggleButton Grid.Column="1"
+                              Margin="12,0,0,0"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Center"
+                              ToolTip="Toggle semantic full-text boosting"
+                              Style="{StaticResource LibraryPillToggleStyle}"
+                              AutomationProperties.Name="Full-text ranking toggle"
+                              IsChecked="{Binding UseFullTextSearch}" />
+              </Grid>
+              <TextBlock Margin="0,14,0,0"
+                         FontSize="11"
+                         Foreground="#CCF4F6FF"
+                         Text="Full-text boosts work best when your query mixes fields with descriptive keywords." />
+            </StackPanel>
+          </Border>
+          <StackPanel Orientation="Horizontal"
+                      Margin="0,16,0,0"
+                      HorizontalAlignment="Right">
+            <Button Command="{Binding ToggleLeftPanelCommand}"
+                    AutomationProperties.Name="Toggle saved searches panel"
+                    ToolTip="Show or hide the saved searches panel">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
+                  <Setter Property="Content" Value="Hide saved" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                      <Setter Property="Content" Value="Show saved" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+            </Button>
+            <Button Command="{Binding ToggleRightPanelCommand}"
+                    AutomationProperties.Name="Toggle entry detail panel"
+                    ToolTip="Show or hide the entry details panel">
+              <Button.Style>
+                <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
+                  <Setter Property="Content" Value="Hide details" />
+                  <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                      <Setter Property="Content" Value="Show details" />
+                    </DataTrigger>
+                  </Style.Triggers>
+                </Style>
+              </Button.Style>
+            </Button>
           </StackPanel>
         </StackPanel>
+        <WrapPanel Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   Margin="0,26,0,0"
+                   HorizontalAlignment="Left">
+          <Button Style="{StaticResource LibraryPrimaryButtonStyle}"
+                  Margin="0,0,12,12"
+                  Content="Run search"
+                  AutomationProperties.Name="Run search"
+                  Command="{Binding DataContext.SearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+          <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
+                  Content="Clear"
+                  AutomationProperties.Name="Clear search"
+                  Command="{Binding ClearCommand}" />
+          <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
+                  Content="Save search"
+                  AutomationProperties.Name="Save search"
+                  Command="{Binding SavePresetCommand}" />
+          <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
+                  Content="Manage saved"
+                  AutomationProperties.Name="Manage saved searches"
+                  Command="{Binding ManagePresetsCommand}" />
+          <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
+                  Content="Load saved"
+                  AutomationProperties.Name="Load saved search"
+                  Command="{Binding LoadPresetCommand}" />
+        </WrapPanel>
+        <Border Grid.Row="2"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="0,18,0,0"
+                Padding="20"
+                Style="{StaticResource LibrarySectionCardStyle}"
+                Background="{StaticResource LibraryPanelBackgroundBrush}"
+                Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
+          <StackPanel>
+            <TextBlock Text="Fine-tune semantic filters"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+            <TextBlock Text="Add context terms to nudge the ranking toward the concepts you care about."
+                       Margin="0,6,0,16"
+                       FontSize="11"
+                       Foreground="{StaticResource LibraryMutedForegroundBrush}" />
+            <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,0,14"
+                     Padding="12"
+                     AutomationProperties.Name="Full-text ranking keywords"
+                     VerticalContentAlignment="Center"
+                     BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+                     BorderThickness="1"
+                     Background="{StaticResource LibraryPanelSubtleBrush}" />
+            <TextBlock Text="Search within"
+                       Margin="0,0,0,8"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+            <WrapPanel Margin="0,-2,0,0">
+              <CheckBox Content="Title"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInTitle}" />
+              <CheckBox Content="Abstract"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInAbstract}" />
+              <CheckBox Content="Content"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInContent}" />
+            </WrapPanel>
+          </StackPanel>
+        </Border>
       </Grid>
     </Border>
 
     <!-- Navigation tree -->
-    <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFE0E0E0" BorderThickness="0,1,0,0">
+    <Border Grid.Row="1"
+            Grid.Column="0"
+            Background="{StaticResource LibraryPanelSubtleBrush}"
+            BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+            BorderThickness="0,1,1,0">
       <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
-        <StackPanel Margin="12">
-          <TextBlock Text="Saved searches" FontWeight="SemiBold" Margin="0,0,0,8"/>
-          <TreeView ItemsSource="{Binding NavigationRoots}" SelectedItemChanged="OnNavigationSelected">
+        <StackPanel Margin="24">
+          <Border Style="{StaticResource LibrarySectionCardStyle}" Background="{StaticResource LibraryPanelBackgroundBrush}">
+            <StackPanel>
+              <TextBlock Text="Saved searches"
+                         FontWeight="SemiBold"
+                         FontSize="16"
+                         Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                         Margin="0,0,0,12"/>
+              <TreeView ItemsSource="{Binding NavigationRoots}" SelectedItemChanged="OnNavigationSelected">
             <TreeView.ItemTemplate>
               <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                 <StackPanel>
@@ -170,7 +314,7 @@
                       </Style>
                     </TextBlock.Style>
                   </TextBlock>
-                  <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="DimGray">
+                  <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{StaticResource LibraryMutedForegroundBrush}">
                     <TextBlock.Style>
                       <Style TargetType="TextBlock">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -188,7 +332,9 @@
                 </StackPanel>
               </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
-          </TreeView>
+              </TreeView>
+            </StackPanel>
+          </Border>
         </StackPanel>
       </ScrollViewer>
     </Border>
@@ -200,20 +346,20 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
             Padding="0"
-            Width="20"
-            Height="48"
-            Margin="0,0,5,0"
-            Background="#FFF4F4F4"
-            BorderBrush="#FFBEBEBE"
-            BorderThickness="1">
+            Width="28"
+            Height="64"
+            Margin="0,0,6,0"
+            Background="{StaticResource LibraryPanelSubtleBrush}"
+            BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+            BorderThickness="1"
+            Foreground="{StaticResource LibraryMutedForegroundBrush}">
       <Button.Style>
         <Style TargetType="Button">
           <Setter Property="Content" Value="«" />
           <Setter Property="ToolTip" Value="Hide saved searches panel" />
           <Setter Property="FontFamily" Value="Segoe UI Symbol" />
-          <Setter Property="FontSize" Value="13" />
+          <Setter Property="FontSize" Value="18" />
           <Setter Property="FontWeight" Value="Bold" />
-          <Setter Property="Foreground" Value="DimGray" />
           <Style.Triggers>
             <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
               <Setter Property="Content" Value="»" />
@@ -227,9 +373,9 @@
                   Grid.Column="1"
                   HorizontalAlignment="Right"
                   VerticalAlignment="Stretch"
-                  Background="#FFE0E0E0"
+                  Background="{StaticResource LibraryPanelBorderBrush}"
                   ShowsPreview="True"
-                  Width="5">
+                  Width="4">
       <GridSplitter.Style>
         <Style TargetType="GridSplitter">
           <Setter Property="Visibility" Value="Visible" />
@@ -244,18 +390,21 @@
 
 
     <!-- Results -->
-    <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}">
+    <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}" Margin="24,24,24,16">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
         <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
 
-      <StackPanel Orientation="Horizontal" Margin="12">
-        <TextBlock Text="Results" FontWeight="Bold"/>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <TextBlock Text="Results"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource LibraryPrimaryForegroundBrush}"/>
         <TextBlock Text="(Full-text ranking)"
-                   Margin="8,0,0,0"
-                   Foreground="DimGray"
+                   Margin="8,4,0,0"
+                   Foreground="{StaticResource LibraryMutedForegroundBrush}"
                    Visibility="{Binding ResultsAreFullText, Converter={StaticResource BoolToVisibilityConverter}}"/>
         <Menu Margin="12,0,0,0"
               VerticalAlignment="Center"
@@ -273,16 +422,23 @@
         </Menu>
       </StackPanel>
 
-      <DataGrid Grid.Row="1"
-                ItemsSource="{Binding Items}"
-                SelectedItem="{Binding Selected}"
-                Margin="12"
-                IsReadOnly="True"
-                AllowDrop="True"
-                CanUserReorderColumns="True"
-                CanUserResizeColumns="True"
-                SelectionMode="Extended"
-                SelectionUnit="FullRow">
+      <Border Grid.Row="1" Style="{StaticResource LibrarySectionCardStyle}">
+        <DataGrid ItemsSource="{Binding Items}"
+                  SelectedItem="{Binding Selected}"
+                  IsReadOnly="True"
+                  AllowDrop="True"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  SelectionMode="Extended"
+                  SelectionUnit="FullRow"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  RowBackground="#FFF8FAFF"
+                  AlternatingRowBackground="#FFF1F5F9"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="#FFE2E8F0"
+                  HeadersVisibility="Column"
+                  Margin="0">
         <DataGrid.Resources>
           <Style TargetType="DataGridRow">
             <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
@@ -340,10 +496,14 @@
           <StaticResource ResourceKey="LibraryResultsColumn.IsInternal" />
           <StaticResource ResourceKey="LibraryResultsColumn.Snippet" />
         </DataGrid.Columns>
-      </DataGrid>
+        </DataGrid>
+      </Border>
 
-      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12">
-        <Button Content="Open"
+      <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+        <Button Style="{StaticResource LibraryPrimaryButtonStyle}"
+                Content="Open entry"
+                Margin="0"
+                AutomationProperties.Name="Open selected entry"
                 Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </StackPanel>
     </Grid>
@@ -353,9 +513,9 @@
                   Grid.Column="3"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Stretch"
-                  Background="#FFE0E0E0"
+                  Background="{StaticResource LibraryPanelBorderBrush}"
                   ShowsPreview="True"
-                  Width="5">
+                  Width="4">
       <GridSplitter.Style>
         <Style TargetType="GridSplitter">
           <Setter Property="Visibility" Value="Visible" />
@@ -373,20 +533,20 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
             Padding="0"
-            Width="20"
-            Height="48"
-            Margin="5,0,0,0"
-            Background="#FFF4F4F4"
-            BorderBrush="#FFBEBEBE"
-            BorderThickness="1">
+            Width="28"
+            Height="64"
+            Margin="6,0,0,0"
+            Background="{StaticResource LibraryPanelSubtleBrush}"
+            BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+            BorderThickness="1"
+            Foreground="{StaticResource LibraryMutedForegroundBrush}">
       <Button.Style>
         <Style TargetType="Button">
           <Setter Property="Content" Value="»" />
           <Setter Property="ToolTip" Value="Hide entry details panel" />
           <Setter Property="FontFamily" Value="Segoe UI Symbol" />
-          <Setter Property="FontSize" Value="13" />
+          <Setter Property="FontSize" Value="18" />
           <Setter Property="FontWeight" Value="Bold" />
-          <Setter Property="Foreground" Value="DimGray" />
           <Style.Triggers>
             <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
               <Setter Property="Content" Value="«" />
@@ -398,7 +558,13 @@
     </Button>
 
 
-    <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
+    <Border Grid.Row="1"
+            Grid.Column="4"
+            BorderBrush="{StaticResource LibraryPanelBorderBrush}"
+            BorderThickness="1,0,0,0"
+            Background="{StaticResource LibraryPanelSubtleBrush}"
+            Padding="16"
+            CornerRadius="0,0,16,16">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
                     AllowDrop="True"
                     DataContext="{Binding Results}">
@@ -408,29 +574,31 @@
         </i:Interaction.Behaviors>
         <Grid>
 
-          <ContentPresenter x:Name="EntryDetailPresenter"
-                            Content="{Binding Selected}"
-                            ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
-                            Margin="12">
+          <Border Style="{StaticResource LibrarySectionCardStyle}" Padding="0" Background="White">
+            <ContentPresenter x:Name="EntryDetailPresenter"
+                              Content="{Binding Selected}"
+                              ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
+                              Margin="0">
 
-            <ContentPresenter.Style>
-              <Style TargetType="ContentPresenter">
-                <Setter Property="Visibility" Value="Visible"/>
-                <Style.Triggers>
+              <ContentPresenter.Style>
+                <Style TargetType="ContentPresenter">
+                  <Setter Property="Visibility" Value="Visible"/>
+                  <Style.Triggers>
 
-                  <Trigger Property="Content" Value="{x:Null}">
-                    <Setter Property="Visibility" Value="Collapsed"/>
-                  </Trigger>
+                    <Trigger Property="Content" Value="{x:Null}">
+                      <Setter Property="Visibility" Value="Collapsed"/>
+                    </Trigger>
 
-                </Style.Triggers>
-              </Style>
-            </ContentPresenter.Style>
-          </ContentPresenter>
+                  </Style.Triggers>
+                </Style>
+              </ContentPresenter.Style>
+            </ContentPresenter>
+          </Border>
 
           <TextBlock Text="Select an entry to view details."
-                     Margin="12"
+                     Margin="24"
                      FontStyle="Italic"
-                     Foreground="Gray"
+                     Foreground="{StaticResource LibraryMutedForegroundBrush}"
                      TextWrapping="Wrap"
                      VerticalAlignment="Center"
                      HorizontalAlignment="Center">
@@ -449,6 +617,8 @@
           </TextBlock>
         </Grid>
       </ScrollViewer>
+    </Border>
+      </Grid>
     </Border>
   </Grid>
 </UserControl>
