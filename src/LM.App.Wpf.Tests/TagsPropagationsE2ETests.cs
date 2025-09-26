@@ -16,6 +16,7 @@ using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Storage;
 using LM.Infrastructure.Utils;
 using LM.Infrastructure.Text;
+using LM.Core.Utils;
 
 public sealed class TagsPropagationE2ETests
 {
@@ -46,7 +47,9 @@ public sealed class TagsPropagationE2ETests
 
         var pipeline = new AddPipeline(
             store, storage, hasher, similarity, ws,
-            metadata, pubmed, doiNorm, orchestrator, pmidNorm, simLog: null);
+            metadata, pubmed, doiNorm, orchestrator, pmidNorm,
+            NullDataExtractionPreprocessor.Instance,
+            simLog: null);
 
         // Create a dummy PDF (content irrelevant — we stub metadata)
         var pdfPath = Path.Combine(temp.Path, "paper.pdf");
