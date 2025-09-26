@@ -14,7 +14,7 @@ internal sealed class StageDefinitionDto : AuditableReviewDto
 
     [JsonPropertyName("stageType")]
     public ReviewStageType StageType { get; set; }
-        = ReviewStageType.Screening;
+        = ReviewStageType.TitleScreening;
 
     [JsonPropertyName("reviewerRequirements")]
     public Dictionary<ReviewerRole, int> ReviewerRequirements { get; set; } = new();

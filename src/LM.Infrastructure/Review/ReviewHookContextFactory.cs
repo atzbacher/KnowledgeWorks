@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using LM.Infrastructure.Hooks;
 using LM.Review.Core.Models;
+using LM.Review.Core.Services;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.Infrastructure.Review;
 
-internal sealed class ReviewHookContextFactory
+public sealed class ReviewHookContextFactory : IReviewHookContextFactory
 {
-    public HookContext CreateProjectCreated(ReviewProject project)
+    public IReviewHookContext CreateProjectCreated(ReviewProject project)
     {
         ArgumentNullException.ThrowIfNull(project);
 
@@ -21,7 +22,7 @@ internal sealed class ReviewHookContextFactory
         return BuildContext(CreateEvent("review.project.created", tags));
     }
 
-    public HookContext CreateAssignmentUpdated(ReviewStage stage, ScreeningAssignment assignment)
+    public IReviewHookContext CreateAssignmentUpdated(ReviewStage stage, ScreeningAssignment assignment)
     {
         ArgumentNullException.ThrowIfNull(stage);
         ArgumentNullException.ThrowIfNull(assignment);
@@ -39,7 +40,7 @@ internal sealed class ReviewHookContextFactory
         return BuildContext(CreateEvent("review.assignment.updated", tags));
     }
 
-    public HookContext CreateReviewerDecisionRecorded(ScreeningAssignment assignment, ReviewerDecision decision)
+    public IReviewHookContext CreateReviewerDecisionRecorded(ScreeningAssignment assignment, ReviewerDecision decision)
     {
         ArgumentNullException.ThrowIfNull(assignment);
         ArgumentNullException.ThrowIfNull(decision);
@@ -56,7 +57,7 @@ internal sealed class ReviewHookContextFactory
         return BuildContext(CreateEvent("review.assignment.decision", tags));
     }
 
-    public HookContext CreateConsensusResolved(ReviewStage stage, ConsensusOutcome consensus)
+    public IReviewHookContext CreateConsensusResolved(ReviewStage stage, ConsensusOutcome consensus)
     {
         ArgumentNullException.ThrowIfNull(stage);
         ArgumentNullException.ThrowIfNull(consensus);
@@ -76,6 +77,27 @@ internal sealed class ReviewHookContextFactory
         }
 
         return BuildContext(CreateEvent("review.consensus.recorded", tags));
+    }
+
+    public IReviewHookContext CreateStageTransition(ReviewStage stage, ConflictState previousState, ConflictState currentState)
+    {
+        ArgumentNullException.ThrowIfNull(stage);
+
+        var tags = new List<string>
+        {
+            $"projectId:{stage.ProjectId}",
+            $"stageId:{stage.Id}",
+            $"from:{previousState}",
+            $"to:{currentState}",
+            $"activatedAt:{stage.ActivatedAt:O}"
+        };
+
+        if (stage.CompletedAt is { } completedAt)
+        {
+            tags.Add($"completedAt:{completedAt:O}");
+        }
+
+        return BuildContext(CreateEvent("review.stage.transition", tags));
     }
 
     private static HookContext BuildContext(HookM.EntryChangeLogEvent changeEvent)
