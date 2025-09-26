@@ -197,10 +197,9 @@ internal sealed partial class JsonReviewProjectStore
         var lockPath = path + ".lock";
         var tmpPath = path + ".tmp";
 
+        var lockHandle = AcquireLock(lockPath);
         try
         {
-            await using (AcquireLock(lockPath)) { }
-
             await using var stream = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
             await JsonSerializer.SerializeAsync(stream, payload, _jsonOptions, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
@@ -214,6 +213,8 @@ internal sealed partial class JsonReviewProjectStore
         }
         finally
         {
+            await lockHandle.DisposeAsync().ConfigureAwait(false);
+
             try
             {
                 File.Delete(lockPath);

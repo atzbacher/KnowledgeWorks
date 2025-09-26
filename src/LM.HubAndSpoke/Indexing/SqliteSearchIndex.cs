@@ -372,7 +372,10 @@ SELECT e.entry_id,
        bm25(entry_text) AS raw_score,
        snippet(entry_text, 'title', '[', ']', '…', 12) AS snip_title,
        snippet(entry_text, 'abstract', '[', ']', '…', 12) AS snip_abstract,
-       snippet(entry_text, 'content', '[', ']', '…', 20) AS snip_content
+       snippet(entry_text, 'content', '[', ']', '…', 20) AS snip_content,
+       entry_text.title   AS plain_title,
+       entry_text.abstract AS plain_abstract,
+       entry_text.content  AS plain_content
 FROM entry_text
 JOIN entries e ON e.entry_id = entry_text.entry_id
 WHERE entry_text MATCH $match
@@ -407,7 +410,7 @@ LIMIT $limit;";
                 {
                     var entryId = reader.GetString(0);
                     var rawScore = reader.IsDBNull(1) ? 0d : reader.GetDouble(1);
-                    var highlight = PickHighlight(reader, columns);
+                    var highlight = PickHighlight(reader, columns, tokens);
                     hits.Add(new FullTextSearchHit(entryId, NormalizeScore(rawScore), highlight));
                 }
             }
@@ -565,28 +568,70 @@ LIMIT $limit;";
             return $"\n  AND e.type IN ({placeholders})";
         }
 
-        private static string? PickHighlight(SqliteDataReader reader, IReadOnlyList<string> preferredColumns)
+        private static string? PickHighlight(SqliteDataReader reader, IReadOnlyList<string> preferredColumns, IReadOnlyList<string> tokens)
         {
             static string? Value(SqliteDataReader r, int index)
                 => r.IsDBNull(index) ? null : r.GetString(index);
 
-            var map = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            var map = new Dictionary<string, (string? Snippet, string? Plain)>(StringComparer.OrdinalIgnoreCase)
             {
-                ["title"] = Value(reader, 2),
-                ["abstract"] = Value(reader, 3),
-                ["content"] = Value(reader, 4)
+                ["title"] = (Value(reader, 2), Value(reader, 5)),
+                ["abstract"] = (Value(reader, 3), Value(reader, 6)),
+                ["content"] = (Value(reader, 4), Value(reader, 7))
             };
 
             foreach (var column in preferredColumns)
             {
-                if (map.TryGetValue(column, out var snippet) && !string.IsNullOrWhiteSpace(snippet))
-                    return snippet;
+                if (!map.TryGetValue(column, out var pair))
+                    continue;
+
+                var highlight = EnsureHighlight(pair.Snippet, pair.Plain, tokens);
+                if (!string.IsNullOrWhiteSpace(highlight))
+                    return highlight;
             }
 
-            foreach (var snippet in map.Values)
+            foreach (var pair in map.Values)
             {
-                if (!string.IsNullOrWhiteSpace(snippet))
-                    return snippet;
+                var highlight = EnsureHighlight(pair.Snippet, pair.Plain, tokens);
+                if (!string.IsNullOrWhiteSpace(highlight))
+                    return highlight;
+            }
+
+            return null;
+        }
+
+        private static string? EnsureHighlight(string? snippet, string? plain, IReadOnlyList<string> tokens)
+        {
+            var candidate = EnsureHighlightContainsMarker(snippet, tokens);
+            if (!string.IsNullOrWhiteSpace(candidate))
+                return candidate;
+
+            return EnsureHighlightContainsMarker(plain, tokens);
+        }
+
+        private static string? EnsureHighlightContainsMarker(string? snippet, IReadOnlyList<string> tokens)
+        {
+            if (string.IsNullOrWhiteSpace(snippet))
+                return snippet;
+
+            var hasMarker = snippet.IndexOf('[', StringComparison.Ordinal) >= 0
+                && snippet.IndexOf(']', StringComparison.Ordinal) > snippet.IndexOf('[', StringComparison.Ordinal);
+            if (hasMarker)
+                return snippet;
+
+            foreach (var token in tokens)
+            {
+                if (string.IsNullOrWhiteSpace(token))
+                    continue;
+
+                var index = snippet.IndexOf(token, StringComparison.OrdinalIgnoreCase);
+                if (index < 0)
+                    continue;
+
+                var before = snippet[..index];
+                var match = snippet.Substring(index, token.Length);
+                var after = snippet[(index + token.Length)..];
+                return string.Concat(before, "[", match, "]", after);
             }
 
             return null;

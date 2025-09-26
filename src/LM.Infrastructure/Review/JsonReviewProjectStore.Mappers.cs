@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -35,11 +36,53 @@ internal sealed partial class JsonReviewProjectStore
             var values = new Dictionary<string, object?>(elements.Count, StringComparer.Ordinal);
             foreach (var (key, element) in elements)
             {
-                values[key] = element.Deserialize<object?>(options);
+                values[key] = NormalizeElement(element);
             }
 
             var snapshot = ExtractionFormSnapshot.Create(doc.FormId, doc.VersionId, values, doc.CapturedBy, doc.CapturedUtc);
             return new FormResponse(doc.Id, doc.ProjectId, doc.StageId, doc.AssignmentId, snapshot);
+        }
+
+        private static object? NormalizeElement(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                    return null;
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Number:
+                    if (element.TryGetInt64(out var integer))
+                        return integer;
+                    if (element.TryGetDecimal(out var dec))
+                        return dec;
+                    return element.GetDouble();
+                case JsonValueKind.Array:
+                {
+                    var list = new List<object?>(element.GetArrayLength());
+                    foreach (var item in element.EnumerateArray())
+                    {
+                        list.Add(NormalizeElement(item));
+                    }
+                    return list;
+                }
+                case JsonValueKind.Object:
+                {
+                    var dict = new Dictionary<string, object?>(StringComparer.Ordinal);
+                    foreach (var property in element.EnumerateObject())
+                    {
+                        dict[property.Name] = NormalizeElement(property.Value);
+                    }
+                    return dict;
+                }
+                default:
+                    return element.GetRawText();
+            }
         }
     }
 }

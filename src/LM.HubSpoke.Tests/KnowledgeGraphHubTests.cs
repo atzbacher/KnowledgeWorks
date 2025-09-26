@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
 using LM.Core.Models;
+using LM.HubSpoke.Abstractions;
+using LM.HubSpoke.Entries;
 using LM.HubSpoke.Hubs.KnowledgeGraph;
 using LM.HubSpoke.Models;
 using LM.HubSpoke.Spokes;
