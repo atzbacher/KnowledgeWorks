@@ -1,0 +1,202 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <LinearGradientBrush x:Key="LibrarySurfaceBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FFF9FAFB" Offset="0" />
+    <GradientStop Color="#FFF2F4F8" Offset="1" />
+  </LinearGradientBrush>
+
+  <SolidColorBrush x:Key="LibraryPrimaryForegroundBrush" Color="#FF111827" />
+  <SolidColorBrush x:Key="LibrarySecondaryForegroundBrush" Color="#FF4B5563" />
+  <SolidColorBrush x:Key="LibraryPanelBackgroundBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="LibraryPanelSubtleBrush" Color="#FFEEF2F7" />
+  <SolidColorBrush x:Key="LibraryPanelBorderBrush" Color="#FFD0D7E5" />
+  <SolidColorBrush x:Key="LibraryAccentBrush" Color="#FF2563EB" />
+  <SolidColorBrush x:Key="LibraryAccentForegroundBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="LibraryMutedForegroundBrush" Color="#FF6B7280" />
+  <SolidColorBrush x:Key="LibraryEmphasisForegroundBrush" Color="#FF1D4ED8" />
+  <Color x:Key="LibraryCardShadowColor">#11000000</Color>
+  <CornerRadius x:Key="LibraryCardCornerRadius">16</CornerRadius>
+
+  <Style x:Key="LibraryHeaderButtonStyle" TargetType="Button">
+    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="Margin" Value="0,0,12,0" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource LibraryPrimaryForegroundBrush}" />
+    <Setter Property="Background" Value="#FFEDF2FF" />
+    <Setter Property="BorderBrush" Value="#FFC7D2FE" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="12"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="#FFDCE6FF" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FFA5B4FC" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="#FFBFD2FF" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF7C9BFA" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF2563EB" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.5" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="LibraryPrimaryButtonStyle" BasedOn="{StaticResource LibraryHeaderButtonStyle}" TargetType="Button">
+    <Setter Property="Foreground" Value="{StaticResource LibraryAccentForegroundBrush}" />
+    <Setter Property="Background" Value="{StaticResource LibraryAccentBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LibraryAccentBrush}" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Background" Value="#FF1D4ED8" />
+        <Setter Property="BorderBrush" Value="#FF1E40AF" />
+      </Trigger>
+      <Trigger Property="IsPressed" Value="True">
+        <Setter Property="Background" Value="#FF1E3A8A" />
+        <Setter Property="BorderBrush" Value="#FF1E3A8A" />
+      </Trigger>
+      <Trigger Property="IsKeyboardFocused" Value="True">
+        <Setter Property="BorderBrush" Value="#FF1E40AF" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="LibrarySectionCardStyle" TargetType="Border">
+    <Setter Property="Background" Value="{StaticResource LibraryPanelBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{StaticResource LibraryPanelBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="20" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+  </Style>
+
+  <Style x:Key="LibraryPillToggleStyle" TargetType="ToggleButton">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border x:Name="Switch"
+                  Background="#FFE2E8F0"
+                  BorderBrush="#FFC9D2E0"
+                  BorderThickness="1.5"
+                  CornerRadius="16"
+                  Padding="2"
+                  SnapsToDevicePixels="True"
+                  Width="60"
+                  Height="30">
+            <Border x:Name="Thumb"
+                    Width="26"
+                    Height="26"
+                    Background="White"
+                    CornerRadius="13"
+                    HorizontalAlignment="Left"
+                    RenderTransformOrigin="0.5,0.5">
+              <Border.RenderTransform>
+                <TransformGroup>
+                  <ScaleTransform />
+                  <TranslateTransform />
+                </TransformGroup>
+              </Border.RenderTransform>
+            </Border>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Switch" Property="Background" Value="#FF2563EB" />
+              <Setter TargetName="Switch" Property="BorderBrush" Value="#FF2563EB" />
+              <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Thumb" Property="Effect">
+                <Setter.Value>
+                  <DropShadowEffect BlurRadius="8" Color="#33000000" ShadowDepth="0" />
+                </Setter.Value>
+              </Setter>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.4" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="controls:LibrarySearchQueryBox" xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls">
+    <Setter Property="Background" Value="#FFFBFCFF" />
+    <Setter Property="BorderBrush" Value="#FFD5DBE6" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{StaticResource LibraryPrimaryForegroundBrush}" />
+    <Setter Property="Padding" Value="18,14" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="controls:LibrarySearchQueryBox">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="24"
+                  Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <Border.Effect>
+              <DropShadowEffect Color="#12000000" BlurRadius="12" ShadowDepth="0" />
+            </Border.Effect>
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Viewbox Width="20" Height="20" Margin="0,0,14,0" VerticalAlignment="Center">
+                <Canvas Width="24" Height="24">
+                  <Path Data="M10,2 C14.418278,2 18,5.581722 18,10 C18,11.848004 17.364392,13.546664 16.294427,14.901877 L21.7071068,20.3141068 C22.0976311,20.7046311 22.0976311,21.3377961 21.7071068,21.7283204 C21.3165825,22.1188447 20.6834175,22.1188447 20.2928932,21.7283204 L14.901877,16.294427 C13.546664,17.364392 11.848004,18 10,18 C5.581722,18 2,14.418278 2,10 C2,5.581722 5.581722,2 10,2 Z M10,4 C6.6862915,4 4,6.6862915 4,10 C4,13.3137085 6.6862915,16 10,16 C13.3137085,16 16,13.3137085 16,10 C16,6.6862915 13.3137085,4 10,4 Z"
+                        Fill="#FF4C5E80" />
+                </Canvas>
+              </Viewbox>
+              <ScrollViewer x:Name="PART_ContentHost"
+                            Grid.Column="1"
+                            Focusable="false"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                            VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Background" Value="#FFF3F4F6" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FFD1D5DB" />
+              <Setter Property="Foreground" Value="#FF9CA3AF" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF2563EB" />
+              <Setter TargetName="Chrome" Property="Effect">
+                <Setter.Value>
+                  <DropShadowEffect Color="#332563EB" BlurRadius="16" ShadowDepth="0" />
+                </Setter.Value>
+              </Setter>
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+</ResourceDictionary>

@@ -17,143 +17,10 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="Library/LibraryCommonResources.xaml" />
+        <ResourceDictionary Source="Library/LibraryThemeResources.xaml" />
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
-      <LinearGradientBrush x:Key="LibrarySurfaceBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#FFF8FAFC" Offset="0" />
-        <GradientStop Color="#FFF1F5F9" Offset="1" />
-      </LinearGradientBrush>
-      <SolidColorBrush x:Key="LibraryPanelBackgroundBrush" Color="#FFFFFFFF" />
-      <SolidColorBrush x:Key="LibraryPanelSubtleBrush" Color="#FFF8FAFF" />
-      <SolidColorBrush x:Key="LibraryPanelBorderBrush" Color="#FFE2E8F0" />
-      <SolidColorBrush x:Key="LibraryAccentBrush" Color="#FF2563EB" />
-      <SolidColorBrush x:Key="LibraryMutedForegroundBrush" Color="#FF64748B" />
-      <Color x:Key="LibraryCardShadowColor">#11000000</Color>
-      <CornerRadius x:Key="LibraryCardCornerRadius">16</CornerRadius>
-      <Style x:Key="LibraryHeaderButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="14,8" />
-        <Setter Property="Margin" Value="0,0,8,0" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="#FF1F2937" />
-        <Setter Property="Background" Value="#FFEFF6FF" />
-        <Setter Property="BorderBrush" Value="#FFD0D7E5" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="Button">
-              <Border Background="{TemplateBinding Background}"
-                      BorderBrush="{TemplateBinding BorderBrush}"
-                      BorderThickness="{TemplateBinding BorderThickness}"
-                      CornerRadius="10"
-                      SnapsToDevicePixels="True">
-                <ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  RecognizesAccessKey="True" />
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter Property="Background" Value="#FFD9E6FF" />
-                  <Setter Property="BorderBrush" Value="#FF9EC5FF" />
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                  <Setter Property="Background" Value="#FFBAD6FF" />
-                  <Setter Property="BorderBrush" Value="#FF7FB5FF" />
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter Property="Opacity" Value="0.5" />
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
-      </Style>
-      <Style x:Key="LibraryPrimaryButtonStyle" BasedOn="{StaticResource LibraryHeaderButtonStyle}" TargetType="Button">
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{StaticResource LibraryAccentBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource LibraryAccentBrush}" />
-        <Style.Triggers>
-          <Trigger Property="IsMouseOver" Value="True">
-            <Setter Property="Background" Value="#FF1D4ED8" />
-            <Setter Property="BorderBrush" Value="#FF1E40AF" />
-          </Trigger>
-          <Trigger Property="IsPressed" Value="True">
-            <Setter Property="Background" Value="#FF1E3A8A" />
-            <Setter Property="BorderBrush" Value="#FF1E3A8A" />
-          </Trigger>
-        </Style.Triggers>
-      </Style>
-      <Style x:Key="LibrarySectionCardStyle" TargetType="Border">
-        <Setter Property="Background" Value="White" />
-        <Setter Property="BorderBrush" Value="{StaticResource LibraryPanelBorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="12" />
-        <Setter Property="Padding" Value="16" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-      </Style>
-      <Style TargetType="controls:LibrarySearchQueryBox">
-        <Setter Property="Background" Value="#FFFDFDFD" />
-        <Setter Property="BorderBrush" Value="#FFE2E8F0" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="#FF1F2937" />
-        <Setter Property="Padding" Value="16,12" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
-        <Setter Property="Template">
-          <Setter.Value>
-            <ControlTemplate TargetType="controls:LibrarySearchQueryBox">
-              <Border x:Name="Chrome"
-                      Background="{TemplateBinding Background}"
-                      BorderBrush="{TemplateBinding BorderBrush}"
-                      BorderThickness="{TemplateBinding BorderThickness}"
-                      CornerRadius="22"
-                      Padding="{TemplateBinding Padding}"
-                      SnapsToDevicePixels="True">
-                <Border.Effect>
-                  <DropShadowEffect Color="#0C000000" BlurRadius="8" ShadowDepth="0" />
-                </Border.Effect>
-                <Grid>
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                  </Grid.ColumnDefinitions>
-                  <Viewbox Width="18"
-                           Height="18"
-                           Margin="0,0,10,0"
-                           VerticalAlignment="Center">
-                    <Canvas Width="24" Height="24">
-                      <Path Data="M10,2 C14.418278,2 18,5.581722 18,10 C18,11.848004 17.364392,13.546664 16.294427,14.901877 L21.7071068,20.3141068 C22.0976311,20.7046311 22.0976311,21.3377961 21.7071068,21.7283204 C21.3165825,22.1188447 20.6834175,22.1188447 20.2928932,21.7283204 L14.901877,16.294427 C13.546664,17.364392 11.848004,18 10,18 C5.581722,18 2,14.418278 2,10 C2,5.581722 5.581722,2 10,2 Z M10,4 C6.6862915,4 4,6.6862915 4,10 C4,13.3137085 6.6862915,16 10,16 C13.3137085,16 16,13.3137085 16,10 C16,6.6862915 13.3137085,4 10,4 Z"
-                            Fill="#FF64748B" />
-                    </Canvas>
-                  </Viewbox>
-                  <ScrollViewer x:Name="PART_ContentHost"
-                                Grid.Column="1"
-                                Focusable="false"
-                                Foreground="{TemplateBinding Foreground}"
-                                HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
-                                VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
-                </Grid>
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                  <Setter TargetName="Chrome" Property="Background" Value="#FFF4F4F5" />
-                  <Setter TargetName="Chrome" Property="BorderBrush" Value="#FFCBD5E1" />
-                  <Setter Property="Foreground" Value="#FF94A3B8" />
-                </Trigger>
-                <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                  <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B82F6" />
-                  <Setter TargetName="Chrome" Property="Background" Value="#FFFFFFFF" />
-                  <Setter TargetName="Chrome" Property="Effect">
-                    <Setter.Value>
-                      <DropShadowEffect Color="#403B82F6" BlurRadius="10" ShadowDepth="0" />
-                    </Setter.Value>
-                  </Setter>
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </Setter.Value>
-        </Setter>
-      </Style>
     </ResourceDictionary>
 
   </UserControl.Resources>
@@ -188,52 +55,128 @@
             BorderBrush="{StaticResource LibraryPanelBorderBrush}"
             BorderThickness="0,0,0,1"
             CornerRadius="16,16,0,0"
-            Padding="28,24,28,20">
+            Padding="32,28,32,24">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+          <GradientStop Color="#FFF9FAFF" Offset="0" />
+          <GradientStop Color="#FFE9EDFB" Offset="1" />
+        </LinearGradientBrush>
+      </Border.Background>
       <Grid DataContext="{Binding Filters}">
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,24,0">
-          <TextBlock Text="Library search"
-                     FontSize="26"
+        <StackPanel Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,0,24,0">
+          <TextBlock Text="Explore the knowledge library"
+                     FontSize="28"
                      FontWeight="SemiBold"
-                     Foreground="#FF0F172A" />
-          <TextBlock Text="Search the full knowledge base with field-aware filters and saved query presets."
-                     Margin="0,6,0,16"
-                     Foreground="{StaticResource LibraryMutedForegroundBrush}" />
-          <Border Background="White"
+                     Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+          <TextBlock Text="Compose rich queries with field keywords, saved presets, and semantic ranking to pinpoint the right entry."
+                     Margin="0,8,0,14"
+                     Foreground="{StaticResource LibrarySecondaryForegroundBrush}"
+                     TextWrapping="Wrap" />
+          <Border Background="{StaticResource LibraryPanelBackgroundBrush}"
                   BorderBrush="{StaticResource LibraryPanelBorderBrush}"
                   BorderThickness="1"
-                  CornerRadius="12"
-                  Padding="12"
+                  CornerRadius="18"
+                  Padding="18"
                   SnapsToDevicePixels="True">
+            <Border.Effect>
+              <DropShadowEffect Color="{StaticResource LibraryCardShadowColor}"
+                                BlurRadius="14"
+                                ShadowDepth="0" />
+            </Border.Effect>
             <StackPanel>
+              <TextBlock Text="Search query"
+                         Margin="0,0,0,6"
+                         FontSize="12"
+                         FontWeight="SemiBold"
+                         Foreground="{StaticResource LibrarySecondaryForegroundBrush}" />
               <controls:LibrarySearchQueryBox Text="{Binding UnifiedQuery}"
-                                              MinHeight="44"
+                                              MinHeight="48"
                                               ToolTip="{Binding KeywordTooltip}"
-                                              ToolTipService.ShowDuration="60000" />
-              <TextBlock Text="Try queries like title:&quot;heart failure&quot; AND tags:cardiology or author:&quot;nicolas&quot; NOT internal:true"
-                         Margin="0,8,0,0"
-                         FontSize="11"
-                         Foreground="{StaticResource LibraryMutedForegroundBrush}" />
+                                              ToolTipService.ShowDuration="60000"
+                                              AutomationProperties.Name="Library search query" />
+              <StackPanel Margin="0,14,0,0">
+                <TextBlock FontSize="11"
+                           Foreground="{StaticResource LibraryMutedForegroundBrush}">
+                  <Run Text="Sample:" />
+                  <Run Text=" title:&quot;heart failure&quot; AND tags:cardiology AND (year&gt;2020)" />
+                </TextBlock>
+                <TextBlock Margin="0,6,0,0"
+                           FontSize="11"
+                           Foreground="{StaticResource LibraryMutedForegroundBrush}"
+                           Text="Use quotes for phrases, colon for field filters, and parentheses to group logic." />
+              </StackPanel>
             </StackPanel>
           </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="0"
                     Grid.Column="1"
-                    Orientation="Vertical"
-                    VerticalAlignment="Top"
-                    HorizontalAlignment="Right">
-          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    MinWidth="240">
+          <Border Background="#FF1D4ED8"
+                  BorderBrush="#FF1E3A8A"
+                  BorderThickness="1"
+                  CornerRadius="18"
+                  Padding="18"
+                  SnapsToDevicePixels="True">
+            <StackPanel>
+              <Grid VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="Full-text ranking"
+                             FontWeight="SemiBold"
+                             Foreground="{StaticResource LibraryAccentForegroundBrush}" />
+                  <TextBlock Margin="0,4,0,0"
+                             FontSize="11"
+                             Foreground="#CCF4F6FF">
+                    <TextBlock.Style>
+                      <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="Off – exact field matches only." />
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding UseFullTextSearch}" Value="True">
+                            <Setter Property="Text" Value="On – semantic scores influence ordering." />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </TextBlock.Style>
+                  </TextBlock>
+                </StackPanel>
+                <ToggleButton Grid.Column="1"
+                              Margin="12,0,0,0"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Center"
+                              ToolTip="Toggle semantic full-text boosting"
+                              Style="{StaticResource LibraryPillToggleStyle}"
+                              AutomationProperties.Name="Full-text ranking toggle"
+                              IsChecked="{Binding UseFullTextSearch}" />
+              </Grid>
+              <TextBlock Margin="0,14,0,0"
+                         FontSize="11"
+                         Foreground="#CCF4F6FF"
+                         Text="Full-text boosts work best when your query mixes fields with descriptive keywords." />
+            </StackPanel>
+          </Border>
+          <StackPanel Orientation="Horizontal"
+                      Margin="0,16,0,0"
+                      HorizontalAlignment="Right">
             <Button Command="{Binding ToggleLeftPanelCommand}"
+                    AutomationProperties.Name="Toggle saved searches panel"
                     ToolTip="Show or hide the saved searches panel">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
@@ -247,6 +190,7 @@
               </Button.Style>
             </Button>
             <Button Command="{Binding ToggleRightPanelCommand}"
+                    AutomationProperties.Name="Toggle entry detail panel"
                     ToolTip="Show or hide the entry details panel">
               <Button.Style>
                 <Style TargetType="Button" BasedOn="{StaticResource LibraryHeaderButtonStyle}">
@@ -260,111 +204,85 @@
               </Button.Style>
             </Button>
           </StackPanel>
-          <Border Margin="0,16,0,0"
-                  Background="#1A2563EB"
-                  BorderBrush="#1A2563EB"
-                  BorderThickness="1"
-                  CornerRadius="12"
-                  Padding="12">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-              <TextBlock Text="Full-text search"
-                         Foreground="White"
-                         FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <ToggleButton Margin="12,0,0,0"
-                            Width="52"
-                            Height="28"
-                            HorizontalAlignment="Right"
-                            ToolTip="Toggle full-text ranking"
-                            IsChecked="{Binding UseFullTextSearch}">
-                <ToggleButton.Template>
-                  <ControlTemplate TargetType="ToggleButton">
-                    <Grid>
-                      <Border x:Name="Switch"
-                              Background="#FFE2E8F0"
-                              BorderBrush="#FFC9D2E0"
-                              BorderThickness="1.5"
-                              CornerRadius="14" />
-                      <Border x:Name="Thumb"
-                              Width="24"
-                              Height="24"
-                              Background="White"
-                              CornerRadius="12"
-                              Margin="2"
-                              HorizontalAlignment="Left" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                      <Trigger Property="IsChecked" Value="True">
-                        <Setter TargetName="Switch" Property="Background" Value="#FF2563EB" />
-                        <Setter TargetName="Switch" Property="BorderBrush" Value="#FF2563EB" />
-                        <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
-                      </Trigger>
-                      <Trigger Property="IsEnabled" Value="False">
-                        <Setter Property="Opacity" Value="0.4" />
-                      </Trigger>
-                    </ControlTemplate.Triggers>
-                  </ControlTemplate>
-                </ToggleButton.Template>
-              </ToggleButton>
-            </StackPanel>
-          </Border>
+
         </StackPanel>
 
-        <StackPanel Grid.Row="1"
-                    Grid.Column="0"
-                    Orientation="Horizontal"
-                    Margin="0,20,0,0">
+        <WrapPanel Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   Margin="0,26,0,0"
+                   HorizontalAlignment="Left">
           <Button Style="{StaticResource LibraryPrimaryButtonStyle}"
+                  Margin="0,0,12,12"
                   Content="Run search"
+                  AutomationProperties.Name="Run search"
                   Command="{Binding DataContext.SearchCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
           <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
                   Content="Clear"
+                  AutomationProperties.Name="Clear search"
                   Command="{Binding ClearCommand}" />
           <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
                   Content="Save search"
+                  AutomationProperties.Name="Save search"
                   Command="{Binding SavePresetCommand}" />
           <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
                   Content="Manage saved"
+                  AutomationProperties.Name="Manage saved searches"
                   Command="{Binding ManagePresetsCommand}" />
           <Button Style="{StaticResource LibraryHeaderButtonStyle}"
+                  Margin="0,0,12,12"
                   Content="Load saved"
+                  AutomationProperties.Name="Load saved search"
                   Command="{Binding LoadPresetCommand}" />
-        </StackPanel>
+        </WrapPanel>
 
         <Border Grid.Row="2"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
-                Margin="0,20,0,0"
-                Padding="16"
-                Background="White"
-                BorderBrush="{StaticResource LibraryPanelBorderBrush}"
-                BorderThickness="1"
-                CornerRadius="12"
+                Margin="0,18,0,0"
+                Padding="20"
+                Style="{StaticResource LibrarySectionCardStyle}"
+                Background="{StaticResource LibraryPanelBackgroundBrush}"
                 Visibility="{Binding UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}">
           <StackPanel>
-            <TextBlock Text="Full-text filters"
+            <TextBlock Text="Fine-tune semantic filters"
                        FontWeight="SemiBold"
-                       Foreground="#FF1F2937" />
-            <TextBlock Text="Add contextual keywords to rank documents more precisely."
-                       Margin="0,4,0,12"
+                       Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+            <TextBlock Text="Add context terms to nudge the ranking toward the concepts you care about."
+                       Margin="0,6,0,16"
                        FontSize="11"
                        Foreground="{StaticResource LibraryMutedForegroundBrush}" />
             <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,0,0,12"
-                     Padding="10"
+                     Margin="0,0,0,14"
+                     Padding="12"
+                     AutomationProperties.Name="Full-text ranking keywords"
+
                      VerticalContentAlignment="Center"
                      BorderBrush="{StaticResource LibraryPanelBorderBrush}"
                      BorderThickness="1"
                      Background="{StaticResource LibraryPanelSubtleBrush}" />
             <TextBlock Text="Search within"
-                       Margin="0,0,0,6"
+                       Margin="0,0,0,8"
                        FontSize="12"
                        FontWeight="SemiBold"
-                       Foreground="#FF1F2937" />
-            <WrapPanel Margin="0,-4,0,0">
-              <CheckBox Content="Title" Margin="0,4,12,4" Foreground="#FF1F2937" IsChecked="{Binding FullTextInTitle}" />
-              <CheckBox Content="Abstract" Margin="0,4,12,4" Foreground="#FF1F2937" IsChecked="{Binding FullTextInAbstract}" />
-              <CheckBox Content="Content" Margin="0,4,12,4" Foreground="#FF1F2937" IsChecked="{Binding FullTextInContent}" />
+                       Foreground="{StaticResource LibraryPrimaryForegroundBrush}" />
+            <WrapPanel Margin="0,-2,0,0">
+              <CheckBox Content="Title"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInTitle}" />
+              <CheckBox Content="Abstract"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInAbstract}" />
+              <CheckBox Content="Content"
+                        Margin="0,2,12,8"
+                        Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+                        IsChecked="{Binding FullTextInContent}" />
+
             </WrapPanel>
           </StackPanel>
         </Border>
@@ -379,12 +297,14 @@
             BorderThickness="0,1,1,0">
       <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
         <StackPanel Margin="24">
-          <Border Style="{StaticResource LibrarySectionCardStyle}" Background="White">
+          <Border Style="{StaticResource LibrarySectionCardStyle}" Background="{StaticResource LibraryPanelBackgroundBrush}">
+
             <StackPanel>
               <TextBlock Text="Saved searches"
                          FontWeight="SemiBold"
                          FontSize="16"
-                         Foreground="#FF0F172A"
+                         Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+
                          Margin="0,0,0,12"/>
               <TreeView ItemsSource="{Binding NavigationRoots}" SelectedItemChanged="OnNavigationSelected">
             <TreeView.ItemTemplate>
@@ -402,7 +322,7 @@
                       </Style>
                     </TextBlock.Style>
                   </TextBlock>
-                  <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="DimGray">
+                  <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="{StaticResource LibraryMutedForegroundBrush}">
                     <TextBlock.Style>
                       <Style TargetType="TextBlock">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -486,7 +406,12 @@
       </Grid.RowDefinitions>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-        <TextBlock Text="Results" FontSize="18" FontWeight="SemiBold" Foreground="#FF0F172A"/>
+
+        <TextBlock Text="Results"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource LibraryPrimaryForegroundBrush}"/>
+
         <TextBlock Text="(Full-text ranking)"
                    Margin="8,4,0,0"
                    Foreground="{StaticResource LibraryMutedForegroundBrush}"
@@ -585,12 +510,11 @@
       </Border>
 
       <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-        <Button Style="{StaticResource LibraryHeaderButtonStyle}"
-                Background="#FF1F2937"
-                Foreground="White"
-                BorderBrush="#FF1F2937"
+        <Button Style="{StaticResource LibraryPrimaryButtonStyle}"
                 Content="Open entry"
                 Margin="0"
+                AutomationProperties.Name="Open selected entry"
+
                 Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </StackPanel>
     </Grid>
