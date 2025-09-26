@@ -38,7 +38,7 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
                 new StagingFiguresTabViewModel(),
                 new StagingEndpointsTabViewModel(),
                 new StagingPopulationTabViewModel(),
-                new StagingReviewCommitTabViewModel());
+                new StagingReviewCommitTabViewModel(list, new DataExtractionCommitBuilder()));
 
             Assert.Equal(6, editor.Tabs.Count);
             Assert.Equal("Metadata", editor.SelectedTab?.Header);
@@ -77,6 +77,7 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
         {
             public string[]? ShowOpenFileDialog(FilePickerOptions options) => Array.Empty<string>();
             public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
+            public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
         }
     }

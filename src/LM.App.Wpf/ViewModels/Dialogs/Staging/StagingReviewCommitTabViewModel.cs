@@ -7,18 +7,31 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
+using LM.App.Wpf.ViewModels;
 
 
 namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 {
     internal sealed class StagingReviewCommitTabViewModel : StagingTabViewModel
     {
-        private IReadOnlyList<StagingTabViewModel>? _tabs;
+        private readonly StagingListViewModel _stagingList;
+        private readonly IDataExtractionCommitBuilder _builder;
+        private readonly AsyncRelayCommand _commitExtractionCommand;
+        private readonly AsyncRelayCommand _commitMetadataOnlyCommand;
 
-        public StagingReviewCommitTabViewModel()
+        private IReadOnlyList<StagingTabViewModel>? _tabs;
+        private StagingTablesTabViewModel? _tablesTab;
+        private StagingEndpointsTabViewModel? _endpointsTab;
+
+        public StagingReviewCommitTabViewModel(StagingListViewModel stagingList,
+                                               IDataExtractionCommitBuilder builder)
             : base("Review & Commit")
         {
+            _stagingList = stagingList ?? throw new ArgumentNullException(nameof(stagingList));
+            _builder = builder ?? throw new ArgumentNullException(nameof(builder));
 
+            _commitExtractionCommand = new AsyncRelayCommand(CommitExtractionAsync, CanCommit);
+            _commitMetadataOnlyCommand = new AsyncRelayCommand(CommitMetadataOnlyAsync, CanCommit);
         }
 
         public ObservableCollection<string> Messages { get; } = new();

@@ -128,3 +128,7 @@ LM.Infrastructure.Export.DataExtractionWordExporter
 LM.Infrastructure.Export.DataExtractionWordExporter.DataExtractionWordExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
 LM.Infrastructure.Export.DataExtractionExcelExporter
 LM.Infrastructure.Export.DataExtractionExcelExporter.DataExtractionExcelExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
+LM.Infrastructure.Export.DataExtractionExportLoader
+LM.Infrastructure.Export.DataExtractionExportLoader.DataExtractionExportLoader(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Export.DataExtractionExportLoader.HasExtractionAsync(string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionExportLoader.LoadAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Infrastructure.Export.DataExtractionExportContext?>!

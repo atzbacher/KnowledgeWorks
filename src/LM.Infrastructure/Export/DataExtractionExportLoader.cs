@@ -11,7 +11,7 @@ using HookM = LM.HubSpoke.Models;
 
 namespace LM.Infrastructure.Export
 {
-    internal sealed class DataExtractionExportLoader
+    public sealed class DataExtractionExportLoader
     {
         private readonly IWorkSpaceService _workspace;
 

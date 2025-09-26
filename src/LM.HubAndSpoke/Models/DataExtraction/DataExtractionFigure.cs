@@ -8,5 +8,8 @@ namespace LM.HubSpoke.Models
     {
         [JsonPropertyName("figure_label")]
         public string? FigureLabel { get; init; }
+
+        [JsonPropertyName("thumbnail_path")]
+        public string? ThumbnailPath { get; init; }
     }
 }

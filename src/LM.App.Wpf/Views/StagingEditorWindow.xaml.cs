@@ -5,7 +5,7 @@ using LM.App.Wpf.ViewModels.Dialogs;
 
 namespace LM.App.Wpf.Views
 {
-    public partial class StagingEditorWindow : System.Windows.Window
+    internal partial class StagingEditorWindow : System.Windows.Window
     {
         private readonly StagingEditorViewModel _viewModel;
 

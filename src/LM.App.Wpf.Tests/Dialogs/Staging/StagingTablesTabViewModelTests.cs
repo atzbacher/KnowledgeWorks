@@ -141,6 +141,8 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
 
             public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
 
+            public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
+
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
         }
     }

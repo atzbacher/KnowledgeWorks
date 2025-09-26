@@ -28,11 +28,6 @@ LM.App.Wpf.Common.Dialogs.IDialogService.ShowSaveFileDialog(LM.App.Wpf.Common.Di
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowSaveFileDialog(LM.App.Wpf.Common.Dialogs.FileSavePickerOptions! options) -> string?
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.Core.Abstractions.IDataExtractionPreprocessor! preprocessor, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.Core.Abstractions.IDataExtractionPreprocessor! preprocessor, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.HasValidationErrors.get -> bool
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.SelectedTab.get -> LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTabViewModel?
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.SelectedTab.set -> void
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingMetadataTabViewModel! metadataTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTablesTabViewModel! tablesTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingFiguresTabViewModel! figuresTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingEndpointsTabViewModel! endpointsTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingPopulationTabViewModel! populationTab, LM.App.Wpf.ViewModels.Dialogs.Staging.StagingReviewCommitTabViewModel! reviewTab) -> void
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Tabs.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Dialogs.Staging.StagingTabViewModel!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToExcelCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToPowerPointCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ExportExtractionToWordCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
@@ -268,9 +263,6 @@ LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultNotes.get -> strin
 LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultTags.get -> string!
 LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.SearchSaveDialogViewModel() -> void
 LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Title.get -> string!
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Dispose() -> void
-LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.get -> string!
@@ -682,9 +674,6 @@ LM.App.Wpf.Views.SearchView.SearchView() -> void
 LM.App.Wpf.Views.ShellWindow
 LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
-LM.App.Wpf.Views.StagingEditorWindow
-LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
-LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
 override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
@@ -694,6 +683,5 @@ override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void
 override LM.App.Wpf.App.OnStartup(System.Windows.StartupEventArgs! e) -> void
 override LM.App.Wpf.Views.LibraryPresetPickerDialog.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.LibraryPresetSaveDialog.OnClosed(System.EventArgs! e) -> void
-override LM.App.Wpf.Views.StagingEditorWindow.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
