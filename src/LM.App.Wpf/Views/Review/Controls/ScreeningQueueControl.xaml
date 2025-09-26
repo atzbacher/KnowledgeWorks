@@ -8,6 +8,13 @@
              xmlns:reviewVm="clr-namespace:LM.App.Wpf.ViewModels.Review"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=reviewVm:ScreeningQueueViewModel}">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Review/ReviewResources.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
   <syswinControls:Border Style="{StaticResource ReviewSectionBorderStyle}">
     <Grid>
       <Grid.RowDefinitions>
