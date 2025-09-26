@@ -774,6 +774,17 @@ namespace LM.App.Wpf.ViewModels
             var article = BuildArticleHook(stagingItem, entry, relativePath, sha256);
             var changeLog = BuildEntryCreationChangeLog(entry, addedBy);
 
+            if (stagingItem.PendingChangeLogEvents.Count > 0)
+            {
+                changeLog ??= new HookM.EntryChangeLogHook();
+                foreach (var evt in stagingItem.PendingChangeLogEvents)
+                {
+                    if (evt is null)
+                        continue;
+                    changeLog.Events.Add(evt);
+                }
+            }
+
             if (article is null && changeLog is null)
                 return null;
 

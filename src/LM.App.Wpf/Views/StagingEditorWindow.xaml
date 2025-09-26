@@ -3,114 +3,98 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:core="clr-namespace:LM.Core.Models;assembly=LM.Core"
+        xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
         mc:Ignorable="d"
         Title="Review staged items"
-        Height="520"
-        Width="800"
+        Height="540"
+        Width="900"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize">
   <Window.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/StagingEditorTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingMetadataTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingTablesTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingFiguresTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingEndpointsTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingPopulationTemplates.xaml" />
+        <ResourceDictionary Source="/LM.App.Wpf;component/Views/Templates/Staging/StagingReviewTemplates.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Window.Resources>
 
-  <Grid Margin="12" DataContext="{Binding StagingList}">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
+  <swc:Grid Margin="12">
+    <swc:Grid.RowDefinitions>
+      <swc:RowDefinition Height="Auto" />
+      <swc:RowDefinition Height="*" />
+      <swc:RowDefinition Height="Auto" />
+    </swc:Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0"
-                Orientation="Horizontal"
-                Margin="0,0,0,8"
-                VerticalAlignment="Center">
-      <TextBlock Text="Review and edit metadata" FontWeight="Bold" />
-      <TextBlock Text="{Binding IndexLabel}" Margin="12,0,0,0" />
-
-      <TextBlock Text="Type:" Margin="24,0,6,0" VerticalAlignment="Center" />
-      <ComboBox ItemsSource="{Binding EntryTypes}"
-                SelectedItem="{Binding SelectedType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                Width="150" />
-
-      <Border Background="#FFE0E0E0"
-              CornerRadius="4"
-              Padding="6,2"
-              Margin="16,0,0,0"
-              Visibility="{Binding Current.IsDuplicate, Converter={StaticResource BoolToVis}}">
-        <TextBlock Text="Exact duplicate in library" Foreground="#FF404040" FontWeight="SemiBold" />
-      </Border>
-
-      <Border Background="#FFFDEEB5"
-              CornerRadius="4"
-              Padding="6,2"
-              Margin="8,0,0,0"
-              Visibility="{Binding Current.IsNearMatch, Converter={StaticResource BoolToVis}}">
-        <TextBlock>
-          <Run Text="Near match: " />
-          <Run Text="{Binding Current.MatchedTitle}" FontStyle="Italic" />
-        </TextBlock>
-      </Border>
-    </StackPanel>
-
-    <Border Grid.Row="1">
-      <Border.Style>
-        <Style TargetType="Border">
-          <Setter Property="Background" Value="{x:Null}" />
-          <Setter Property="Opacity" Value="1" />
-          <Setter Property="IsEnabled" Value="True" />
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding Current.IsDuplicate}" Value="True">
-              <Setter Property="Opacity" Value="0.5" />
-              <Setter Property="IsEnabled" Value="False" />
-              <Setter Property="Background">
-                <Setter.Value>
-                  <SolidColorBrush Color="#FFF0F0F0" />
-                </Setter.Value>
-              </Setter>
-            </DataTrigger>
-
-            <DataTrigger Binding="{Binding Current.IsNearMatch}" Value="True">
-              <Setter Property="Background">
-                <Setter.Value>
-                  <SolidColorBrush Color="#FFFDEEB5" />
-                </Setter.Value>
-              </Setter>
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </Border.Style>
-
-      <ContentControl Content="{Binding Current}">
-        <ContentControl.Style>
-          <Style TargetType="ContentControl">
-            <Setter Property="ContentTemplate" Value="{StaticResource DocumentTemplate}" />
+    <swc:StackPanel Grid.Row="0"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,8"
+                    VerticalAlignment="Center">
+      <swc:TextBlock Text="Review staged evidence" FontWeight="Bold" />
+      <swc:TextBlock Text="{Binding StagingList.IndexLabel}" Margin="12,0,0,0" />
+      <swc:TextBlock Text="Validation" Margin="24,0,0,0" FontWeight="SemiBold" />
+      <swc:TextBlock Text="Issues pending"
+                     Foreground="Red"
+                     Margin="6,0,0,0">
+        <swc:TextBlock.Style>
+          <Style TargetType="swc:TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
             <Style.Triggers>
-              <DataTrigger Binding="{Binding Current.Type}" Value="{x:Static core:EntryType.Publication}">
-                <Setter Property="ContentTemplate" Value="{StaticResource PublicationTemplate}" />
+              <DataTrigger Binding="{Binding HasValidationErrors}" Value="True">
+                <Setter Property="Visibility" Value="Visible" />
               </DataTrigger>
             </Style.Triggers>
           </Style>
-        </ContentControl.Style>
-      </ContentControl>
-    </Border>
+        </swc:TextBlock.Style>
+      </swc:TextBlock>
+      <swc:TextBlock Text="All checks passed"
+                     Foreground="Green"
+                     Margin="6,0,0,0">
+        <swc:TextBlock.Style>
+          <Style TargetType="swc:TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding HasValidationErrors}" Value="False">
+                <Setter Property="Visibility" Value="Visible" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </swc:TextBlock.Style>
+      </swc:TextBlock>
+    </swc:StackPanel>
 
-    <StackPanel Grid.Row="2"
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                Margin="0,8,0,0">
-      <Button Content="◀ Previous"
-              Margin="0,0,8,0"
-              Command="{Binding DataContext.PrevCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-      <Button Content="Next ▶"
-              Margin="0,0,8,0"
-              Command="{Binding DataContext.NextCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-      <Button Content="Close"
-              Command="{Binding DataContext.CloseCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-    </StackPanel>
-  </Grid>
+    <swc:TabControl Grid.Row="1"
+                    ItemsSource="{Binding Tabs}"
+                    SelectedItem="{Binding SelectedTab, Mode=TwoWay}"
+                    Margin="0,0,0,8">
+      <swc:TabControl.ItemTemplate>
+        <DataTemplate>
+          <swc:TextBlock Text="{Binding Header}" />
+        </DataTemplate>
+      </swc:TabControl.ItemTemplate>
+      <swc:TabControl.ContentTemplate>
+        <DataTemplate>
+          <ContentPresenter Content="{Binding}" />
+        </DataTemplate>
+      </swc:TabControl.ContentTemplate>
+    </swc:TabControl>
+
+    <swc:StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,8,0,0">
+      <swc:Button Content="◀ Previous"
+                  Margin="0,0,8,0"
+                  Command="{Binding PrevCommand}" />
+      <swc:Button Content="Next ▶"
+                  Margin="0,0,8,0"
+                  Command="{Binding NextCommand}" />
+      <swc:Button Content="Close"
+                  Command="{Binding CloseCommand}" />
+    </swc:StackPanel>
+  </swc:Grid>
 </Window>

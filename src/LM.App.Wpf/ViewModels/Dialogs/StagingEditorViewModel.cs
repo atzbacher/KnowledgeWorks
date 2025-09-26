@@ -1,23 +1,69 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.Infrastructure.Utils;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
     public sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
     {
-        public StagingEditorViewModel(StagingListViewModel stagingList)
+        private readonly StagingReviewCommitTabViewModel _reviewTab;
+        private StagingTabViewModel? _selectedTab;
+
+        public StagingEditorViewModel(StagingListViewModel stagingList,
+                                      StagingMetadataTabViewModel metadataTab,
+                                      StagingTablesTabViewModel tablesTab,
+                                      StagingFiguresTabViewModel figuresTab,
+                                      StagingEndpointsTabViewModel endpointsTab,
+                                      StagingPopulationTabViewModel populationTab,
+                                      StagingReviewCommitTabViewModel reviewTab)
         {
             StagingList = stagingList ?? throw new ArgumentNullException(nameof(stagingList));
             StagingList.PropertyChanged += OnStagingListPropertyChanged;
+
+            if (metadataTab is null) throw new ArgumentNullException(nameof(metadataTab));
+            if (tablesTab is null) throw new ArgumentNullException(nameof(tablesTab));
+            if (figuresTab is null) throw new ArgumentNullException(nameof(figuresTab));
+            if (endpointsTab is null) throw new ArgumentNullException(nameof(endpointsTab));
+            if (populationTab is null) throw new ArgumentNullException(nameof(populationTab));
+            _reviewTab = reviewTab ?? throw new ArgumentNullException(nameof(reviewTab));
+
+            Tabs = new ObservableCollection<StagingTabViewModel>
+            {
+                metadataTab,
+                tablesTab,
+                figuresTab,
+                endpointsTab,
+                populationTab,
+                _reviewTab
+            };
+
+            SelectedTab = Tabs.FirstOrDefault();
+            UpdateActiveItem();
         }
 
         public StagingListViewModel StagingList { get; }
+
+        public ObservableCollection<StagingTabViewModel> Tabs { get; }
+
+        public StagingTabViewModel? SelectedTab
+        {
+            get => _selectedTab;
+            set
+            {
+                if (SetProperty(ref _selectedTab, value))
+                    UpdateActiveTabState();
+            }
+        }
+
+        public bool HasValidationErrors => Tabs.Any(tab => !tab.IsValid);
 
         [RelayCommand(CanExecute = nameof(CanNavigate))]
         private void Prev()
@@ -76,7 +122,35 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             else if (e.PropertyName == nameof(StagingListViewModel.Current))
             {
                 GenerateShortTitleCommand.NotifyCanExecuteChanged();
+                UpdateActiveItem();
             }
+            else if (e.PropertyName == nameof(StagingListViewModel.IndexLabel))
+            {
+                UpdateActiveItem();
+            }
+        }
+
+        private void UpdateActiveItem()
+        {
+            var current = StagingList.Current;
+            foreach (var tab in Tabs)
+            {
+                tab.Update(current);
+            }
+
+            _reviewTab.Sync(current, Tabs.ToList());
+            UpdateActiveTabState();
+            OnPropertyChanged(nameof(HasValidationErrors));
+        }
+
+        private void UpdateActiveTabState()
+        {
+            foreach (var tab in Tabs)
+            {
+                tab.IsActive = ReferenceEquals(tab, SelectedTab);
+            }
+
+            OnPropertyChanged(nameof(HasValidationErrors));
         }
     }
 }
