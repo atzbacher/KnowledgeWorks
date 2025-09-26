@@ -5,4 +5,22 @@
   <ItemGroup>
     <ProjectReference Include="..\LM.Core\LM.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Track public API changes -->
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+  <Target Name="EnsurePublicApiFiles" BeforeTargets="Build">
+    <WriteLinesToFile File="PublicAPI.Shipped.txt"
+                      Lines=""
+                      Overwrite="false"
+                      Condition="!Exists('PublicAPI.Shipped.txt')" />
+    <WriteLinesToFile File="PublicAPI.Unshipped.txt"
+                      Lines=""
+                      Overwrite="false"
+                      Condition="!Exists('PublicAPI.Unshipped.txt')" />
+  </Target>
 </Project>
