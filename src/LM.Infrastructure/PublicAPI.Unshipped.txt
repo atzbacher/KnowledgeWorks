@@ -40,6 +40,8 @@ LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHoo
 LM.Infrastructure.Hooks.HookContext.Article.init -> void
 LM.Infrastructure.Hooks.HookContext.Attachments.get -> LM.HubSpoke.Models.AttachmentHook?
 LM.Infrastructure.Hooks.HookContext.Attachments.init -> void
+LM.Infrastructure.Hooks.HookContext.DataExtraction.get -> LM.HubSpoke.Models.DataExtractionHook?
+LM.Infrastructure.Hooks.HookContext.DataExtraction.init -> void
 LM.Infrastructure.Hooks.HookContext.ChangeLog.get -> LM.HubSpoke.Models.EntryChangeLogHook?
 LM.Infrastructure.Hooks.HookContext.ChangeLog.init -> void
 LM.Infrastructure.Hooks.HookContext.HookContext() -> void

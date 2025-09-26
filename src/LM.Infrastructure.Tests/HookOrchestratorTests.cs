@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ using Xunit;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.FileSystem;   // WorkspaceService
+using LM.HubSpoke.FileSystem;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.Infrastructure.Tests.Hooks
@@ -166,6 +169,135 @@ namespace LM.Infrastructure.Tests.Hooks
             Assert.NotNull(hook);
             Assert.Equal(2, hook!.Events.Count);
             Assert.Equal("tester2", hook.Events[1].PerformedBy);
+        }
+
+        [Fact]
+        public async Task ProcessAsync_WithDataExtraction_WritesHashTreeAndUpdatesHub()
+        {
+            using var temp = new TempDir();
+
+            var ws = new WorkspaceService();
+            await ws.EnsureWorkspaceAsync(temp.Path);
+
+            var entryId = "ex123";
+            var now = new DateTime(2024, 04, 01, 8, 30, 0, DateTimeKind.Utc);
+            var hub = new HookM.EntryHub
+            {
+                EntryId = entryId,
+                DisplayTitle = "Extraction",
+                CreatedUtc = now,
+                UpdatedUtc = now,
+                CreatedBy = new HookM.PersonRef("tester", "tester") { TimestampUtc = now },
+                UpdatedBy = new HookM.PersonRef("tester", "tester") { TimestampUtc = now },
+                Hooks = new HookM.EntryHooks
+                {
+                    Article = "hooks/article.json"
+                }
+            };
+
+            Directory.CreateDirectory(Path.Combine(temp.Path, "entries", entryId));
+            await File.WriteAllTextAsync(
+                WorkspaceLayout.HubPath(ws, entryId),
+                JsonSerializer.Serialize(hub, HookM.JsonStd.Options));
+
+            var orch = new HookOrchestrator(ws);
+
+            var extractionHook = new HookM.DataExtractionHook
+            {
+                ExtractedBy = "CONTOSO\\tester",
+                ExtractedAtUtc = now,
+                Populations =
+                {
+                    new HookM.DataExtractionPopulation
+                    {
+                        Id = "pop-1",
+                        Label = "Adults",
+                        SampleSize = 42
+                    }
+                },
+                Interventions =
+                {
+                    new HookM.DataExtractionIntervention
+                    {
+                        Id = "arm-1",
+                        Name = "Drug A",
+                        PopulationIds = { "pop-1" },
+                        Dosage = "5mg"
+                    }
+                },
+                Endpoints =
+                {
+                    new HookM.DataExtractionEndpoint
+                    {
+                        Id = "end-1",
+                        Name = "Mortality",
+                        PopulationIds = { "pop-1" },
+                        InterventionIds = { "arm-1" },
+                        ResultSummary = "No difference"
+                    }
+                },
+                Tables =
+                {
+                    new HookM.DataExtractionTable
+                    {
+                        Id = "tbl-1",
+                        Title = "Primary outcome",
+                        TableLabel = "Table 1",
+                        ProvenanceHash = "sha256-abcdef",
+                        Summary = "Summary"
+                    }
+                }
+            };
+
+            var ctx = new HookContext
+            {
+                DataExtraction = extractionHook,
+                ChangeLog = new HookM.EntryChangeLogHook
+                {
+                    Events = new List<HookM.EntryChangeLogEvent>
+                    {
+                        new()
+                        {
+                            EventId = "evt-3",
+                            TimestampUtc = now,
+                            PerformedBy = "CONTOSO\\tester",
+                            Action = "DataExtractionUpdated"
+                        }
+                    }
+                }
+            };
+
+            await orch.ProcessAsync(entryId, ctx, CancellationToken.None);
+
+            var serialized = JsonSerializer.Serialize(extractionHook, new JsonSerializerOptions { WriteIndented = true });
+            var hash = ComputeHash(serialized);
+            var relative = WorkspaceLayout.DataExtractionRelativePath(hash).Replace(Path.DirectorySeparatorChar, '/');
+            var absolute = ws.GetAbsolutePath(relative.Replace('/', Path.DirectorySeparatorChar));
+
+            Assert.True(File.Exists(absolute), $"Expected extraction JSON at {absolute}");
+
+            var stored = JsonSerializer.Deserialize<HookM.DataExtractionHook>(await File.ReadAllTextAsync(absolute));
+            Assert.NotNull(stored);
+            Assert.Equal("Adults", stored!.Populations[0].Label);
+            Assert.Equal("Primary outcome", stored.Tables[0].Title);
+            Assert.Equal("sha256-abcdef", stored.Tables[0].ProvenanceHash);
+
+            var hubJson = await File.ReadAllTextAsync(WorkspaceLayout.HubPath(ws, entryId));
+            using var doc = JsonDocument.Parse(hubJson);
+            var pointer = doc.RootElement.GetProperty("hooks").GetProperty("data_extraction").GetString();
+            Assert.Equal(relative, pointer);
+
+            var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
+            Assert.True(File.Exists(changeLogPath));
+            var changeLog = JsonSerializer.Deserialize<HookM.EntryChangeLogHook>(await File.ReadAllTextAsync(changeLogPath));
+            Assert.Equal("DataExtractionUpdated", changeLog!.Events[^1].Action);
+        }
+
+        private static string ComputeHash(string payload)
+        {
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(payload);
+            return Convert.ToHexString(sha.ComputeHash(bytes)).ToLowerInvariant();
         }
 
         private sealed class TempDir : IDisposable
