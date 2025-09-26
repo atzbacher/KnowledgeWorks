@@ -27,3 +27,4 @@ LM.Review.Core.Services.ReviewerAssignmentRequest.ReviewerId.get -> string!
 LM.Review.Core.Services.ReviewerAssignmentRequest.ReviewerId.init -> void
 LM.Review.Core.Services.ReviewerAssignmentRequest.Role.get -> LM.Review.Core.Models.ReviewerRole
 LM.Review.Core.Services.ReviewerAssignmentRequest.Role.init -> void
+LM.Review.Core.Models.ReviewStageType.DataExtraction = 4 -> LM.Review.Core.Models.ReviewStageType
