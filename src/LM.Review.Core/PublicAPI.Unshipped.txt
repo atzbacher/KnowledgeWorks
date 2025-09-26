@@ -93,3 +93,94 @@ LM.Review.Core.Models.ScreeningAssignment.ReviewerId.get -> string!
 LM.Review.Core.Models.ScreeningAssignment.Role.get -> LM.Review.Core.Models.ReviewerRole
 LM.Review.Core.Models.ScreeningAssignment.StageId.get -> string!
 LM.Review.Core.Models.ScreeningAssignment.Status.get -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.Forms.ExtractionForm
+LM.Review.Core.Models.Forms.ExtractionForm.Category.get -> string?
+static LM.Review.Core.Models.Forms.ExtractionForm.Create(string! id, string! name, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>! sections, string? description = null, string? category = null) -> LM.Review.Core.Models.Forms.ExtractionForm!
+LM.Review.Core.Models.Forms.ExtractionForm.Description.get -> string?
+LM.Review.Core.Models.Forms.ExtractionForm.Id.get -> string!
+LM.Review.Core.Models.Forms.ExtractionForm.Name.get -> string!
+LM.Review.Core.Models.Forms.ExtractionForm.Sections.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
+LM.Review.Core.Models.Forms.FormField
+LM.Review.Core.Models.Forms.FormField.AllowFreeTextFallback.get -> bool
+LM.Review.Core.Models.Forms.FormField.Description.get -> string?
+LM.Review.Core.Models.Forms.FormField.FieldType.get -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormField.Id.get -> string!
+LM.Review.Core.Models.Forms.FormField.Options.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormFieldOption!>!
+LM.Review.Core.Models.Forms.FormField.Title.get -> string!
+LM.Review.Core.Models.Forms.FormField.Validation.get -> LM.Review.Core.Models.Forms.FormFieldValidation?
+LM.Review.Core.Models.Forms.FormField.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
+static LM.Review.Core.Models.Forms.FormField.Create(string! id, string! title, LM.Review.Core.Models.Forms.FormFieldType fieldType, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormFieldOption!>? options = null, string? description = null, LM.Review.Core.Models.Forms.FormFieldValidation? validation = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null, bool allowFreeTextFallback = false) -> LM.Review.Core.Models.Forms.FormField!
+LM.Review.Core.Models.Forms.FormFieldOption
+LM.Review.Core.Models.Forms.FormFieldOption.Description.get -> string?
+LM.Review.Core.Models.Forms.FormFieldOption.Id.get -> string!
+LM.Review.Core.Models.Forms.FormFieldOption.IsDefault.get -> bool
+LM.Review.Core.Models.Forms.FormFieldOption.Label.get -> string!
+static LM.Review.Core.Models.Forms.FormFieldOption.Create(string! id, string! label, string? description = null, bool isDefault = false) -> LM.Review.Core.Models.Forms.FormFieldOption!
+LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.SingleSelect = 0 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.MultiSelect = 1 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Text = 2 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Numeric = 3 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Date = 4 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Reference = 5 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldValidation
+LM.Review.Core.Models.Forms.FormFieldValidation.Expression.get -> string?
+LM.Review.Core.Models.Forms.FormFieldValidation.Maximum.get -> decimal?
+LM.Review.Core.Models.Forms.FormFieldValidation.MaximumDateUtc.get -> System.DateTime?
+LM.Review.Core.Models.Forms.FormFieldValidation.Minimum.get -> decimal?
+LM.Review.Core.Models.Forms.FormFieldValidation.MinimumDateUtc.get -> System.DateTime?
+LM.Review.Core.Models.Forms.FormFieldValidation.Mode.get -> LM.Review.Core.Models.Forms.FormValidationMode
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateDateRange(System.DateTime? minimumUtc, System.DateTime? maximumUtc) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateNumericRange(decimal? minimum, decimal? maximum) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRegex(string! pattern) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRequired() -> LM.Review.Core.Models.Forms.FormFieldValidation!
+LM.Review.Core.Models.Forms.FormIdentifier
+static bool LM.Review.Core.Models.Forms.FormIdentifier.IsNormalized(string! identifier) -> bool
+static string LM.Review.Core.Models.Forms.FormIdentifier.Normalize(string! identifier) -> string!
+LM.Review.Core.Models.Forms.FormSection
+LM.Review.Core.Models.Forms.FormSection.Children.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
+LM.Review.Core.Models.Forms.FormSection.Description.get -> string?
+LM.Review.Core.Models.Forms.FormSection.Fields.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormField!>!
+LM.Review.Core.Models.Forms.FormSection.Id.get -> string!
+LM.Review.Core.Models.Forms.FormSection.IsRepeatable.get -> bool
+LM.Review.Core.Models.Forms.FormSection.Title.get -> string!
+LM.Review.Core.Models.Forms.FormSection.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
+static LM.Review.Core.Models.Forms.FormSection.Create(string! id, string! title, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormField!>! fields, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>? children = null, bool isRepeatable = false, string? description = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null) -> LM.Review.Core.Models.Forms.FormSection!
+LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Required = 0 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Range = 1 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Regex = 2 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormVisibilityRule
+LM.Review.Core.Models.Forms.FormVisibilityRule.ExpectedValues.get -> System.Collections.Generic.IReadOnlyList<string>!
+LM.Review.Core.Models.Forms.FormVisibilityRule.IsVisibleWhenMatches.get -> bool
+LM.Review.Core.Models.Forms.FormVisibilityRule.SourceFieldId.get -> string!
+static LM.Review.Core.Models.Forms.FormVisibilityRule.Create(string! sourceFieldId, System.Collections.Generic.IEnumerable<string>? expectedValues = null, bool isVisibleWhenMatches = true) -> LM.Review.Core.Models.Forms.FormVisibilityRule!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedBy.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedUtc.get -> System.DateTime
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.FormId.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, object?>!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.VersionId.get -> string!
+static LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Create(string! formId, string! versionId, System.Collections.Generic.IDictionary<string, object?>! values, string? capturedBy = null, System.DateTime? capturedUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormSnapshot!
+LM.Review.Core.Models.Forms.ExtractionFormVersion
+LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedBy.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedUtc.get -> System.DateTime
+LM.Review.Core.Models.Forms.ExtractionFormVersion.Form.get -> LM.Review.Core.Models.Forms.ExtractionForm!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.Metadata.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.VersionId.get -> string!
+static LM.Review.Core.Models.Forms.ExtractionFormVersion.Create(string! versionId, LM.Review.Core.Models.Forms.ExtractionForm! form, System.Collections.Generic.IDictionary<string, string>? metadata = null, string? createdBy = null, System.DateTime? createdUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormVersion!
+LM.Review.Core.Validation.FormSchemaIssue
+LM.Review.Core.Validation.FormSchemaIssue.Code.get -> string!
+LM.Review.Core.Validation.FormSchemaIssue.FieldId.get -> string?
+LM.Review.Core.Validation.FormSchemaIssue.Message.get -> string!
+LM.Review.Core.Validation.FormSchemaIssue.SectionId.get -> string?
+LM.Review.Core.Validation.FormSchemaIssue.Severity.get -> LM.Review.Core.Validation.FormSchemaSeverity
+static LM.Review.Core.Validation.FormSchemaIssue.Error(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
+static LM.Review.Core.Validation.FormSchemaIssue.Warning(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
+LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaSeverity.Warning = 0 -> LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaSeverity.Error = 1 -> LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaValidator
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionForm! form) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormSnapshot! snapshot, LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
