@@ -28,6 +28,7 @@ namespace LM.App.Wpf.Services.Review
         private readonly IWorkSpaceService _workspace;
         private readonly ILitSearchRunPicker _runPicker;
 
+
         public ReviewProjectLauncher(
             IDialogService dialogService,
             IEntryStore entryStore,
@@ -38,6 +39,7 @@ namespace LM.App.Wpf.Services.Review
             IUserContext userContext,
             IWorkSpaceService workspace,
             ILitSearchRunPicker runPicker)
+
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
@@ -48,6 +50,7 @@ namespace LM.App.Wpf.Services.Review
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
+
         }
 
         public async Task<ReviewProject?> CreateProjectAsync(CancellationToken cancellationToken)
@@ -56,6 +59,7 @@ namespace LM.App.Wpf.Services.Review
             {
                 var selection = await _runPicker.PickAsync(cancellationToken).ConfigureAwait(false);
                 if (selection is null)
+
                 {
                     return null;
                 }
@@ -66,12 +70,14 @@ namespace LM.App.Wpf.Services.Review
 
                 var project = CreateProject(selection, entry);
 
+
                 await _workflowStore.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
 
                 var context = _hookContextFactory.CreateProjectCreated(project);
                 await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken).ConfigureAwait(false);
 
                 var tags = BuildCreationTags(project, selection, entry);
+
                 await ReviewChangeLogWriter.WriteAsync(
                     _changeLogOrchestrator,
                     project.Id,
@@ -179,6 +185,7 @@ namespace LM.App.Wpf.Services.Review
             return selection[0];
         }
 
+
         private ProjectReference ResolveProjectReference(string absolutePath)
         {
             var workspaceRoot = _workspace.GetWorkspaceRoot();
@@ -205,12 +212,14 @@ namespace LM.App.Wpf.Services.Review
         }
 
         private ReviewProject CreateProject(LitSearchRunSelection selection, Entry? entry)
+
         {
             var now = DateTimeOffset.UtcNow;
             var projectId = $"review-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}";
             var projectName = ResolveProjectName(entry);
             var definitions = CreateStageDefinitions();
             var auditDetails = $"litsearch:{selection.EntryId}:run:{selection.RunId}";
+
 
             var auditEntry = ReviewAuditTrail.AuditEntry.Create(
                 $"audit-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
@@ -268,6 +277,7 @@ namespace LM.App.Wpf.Services.Review
         }
 
         private static IEnumerable<string> BuildCreationTags(ReviewProject project, LitSearchRunSelection selection, Entry? entry)
+
         {
             var tags = new List<string>
             {
@@ -280,6 +290,7 @@ namespace LM.App.Wpf.Services.Review
             if (!string.IsNullOrWhiteSpace(selection.HookRelativePath))
             {
                 tags.Add($"litsearchHook:{selection.HookRelativePath.Trim()}");
+
             }
 
             if (entry is not null)
@@ -314,6 +325,7 @@ namespace LM.App.Wpf.Services.Review
         {
             return relativePath.Replace('\\', '/');
         }
+
 
         private sealed record ProjectReference(string AbsolutePath, string? ProjectId, string? RelativePath);
     }

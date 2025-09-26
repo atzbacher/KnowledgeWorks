@@ -34,6 +34,7 @@ internal sealed class ReviewModule : IAppModule
         services.AddTransient<LitSearchRunPickerViewModel>();
         services.AddTransient<LitSearchRunPickerWindow>();
 
+
         services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<ScreeningQueueViewModel>();
         services.AddTransient<AssignmentDetailViewModel>();
