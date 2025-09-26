@@ -46,6 +46,16 @@ namespace LM.App.Wpf.ViewModels
         private string? _loadedEntryId;
         private LitSearchHook? _loadedHook;
 
+        private const double DefaultLeftPanelWidth = 260d;
+        private const double DefaultRightPanelWidth = 320d;
+
+        private System.Windows.GridLength _leftPanelWidth = new(DefaultLeftPanelWidth);
+        private System.Windows.GridLength _rightPanelWidth = new(DefaultRightPanelWidth);
+        private double _leftPanelExpandedWidth = DefaultLeftPanelWidth;
+        private double _rightPanelExpandedWidth = DefaultRightPanelWidth;
+        private bool _isLeftPanelCollapsed;
+        private bool _isRightPanelCollapsed;
+
         public SearchViewModel(IEntryStore store,
                                IFileStorageRepository storage,
                                IWorkSpaceService ws,
@@ -71,6 +81,8 @@ namespace LM.App.Wpf.ViewModels
             StartPreviousRunCommand = new AsyncRelayCommand(StartPreviousRunAsync, p => !IsBusy && p is PreviousSearchSummary);
             ToggleFavoriteCommand = new AsyncRelayCommand(ToggleFavoriteAsync, p => !IsBusy && p is PreviousSearchSummary);
             ShowRunDetailsCommand = new AsyncRelayCommand(ShowRunDetailsAsync, p => !IsBusy && p is PreviousSearchSummary);
+            ToggleLeftPanelCommand = new RelayCommand(_ => ToggleLeftPanel(), _ => !IsBusy);
+            ToggleRightPanelCommand = new RelayCommand(_ => ToggleRightPanel(), _ => !IsBusy);
 
             _providers.SearchExecuted += OnProvidersSearchExecuted;
             _providers.PropertyChanged += OnProvidersPropertyChanged;
@@ -192,6 +204,70 @@ namespace LM.App.Wpf.ViewModels
         public System.Windows.Input.ICommand StartPreviousRunCommand { get; }
         public System.Windows.Input.ICommand ToggleFavoriteCommand { get; }
         public System.Windows.Input.ICommand ShowRunDetailsCommand { get; }
+        public System.Windows.Input.ICommand ToggleLeftPanelCommand { get; }
+        public System.Windows.Input.ICommand ToggleRightPanelCommand { get; }
+
+        public System.Windows.GridLength LeftPanelWidth
+        {
+            get => _leftPanelWidth;
+            set
+            {
+                if (_leftPanelWidth.Equals(value))
+                    return;
+
+                _leftPanelWidth = value;
+                if (!_isLeftPanelCollapsed && value.Value > 0d)
+                {
+                    _leftPanelExpandedWidth = value.Value;
+                }
+
+                OnPropertyChanged();
+            }
+        }
+
+        public System.Windows.GridLength RightPanelWidth
+        {
+            get => _rightPanelWidth;
+            set
+            {
+                if (_rightPanelWidth.Equals(value))
+                    return;
+
+                _rightPanelWidth = value;
+                if (!_isRightPanelCollapsed && value.Value > 0d)
+                {
+                    _rightPanelExpandedWidth = value.Value;
+                }
+
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsLeftPanelCollapsed
+        {
+            get => _isLeftPanelCollapsed;
+            private set
+            {
+                if (_isLeftPanelCollapsed == value)
+                    return;
+
+                _isLeftPanelCollapsed = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsRightPanelCollapsed
+        {
+            get => _isRightPanelCollapsed;
+            private set
+            {
+                if (_isRightPanelCollapsed == value)
+                    return;
+
+                _isRightPanelCollapsed = value;
+                OnPropertyChanged();
+            }
+        }
 
         private void RaiseCanExec()
         {
@@ -201,6 +277,38 @@ namespace LM.App.Wpf.ViewModels
             (StartPreviousRunCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ToggleFavoriteCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
             (ShowRunDetailsCommand as AsyncRelayCommand)!.RaiseCanExecuteChanged();
+            (ToggleLeftPanelCommand as RelayCommand)!.RaiseCanExecuteChanged();
+            (ToggleRightPanelCommand as RelayCommand)!.RaiseCanExecuteChanged();
+        }
+
+        private void ToggleLeftPanel()
+        {
+            if (IsLeftPanelCollapsed)
+            {
+                var width = _leftPanelExpandedWidth <= 0d ? DefaultLeftPanelWidth : _leftPanelExpandedWidth;
+                LeftPanelWidth = new System.Windows.GridLength(width);
+                IsLeftPanelCollapsed = false;
+                return;
+            }
+
+            _leftPanelExpandedWidth = LeftPanelWidth.Value <= 0d ? DefaultLeftPanelWidth : LeftPanelWidth.Value;
+            LeftPanelWidth = new System.Windows.GridLength(0d);
+            IsLeftPanelCollapsed = true;
+        }
+
+        private void ToggleRightPanel()
+        {
+            if (IsRightPanelCollapsed)
+            {
+                var width = _rightPanelExpandedWidth <= 0d ? DefaultRightPanelWidth : _rightPanelExpandedWidth;
+                RightPanelWidth = new System.Windows.GridLength(width);
+                IsRightPanelCollapsed = false;
+                return;
+            }
+
+            _rightPanelExpandedWidth = RightPanelWidth.Value <= 0d ? DefaultRightPanelWidth : RightPanelWidth.Value;
+            RightPanelWidth = new System.Windows.GridLength(0d);
+            IsRightPanelCollapsed = true;
         }
 
         private async void OnProvidersSearchExecuted(object? sender, SearchExecutedEventArgs e)

@@ -7,259 +7,338 @@
              xmlns:coreModels="clr-namespace:LM.Core.Models;assembly=LM.Core"
              mc:Ignorable="d">
   <UserControl.Resources>
-    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="CardBorderBrush" Color="#D9DFE8" />
-    <SolidColorBrush x:Key="CardHeaderBrush" Color="#1F2937" />
-    <SolidColorBrush x:Key="CardSubtleBrush" Color="#4B5563" />
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Search/SearchViewResources.xaml" />
+      </ResourceDictionary.MergedDictionaries>
 
-    <common:BooleanToOpacityConverter x:Key="AlreadyInDbOpacityConverter"
-                                       TrueOpacity="1"
-                                       FalseOpacity="0" />
+      <common:BooleanToOpacityConverter x:Key="AlreadyInDbOpacityConverter"
+                                         TrueOpacity="1"
+                                         FalseOpacity="0" />
 
-    <DataTemplate x:Key="SearchHitPreviewTemplate" DataType="{x:Type coreModels:SearchHit}">
-      <StackPanel>
-        <Border Background="#E6F4EA"
-                CornerRadius="6"
-                Padding="8"
-                Margin="0,0,0,12">
-          <Border.Style>
-            <Style TargetType="Border">
-              <Setter Property="Visibility" Value="Collapsed" />
-              <Style.Triggers>
-                <DataTrigger Binding="{Binding AlreadyInDb}" Value="True">
-                  <Setter Property="Visibility" Value="Visible" />
-                </DataTrigger>
-              </Style.Triggers>
-            </Style>
-          </Border.Style>
-          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-            <TextBlock Text="&#xE73E;"
-                       FontFamily="Segoe MDL2 Assets"
-                       Margin="0,0,8,0"
-                       Foreground="#166534" />
-            <TextBlock Text="Already added to your library"
-                       Foreground="#14532D"
-                       FontWeight="SemiBold" />
-          </StackPanel>
-        </Border>
+      <DataTemplate x:Key="SearchHitPreviewTemplate" DataType="{x:Type coreModels:SearchHit}">
+        <StackPanel>
+          <Border Background="#FF143029"
+                  CornerRadius="4"
+                  Padding="8"
+                  Margin="0,0,0,10">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding AlreadyInDb}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBlock Text="&#xE73E;"
+                         FontFamily="Segoe MDL2 Assets"
+                         Margin="0,0,6,0"
+                         Foreground="#FF34D399" />
+              <TextBlock Text="Already added to your library"
+                         Foreground="#FF6EE7B7"
+                         FontWeight="SemiBold" />
+            </StackPanel>
+          </Border>
 
-        <TextBlock Text="{Binding Title}"
-                   FontSize="20"
-                   FontWeight="SemiBold"
-                   TextWrapping="Wrap" />
-        <TextBlock Text="{Binding Authors}"
-                   Margin="0,6,0,0"
-                   Foreground="#4B5563"
-                   TextWrapping="Wrap" />
-
-        <StackPanel Orientation="Horizontal"
-                    Margin="0,10,0,0"
-                    VerticalAlignment="Center">
-          <TextBlock Text="{Binding JournalOrSource}"
+          <TextBlock Text="{Binding Title}"
+                     FontSize="18"
                      FontWeight="SemiBold"
-                     Foreground="#1F2937"
+                     Foreground="{StaticResource SearchPrimaryTextBrush}"
+                     TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Authors}"
+                     Margin="0,4,0,0"
+                     Foreground="{StaticResource SearchSecondaryTextBrush}"
+                     TextWrapping="Wrap" />
+
+          <StackPanel Orientation="Horizontal"
+                      Margin="0,10,0,6"
+                      VerticalAlignment="Center">
+            <TextBlock Text="{Binding JournalOrSource}"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource SearchPrimaryTextBrush}"
+                       TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Year}"
+                       Margin="8,0,0,0"
+                       Foreground="{StaticResource SearchSecondaryTextBrush}" />
+          </StackPanel>
+
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0,0,8,0"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource SearchSecondaryTextBrush}"
+                       Text="Database" />
+            <TextBlock Grid.Row="0"
+                       Grid.Column="1"
+                       Foreground="{StaticResource SearchPrimaryTextBrush}"
+                       Text="{Binding Source}" />
+
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="0,6,8,0"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource SearchSecondaryTextBrush}"
+                       Text="Record ID" />
+            <TextBlock Grid.Row="1"
+                       Grid.Column="1"
+                       Margin="0,6,0,0"
+                       Foreground="{StaticResource SearchPrimaryTextBrush}"
+                       Text="{Binding ExternalId}" />
+
+            <TextBlock Grid.Row="2"
+                       Grid.Column="0"
+                       Margin="0,6,8,0"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource SearchSecondaryTextBrush}"
+                       Text="DOI" />
+            <TextBlock Grid.Row="2"
+                       Grid.Column="1"
+                       Margin="0,6,0,0"
+                       Foreground="{StaticResource SearchPrimaryTextBrush}"
+                       Text="{Binding Doi}" />
+          </Grid>
+
+          <TextBlock Margin="0,10,0,0"
+                     Text="{Binding Url}"
                      TextWrapping="Wrap"
-                     Width="Auto" />
-          <TextBlock Text="{Binding Year}"
-                     Margin="8,0,0,0"
-                     Foreground="#1F2937" />
+                     Foreground="{StaticResource SearchAccentBrush}"
+                     TextDecorations="Underline" />
         </StackPanel>
+      </DataTemplate>
 
-        <Separator Margin="0,12,0,12" />
+      <DataTemplate x:Key="SearchHitPreviewPlaceholderTemplate">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="Select a result to preview"
+                     FontSize="16"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource SearchSecondaryTextBrush}" />
+          <TextBlock Text="Choose an item from the list to see details here."
+                     Margin="0,6,0,0"
+                     Foreground="{StaticResource SearchSecondaryTextBrush}" />
+        </StackPanel>
+      </DataTemplate>
 
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-          </Grid.RowDefinitions>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-          </Grid.ColumnDefinitions>
-
-          <TextBlock Grid.Row="0" Grid.Column="0" Text="Database" FontWeight="SemiBold" />
-          <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Source}" />
-
-          <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6,0,0" Text="Record ID" FontWeight="SemiBold" />
-          <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Text="{Binding ExternalId}" />
-
-          <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6,0,0" Text="DOI" FontWeight="SemiBold" />
-          <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,6,0,0" Text="{Binding Doi}" TextWrapping="Wrap" />
-        </Grid>
-
-        <TextBlock Margin="0,12,0,0"
-                   Text="{Binding Url}"
-                   TextWrapping="Wrap"
-                   Foreground="#2563EB"
-                   TextDecorations="Underline" />
-      </StackPanel>
-    </DataTemplate>
-
-    <DataTemplate x:Key="SearchHitPreviewPlaceholderTemplate">
-      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="Select a result to preview"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   HorizontalAlignment="Center" />
-        <TextBlock Text="Choose an item from the list to see details here."
-                   Margin="0,6,0,0"
-                   Foreground="#6B7280"
-                   HorizontalAlignment="Center" />
-      </StackPanel>
-    </DataTemplate>
-
-    <Style x:Key="SearchPreviewContentStyle" TargetType="ContentControl">
-      <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewTemplate}" />
-      <Style.Triggers>
-        <Trigger Property="Content" Value="{x:Null}">
-          <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewPlaceholderTemplate}" />
-        </Trigger>
-      </Style.Triggers>
-    </Style>
+      <Style x:Key="SearchPreviewContentStyle" TargetType="ContentControl">
+        <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewTemplate}" />
+        <Style.Triggers>
+          <Trigger Property="Content" Value="{x:Null}">
+            <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewPlaceholderTemplate}" />
+          </Trigger>
+        </Style.Triggers>
+      </Style>
+    </ResourceDictionary>
   </UserControl.Resources>
 
-  <Grid Margin="24">
+  <Grid Background="{StaticResource SearchSurfaceBrush}">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0">
-      <TextBlock Text="Explore the knowledge library"
-                 FontSize="26"
-                 FontWeight="SemiBold"
-                 Foreground="{StaticResource CardHeaderBrush}" />
-      <TextBlock Text="Search across connected databases, review rich metadata, and capture the runs that matter."
-                 Margin="0,6,0,0"
-                 Foreground="{StaticResource CardSubtleBrush}" />
-    </StackPanel>
+    <Border Grid.Row="0"
+            Background="{StaticResource SearchPanelBrush}"
+            BorderBrush="{StaticResource SearchPanelBorderBrush}"
+            BorderThickness="0,0,0,1">
+      <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
 
-    <Border Grid.Row="1"
-            Margin="0,20,0,0"
-            Background="{StaticResource CardBackgroundBrush}"
-            BorderBrush="{StaticResource CardBorderBrush}"
-            BorderThickness="1"
-            CornerRadius="12"
-            Padding="20">
-      <StackPanel>
-        <TextBlock Text="Search criteria"
-                   FontWeight="SemiBold"
-                   Foreground="{StaticResource CardHeaderBrush}" />
+        <StackPanel Grid.Column="0"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    Margin="0,0,12,0">
+          <Button Command="{Binding ToggleLeftPanelCommand}"
+                  AutomationProperties.Name="Toggle filter panel">
+            <Button.Style>
+              <Style TargetType="Button" BasedOn="{StaticResource SearchIconButtonStyle}">
+                <Setter Property="Content" Value="&#xE1D1;" />
+                <Setter Property="ToolTip" Value="Hide filter panel" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="&#xE1D0;" />
+                    <Setter Property="ToolTip" Value="Show filter panel" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+        </StackPanel>
 
-        <Grid Margin="0,12,0,0">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-          </Grid.RowDefinitions>
+        <Grid Grid.Column="1" VerticalAlignment="Center">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="16" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="16" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
 
-          <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5">
-            <TextBlock Text="Search for"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource CardSubtleBrush}" />
-            <TextBox Margin="0,6,0,0"
-                     Height="36"
-                     Padding="10,4"
-                     Text="{Binding Providers.Query, UpdateSourceTrigger=PropertyChanged}" />
-          </StackPanel>
-
-          <StackPanel Grid.Row="1" Grid.Column="0">
-            <TextBlock Text="Database"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource CardSubtleBrush}" />
-            <ComboBox Margin="0,6,0,0"
-                      Height="36"
-                      ItemsSource="{Binding Providers.Databases}"
-                      SelectedValuePath="Value"
-                      DisplayMemberPath="DisplayName"
-                      SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}" />
-          </StackPanel>
-
-          <StackPanel Grid.Row="1" Grid.Column="2">
-            <TextBlock Text="From"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource CardSubtleBrush}" />
-            <DatePicker Margin="0,6,0,0"
-                        Height="36"
-                        SelectedDate="{Binding Providers.From}" />
-          </StackPanel>
-
-          <StackPanel Grid.Row="1" Grid.Column="4">
-            <TextBlock Text="To"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource CardSubtleBrush}" />
-            <DatePicker Margin="0,6,0,0"
-                        Height="36"
-                        SelectedDate="{Binding Providers.To}" />
-          </StackPanel>
+          <TextBox Grid.Column="0"
+                   MinHeight="32"
+                   Style="{StaticResource SearchTextBoxStyle}"
+                   Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                   ToolTip="Enter your search query" />
         </Grid>
 
-        <StackPanel Orientation="Horizontal"
+        <StackPanel Grid.Column="2"
+                    Orientation="Horizontal"
                     HorizontalAlignment="Right"
-                    Margin="0,18,0,0">
-          <Button Content="Export"
-                  MinWidth="110"
-                  Height="36"
-                  Command="{Binding ExportSearchCommand}" />
-          <Button Content="Load"
-                  MinWidth="110"
-                  Height="36"
-                  Margin="10,0,0,0"
-                  Command="{Binding LoadSearchCommand}" />
-          <Button Content="Save"
-                  MinWidth="110"
-                  Height="36"
-                  Margin="10,0,0,0"
-                  Command="{Binding SaveSearchCommand}" />
-          <Button Content="Run search"
-                  MinWidth="120"
-                  Height="36"
-                  Margin="10,0,0,0"
-                  Background="#2563EB"
-                  Foreground="White"
-                  Command="{Binding Providers.RunSearchCommand}" />
+                    VerticalAlignment="Center">
+          <Button Style="{StaticResource SearchIconButtonStyle}"
+                  Content="&#xE8B7;"
+                  Margin="0,0,8,0"
+                  Command="{Binding LoadSearchCommand}"
+                  ToolTip="Load saved search"
+                  AutomationProperties.Name="Load saved search" />
+          <Button Style="{StaticResource SearchIconButtonStyle}"
+                  Content="&#xE105;"
+                  Margin="0,0,8,0"
+                  Command="{Binding SaveSearchCommand}"
+                  ToolTip="Save current search"
+                  AutomationProperties.Name="Save current search" />
+          <Button Style="{StaticResource SearchIconButtonStyle}"
+                  Content="&#xEDE1;"
+                  Margin="0,0,8,0"
+                  Command="{Binding ExportSearchCommand}"
+                  ToolTip="Export results"
+                  AutomationProperties.Name="Export search results" />
+          <Button Style="{StaticResource SearchAccentButtonStyle}"
+                  Content="&#xE768;"
+                  Margin="0,0,8,0"
+                  Command="{Binding RunSearchCommand}"
+                  ToolTip="Run search"
+                  AutomationProperties.Name="Run search" />
+          <Button Command="{Binding ToggleRightPanelCommand}"
+                  AutomationProperties.Name="Toggle details panel">
+            <Button.Style>
+              <Style TargetType="Button" BasedOn="{StaticResource SearchIconButtonStyle}">
+                <Setter Property="Content" Value="&#xE90F;" />
+                <Setter Property="ToolTip" Value="Hide details panel" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="&#xE1CE;" />
+                    <Setter Property="ToolTip" Value="Show details panel" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
         </StackPanel>
-      </StackPanel>
+      </Grid>
     </Border>
 
-    <Grid Grid.Row="2" Margin="0,24,0,0">
+    <Grid Grid.Row="1" Margin="12,10">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="3*" />
-        <ColumnDefinition Width="8" />
-        <ColumnDefinition Width="2*" />
+        <ColumnDefinition Width="{Binding LeftPanelWidth, Mode=TwoWay}" MinWidth="0" />
+        <ColumnDefinition Width="4" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="4" />
+        <ColumnDefinition Width="{Binding RightPanelWidth, Mode=TwoWay}" MinWidth="0" />
       </Grid.ColumnDefinitions>
 
-      <Border Background="{StaticResource CardBackgroundBrush}"
-              BorderBrush="{StaticResource CardBorderBrush}"
+      <Border Grid.Column="0"
+              Background="{StaticResource SearchPanelBrush}"
+              BorderBrush="{StaticResource SearchPanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="12"
+              CornerRadius="4"
+              Padding="{StaticResource SearchPanelPadding}">
+        <Border.Style>
+          <Style TargetType="Border">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel>
+            <TextBlock Text="Filters"
+                       Foreground="{StaticResource SearchSecondaryTextBrush}"
+                       FontWeight="SemiBold"
+                       FontSize="13"
+                       Margin="0,0,0,12" />
+
+            <TextBlock Text="Database"
+                       Style="{StaticResource SearchSectionHeader}" />
+            <ComboBox Style="{StaticResource SearchComboBoxStyle}"
+                      ItemsSource="{Binding Providers.Databases}"
+                      DisplayMemberPath="DisplayName"
+                      SelectedValuePath="Value"
+                      SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}" />
+
+            <TextBlock Text="Date range"
+                       Style="{StaticResource SearchSectionHeader}"
+                       Margin="0,12,0,4" />
+            <StackPanel>
+              <DatePicker Style="{StaticResource SearchDatePickerStyle}"
+                          SelectedDate="{Binding Providers.From}" />
+              <DatePicker Style="{StaticResource SearchDatePickerStyle}"
+                          Margin="0,8,0,0"
+                          SelectedDate="{Binding Providers.To}" />
+            </StackPanel>
+
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+
+      <GridSplitter Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    ShowsPreview="True"
+                    Background="{StaticResource SearchDividerBrush}">
+        <GridSplitter.Style>
+          <Style TargetType="GridSplitter">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </GridSplitter.Style>
+      </GridSplitter>
+
+      <Border Grid.Column="2"
+              Background="{StaticResource SearchPanelBrush}"
+              BorderBrush="{StaticResource SearchPanelBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
               Padding="0">
-        <DockPanel LastChildFill="True">
-          <Grid DockPanel.Dock="Top" Margin="20,20,20,0">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top"
+                Margin="12,10,12,0">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <TextBlock Text="Results"
-                       FontSize="18"
-                       FontWeight="SemiBold"
-                       Foreground="{StaticResource CardHeaderBrush}" />
+                       Foreground="{StaticResource SearchPrimaryTextBrush}"
+                       FontWeight="SemiBold" />
             <TextBlock Grid.Column="1"
-                       Text="{Binding Providers.Results.Count, StringFormat={}{0} matches}"
                        HorizontalAlignment="Right"
-                       Foreground="{StaticResource CardSubtleBrush}" />
+                       Foreground="{StaticResource SearchSecondaryTextBrush}"
+                       Text="{Binding Providers.Results.Count, StringFormat={}{0} matches}" />
           </Grid>
 
-          <DataGrid Margin="20"
+          <DataGrid Margin="12"
                     ItemsSource="{Binding Providers.Results}"
                     SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
                     AutoGenerateColumns="False"
@@ -269,30 +348,40 @@
                     GridLinesVisibility="None"
                     RowHeaderWidth="0"
                     AlternationCount="2"
-                    AlternatingRowBackground="#F9FAFB"
                     SelectionMode="Extended"
                     SelectionUnit="FullRow"
                     EnableRowVirtualization="True"
+                    Background="Transparent"
+                    Foreground="{StaticResource SearchPrimaryTextBrush}"
+                    RowBackground="#FF1F242D"
+                    AlternatingRowBackground="#FF1A1F27"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
+            <DataGrid.ColumnHeaderStyle>
+              <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="{StaticResource SearchPanelSubtleBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource SearchSecondaryTextBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource SearchDividerBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,1,1" />
+                <Setter Property="Padding" Value="6,4" />
+              </Style>
+            </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
               <DataGridCheckBoxColumn Header=""
-                                       Binding="{Binding Selected, Mode=TwoWay}"
-                                       Width="40" />
-              <DataGridTemplateColumn Header=""
-                                      Width="40">
+                                       Binding="{Binding Selected, Mode=TwoWay}" Width="36" />
+              <DataGridTemplateColumn Header="" Width="36">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
-                    <Border Background="#E6F4EA"
-                            CornerRadius="999"
-                            Width="24"
-                            Height="24"
+                    <Border Background="#FF1F6F43"
+                            CornerRadius="10"
+                            Width="20"
+                            Height="20"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Opacity="{Binding AlreadyInDb, Converter={StaticResource AlreadyInDbOpacityConverter}}">
                       <TextBlock Text="&#xE73E;"
                                  FontFamily="Segoe MDL2 Assets"
-                                 Foreground="#15803D"
+                                 Foreground="#FF34D399"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center" />
                     </Border>
@@ -313,39 +402,59 @@
         </DockPanel>
       </Border>
 
-      <GridSplitter Grid.Column="1"
-                    Margin="12,0"
-                    Width="8"
-                    HorizontalAlignment="Center"
+      <GridSplitter Grid.Column="3"
+                    HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Background="#D9DFE8" />
+                    ShowsPreview="True"
+                    Background="{StaticResource SearchDividerBrush}">
+        <GridSplitter.Style>
+          <Style TargetType="GridSplitter">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </GridSplitter.Style>
+      </GridSplitter>
 
-      <Border Grid.Column="2"
-              Background="{StaticResource CardBackgroundBrush}"
-              BorderBrush="{StaticResource CardBorderBrush}"
+      <Border Grid.Column="4"
+              Background="{StaticResource SearchPanelBrush}"
+              BorderBrush="{StaticResource SearchPanelBorderBrush}"
               BorderThickness="1"
-              CornerRadius="12"
-              Padding="20">
+              CornerRadius="4"
+              Padding="{StaticResource SearchPanelPadding}">
+        <Border.Style>
+          <Style TargetType="Border">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+
         <StackPanel>
-          <TextBlock Text="Result details"
-                     FontSize="18"
-                     FontWeight="SemiBold"
-                     Foreground="{StaticResource CardHeaderBrush}" />
-          <ContentControl Margin="0,16,0,0"
+          <TextBlock Text="Details"
+                     Foreground="{StaticResource SearchPrimaryTextBrush}"
+                     FontWeight="SemiBold" />
+          <ContentControl Margin="0,12,0,0"
                           Content="{Binding SelectedResult}"
                           Style="{StaticResource SearchPreviewContentStyle}" />
         </StackPanel>
       </Border>
     </Grid>
 
-    <Border Grid.Row="3"
-            Margin="0,24,0,0"
-            Background="{StaticResource CardBackgroundBrush}"
-            BorderBrush="{StaticResource CardBorderBrush}"
+    <Border Grid.Row="2"
+            Margin="12,0,12,12"
+            Background="{StaticResource SearchPanelBrush}"
+            BorderBrush="{StaticResource SearchPanelBorderBrush}"
             BorderThickness="1"
-            CornerRadius="12"
-            Padding="20">
-      <DockPanel LastChildFill="True">
+            CornerRadius="4"
+            Padding="12">
+      <DockPanel>
         <Grid DockPanel.Dock="Top">
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -353,19 +462,18 @@
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <TextBlock Text="Saved runs"
-                     FontSize="18"
-                     FontWeight="SemiBold"
-                     Foreground="{StaticResource CardHeaderBrush}" />
+                     Foreground="{StaticResource SearchPrimaryTextBrush}"
+                     FontWeight="SemiBold" />
           <TextBlock Grid.Column="1"
-                     Margin="16,0,0,0"
-                     Text="Recent favorites and search history"
-                     Foreground="{StaticResource CardSubtleBrush}" />
+                     Margin="12,0,0,0"
+                     Foreground="{StaticResource SearchSecondaryTextBrush}"
+                     Text="Recent favorites and history" />
           <TextBlock Grid.Column="2"
-                     Text="{Binding PreviousRunsCount, StringFormat={}{0} total}"
-                     Foreground="{StaticResource CardSubtleBrush}" />
+                     Foreground="{StaticResource SearchSecondaryTextBrush}"
+                     Text="{Binding PreviousRunsCount, StringFormat={}{0} total}" />
         </Grid>
 
-        <DataGrid Margin="0,16,0,0"
+        <DataGrid Margin="0,10,0,0"
                   ItemsSource="{Binding PreviousRuns}"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
@@ -375,9 +483,19 @@
                   GridLinesVisibility="None"
                   RowHeaderWidth="0"
                   AlternationCount="2"
-                  AlternatingRowBackground="#F9FAFB"
-                  HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Auto">
+                  Background="Transparent"
+                  Foreground="{StaticResource SearchPrimaryTextBrush}"
+                  RowBackground="#FF1F242D"
+                  AlternatingRowBackground="#FF1A1F27">
+          <DataGrid.ColumnHeaderStyle>
+            <Style TargetType="DataGridColumnHeader">
+              <Setter Property="Background" Value="{StaticResource SearchPanelSubtleBrush}" />
+              <Setter Property="Foreground" Value="{StaticResource SearchSecondaryTextBrush}" />
+              <Setter Property="BorderBrush" Value="{StaticResource SearchDividerBrush}" />
+              <Setter Property="BorderThickness" Value="0,0,1,1" />
+              <Setter Property="Padding" Value="6,4" />
+            </Style>
+          </DataGrid.ColumnHeaderStyle>
           <DataGrid.Resources>
             <Style TargetType="DataGridRow">
               <Setter Property="ContextMenu">
@@ -392,19 +510,17 @@
             </Style>
           </DataGrid.Resources>
           <DataGrid.Columns>
-            <DataGridTemplateColumn Header="★" Width="40">
+            <DataGridTemplateColumn Header="★" Width="36">
               <DataGridTemplateColumn.CellTemplate>
                 <DataTemplate>
                   <Button Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                           CommandParameter="{Binding}"
-                          HorizontalAlignment="Center"
-                          Padding="0"
+                          Style="{StaticResource SearchIconButtonStyle}"
                           Background="Transparent"
-                          BorderBrush="{x:Null}"
-                          BorderThickness="0"
-                          Focusable="False"
+                          BorderBrush="Transparent"
                           ToolTip="Toggle favorite">
-                    <TextBlock Text="★" Foreground="Goldenrod">
+                    <TextBlock Text="★"
+                               Foreground="#FFFACC15">
                       <TextBlock.Style>
                         <Style TargetType="TextBlock">
                           <Setter Property="Opacity" Value="0.2" />
@@ -420,9 +536,9 @@
                 </DataTemplate>
               </DataGridTemplateColumn.CellTemplate>
             </DataGridTemplateColumn>
-            <DataGridTextColumn Header="Last search"
+            <DataGridTextColumn Header="Last"
                                  Binding="{Binding LastRunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
-                                 Width="160" />
+                                 Width="150" />
             <DataGridTextColumn Header="Provider"
                                  Binding="{Binding Provider}"
                                  Width="100" />
