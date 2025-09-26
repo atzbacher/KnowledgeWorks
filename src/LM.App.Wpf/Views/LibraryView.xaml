@@ -204,6 +204,7 @@
               </Button.Style>
             </Button>
           </StackPanel>
+
         </StackPanel>
 
         <WrapPanel Grid.Row="1"
@@ -258,6 +259,7 @@
                      Margin="0,0,0,14"
                      Padding="12"
                      AutomationProperties.Name="Full-text ranking keywords"
+
                      VerticalContentAlignment="Center"
                      BorderBrush="{StaticResource LibraryPanelBorderBrush}"
                      BorderThickness="1"
@@ -280,6 +282,7 @@
                         Margin="0,2,12,8"
                         Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
                         IsChecked="{Binding FullTextInContent}" />
+
             </WrapPanel>
           </StackPanel>
         </Border>
@@ -295,11 +298,13 @@
       <ScrollViewer VerticalScrollBarVisibility="Auto" DataContext="{Binding Filters}">
         <StackPanel Margin="24">
           <Border Style="{StaticResource LibrarySectionCardStyle}" Background="{StaticResource LibraryPanelBackgroundBrush}">
+
             <StackPanel>
               <TextBlock Text="Saved searches"
                          FontWeight="SemiBold"
                          FontSize="16"
                          Foreground="{StaticResource LibraryPrimaryForegroundBrush}"
+
                          Margin="0,0,0,12"/>
               <TreeView ItemsSource="{Binding NavigationRoots}" SelectedItemChanged="OnNavigationSelected">
             <TreeView.ItemTemplate>
@@ -401,10 +406,12 @@
       </Grid.RowDefinitions>
 
       <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+
         <TextBlock Text="Results"
                    FontSize="18"
                    FontWeight="SemiBold"
                    Foreground="{StaticResource LibraryPrimaryForegroundBrush}"/>
+
         <TextBlock Text="(Full-text ranking)"
                    Margin="8,4,0,0"
                    Foreground="{StaticResource LibraryMutedForegroundBrush}"
@@ -507,6 +514,7 @@
                 Content="Open entry"
                 Margin="0"
                 AutomationProperties.Name="Open selected entry"
+
                 Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </StackPanel>
     </Grid>

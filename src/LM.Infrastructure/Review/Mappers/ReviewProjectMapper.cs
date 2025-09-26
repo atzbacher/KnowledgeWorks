@@ -1,0 +1,46 @@
+using System.Collections.Generic;
+using System.Linq;
+using LM.Infrastructure.Review.Dto;
+using LM.Review.Core.Models;
+
+namespace LM.Infrastructure.Review.Mappers;
+
+internal static class ReviewProjectMapper
+{
+    public static ReviewProjectDto ToDto(ReviewProject project)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+
+        var dto = new ReviewProjectDto
+        {
+            Id = project.Id,
+            Name = project.Name,
+            CreatedAt = project.CreatedAt,
+            StageDefinitions = project.StageDefinitions
+                .Select(StageDefinitionMapper.ToDto)
+                .ToList(),
+            AuditTrail = project.AuditTrail.Entries
+                .Select(ReviewAuditTrailMapper.ToDto)
+                .ToList()
+        };
+
+        return ReviewDtoAuditStamp.Stamp(dto);
+    }
+
+    public static ReviewProject ToDomain(ReviewProjectDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        var definitions = dto.StageDefinitions?
+            .Select(StageDefinitionMapper.ToDomain)
+            .ToList() ?? new List<StageDefinition>();
+
+        var auditEntries = dto.AuditTrail?
+            .Select(ReviewAuditTrailMapper.ToDomain)
+            .ToList() ?? new List<ReviewAuditTrail.AuditEntry>();
+
+        var auditTrail = ReviewAuditTrail.Create(auditEntries);
+
+        return ReviewProject.Create(dto.Id, dto.Name, dto.CreatedAt, definitions, auditTrail);
+    }
+}
