@@ -9,6 +9,12 @@ namespace LM.App.Wpf.Common.Dialogs
         public bool AllowMultiple { get; init; }
     }
 
+    public sealed record FileSavePickerOptions
+    {
+        public string? Filter { get; init; }
+        public string? DefaultFileName { get; init; }
+    }
+
     public sealed record FolderPickerOptions
     {
         public string? Description { get; init; }
@@ -18,6 +24,7 @@ namespace LM.App.Wpf.Common.Dialogs
     {
         string[]? ShowOpenFileDialog(FilePickerOptions options);
         string? ShowFolderBrowserDialog(FolderPickerOptions options);
+        string? ShowSaveFileDialog(FileSavePickerOptions options);
         bool? ShowStagingEditor(StagingListViewModel stagingList);
     }
 }
