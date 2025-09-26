@@ -20,6 +20,28 @@
         <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
         <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
       </ResourceDictionary.MergedDictionaries>
+      <Style TargetType="controls:LibrarySearchQueryBox">
+        <Setter Property="Background" Value="#FFECEFF2" />
+        <Setter Property="BorderBrush" Value="#FFC4CAD0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="controls:LibrarySearchQueryBox">
+              <Border Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="18"
+                      Padding="{TemplateBinding Padding}">
+                <ScrollViewer x:Name="PART_ContentHost"
+                              Focusable="false"
+                              HorizontalScrollBarVisibility="{TemplateBinding HorizontalScrollBarVisibility}"
+                              VerticalScrollBarVisibility="{TemplateBinding VerticalScrollBarVisibility}" />
+              </Border>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
     </ResourceDictionary>
 
   </UserControl.Resources>
