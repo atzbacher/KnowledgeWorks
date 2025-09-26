@@ -93,3 +93,10 @@ LM.Review.Core.Models.ScreeningAssignment.ReviewerId.get -> string!
 LM.Review.Core.Models.ScreeningAssignment.Role.get -> LM.Review.Core.Models.ReviewerRole
 LM.Review.Core.Models.ScreeningAssignment.StageId.get -> string!
 LM.Review.Core.Models.ScreeningAssignment.Status.get -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.DataExtraction.TableVocabulary
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyColumnHeader(string? header) -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyRowLabel(string? label) -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyTitle(string? title) -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Review.Core.DataExtraction.TableVocabulary.NormalizeHeader(string header) -> string!
+LM.Review.Core.DataExtraction.TableVocabulary.TryDetectEndpoint(string? token) -> string?
+LM.Review.Core.DataExtraction.TableVocabulary.TryDetectPopulation(string? token) -> string?
