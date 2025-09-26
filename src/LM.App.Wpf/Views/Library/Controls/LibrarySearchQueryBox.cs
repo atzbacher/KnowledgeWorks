@@ -9,8 +9,31 @@ namespace LM.App.Wpf.Views.Library.Controls
 {
     public sealed class LibrarySearchQueryBox : System.Windows.Controls.RichTextBox
     {
-        private static readonly System.Windows.Media.Brush KeywordBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(72, 118, 214));
-        private static readonly System.Windows.Media.Brush OperatorBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(176, 88, 35));
+        private static readonly System.Windows.Media.Brush KeywordForegroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+        private static readonly System.Windows.Media.Brush KeywordBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(16, 76, 121));
+        private static readonly System.Windows.Media.Brush OperatorForegroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+        private static readonly System.Windows.Media.Brush OperatorBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(55, 118, 54));
+        private static readonly System.Windows.Media.Brush ParenthesisGlyphForegroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(255, 255, 255));
+        private static readonly ParenthesisPalette[] ParenthesisPalettes =
+        {
+            new ParenthesisPalette(
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(16, 76, 121)),
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(227, 238, 247))),
+            new ParenthesisPalette(
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(55, 118, 54)),
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(230, 244, 228))),
+            new ParenthesisPalette(
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(121, 76, 16)),
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(246, 237, 225))),
+            new ParenthesisPalette(
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(94, 55, 118)),
+                CreateFrozenBrush(System.Windows.Media.Color.FromRgb(239, 230, 245)))
+        };
+        private static readonly ParenthesisPalette ParenthesisFallbackPalette = new(
+            CreateFrozenBrush(System.Windows.Media.Color.FromRgb(120, 120, 120)),
+            CreateFrozenBrush(System.Windows.Media.Color.FromRgb(234, 234, 234)));
+        private static readonly System.Windows.Media.Brush AccentBorderBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(196, 202, 208));
+        private static readonly System.Windows.Media.Brush AccentBackgroundBrush = CreateFrozenBrush(System.Windows.Media.Color.FromRgb(236, 239, 242));
         private static readonly Regex KeywordRegex = BuildKeywordRegex();
         private static readonly Regex OperatorRegex = new("(?<!\\w)(AND|OR|NOT)(?!\\w)", RegexOptions.Compiled);
 
@@ -29,7 +52,9 @@ namespace LM.App.Wpf.Views.Library.Controls
             VerticalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Hidden;
             HorizontalScrollBarVisibility = System.Windows.Controls.ScrollBarVisibility.Hidden;
             BorderThickness = new System.Windows.Thickness(1);
-            Padding = new System.Windows.Thickness(6, 4, 6, 4);
+            BorderBrush = AccentBorderBrush;
+            Background = AccentBackgroundBrush;
+            Padding = new System.Windows.Thickness(10, 6, 10, 6);
             Document.Blocks.Clear();
             Document.Blocks.Add(new System.Windows.Documents.Paragraph { Margin = new System.Windows.Thickness(0) });
             Document.PagePadding = new System.Windows.Thickness(0);
@@ -109,7 +134,7 @@ namespace LM.App.Wpf.Views.Library.Controls
 
             if (string.IsNullOrEmpty(text))
             {
-                inlines.Add(CreateRun(string.Empty, Foreground, System.Windows.FontWeights.Normal));
+                inlines.Add(CreateInline(string.Empty, Foreground, null, System.Windows.FontWeights.Normal));
                 return;
             }
 
@@ -121,18 +146,18 @@ namespace LM.App.Wpf.Views.Library.Controls
                 if (segment.Start > index)
                 {
                     var plain = text.Substring(index, segment.Start - index);
-                    inlines.Add(CreateRun(plain, Foreground, System.Windows.FontWeights.Normal));
+                    inlines.Add(CreateInline(plain, Foreground, null, System.Windows.FontWeights.Normal));
                 }
 
                 var highlightText = text.Substring(segment.Start, segment.Length);
-                inlines.Add(CreateRun(highlightText, segment.Foreground, segment.FontWeight));
+                inlines.Add(CreateInline(highlightText, segment.Foreground, segment.Background, segment.FontWeight));
                 index = segment.Start + segment.Length;
             }
 
             if (index < text.Length)
             {
                 var remainder = text.Substring(index);
-                inlines.Add(CreateRun(remainder, Foreground, System.Windows.FontWeights.Normal));
+                inlines.Add(CreateInline(remainder, Foreground, null, System.Windows.FontWeights.Normal));
             }
         }
 
@@ -144,7 +169,25 @@ namespace LM.App.Wpf.Views.Library.Controls
             }
 
             var segments = new List<HighlightSegment>();
+            var occupied = new bool[text.Length];
 
+            AddKeywordSegments(text, segments, occupied);
+            AddOperatorSegments(text, segments, occupied);
+            AddParenthesisSegments(text, segments, occupied);
+            AddParenthesisDepthSegments(text, segments, occupied);
+
+            if (segments.Count == 0)
+            {
+                return Array.Empty<HighlightSegment>();
+            }
+
+            segments.Sort(static (a, b) => a.Start.CompareTo(b.Start));
+
+            return segments.ToArray();
+        }
+
+        private void AddKeywordSegments(string text, List<HighlightSegment> segments, bool[] occupied)
+        {
             foreach (Match match in KeywordRegex.Matches(text))
             {
                 if (!match.Success)
@@ -159,11 +202,12 @@ namespace LM.App.Wpf.Views.Library.Controls
                     length += 1;
                 }
 
-                segments.Add(new HighlightSegment(match.Index, length, KeywordBrush, System.Windows.FontWeights.SemiBold));
-
-
+                AddSegmentIfAvailable(segments, occupied, match.Index, length, KeywordForegroundBrush, KeywordBackgroundBrush, System.Windows.FontWeights.SemiBold);
             }
+        }
 
+        private void AddOperatorSegments(string text, List<HighlightSegment> segments, bool[] occupied)
+        {
             foreach (Match match in OperatorRegex.Matches(text))
             {
                 if (!match.Success)
@@ -171,37 +215,134 @@ namespace LM.App.Wpf.Views.Library.Controls
                     continue;
                 }
 
-                segments.Add(new HighlightSegment(match.Index, match.Length, OperatorBrush, System.Windows.FontWeights.SemiBold));
+                AddSegmentIfAvailable(segments, occupied, match.Index, match.Length, OperatorForegroundBrush, OperatorBackgroundBrush, System.Windows.FontWeights.SemiBold);
             }
+        }
 
-            if (segments.Count == 0)
-            {
-                return Array.Empty<HighlightSegment>();
-            }
+        private void AddParenthesisSegments(string text, List<HighlightSegment> segments, bool[] occupied)
+        {
+            var paletteStack = new Stack<ParenthesisPalette>();
 
-            segments.Sort(static (a, b) =>
+            for (var i = 0; i < text.Length; i++)
             {
-                var startComparison = a.Start.CompareTo(b.Start);
-                if (startComparison != 0)
+                var character = text[i];
+
+                if (character == '(')
                 {
-                    return startComparison;
+                    var palette = ParenthesisPalettes[paletteStack.Count % ParenthesisPalettes.Length];
+                    paletteStack.Push(palette);
+                    AddSegmentIfAvailable(segments, occupied, i, 1, ParenthesisGlyphForegroundBrush, palette.GlyphBackground, System.Windows.FontWeights.SemiBold);
                 }
-
-                return b.Length.CompareTo(a.Length);
-            });
-
-            var filtered = new List<HighlightSegment>(segments.Count);
-            var currentEnd = -1;
-            foreach (var segment in segments)
-            {
-                if (segment.Start >= currentEnd)
+                else if (character == ')')
                 {
-                    filtered.Add(segment);
-                    currentEnd = segment.Start + segment.Length;
+                    var palette = paletteStack.Count > 0 ? paletteStack.Pop() : ParenthesisFallbackPalette;
+                    AddSegmentIfAvailable(segments, occupied, i, 1, ParenthesisGlyphForegroundBrush, palette.GlyphBackground, System.Windows.FontWeights.SemiBold);
                 }
             }
+        }
 
-            return filtered.ToArray();
+        private void AddParenthesisDepthSegments(string text, List<HighlightSegment> segments, bool[] occupied)
+        {
+            if (text.Length == 0)
+            {
+                return;
+            }
+
+            var paletteStack = new Stack<ParenthesisPalette>();
+            var rangeStart = -1;
+            var hasPalette = false;
+            ParenthesisPalette currentPalette = default;
+
+            for (var i = 0; i < text.Length; i++)
+            {
+                var character = text[i];
+
+                if (character == '(')
+                {
+                    FlushRange(i);
+                    var palette = ParenthesisPalettes[paletteStack.Count % ParenthesisPalettes.Length];
+                    paletteStack.Push(palette);
+                    continue;
+                }
+
+                if (character == ')')
+                {
+                    FlushRange(i);
+                    if (paletteStack.Count > 0)
+                    {
+                        paletteStack.Pop();
+                    }
+                    continue;
+                }
+
+                if (paletteStack.Count == 0 || occupied[i])
+                {
+                    FlushRange(i);
+                    continue;
+                }
+
+                var palette = paletteStack.Peek();
+                if (rangeStart < 0)
+                {
+                    rangeStart = i;
+                    currentPalette = palette;
+                    hasPalette = true;
+                    continue;
+                }
+
+                if (!ReferenceEquals(currentPalette.RegionBackground, palette.RegionBackground))
+                {
+                    FlushRange(i);
+                    rangeStart = i;
+                    currentPalette = palette;
+                    hasPalette = true;
+                }
+            }
+
+            FlushRange(text.Length);
+
+            void FlushRange(int exclusiveEnd)
+            {
+                if (rangeStart < 0 || !hasPalette)
+                {
+                    rangeStart = -1;
+                    hasPalette = false;
+                    return;
+                }
+
+                var length = exclusiveEnd - rangeStart;
+                if (length > 0)
+                {
+                    AddSegmentIfAvailable(segments, occupied, rangeStart, length, null, currentPalette.RegionBackground, System.Windows.FontWeights.Normal);
+                }
+
+                rangeStart = -1;
+                hasPalette = false;
+            }
+        }
+
+        private void AddSegmentIfAvailable(List<HighlightSegment> segments, bool[] occupied, int start, int length, System.Windows.Media.Brush? foreground, System.Windows.Media.Brush? background, System.Windows.FontWeight fontWeight)
+        {
+            if (length <= 0 || start < 0 || start >= occupied.Length)
+            {
+                return;
+            }
+
+            var end = Math.Min(start + length, occupied.Length);
+            for (var i = start; i < end; i++)
+            {
+                if (occupied[i])
+                {
+                    return;
+                }
+            }
+
+            segments.Add(new HighlightSegment(start, end - start, foreground, background, fontWeight));
+
+            for (var i = start; i < end; i++)
+            {
+                occupied[i] = true;
+            }
         }
 
         private static Regex BuildKeywordRegex()
@@ -253,14 +394,26 @@ namespace LM.App.Wpf.Views.Library.Controls
 
         }
 
-        private System.Windows.Documents.Run CreateRun(string text, System.Windows.Media.Brush? foreground, System.Windows.FontWeight fontWeight)
+        private System.Windows.Documents.Inline CreateInline(string text, System.Windows.Media.Brush? foreground, System.Windows.Media.Brush? background, System.Windows.FontWeight fontWeight)
         {
             var run = new System.Windows.Documents.Run(text ?? string.Empty)
             {
                 Foreground = foreground ?? Foreground,
                 FontWeight = fontWeight
             };
-            return run;
+            if (background is null)
+            {
+                return run;
+            }
+
+            var span = new System.Windows.Documents.Span(run)
+            {
+                Foreground = foreground ?? Foreground,
+                Background = background,
+                FontWeight = fontWeight
+            };
+
+            return span;
         }
 
         private static System.Windows.Media.Brush CreateFrozenBrush(System.Windows.Media.Color color)
@@ -289,18 +442,37 @@ namespace LM.App.Wpf.Views.Library.Controls
 
         private readonly struct HighlightSegment
         {
-            public HighlightSegment(int start, int length, System.Windows.Media.Brush foreground, System.Windows.FontWeight fontWeight)
+            public HighlightSegment(
+                int start,
+                int length,
+                System.Windows.Media.Brush? foreground,
+                System.Windows.Media.Brush? background,
+                System.Windows.FontWeight fontWeight)
             {
                 Start = start;
                 Length = length;
                 Foreground = foreground;
+                Background = background;
                 FontWeight = fontWeight;
             }
 
             public int Start { get; }
             public int Length { get; }
-            public System.Windows.Media.Brush Foreground { get; }
+            public System.Windows.Media.Brush? Foreground { get; }
+            public System.Windows.Media.Brush? Background { get; }
             public System.Windows.FontWeight FontWeight { get; }
+        }
+
+        private readonly struct ParenthesisPalette
+        {
+            public ParenthesisPalette(System.Windows.Media.Brush glyphBackground, System.Windows.Media.Brush regionBackground)
+            {
+                GlyphBackground = glyphBackground;
+                RegionBackground = regionBackground;
+            }
+
+            public System.Windows.Media.Brush GlyphBackground { get; }
+            public System.Windows.Media.Brush RegionBackground { get; }
         }
     }
 }
