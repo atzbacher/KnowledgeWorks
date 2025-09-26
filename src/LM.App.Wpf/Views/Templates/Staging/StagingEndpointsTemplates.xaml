@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging">
+  <DataTemplate DataType="{x:Type vm:StagingEndpointsTabViewModel}">
+    <swc:Grid>
+      <swc:Grid.RowDefinitions>
+        <swc:RowDefinition Height="*" />
+        <swc:RowDefinition Height="Auto" />
+      </swc:Grid.RowDefinitions>
+
+      <swc:ListView ItemsSource="{Binding Endpoints}">
+        <swc:ListView.View>
+          <swc:GridView>
+            <swc:GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="200" />
+            <swc:GridViewColumn Header="Populations" DisplayMemberBinding="{Binding Populations}" Width="220" />
+            <swc:GridViewColumn Header="Interventions" DisplayMemberBinding="{Binding Interventions}" Width="220" />
+            <swc:GridViewColumn Header="Confirmed">
+              <swc:GridViewColumn.CellTemplate>
+                <DataTemplate>
+                  <swc:CheckBox IsChecked="{Binding IsConfirmed, Mode=TwoWay}" HorizontalAlignment="Center" />
+                </DataTemplate>
+              </swc:GridViewColumn.CellTemplate>
+            </swc:GridViewColumn>
+          </swc:GridView>
+        </swc:ListView.View>
+      </swc:ListView>
+
+      <swc:TextBlock Grid.Row="1"
+                     Margin="0,8,0,0"
+                     Text="Mark endpoints as confirmed once reviewed." />
+    </swc:Grid>
+  </DataTemplate>
+</ResourceDictionary>

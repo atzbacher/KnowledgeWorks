@@ -401,6 +401,8 @@ LM.HubSpoke.Models.DataExtractionEndpoint.ResultSummary.get -> string?
 LM.HubSpoke.Models.DataExtractionEndpoint.ResultSummary.init -> void
 LM.HubSpoke.Models.DataExtractionEndpoint.Timepoint.get -> string?
 LM.HubSpoke.Models.DataExtractionEndpoint.Timepoint.init -> void
+LM.HubSpoke.Models.DataExtractionEndpoint.Confirmed.get -> bool
+LM.HubSpoke.Models.DataExtractionEndpoint.Confirmed.init -> void
 LM.HubSpoke.Models.DataExtractionPopulation
 LM.HubSpoke.Models.DataExtractionPopulation.DataExtractionPopulation() -> void
 LM.HubSpoke.Models.DataExtractionPopulation.Description.get -> string?

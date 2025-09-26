@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
+                    xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging">
+  <DataTemplate DataType="{x:Type vm:StagingPopulationTabViewModel}">
+    <swc:Grid>
+      <swc:Grid.ColumnDefinitions>
+        <swc:ColumnDefinition Width="*" />
+        <swc:ColumnDefinition Width="*" />
+      </swc:Grid.ColumnDefinitions>
+
+      <swc:GroupBox Header="Populations" Margin="0,0,8,0">
+        <swc:ListBox ItemsSource="{Binding Populations}" DisplayMemberPath="Label" />
+      </swc:GroupBox>
+
+      <swc:GroupBox Header="Interventions" Grid.Column="1" Margin="8,0,0,0">
+        <swc:ListBox ItemsSource="{Binding Interventions}" DisplayMemberPath="Name" />
+      </swc:GroupBox>
+    </swc:Grid>
+  </DataTemplate>
+</ResourceDictionary>
