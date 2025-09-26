@@ -197,9 +197,13 @@ namespace LM.App.Wpf.Views.Library.Controls
 
                 var length = match.Length;
                 var colonIndex = match.Index + match.Length;
+                while (colonIndex < text.Length && char.IsWhiteSpace(text[colonIndex]))
+                {
+                    colonIndex++;
+                }
                 if (colonIndex < text.Length && text[colonIndex] == ':')
                 {
-                    length += 1;
+                    length = colonIndex - match.Index + 1;
                 }
 
                 AddSegmentIfAvailable(segments, occupied, match.Index, length, KeywordForegroundBrush, KeywordBackgroundBrush, System.Windows.FontWeights.SemiBold);
@@ -238,6 +242,14 @@ namespace LM.App.Wpf.Views.Library.Controls
                     var palette = paletteStack.Count > 0 ? paletteStack.Pop() : ParenthesisFallbackPalette;
                     AddSegmentIfAvailable(segments, occupied, i, 1, ParenthesisGlyphForegroundBrush, palette.GlyphBackground, System.Windows.FontWeights.SemiBold);
                 }
+            }
+        }
+
+        private void AddParenthesisDepthSegments(string text, List<HighlightSegment> segments, bool[] occupied)
+        {
+            if (text.Length == 0)
+            {
+                return;
             }
         }
 
