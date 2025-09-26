@@ -32,7 +32,7 @@ namespace LM.App.Wpf.Services.Review
 
         public async Task<LitSearchRunSelection?> PickAsync(CancellationToken cancellationToken)
         {
-            var options = await LoadOptionsAsync(cancellationToken).ConfigureAwait(false);
+            var options = await LoadOptionsAsync(cancellationToken);
             if (options.Count == 0)
             {
                 System.Windows.MessageBox.Show(
