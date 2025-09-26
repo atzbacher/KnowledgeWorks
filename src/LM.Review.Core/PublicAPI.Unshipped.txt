@@ -1,0 +1,95 @@
+#nullable enable
+LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.None = 0 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Conflict = 1 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Escalated = 2 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Resolved = 3 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Pending = 0 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.InProgress = 1 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Included = 2 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Excluded = 3 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Escalated = 4 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Primary = 0 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Secondary = 1 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.TieBreaker = 2 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Arbitrator = 3 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.TitleScreening = 0 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.FullTextReview = 1 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.ConsensusMeeting = 2 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.QualityAssurance = 3 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewerDecision
+LM.Review.Core.Models.ReviewerDecision.AssignmentId.get -> string!
+static LM.Review.Core.Models.ReviewerDecision.Create(string! assignmentId, string! reviewerId, LM.Review.Core.Models.ScreeningStatus decision, System.DateTimeOffset decidedAtUtc, string? notes = null) -> LM.Review.Core.Models.ReviewerDecision!
+LM.Review.Core.Models.ReviewerDecision.DecidedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewerDecision.Decision.get -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ReviewerDecision.Notes.get -> string?
+LM.Review.Core.Models.ReviewerDecision.ReviewerId.get -> string!
+LM.Review.Core.Models.ConsensusOutcome
+LM.Review.Core.Models.ConsensusOutcome.Approved.get -> bool
+static LM.Review.Core.Models.ConsensusOutcome.Create(string! stageId, bool approved, LM.Review.Core.Models.ConflictState resultingState, System.DateTimeOffset resolvedAtUtc, string? notes = null, string? resolvedBy = null) -> LM.Review.Core.Models.ConsensusOutcome!
+LM.Review.Core.Models.ConsensusOutcome.Notes.get -> string?
+LM.Review.Core.Models.ConsensusOutcome.ResolvedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ConsensusOutcome.ResolvedBy.get -> string?
+LM.Review.Core.Models.ConsensusOutcome.ResultingState.get -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConsensusOutcome.StageId.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail
+LM.Review.Core.Models.ReviewAuditTrail.Append(LM.Review.Core.Models.ReviewAuditTrail.AuditEntry! entry) -> LM.Review.Core.Models.ReviewAuditTrail!
+static LM.Review.Core.Models.ReviewAuditTrail.Create(System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>? entries = null) -> LM.Review.Core.Models.ReviewAuditTrail!
+LM.Review.Core.Models.ReviewAuditTrail.Entries.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Action.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Actor.get -> string!
+static LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Create(string! id, string! actor, string! action, System.DateTimeOffset occurredAtUtc, string? details = null) -> LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Details.get -> string?
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Id.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.OccurredAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewProject
+LM.Review.Core.Models.ReviewProject.AuditTrail.get -> LM.Review.Core.Models.ReviewAuditTrail!
+static LM.Review.Core.Models.ReviewProject.Create(string! id, string! name, System.DateTimeOffset createdAtUtc, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageDefinition!>! stageDefinitions, LM.Review.Core.Models.ReviewAuditTrail? auditTrail = null) -> LM.Review.Core.Models.ReviewProject!
+LM.Review.Core.Models.ReviewProject.CreatedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewProject.Id.get -> string!
+LM.Review.Core.Models.ReviewProject.Name.get -> string!
+LM.Review.Core.Models.ReviewProject.StageDefinitions.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.StageDefinition!>!
+LM.Review.Core.Models.ReviewStage
+LM.Review.Core.Models.ReviewStage.ActivatedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewStage.Assignments.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ScreeningAssignment!>!
+LM.Review.Core.Models.ReviewStage.CompletedAt.get -> System.DateTimeOffset?
+LM.Review.Core.Models.ReviewStage.Consensus.get -> LM.Review.Core.Models.ConsensusOutcome?
+LM.Review.Core.Models.ReviewStage.ConflictState.get -> LM.Review.Core.Models.ConflictState
+static LM.Review.Core.Models.ReviewStage.Create(string! id, string! projectId, LM.Review.Core.Models.StageDefinition! definition, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ScreeningAssignment!>! assignments, LM.Review.Core.Models.ConflictState conflictState, System.DateTimeOffset activatedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ConsensusOutcome? consensus = null) -> LM.Review.Core.Models.ReviewStage!
+LM.Review.Core.Models.ReviewStage.Definition.get -> LM.Review.Core.Models.StageDefinition!
+LM.Review.Core.Models.ReviewStage.Id.get -> string!
+LM.Review.Core.Models.ReviewStage.IsComplete.get -> bool
+LM.Review.Core.Models.ReviewStage.ProjectId.get -> string!
+LM.Review.Core.Models.StageDefinition
+LM.Review.Core.Models.StageDefinition.ConsensusPolicy.get -> LM.Review.Core.Models.StageConsensusPolicy!
+static LM.Review.Core.Models.StageDefinition.Create(string! id, string! name, LM.Review.Core.Models.ReviewStageType stageType, LM.Review.Core.Models.ReviewerRequirement! reviewerRequirement, LM.Review.Core.Models.StageConsensusPolicy! consensusPolicy) -> LM.Review.Core.Models.StageDefinition!
+LM.Review.Core.Models.StageDefinition.Id.get -> string!
+LM.Review.Core.Models.StageDefinition.Name.get -> string!
+LM.Review.Core.Models.StageDefinition.ReviewerRequirement.get -> LM.Review.Core.Models.ReviewerRequirement!
+LM.Review.Core.Models.StageDefinition.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.StageConsensusPolicy
+LM.Review.Core.Models.StageConsensusPolicy.ArbitrationRole.get -> LM.Review.Core.Models.ReviewerRole?
+static LM.Review.Core.Models.StageConsensusPolicy.Disabled() -> LM.Review.Core.Models.StageConsensusPolicy!
+LM.Review.Core.Models.StageConsensusPolicy.EscalateOnDisagreement.get -> bool
+LM.Review.Core.Models.StageConsensusPolicy.MinimumAgreements.get -> int
+static LM.Review.Core.Models.StageConsensusPolicy.RequireAgreement(int minimumAgreements, bool escalateOnDisagreement, LM.Review.Core.Models.ReviewerRole? arbitrationRole) -> LM.Review.Core.Models.StageConsensusPolicy!
+LM.Review.Core.Models.StageConsensusPolicy.RequiresConsensus.get -> bool
+LM.Review.Core.Models.ReviewerRequirement
+static LM.Review.Core.Models.ReviewerRequirement.Create(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<LM.Review.Core.Models.ReviewerRole, int>>! requirements) -> LM.Review.Core.Models.ReviewerRequirement!
+LM.Review.Core.Models.ReviewerRequirement.GetRequirement(LM.Review.Core.Models.ReviewerRole role) -> int
+LM.Review.Core.Models.ReviewerRequirement.Requirements.get -> System.Collections.Generic.IReadOnlyDictionary<LM.Review.Core.Models.ReviewerRole, int>!
+LM.Review.Core.Models.ReviewerRequirement.TotalRequired.get -> int
+LM.Review.Core.Models.ScreeningAssignment
+LM.Review.Core.Models.ScreeningAssignment.AssignedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ScreeningAssignment.CompletedAt.get -> System.DateTimeOffset?
+static LM.Review.Core.Models.ScreeningAssignment.Create(string! id, string! stageId, string! reviewerId, LM.Review.Core.Models.ReviewerRole role, LM.Review.Core.Models.ScreeningStatus status, System.DateTimeOffset assignedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ReviewerDecision? decision = null) -> LM.Review.Core.Models.ScreeningAssignment!
+LM.Review.Core.Models.ScreeningAssignment.Decision.get -> LM.Review.Core.Models.ReviewerDecision?
+LM.Review.Core.Models.ScreeningAssignment.Id.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.ReviewerId.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.Role.get -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ScreeningAssignment.StageId.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.Status.get -> LM.Review.Core.Models.ScreeningStatus
