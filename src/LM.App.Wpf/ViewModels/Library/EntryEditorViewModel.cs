@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common.Dialogs;
@@ -24,6 +25,7 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IWorkSpaceService _workspace;
 
         private Entry? _entry;
+        private Entry? _originalEntry;
         private string? _articleHookJson;
         private string? _originalAuthorsSignature;
 
@@ -59,6 +61,7 @@ namespace LM.App.Wpf.ViewModels.Library
                 return false;
             }
 
+            _originalEntry = CloneEntry(entry);
             _entry = CloneEntry(entry);
             WasSaved = false;
 
@@ -103,8 +106,11 @@ namespace LM.App.Wpf.ViewModels.Library
 
                 await _store.SaveAsync(_entry).ConfigureAwait(true);
 
+                await AppendChangeLogAsync(_originalEntry, _entry).ConfigureAwait(true);
+
                 await UpdateArticleHookAsync(_entry).ConfigureAwait(true);
 
+                _originalEntry = CloneEntry(_entry);
                 _originalAuthorsSignature = NormalizeAuthorsSignature(_entry.Authors);
                 WasSaved = true;
                 RequestClose(true);
@@ -310,6 +316,157 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 Trace.WriteLine($"[EntryEditorViewModel] Failed to persist article hook for '{entry.Id}': {ex}");
             }
+        }
+
+        private async Task AppendChangeLogAsync(Entry? original, Entry updated)
+        {
+            if (original is null)
+                return;
+            if (updated is null || string.IsNullOrWhiteSpace(updated.Id))
+                return;
+
+            var changeLog = BuildChangeLogHook(original, updated, GetCurrentUserName());
+            if (changeLog is null)
+                return;
+
+            try
+            {
+                await _orchestrator.ProcessAsync(
+                    updated.Id,
+                    new HookContext { ChangeLog = changeLog },
+                    CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"[EntryEditorViewModel] Failed to persist change log for '{updated.Id}': {ex}");
+            }
+        }
+
+        private static EntryChangeLogHook? BuildChangeLogHook(Entry original, Entry updated, string userName)
+        {
+            var changes = CollectChangedFields(original, updated);
+            if (changes.Count == 0)
+                return null;
+
+            var normalizedUser = string.IsNullOrWhiteSpace(userName) ? "unknown" : userName.Trim();
+            var normalizedPath = NormalizeStoragePath(updated.MainFilePath);
+            var tags = changes.Select(change => $"changed:{change}").ToList();
+
+            return new EntryChangeLogHook
+            {
+                Events = new List<EntryChangeLogEvent>
+                {
+                    new EntryChangeLogEvent
+                    {
+                        EventId = Guid.NewGuid().ToString("N"),
+                        TimestampUtc = DateTime.UtcNow,
+                        PerformedBy = normalizedUser,
+                        Action = "EntryUpdated",
+                        Details = new ChangeLogAttachmentDetails
+                        {
+                            AttachmentId = updated.Id,
+                            Title = ResolveEntryTitle(updated),
+                            LibraryPath = normalizedPath,
+                            Purpose = AttachmentKind.Metadata,
+                            Tags = tags
+                        }
+                    }
+                }
+            };
+        }
+
+        private static List<string> CollectChangedFields(Entry original, Entry updated)
+        {
+            var changes = new List<string>();
+
+            if (original.Type != updated.Type)
+                changes.Add("type");
+
+            if (!string.Equals(original.Title, updated.Title, StringComparison.Ordinal))
+                changes.Add("title");
+
+            if (!string.Equals(NormalizeString(original.DisplayName), NormalizeString(updated.DisplayName), StringComparison.Ordinal))
+                changes.Add("displayName");
+
+            var originalAuthors = NormalizeList(original.Authors);
+            var updatedAuthors = NormalizeList(updated.Authors);
+            if (!originalAuthors.SequenceEqual(updatedAuthors, StringComparer.OrdinalIgnoreCase))
+                changes.Add("authors");
+
+            if (original.Year != updated.Year)
+                changes.Add("year");
+
+            if (!string.Equals(NormalizeString(original.Source), NormalizeString(updated.Source), StringComparison.Ordinal))
+                changes.Add("source");
+
+            if (!string.Equals(NormalizeString(original.Doi), NormalizeString(updated.Doi), StringComparison.Ordinal))
+                changes.Add("doi");
+
+            if (!string.Equals(NormalizeString(original.Pmid), NormalizeString(updated.Pmid), StringComparison.Ordinal))
+                changes.Add("pmid");
+
+            if (!string.Equals(NormalizeString(original.InternalId), NormalizeString(updated.InternalId), StringComparison.Ordinal))
+                changes.Add("internalId");
+
+            if (original.IsInternal != updated.IsInternal)
+                changes.Add("isInternal");
+
+            var originalTags = NormalizeList(original.Tags);
+            var updatedTags = NormalizeList(updated.Tags);
+            if (!originalTags.SequenceEqual(updatedTags, StringComparer.OrdinalIgnoreCase))
+                changes.Add("tags");
+
+            if (!string.Equals(NormalizeString(original.UserNotes), NormalizeString(updated.UserNotes), StringComparison.Ordinal))
+                changes.Add("notes");
+
+            return changes;
+        }
+
+        private static string ResolveEntryTitle(Entry entry)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.DisplayName))
+                return entry.DisplayName!;
+            if (!string.IsNullOrWhiteSpace(entry.Title))
+                return entry.Title!;
+            if (!string.IsNullOrWhiteSpace(entry.OriginalFileName))
+                return entry.OriginalFileName!;
+            if (!string.IsNullOrWhiteSpace(entry.MainFilePath))
+            {
+                var fileName = Path.GetFileName(entry.MainFilePath);
+                if (!string.IsNullOrWhiteSpace(fileName))
+                    return fileName!;
+            }
+
+            return entry.Id ?? string.Empty;
+        }
+
+        private static string NormalizeStoragePath(string? relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+                return string.Empty;
+
+            return relativePath.Replace('\\', '/');
+        }
+
+        private static string GetCurrentUserName()
+        {
+            var user = Environment.UserName;
+            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+        }
+
+        private static string NormalizeString(string? value)
+            => string.IsNullOrWhiteSpace(value) ? string.Empty : value!.Trim();
+
+        private static IReadOnlyList<string> NormalizeList(IEnumerable<string>? values)
+        {
+            if (values is null)
+                return Array.Empty<string>();
+
+            return values
+                .Select(v => v?.Trim())
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Select(v => v!)
+                .ToList();
         }
 
         private static string? TrimOrNull(string? value)

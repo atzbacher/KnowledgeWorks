@@ -70,6 +70,7 @@ LM.Core.Models.AttachmentKind.Supplement = 0 -> LM.Core.Models.AttachmentKind
 LM.Core.Models.AttachmentKind.Version = 1 -> LM.Core.Models.AttachmentKind
 LM.Core.Models.AttachmentKind.Presentation = 2 -> LM.Core.Models.AttachmentKind
 LM.Core.Models.AttachmentKind.ExternalNotes = 3 -> LM.Core.Models.AttachmentKind
+LM.Core.Models.AttachmentKind.Metadata = 4 -> LM.Core.Models.AttachmentKind
 LM.Core.Models.AuthorName
 LM.Core.Models.AuthorName.Affiliations.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.Core.Models.AuthorName.Affiliations.init -> void

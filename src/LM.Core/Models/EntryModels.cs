@@ -19,7 +19,8 @@ namespace LM.Core.Models
         Supplement,
         Version,
         Presentation,
-        ExternalNotes
+        ExternalNotes,
+        Metadata
     }
 
     /// <summary>
