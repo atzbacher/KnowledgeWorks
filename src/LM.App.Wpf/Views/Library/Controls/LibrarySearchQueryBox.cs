@@ -172,7 +172,6 @@ namespace LM.App.Wpf.Views.Library.Controls
                     KeywordBackgroundBrush,
                     System.Windows.FontWeights.SemiBold));
 
-
             }
 
             foreach (Match match in OperatorRegex.Matches(text))
@@ -237,7 +236,7 @@ namespace LM.App.Wpf.Views.Library.Controls
         {
             var range = new System.Windows.Documents.TextRange(Document.ContentStart, Document.ContentEnd);
             var raw = range.Text ?? string.Empty;
-            return raw.TrimEnd('\r', '\n');
+            return TrimTrailingLineBreak(raw);
         }
 
         private void RestoreSelection(int start, int length)
@@ -246,7 +245,6 @@ namespace LM.App.Wpf.Views.Library.Controls
             var clampedEnd = Math.Max(clampedStart, start + length);
             var startPointer = GetTextPointerAtOffset(clampedStart) ?? Document.ContentStart;
             var endPointer = GetTextPointerAtOffset(clampedEnd) ?? startPointer;
-
             Selection.Select(startPointer, endPointer);
         }
 
@@ -257,16 +255,44 @@ namespace LM.App.Wpf.Views.Library.Controls
                 return 0;
             }
 
-            return Document.ContentStart.GetOffsetToPosition(pointer);
-
+            var range = new System.Windows.Documents.TextRange(Document.ContentStart, pointer);
+            var text = range.Text ?? string.Empty;
+            var normalized = TrimTrailingLineBreak(text);
+            return normalized.Length;
         }
 
         private System.Windows.Documents.TextPointer? GetTextPointerAtOffset(int offset)
         {
-
             var clamped = Math.Max(0, offset);
-            return Document.ContentStart.GetPositionAtOffset(clamped, System.Windows.Documents.LogicalDirection.Forward);
+            var navigator = Document.ContentStart;
+            var remaining = clamped;
 
+            while (navigator is not null && remaining > 0)
+            {
+                var context = navigator.GetPointerContext(System.Windows.Documents.LogicalDirection.Forward);
+                if (context == System.Windows.Documents.TextPointerContext.Text)
+                {
+                    var runText = navigator.GetTextInRun(System.Windows.Documents.LogicalDirection.Forward);
+                    if (string.IsNullOrEmpty(runText))
+                    {
+                        navigator = navigator.GetNextContextPosition(System.Windows.Documents.LogicalDirection.Forward);
+                        continue;
+                    }
+
+                    if (runText.Length >= remaining)
+                    {
+                        return navigator.GetPositionAtOffset(remaining, System.Windows.Documents.LogicalDirection.Forward);
+                    }
+
+                    navigator = navigator.GetPositionAtOffset(runText.Length, System.Windows.Documents.LogicalDirection.Forward);
+                    remaining -= runText.Length;
+                }
+                else
+                {
+                    navigator = navigator.GetNextContextPosition(System.Windows.Documents.LogicalDirection.Forward);
+                }
+            }
+            return navigator ?? Document.ContentEnd;
         }
 
         private System.Windows.Documents.Inline CreateInline(string text, System.Windows.Media.Brush? foreground, System.Windows.Media.Brush? background, System.Windows.FontWeight fontWeight)
@@ -302,6 +328,26 @@ namespace LM.App.Wpf.Views.Library.Controls
             return brush;
         }
 
+        private static string TrimTrailingLineBreak(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            if (text.EndsWith("\r\n", StringComparison.Ordinal))
+            {
+                return text[..^2];
+            }
+
+            if (text.Length > 0 && (text[^1] == '\r' || text[^1] == '\n'))
+            {
+                return text[..^1];
+            }
+
+            return text;
+        }
+        
         private void OnPaste(object? sender, System.Windows.DataObjectPastingEventArgs e)
         {
             if (!e.SourceDataObject.GetDataPresent(System.Windows.DataFormats.UnicodeText, true))
