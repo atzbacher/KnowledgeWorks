@@ -119,5 +119,6 @@ LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.GetProjectAsync(string! pr
 LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.GetProjectsAsync(System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewProject!>!>!
 LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.GetStageAsync(string! stageId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<LM.Review.Core.Models.ReviewStage?>!
 LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.SaveAssignmentAsync(string! projectId, LM.Review.Core.Models.ScreeningAssignment! assignment, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.SaveProjectAsync(LM.Review.Core.Models.ReviewProject! project, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.SaveStageAsync(LM.Review.Core.Models.ReviewStage! stage, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Review.WorkspaceReviewWorkflowStore.WorkspaceReviewWorkflowStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void

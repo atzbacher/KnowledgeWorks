@@ -25,15 +25,36 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0">
-      <TextBlock Text="Evidence review workspace"
-                 FontSize="26"
-                 FontWeight="SemiBold"
-                 Foreground="{StaticResource ReviewCardHeaderBrush}" />
-      <TextBlock Text="Navigate projects, progress assignments, and monitor quality from a single view."
-                 Margin="0,6,0,0"
-                 Foreground="{StaticResource ReviewCardSubduedBrush}" />
-    </StackPanel>
+    <Grid Grid.Row="0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0">
+        <TextBlock Text="Evidence review workspace"
+                   FontSize="26"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource ReviewCardHeaderBrush}" />
+        <TextBlock Text="Navigate projects, progress assignments, and monitor quality from a single view."
+                   Margin="0,6,0,0"
+                   Foreground="{StaticResource ReviewCardSubduedBrush}" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1"
+                  Orientation="Horizontal"
+                  VerticalAlignment="Center"
+                  HorizontalAlignment="Right"
+                  Margin="24,0,0,0">
+        <Button Content="New project"
+                Command="{Binding CreateProjectCommand}"
+                Padding="16,6"
+                Margin="0,0,12,0" />
+        <Button Content="Load project"
+                Command="{Binding LoadProjectCommand}"
+                Padding="16,6" />
+      </StackPanel>
+    </Grid>
 
     <Grid Grid.Row="1" Margin="0,24,0,24">
       <Grid.ColumnDefinitions>

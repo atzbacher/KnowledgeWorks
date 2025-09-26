@@ -4,6 +4,8 @@ namespace LM.Review.Core.Services;
 
 public interface IReviewHookContextFactory
 {
+    IReviewHookContext CreateProjectCreated(ReviewProject project);
+
     IReviewHookContext CreateAssignmentUpdated(ReviewStage stage, ScreeningAssignment assignment);
 
     IReviewHookContext CreateReviewerDecisionRecorded(ScreeningAssignment assignment, ReviewerDecision decision);
