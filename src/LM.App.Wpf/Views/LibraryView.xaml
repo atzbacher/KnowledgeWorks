@@ -33,7 +33,6 @@
       <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="Auto"/>
-
       <ColumnDefinition Width="{Binding DataContext.Filters.RightPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
     </Grid.ColumnDefinitions>
 
@@ -173,57 +172,53 @@
     </Border>
 
 
-    <Grid Grid.Row="1" Grid.Column="1">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="5" />
-      </Grid.ColumnDefinitions>
-      <Button Grid.Column="0"
-              Command="{Binding DataContext.Filters.ToggleLeftPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center"
-              Padding="0"
-              Width="20"
-              Height="48"
-              Margin="0"
-              Background="#FFF4F4F4"
-              BorderBrush="#FFBEBEBE"
-              BorderThickness="1">
-        <Button.Style>
-          <Style TargetType="Button">
-            <Setter Property="Content" Value="«" />
-            <Setter Property="ToolTip" Value="Hide saved searches panel" />
-            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Foreground" Value="DimGray" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                <Setter Property="Content" Value="»" />
-                <Setter Property="ToolTip" Value="Show saved searches panel" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </Button.Style>
-      </Button>
-      <GridSplitter Grid.Column="1"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Background="#FFE0E0E0"
-                    ShowsPreview="True"
-                    Width="5">
-        <GridSplitter.Style>
-          <Style TargetType="GridSplitter">
-            <Setter Property="Visibility" Value="Visible" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </GridSplitter.Style>
-      </GridSplitter>
-    </Grid>
+    <Button Grid.Row="1"
+            Grid.Column="1"
+            Command="{Binding DataContext.Filters.ToggleLeftPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Padding="0"
+            Width="20"
+            Height="48"
+            Margin="0,0,5,0"
+            Background="#FFF4F4F4"
+            BorderBrush="#FFBEBEBE"
+            BorderThickness="1">
+      <Button.Style>
+        <Style TargetType="Button">
+          <Setter Property="Content" Value="«" />
+          <Setter Property="ToolTip" Value="Hide saved searches panel" />
+          <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+          <Setter Property="FontSize" Value="13" />
+          <Setter Property="FontWeight" Value="Bold" />
+          <Setter Property="Foreground" Value="DimGray" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+              <Setter Property="Content" Value="»" />
+              <Setter Property="ToolTip" Value="Show saved searches panel" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Button.Style>
+    </Button>
+    <GridSplitter Grid.Row="1"
+                  Grid.Column="1"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Stretch"
+                  Background="#FFE0E0E0"
+                  ShowsPreview="True"
+                  Width="5">
+      <GridSplitter.Style>
+        <Style TargetType="GridSplitter">
+          <Setter Property="Visibility" Value="Visible" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.Filters.IsLeftPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </GridSplitter.Style>
+    </GridSplitter>
 
 
     <!-- Results -->
@@ -332,57 +327,53 @@
     </Grid>
 
 
-    <Grid Grid.Row="1" Grid.Column="3">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="5" />
-        <ColumnDefinition Width="Auto" />
-      </Grid.ColumnDefinitions>
-      <GridSplitter Grid.Column="0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Background="#FFE0E0E0"
-                    ShowsPreview="True"
-                    Width="5">
-        <GridSplitter.Style>
-          <Style TargetType="GridSplitter">
-            <Setter Property="Visibility" Value="Visible" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </GridSplitter.Style>
-      </GridSplitter>
-      <Button Grid.Column="1"
-              Command="{Binding DataContext.Filters.ToggleRightPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-              HorizontalAlignment="Center"
-              VerticalAlignment="Center"
-              Padding="0"
-              Width="20"
-              Height="48"
-              Margin="0"
-              Background="#FFF4F4F4"
-              BorderBrush="#FFBEBEBE"
-              BorderThickness="1">
-        <Button.Style>
-          <Style TargetType="Button">
-            <Setter Property="Content" Value="»" />
-            <Setter Property="ToolTip" Value="Hide entry details panel" />
-            <Setter Property="FontFamily" Value="Segoe UI Symbol" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Foreground" Value="DimGray" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
-                <Setter Property="Content" Value="«" />
-                <Setter Property="ToolTip" Value="Show entry details panel" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </Button.Style>
-      </Button>
-    </Grid>
+    <GridSplitter Grid.Row="1"
+                  Grid.Column="3"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Stretch"
+                  Background="#FFE0E0E0"
+                  ShowsPreview="True"
+                  Width="5">
+      <GridSplitter.Style>
+        <Style TargetType="GridSplitter">
+          <Setter Property="Visibility" Value="Visible" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </GridSplitter.Style>
+    </GridSplitter>
+    <Button Grid.Row="1"
+            Grid.Column="3"
+            Command="{Binding DataContext.Filters.ToggleRightPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Padding="0"
+            Width="20"
+            Height="48"
+            Margin="5,0,0,0"
+            Background="#FFF4F4F4"
+            BorderBrush="#FFBEBEBE"
+            BorderThickness="1">
+      <Button.Style>
+        <Style TargetType="Button">
+          <Setter Property="Content" Value="»" />
+          <Setter Property="ToolTip" Value="Hide entry details panel" />
+          <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+          <Setter Property="FontSize" Value="13" />
+          <Setter Property="FontWeight" Value="Bold" />
+          <Setter Property="Foreground" Value="DimGray" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.Filters.IsRightPanelCollapsed, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="True">
+              <Setter Property="Content" Value="«" />
+              <Setter Property="ToolTip" Value="Show entry details panel" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Button.Style>
+    </Button>
 
 
     <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
