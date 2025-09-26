@@ -2,7 +2,9 @@
 using System;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.Services.Review;
+using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Review;
+using LM.App.Wpf.Views.Review;
 using LM.Infrastructure.Review;
 using LM.Review.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +29,11 @@ internal sealed class ReviewModule : IAppModule
 
         services.AddSingleton<IUserContext, UserContext>();
 
+        services.AddTransient<ILitSearchRunPicker, LitSearchRunPicker>();
         services.AddTransient<IReviewProjectLauncher, ReviewProjectLauncher>();
+        services.AddTransient<LitSearchRunPickerViewModel>();
+        services.AddTransient<LitSearchRunPickerWindow>();
+
 
         services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<ScreeningQueueViewModel>();

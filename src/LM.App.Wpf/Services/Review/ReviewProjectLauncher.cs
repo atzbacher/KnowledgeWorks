@@ -26,6 +26,8 @@ namespace LM.App.Wpf.Services.Review
         private readonly HookOrchestrator _changeLogOrchestrator;
         private readonly IUserContext _userContext;
         private readonly IWorkSpaceService _workspace;
+        private readonly ILitSearchRunPicker _runPicker;
+
 
         public ReviewProjectLauncher(
             IDialogService dialogService,
@@ -35,7 +37,9 @@ namespace LM.App.Wpf.Services.Review
             IReviewHookOrchestrator reviewHookOrchestrator,
             HookOrchestrator changeLogOrchestrator,
             IUserContext userContext,
-            IWorkSpaceService workspace)
+            IWorkSpaceService workspace,
+            ILitSearchRunPicker runPicker)
+
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
@@ -45,35 +49,35 @@ namespace LM.App.Wpf.Services.Review
             _changeLogOrchestrator = changeLogOrchestrator ?? throw new ArgumentNullException(nameof(changeLogOrchestrator));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
+
         }
 
         public async Task<ReviewProject?> CreateProjectAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var litSearchPath = PromptForLitSearchPath();
-                if (litSearchPath is null)
+                var selection = await _runPicker.PickAsync(cancellationToken).ConfigureAwait(false);
+                if (selection is null)
+
                 {
                     return null;
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var reference = ResolveLitSearchReference(litSearchPath);
-                Entry? entry = null;
-                if (!string.IsNullOrWhiteSpace(reference.EntryId))
-                {
-                    entry = await _entryStore.GetByIdAsync(reference.EntryId!, cancellationToken).ConfigureAwait(false);
-                }
+                var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken).ConfigureAwait(false);
 
-                var project = CreateProject(reference, entry);
+                var project = CreateProject(selection, entry);
+
 
                 await _workflowStore.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
 
                 var context = _hookContextFactory.CreateProjectCreated(project);
                 await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken).ConfigureAwait(false);
 
-                var tags = BuildCreationTags(project, reference, entry);
+                var tags = BuildCreationTags(project, selection, entry);
+
                 await ReviewChangeLogWriter.WriteAsync(
                     _changeLogOrchestrator,
                     project.Id,
@@ -165,22 +169,6 @@ namespace LM.App.Wpf.Services.Review
             }
         }
 
-        private string? PromptForLitSearchPath()
-        {
-            var selection = _dialogService.ShowOpenFileDialog(new FilePickerOptions
-            {
-                AllowMultiple = false,
-                Filter = "LitSearch run (litsearch.json)|litsearch.json|JSON files (*.json)|*.json|All files (*.*)|*.*"
-            });
-
-            if (selection is null || selection.Length == 0)
-            {
-                return null;
-            }
-
-            return selection[0];
-        }
-
         private string? PromptForProjectPath()
         {
             var selection = _dialogService.ShowOpenFileDialog(new FilePickerOptions
@@ -197,25 +185,6 @@ namespace LM.App.Wpf.Services.Review
             return selection[0];
         }
 
-        private LitSearchReference ResolveLitSearchReference(string absolutePath)
-        {
-            var workspaceRoot = _workspace.GetWorkspaceRoot();
-            if (!absolutePath.StartsWith(workspaceRoot, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException("Selected litsearch run is outside of the active workspace.");
-            }
-
-            var relativePath = NormalizeRelativePath(Path.GetRelativePath(workspaceRoot, absolutePath));
-            string? entryId = null;
-
-            var segments = relativePath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-            if (segments.Length >= 2 && string.Equals(segments[0], "entries", StringComparison.OrdinalIgnoreCase))
-            {
-                entryId = segments[1];
-            }
-
-            return new LitSearchReference(absolutePath, entryId, relativePath);
-        }
 
         private ProjectReference ResolveProjectReference(string absolutePath)
         {
@@ -242,15 +211,15 @@ namespace LM.App.Wpf.Services.Review
             return new ProjectReference(absolutePath, projectId, relativePath);
         }
 
-        private ReviewProject CreateProject(LitSearchReference reference, Entry? entry)
+        private ReviewProject CreateProject(LitSearchRunSelection selection, Entry? entry)
+
         {
             var now = DateTimeOffset.UtcNow;
             var projectId = $"review-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}";
             var projectName = ResolveProjectName(entry);
             var definitions = CreateStageDefinitions();
-            var auditDetails = reference.EntryId is null
-                ? $"litsearch:{reference.RelativePath ?? reference.AbsolutePath}"
-                : $"litsearch:{reference.EntryId}";
+            var auditDetails = $"litsearch:{selection.EntryId}:run:{selection.RunId}";
+
 
             var auditEntry = ReviewAuditTrail.AuditEntry.Create(
                 $"audit-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
@@ -307,22 +276,21 @@ namespace LM.App.Wpf.Services.Review
             return $"Review – {label.Trim()}";
         }
 
-        private static IEnumerable<string> BuildCreationTags(ReviewProject project, LitSearchReference reference, Entry? entry)
+        private static IEnumerable<string> BuildCreationTags(ReviewProject project, LitSearchRunSelection selection, Entry? entry)
+
         {
             var tags = new List<string>
             {
                 $"projectId:{project.Id}",
-                $"projectName:{project.Name}".Trim()
+                $"projectName:{project.Name}".Trim(),
+                $"litsearchRun:{selection.RunId}",
+                $"litsearchEntry:{selection.EntryId}"
             };
 
-            if (!string.IsNullOrWhiteSpace(reference.EntryId))
+            if (!string.IsNullOrWhiteSpace(selection.HookRelativePath))
             {
-                tags.Add($"litsearchEntry:{reference.EntryId!.Trim()}");
-            }
+                tags.Add($"litsearchHook:{selection.HookRelativePath.Trim()}");
 
-            if (!string.IsNullOrWhiteSpace(reference.RelativePath))
-            {
-                tags.Add($"litsearchHook:{reference.RelativePath!.Trim()}");
             }
 
             if (entry is not null)
@@ -358,7 +326,6 @@ namespace LM.App.Wpf.Services.Review
             return relativePath.Replace('\\', '/');
         }
 
-        private sealed record LitSearchReference(string AbsolutePath, string? EntryId, string? RelativePath);
 
         private sealed record ProjectReference(string AbsolutePath, string? ProjectId, string? RelativePath);
     }

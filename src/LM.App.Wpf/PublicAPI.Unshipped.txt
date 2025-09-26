@@ -199,6 +199,32 @@ LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Initialize(LM.A
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.LibraryPresetPickerDialogViewModel() -> void
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Presets.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.Common.LibraryPresetSummary!>!
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.SelectedPresetName.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.EntryId.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.HookAbsolutePath.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.HookRelativePath.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Label.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Query.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Runs.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel!>!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.DisplayLabel.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.ExecutedBy.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.IsFavorite.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.Owner.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.RunId.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.RunUtc.get -> System.DateTime
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.TotalHits.get -> int
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.CancelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.ConfirmCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.Entries.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel!>!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.HasEntries.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.HasEntries.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.LitSearchRunPickerViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedEntry.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedEntry.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedRun.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedRun.set -> void
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Initialize(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> void
 LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.LibraryPresetSaveDialogViewModel() -> void
@@ -638,6 +664,10 @@ LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl.ScreeningQueueControl() -
 LM.App.Wpf.Views.Review.ReviewView
 LM.App.Wpf.Views.Review.ReviewView.InitializeComponent() -> void
 LM.App.Wpf.Views.Review.ReviewView.ReviewView() -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.LitSearchRunPickerWindow(LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel! viewModel) -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel!
 LM.App.Wpf.Views.SearchSavePrompt
 LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
 LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
@@ -665,4 +695,5 @@ override LM.App.Wpf.Views.LibraryPresetPickerDialog.OnClosed(System.EventArgs! e
 override LM.App.Wpf.Views.LibraryPresetSaveDialog.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.StagingEditorWindow.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.OnClosed(System.EventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
