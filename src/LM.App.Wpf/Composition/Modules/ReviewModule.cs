@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Infrastructure.Review;
 using LM.Review.Core.Services;
@@ -23,10 +24,16 @@ internal sealed class ReviewModule : IAppModule
             sp.GetRequiredService<IReviewHookContextFactory>()));
         services.AddSingleton<IReviewAnalyticsService, ReviewAnalyticsService>();
 
-        services.AddTransient<ReviewDashboardViewModel>();
-        services.AddTransient<ReviewStageViewModel>();
+        services.AddSingleton<IUserContext, UserContext>();
 
-        services.AddTransient<Func<ReviewDashboardViewModel>>(static sp => () => sp.GetRequiredService<ReviewDashboardViewModel>());
-        services.AddTransient<Func<ReviewStageViewModel>>(static sp => () => sp.GetRequiredService<ReviewStageViewModel>());
+        services.AddTransient<ProjectDashboardViewModel>();
+        services.AddTransient<ScreeningQueueViewModel>();
+        services.AddTransient<AssignmentDetailViewModel>();
+        services.AddTransient<ExtractionWorkspaceViewModel>();
+        services.AddTransient<QualityAssuranceViewModel>();
+        services.AddTransient<AnalyticsViewModel>();
+        services.AddTransient<ReviewViewModel>();
+
+        services.AddTransient<Func<ReviewViewModel>>(static sp => () => sp.GetRequiredService<ReviewViewModel>());
     }
 }

@@ -12310,3 +12310,4 @@ override LM.App.Wpf.Views.LibraryPresetSaveDialog.OnClosed(System.EventArgs! e) 
 override LM.App.Wpf.Views.StagingEditorWindow.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
+

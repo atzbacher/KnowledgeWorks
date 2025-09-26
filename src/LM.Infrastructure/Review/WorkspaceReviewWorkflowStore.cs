@@ -29,6 +29,12 @@ public sealed class WorkspaceReviewWorkflowStore : IReviewWorkflowStore
         return await _store.GetProjectAsync(projectId, cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+    {
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        return await _store.GetProjectsAsync(cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
     {
         await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);

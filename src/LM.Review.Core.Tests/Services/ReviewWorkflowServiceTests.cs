@@ -303,6 +303,12 @@ public sealed class ReviewWorkflowServiceTests
             return Task.FromResult(project);
         }
 
+        public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+        {
+            IReadOnlyList<ReviewProject> snapshot = _projects.Values.ToList();
+            return Task.FromResult(snapshot);
+        }
+
         public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
         {
             _stages.TryGetValue(stageId, out var stage);

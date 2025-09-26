@@ -11,6 +11,8 @@ LM.App.Wpf.Common.AsyncRelayCommand.CanExecute(object? parameter) -> bool
 LM.App.Wpf.Common.AsyncRelayCommand.CanExecuteChanged -> System.EventHandler?
 LM.App.Wpf.Common.AsyncRelayCommand.Execute(object? parameter) -> void
 LM.App.Wpf.Common.AsyncRelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.IAsyncRelayCommand
+LM.App.Wpf.Common.IAsyncRelayCommand.RaiseCanExecuteChanged() -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter
 LM.App.Wpf.Common.BooleanToOpacityConverter.BooleanToOpacityConverter() -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!

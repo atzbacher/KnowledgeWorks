@@ -7,7 +7,7 @@ namespace LM.App.Wpf.Common
     /// Async ICommand with re-entrancy guard.
     /// Supports both parameterless (Func<Task>) and parameterized (Func<object?, Task>) delegates.
     /// </summary>
-    public sealed class AsyncRelayCommand : System.Windows.Input.ICommand
+    public sealed class AsyncRelayCommand : IAsyncRelayCommand
     {
         private readonly Func<object?, Task> _execute;
         private readonly Func<object?, bool>? _canExecute;

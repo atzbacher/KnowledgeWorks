@@ -30,15 +30,17 @@ public class AppHostBuilderTests
         var pipeline = host.GetRequiredService<IAddPipeline>();
         var workflowService = host.GetRequiredService<IReviewWorkflowService>();
         var analyticsService = host.GetRequiredService<IReviewAnalyticsService>();
-        var dashboardFactory = host.GetRequiredService<Func<ReviewDashboardViewModel>>();
-        var stageFactory = host.GetRequiredService<Func<ReviewStageViewModel>>();
+        var reviewFactory = host.GetRequiredService<Func<ReviewViewModel>>();
+        var dashboard = host.GetRequiredService<ProjectDashboardViewModel>();
+        var queue = host.GetRequiredService<ScreeningQueueViewModel>();
 
         Assert.NotNull(entryStore);
         Assert.NotNull(pipeline);
         Assert.NotNull(workflowService);
         Assert.NotNull(analyticsService);
-        Assert.NotNull(dashboardFactory());
-        Assert.NotNull(stageFactory());
+        Assert.NotNull(reviewFactory());
+        Assert.NotNull(dashboard);
+        Assert.NotNull(queue);
 
         await entryStore.InitializeAsync();
     }
