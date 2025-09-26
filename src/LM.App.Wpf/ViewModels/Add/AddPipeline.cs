@@ -947,6 +947,7 @@ namespace LM.App.Wpf.ViewModels
             return (title, display);
         }
 
+
         private HookContext? BuildHookContext(StagingItem stagingItem,
                                               Entry entry,
                                               string relativePath,
@@ -1202,6 +1203,7 @@ namespace LM.App.Wpf.ViewModels
                 .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim())
                 .Where(s => s.Length > 0);
+
 
 
             return (distinct ? parts.Distinct(StringComparer.OrdinalIgnoreCase) : parts).ToList();

@@ -20,6 +20,7 @@
         </swc:ItemsControl.ItemTemplate>
       </swc:ItemsControl>
 
+
       <swc:StackPanel Orientation="Horizontal" Margin="0,12,0,0">
         <swc:Button Content="Commit Extraction"
                     Command="{Binding CommitExtractionCommand}"
