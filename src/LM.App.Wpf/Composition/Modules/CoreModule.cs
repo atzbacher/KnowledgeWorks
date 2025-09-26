@@ -7,6 +7,7 @@ using LM.HubSpoke.Indexing;
 using LM.HubSpoke.Spokes;
 using LM.Infrastructure.Content;
 using LM.Infrastructure.Entries;
+using LM.Infrastructure.Export;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Metadata.EvidenceExtraction;
@@ -69,6 +70,11 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<IFullTextSearchService>(sp => sp.GetRequiredService<HubSpokeStore>().FullTextSearch);
 
             services.AddSingleton<IWatchedFolderSettingsStore>(sp => new JsonWatchedFolderSettingsStore(sp.GetRequiredService<IWorkSpaceService>()));
+
+            services.AddSingleton<DataExtractionExportLoader>();
+            services.AddSingleton<IDataExtractionPowerPointExporter, DataExtractionPowerPointExporter>();
+            services.AddSingleton<IDataExtractionExcelExporter, DataExtractionExcelExporter>();
+            services.AddSingleton<IDataExtractionWordExporter, DataExtractionWordExporter>();
         }
     }
 }

@@ -567,3 +567,12 @@ LM.Core.Models.WatchedFolderState.LastScanWasUnchanged.init -> void
 LM.Core.Models.WatchedFolderState.Path.get -> string!
 LM.Core.Models.WatchedFolderState.Path.init -> void
 static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerOptions!
+LM.Core.Abstractions.IDataExtractionPowerPointExporter
+LM.Core.Abstractions.IDataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
+LM.Core.Abstractions.IDataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
+LM.Core.Abstractions.IDataExtractionExcelExporter
+LM.Core.Abstractions.IDataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
+LM.Core.Abstractions.IDataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>
+LM.Core.Abstractions.IDataExtractionWordExporter
+LM.Core.Abstractions.IDataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>
+LM.Core.Abstractions.IDataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>

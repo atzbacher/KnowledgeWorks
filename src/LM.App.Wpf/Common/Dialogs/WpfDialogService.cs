@@ -48,6 +48,22 @@ namespace LM.App.Wpf.Common.Dialogs
                 : null;
         }
 
+        public string? ShowSaveFileDialog(FileSavePickerOptions options)
+        {
+            if (options is null)
+                throw new ArgumentNullException(nameof(options));
+
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = string.IsNullOrWhiteSpace(options.Filter) ? "All files|*.*" : options.Filter,
+                FileName = options.DefaultFileName ?? string.Empty,
+                AddExtension = true,
+                OverwritePrompt = true
+            };
+
+            return dialog.ShowDialog() == true ? dialog.FileName : null;
+        }
+
         public bool? ShowStagingEditor(StagingListViewModel stagingList)
         {
             if (stagingList is null)

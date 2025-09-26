@@ -1,4 +1,5 @@
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.Views.Library;
@@ -49,7 +50,11 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<ILibraryDocumentService>(),
                 sp.GetRequiredService<IAttachmentMetadataPrompt>(),
                 sp.GetRequiredService<IWorkSpaceService>(),
-                sp.GetRequiredService<HookOrchestrator>()));
+                sp.GetRequiredService<HookOrchestrator>(),
+                sp.GetRequiredService<IDialogService>(),
+                sp.GetRequiredService<IDataExtractionPowerPointExporter>(),
+                sp.GetRequiredService<IDataExtractionWordExporter>(),
+                sp.GetRequiredService<IDataExtractionExcelExporter>()));
 
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),

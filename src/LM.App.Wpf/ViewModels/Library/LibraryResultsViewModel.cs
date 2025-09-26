@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views.Behaviors;
 using LM.Core.Abstractions;
@@ -37,7 +38,20 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IAttachmentMetadataPrompt _attachmentPrompt;
         private readonly IWorkSpaceService _workspace;
         private readonly HookOrchestrator _hookOrchestrator;
+        private readonly IDialogService _dialogs;
+        private readonly IDataExtractionPowerPointExporter _powerPointExporter;
+        private readonly IDataExtractionWordExporter _wordExporter;
+        private readonly IDataExtractionExcelExporter _excelExporter;
         private CancellationTokenSource? _abstractLoadCts;
+        private CancellationTokenSource? _exportAvailabilityCts;
+
+        private bool _canExportPowerPoint;
+        private bool _canExportWord;
+        private bool _canExportExcel;
+
+        private readonly AsyncRelayCommand<LibrarySearchResult?> _exportPowerPointCommand;
+        private readonly AsyncRelayCommand<LibrarySearchResult?> _exportWordCommand;
+        private readonly AsyncRelayCommand<LibrarySearchResult?> _exportExcelCommand;
 
         [ObservableProperty]
         private LibrarySearchResult? selected;
@@ -74,7 +88,11 @@ namespace LM.App.Wpf.ViewModels.Library
                                        ILibraryDocumentService documentService,
                                        IAttachmentMetadataPrompt attachmentPrompt,
                                        IWorkSpaceService workspace,
-                                       HookOrchestrator hookOrchestrator)
+                                       HookOrchestrator hookOrchestrator,
+                                       IDialogService dialogs,
+                                       IDataExtractionPowerPointExporter powerPointExporter,
+                                       IDataExtractionWordExporter wordExporter,
+                                       IDataExtractionExcelExporter excelExporter)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
@@ -83,12 +101,26 @@ namespace LM.App.Wpf.ViewModels.Library
             _attachmentPrompt = attachmentPrompt ?? throw new ArgumentNullException(nameof(attachmentPrompt));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
+            _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
+            _powerPointExporter = powerPointExporter ?? throw new ArgumentNullException(nameof(powerPointExporter));
+            _wordExporter = wordExporter ?? throw new ArgumentNullException(nameof(wordExporter));
+            _excelExporter = excelExporter ?? throw new ArgumentNullException(nameof(excelExporter));
 
             Items = new ObservableCollection<LibrarySearchResult>();
             LinkItems = new ObservableCollection<LibraryLinkItem>();
+
+            _exportPowerPointCommand = new AsyncRelayCommand<LibrarySearchResult?>(ExportPowerPointAsync, _ => _canExportPowerPoint);
+            _exportWordCommand = new AsyncRelayCommand<LibrarySearchResult?>(ExportWordAsync, _ => _canExportWord);
+            _exportExcelCommand = new AsyncRelayCommand<LibrarySearchResult?>(ExportExcelAsync, _ => _canExportExcel);
         }
 
         public ObservableCollection<LibrarySearchResult> Items { get; }
+
+        public IAsyncRelayCommand ExportExtractionToPowerPointCommand => _exportPowerPointCommand;
+
+        public IAsyncRelayCommand ExportExtractionToWordCommand => _exportWordCommand;
+
+        public IAsyncRelayCommand ExportExtractionToExcelCommand => _exportExcelCommand;
 
         [RelayCommand]
         private void HandleSelectionChanged(IList? selectedItems)
@@ -110,6 +142,8 @@ namespace LM.App.Wpf.ViewModels.Library
             OnPropertyChanged(nameof(SelectedItems));
             OnPropertyChanged(nameof(HasSelection));
             RaiseSelectionChanged();
+
+            _ = UpdateExporterAvailabilityAsync();
         }
 
         public void Clear()
@@ -120,6 +154,8 @@ namespace LM.App.Wpf.ViewModels.Library
                 Selected = null;
                 ResultsAreFullText = false;
             });
+
+            SetExportAvailability(false, false, false);
         }
 
         public void LoadMetadataResults(IEnumerable<Entry> entries)
@@ -708,6 +744,144 @@ namespace LM.App.Wpf.ViewModels.Library
             }
 
             action();
+        }
+
+        private async Task ExportPowerPointAsync(LibrarySearchResult? result)
+            => await ExportAsync(result,
+                "PowerPoint (*.pptx)|*.pptx|All files (*.*)|*.*",
+                "-extraction.pptx",
+                _powerPointExporter.ExportAsync,
+                "PowerPoint").ConfigureAwait(false);
+
+        private async Task ExportWordAsync(LibrarySearchResult? result)
+            => await ExportAsync(result,
+                "Word (*.docx)|*.docx|All files (*.*)|*.*",
+                "-extraction.docx",
+                _wordExporter.ExportAsync,
+                "Word").ConfigureAwait(false);
+
+        private async Task ExportExcelAsync(LibrarySearchResult? result)
+            => await ExportAsync(result,
+                "Excel (*.xlsx)|*.xlsx|All files (*.*)|*.*",
+                "-extraction.xlsx",
+                _excelExporter.ExportAsync,
+                "Excel").ConfigureAwait(false);
+
+        private async Task ExportAsync(LibrarySearchResult? result,
+                                       string filter,
+                                       string suffix,
+                                       Func<string, string, CancellationToken, Task<string>> exporter,
+                                       string artifactLabel)
+        {
+            var entry = (result ?? Selected)?.Entry;
+            if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
+            {
+                return;
+            }
+
+            var defaultName = BuildDefaultFileName(entry, suffix);
+            var targetPath = _dialogs.ShowSaveFileDialog(new FileSavePickerOptions
+            {
+                Filter = filter,
+                DefaultFileName = defaultName
+            });
+
+            if (string.IsNullOrWhiteSpace(targetPath))
+            {
+                return;
+            }
+
+            try
+            {
+                await exporter(entry.Id, targetPath, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LibraryResultsViewModel] {artifactLabel} export failed: {ex}");
+                System.Windows.MessageBox.Show(
+                    $"Failed to export {artifactLabel.ToLowerInvariant()} assets: {ex.Message}",
+                    "Export failed",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async Task UpdateExporterAvailabilityAsync()
+        {
+            var entry = Selected?.Entry;
+            if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
+            {
+                SetExportAvailability(false, false, false);
+                return;
+            }
+
+            var cts = new CancellationTokenSource();
+            var previous = Interlocked.Exchange(ref _exportAvailabilityCts, cts);
+            previous?.Cancel();
+            previous?.Dispose();
+
+            try
+            {
+                var tasks = new[]
+                {
+                    _powerPointExporter.CanExportAsync(entry.Id, cts.Token),
+                    _wordExporter.CanExportAsync(entry.Id, cts.Token),
+                    _excelExporter.CanExportAsync(entry.Id, cts.Token)
+                };
+
+                var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+                if (cts.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                SetExportAvailability(results[0], results[1], results[2]);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LibraryResultsViewModel] Failed to evaluate export availability: {ex}");
+                SetExportAvailability(false, false, false);
+            }
+            finally
+            {
+                if (ReferenceEquals(_exportAvailabilityCts, cts))
+                {
+                    _exportAvailabilityCts = null;
+                }
+
+                cts.Dispose();
+            }
+        }
+
+        private void SetExportAvailability(bool powerPoint, bool word, bool excel)
+        {
+            ExecuteOnDispatcher(() =>
+            {
+                _canExportPowerPoint = powerPoint;
+                _canExportWord = word;
+                _canExportExcel = excel;
+                _exportPowerPointCommand.NotifyCanExecuteChanged();
+                _exportWordCommand.NotifyCanExecuteChanged();
+                _exportExcelCommand.NotifyCanExecuteChanged();
+            });
+        }
+
+        private static string BuildDefaultFileName(Entry entry, string suffix)
+        {
+            var baseName = entry.DisplayName;
+            if (string.IsNullOrWhiteSpace(baseName))
+                baseName = entry.Title;
+            if (string.IsNullOrWhiteSpace(baseName))
+                baseName = entry.Id;
+            if (string.IsNullOrWhiteSpace(baseName))
+                baseName = "entry";
+
+            var invalid = Path.GetInvalidFileNameChars();
+            var sanitized = new string(baseName.Select(ch => invalid.Contains(ch) ? '_' : ch).ToArray());
+            return sanitized + suffix;
         }
 
         private static bool IsSupportedAttachment(string path)

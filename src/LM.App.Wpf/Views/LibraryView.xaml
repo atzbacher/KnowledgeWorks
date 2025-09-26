@@ -457,6 +457,17 @@
                   <MenuItem Header="Copy workspace path"
                             Command="{Binding PlacementTarget.Tag.CopyWorkspacePathCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                             CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="Export extraction">
+                    <MenuItem Header="PowerPoint"
+                              Command="{Binding PlacementTarget.Tag.ExportExtractionToPowerPointCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <MenuItem Header="Word"
+                              Command="{Binding PlacementTarget.Tag.ExportExtractionToWordCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    <MenuItem Header="Excel"
+                              Command="{Binding PlacementTarget.Tag.ExportExtractionToExcelCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  </MenuItem>
                   <Separator />
                   <MenuItem Header="Edit entry"
                             Command="{Binding PlacementTarget.Tag.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
