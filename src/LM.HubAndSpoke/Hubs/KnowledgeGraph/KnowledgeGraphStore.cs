@@ -68,7 +68,7 @@ namespace LM.HubSpoke.Hubs.KnowledgeGraph
 
             var entryId = hub.EntryId;
             await using var connection = await OpenConnectionAsync(ct).ConfigureAwait(false);
-            await using var transaction = await connection.BeginTransactionAsync(ct).ConfigureAwait(false);
+            await using SqliteTransaction transaction = (SqliteTransaction)await connection.BeginTransactionAsync(ct).ConfigureAwait(false);
 
             await DeleteEntryInternalAsync(connection, transaction, entryId, ct).ConfigureAwait(false);
             await InsertPaperAsync(connection, transaction, hub, hook, ct).ConfigureAwait(false);
@@ -85,7 +85,7 @@ namespace LM.HubSpoke.Hubs.KnowledgeGraph
                 return;
 
             await using var connection = await OpenConnectionAsync(ct).ConfigureAwait(false);
-            await using var transaction = await connection.BeginTransactionAsync(ct).ConfigureAwait(false);
+            await using SqliteTransaction transaction = (SqliteTransaction)await connection.BeginTransactionAsync(ct).ConfigureAwait(false);
             await DeleteEntryInternalAsync(connection, transaction, entryId, ct).ConfigureAwait(false);
             await transaction.CommitAsync(ct).ConfigureAwait(false);
         }
@@ -483,7 +483,7 @@ namespace LM.HubSpoke.Hubs.KnowledgeGraph
 
         private static async Task<IReadOnlyList<GraphInterventionNode>> LoadInterventionsAsync(SqliteConnection connection, string entryId, CancellationToken ct)
         {
-            const string sql = "SELECT InterventionId, Name, Type, Description FROM Interventions WHERE EntryId = $entryId ORDER BY InterventionId";
+            const string sql = "SELECT InterventionId, Name, Type, Description FROM Interventions WHERE EntryId = $entryId ORDER BY Name COLLATE NOCASE, InterventionId";
             await using var command = connection.CreateCommand();
             command.CommandText = sql;
             AddParam(command, "$entryId", entryId);

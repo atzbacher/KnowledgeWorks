@@ -316,6 +316,9 @@ internal sealed partial class JsonReviewProjectStore
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(projectId);
         ArgumentNullException.ThrowIfNull(assignment);
+        ScreeningAssignmentDto dto;
+        string path;
+
         await _mutex.WaitAsync(ct).ConfigureAwait(false);
         try
         {
@@ -325,10 +328,20 @@ internal sealed partial class JsonReviewProjectStore
                 throw new InvalidOperationException($"Stage '{assignment.StageId}' must be saved before assignments can be persisted.");
             }
 
-            var dto = ScreeningAssignmentMapper.ToDto(projectId, assignment);
-            var path = GetAssignmentPath(projectId, assignment.Id);
-            await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
+            dto = ScreeningAssignmentMapper.ToDto(projectId, assignment);
+            path = GetAssignmentPath(projectId, assignment.Id);
+        }
+        finally
+        {
+            _mutex.Release();
+        }
 
+        await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
+
+        await _mutex.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            EnsureInitialized();
             _assignmentDtos[assignment.Id] = dto;
             _assignments[assignment.Id] = assignment;
             if (!_assignmentIdsByStage.ContainsKey(assignment.StageId))
