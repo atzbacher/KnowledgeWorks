@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Services;
+using LM.App.Wpf.Services.Review;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Core.Abstractions;
 using LM.Infrastructure.Hooks;
@@ -108,6 +109,43 @@ namespace LM.App.Wpf.Tests.Review
             await Assert.ThrowsAsync<ArgumentException>(() => _fixture.ViewModel.SelectProjectAsync(" ", CancellationToken.None));
         }
 
+        [Fact]
+        public async Task CreateProjectAsync_SelectsCreatedProject()
+        {
+            var newProject = ReviewProject.Create(
+                "project-new",
+                "Project New",
+                DateTimeOffset.UtcNow,
+                new[] { _fixture.Definition });
+            _fixture.Launcher.ProjectToCreate = newProject;
+
+            await _fixture.ViewModel.CreateProjectAsync(CancellationToken.None);
+
+            Assert.Equal(newProject.Id, _fixture.ViewModel.SelectedProject?.Id);
+            Assert.Contains(_fixture.ViewModel.Projects, project => project.Id == newProject.Id);
+        }
+
+        [Fact]
+        public async Task CreateProjectAsync_NoSelectionWhenCancelled()
+        {
+            _fixture.Launcher.ProjectToCreate = null;
+
+            await _fixture.ViewModel.CreateProjectAsync(CancellationToken.None);
+
+            Assert.Null(_fixture.ViewModel.SelectedProject);
+        }
+
+        [Fact]
+        public async Task LoadProjectAsync_SelectsLoadedProject()
+        {
+            await _fixture.ViewModel.InitializeAsync(CancellationToken.None);
+            _fixture.Launcher.ProjectToLoad = _fixture.Project1;
+
+            await _fixture.ViewModel.LoadProjectAsync(CancellationToken.None);
+
+            Assert.Equal(_fixture.Project1.Id, _fixture.ViewModel.SelectedProject?.Id);
+        }
+
         private sealed class ReviewViewModelFixture : IDisposable
         {
             private readonly TempWorkspace _workspace;
@@ -115,6 +153,7 @@ namespace LM.App.Wpf.Tests.Review
             private readonly HookOrchestrator _orchestrator;
             private readonly FakeReviewWorkflowStore _store;
             private readonly FakeWorkflowService _workflowService;
+            private readonly FakeReviewProjectLauncher _launcher;
             private readonly ProjectDashboardViewModel _dashboard;
             private readonly ScreeningQueueViewModel _queue;
             private readonly AssignmentDetailViewModel _assignmentDetail;
@@ -122,6 +161,7 @@ namespace LM.App.Wpf.Tests.Review
             private readonly QualityAssuranceViewModel _quality;
             private readonly AnalyticsViewModel _analytics;
             private readonly string _stage1Id = "stage-1";
+            private readonly StageDefinition _definition;
 
             public ReviewViewModelFixture(bool delayProjectLoad = false)
             {
@@ -139,8 +179,8 @@ namespace LM.App.Wpf.Tests.Review
                     new KeyValuePair<ReviewerRole, int>(ReviewerRole.Secondary, 1)
                 });
                 var policy = StageConsensusPolicy.Disabled();
-                var definition = StageDefinition.Create("def-1", "Screening", ReviewStageType.TitleScreening, requirement, policy);
-                Project1 = ReviewProject.Create("project-1", "Project One", DateTimeOffset.UtcNow, new[] { definition });
+                _definition = StageDefinition.Create("def-1", "Screening", ReviewStageType.TitleScreening, requirement, policy);
+                Project1 = ReviewProject.Create("project-1", "Project One", DateTimeOffset.UtcNow, new[] { _definition });
                 var assignments = new List<ScreeningAssignment>
                 {
                     CreateAssignment("a1", ScreeningStatus.Pending),
@@ -150,7 +190,7 @@ namespace LM.App.Wpf.Tests.Review
                 Stage1 = ReviewStage.Create(
                     _stage1Id,
                     Project1.Id,
-                    definition,
+                    _definition,
                     assignments,
                     ConflictState.None,
                     DateTimeOffset.UtcNow);
@@ -179,6 +219,7 @@ namespace LM.App.Wpf.Tests.Review
                 _extraction = new ExtractionWorkspaceViewModel(_orchestrator, _userContext);
                 _quality = new QualityAssuranceViewModel(_orchestrator, _userContext);
                 _analytics = new AnalyticsViewModel(analyticsService, _orchestrator, _userContext);
+                _launcher = new FakeReviewProjectLauncher(_store);
 
                 ViewModel = new ReviewViewModel(
                     _store,
@@ -189,12 +230,17 @@ namespace LM.App.Wpf.Tests.Review
                     _assignmentDetail,
                     _extraction,
                     _quality,
-                    _analytics);
+                    _analytics,
+                    _launcher);
             }
 
             public ReviewProject Project1 { get; }
 
             public ReviewStage Stage1 { get; }
+
+            public FakeReviewProjectLauncher Launcher => _launcher;
+
+            public StageDefinition Definition => _definition;
 
             public ReviewViewModel ViewModel { get; }
 
@@ -222,6 +268,35 @@ namespace LM.App.Wpf.Tests.Review
             public void Dispose()
             {
                 _workspace.Dispose();
+            }
+        }
+
+        private sealed class FakeReviewProjectLauncher : IReviewProjectLauncher
+        {
+            private readonly FakeReviewWorkflowStore _store;
+
+            public FakeReviewProjectLauncher(FakeReviewWorkflowStore store)
+            {
+                _store = store;
+            }
+
+            public ReviewProject? ProjectToCreate { get; set; }
+
+            public ReviewProject? ProjectToLoad { get; set; }
+
+            public Task<ReviewProject?> CreateProjectAsync(CancellationToken cancellationToken)
+            {
+                if (ProjectToCreate is not null)
+                {
+                    _store.AddProject(ProjectToCreate);
+                }
+
+                return Task.FromResult(ProjectToCreate);
+            }
+
+            public Task<ReviewProject?> LoadProjectAsync(CancellationToken cancellationToken)
+            {
+                return Task.FromResult(ProjectToLoad);
             }
         }
 
@@ -259,6 +334,12 @@ namespace LM.App.Wpf.Tests.Review
 
                 _stages[stage.Id] = stage;
                 _assignmentsByStage[stage.Id] = assignments.ToList();
+            }
+
+            public void AddProject(ReviewProject project)
+            {
+                _projects[project.Id] = project;
+                _stagesByProject.TryAdd(project.Id, new List<ReviewStage>());
             }
 
             public void OverrideAssignments(string stageId, IEnumerable<ScreeningAssignment> assignments)
@@ -338,6 +419,12 @@ namespace LM.App.Wpf.Tests.Review
                     ? Array.Empty<ScreeningAssignment>()
                     : assignments.ToList();
                 return Task.FromResult(snapshot);
+            }
+
+            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+            {
+                AddProject(project);
+                return Task.CompletedTask;
             }
 
             public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)

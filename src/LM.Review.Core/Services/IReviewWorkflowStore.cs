@@ -19,6 +19,8 @@ public interface IReviewWorkflowStore
 
     Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken);
 
+    Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken);
+
     Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken);
 
     Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken);

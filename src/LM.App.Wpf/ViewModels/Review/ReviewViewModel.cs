@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Services;
+using LM.App.Wpf.Services.Review;
 using LM.Infrastructure.Hooks;
 using LM.Review.Core.Models;
 using LM.Review.Core.Services;
@@ -22,6 +23,7 @@ namespace LM.App.Wpf.ViewModels.Review
         private readonly ExtractionWorkspaceViewModel _extractionWorkspace;
         private readonly QualityAssuranceViewModel _qualityAssurance;
         private readonly AnalyticsViewModel _analyticsViewModel;
+        private readonly IReviewProjectLauncher _projectLauncher;
         private IReadOnlyList<ReviewProject> _projects = Array.Empty<ReviewProject>();
         private IReadOnlyList<ReviewStage> _stages = Array.Empty<ReviewStage>();
         private IReadOnlyList<ScreeningAssignment> _assignments = Array.Empty<ScreeningAssignment>();
@@ -38,7 +40,8 @@ namespace LM.App.Wpf.ViewModels.Review
             AssignmentDetailViewModel assignmentDetail,
             ExtractionWorkspaceViewModel extractionWorkspace,
             QualityAssuranceViewModel qualityAssurance,
-            AnalyticsViewModel analyticsViewModel)
+            AnalyticsViewModel analyticsViewModel,
+            IReviewProjectLauncher projectLauncher)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
@@ -49,10 +52,13 @@ namespace LM.App.Wpf.ViewModels.Review
             _extractionWorkspace = extractionWorkspace ?? throw new ArgumentNullException(nameof(extractionWorkspace));
             _qualityAssurance = qualityAssurance ?? throw new ArgumentNullException(nameof(qualityAssurance));
             _analyticsViewModel = analyticsViewModel ?? throw new ArgumentNullException(nameof(analyticsViewModel));
+            _projectLauncher = projectLauncher ?? throw new ArgumentNullException(nameof(projectLauncher));
 
             SelectProjectCommand = new AsyncRelayCommand(SelectProjectCommandAsync, CanSelectProject);
             NavigateStageCommand = new AsyncRelayCommand(NavigateStageCommandAsync, CanNavigateStage);
             RefreshCommand = new AsyncRelayCommand(() => RefreshAsync(CancellationToken.None), CanRefresh);
+            CreateProjectCommand = new AsyncRelayCommand(() => CreateProjectAsync(CancellationToken.None), CanInitiateProjectAction);
+            LoadProjectCommand = new AsyncRelayCommand(() => LoadProjectAsync(CancellationToken.None), CanInitiateProjectAction);
         }
 
         public IReadOnlyList<ReviewProject> Projects
@@ -109,6 +115,8 @@ namespace LM.App.Wpf.ViewModels.Review
                     SelectProjectCommand.RaiseCanExecuteChanged();
                     NavigateStageCommand.RaiseCanExecuteChanged();
                     RefreshCommand.RaiseCanExecuteChanged();
+                    CreateProjectCommand.RaiseCanExecuteChanged();
+                    LoadProjectCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -130,6 +138,10 @@ namespace LM.App.Wpf.ViewModels.Review
         public IAsyncRelayCommand NavigateStageCommand { get; }
 
         public IAsyncRelayCommand RefreshCommand { get; }
+
+        public IAsyncRelayCommand CreateProjectCommand { get; }
+
+        public IAsyncRelayCommand LoadProjectCommand { get; }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
@@ -198,6 +210,11 @@ namespace LM.App.Wpf.ViewModels.Review
             return !IsBusy && SelectedProject is not null;
         }
 
+        private bool CanInitiateProjectAction()
+        {
+            return !IsBusy;
+        }
+
         public Task RefreshAsync(CancellationToken cancellationToken)
         {
             if (SelectedProject is null)
@@ -206,6 +223,40 @@ namespace LM.App.Wpf.ViewModels.Review
             }
 
             return RunExclusiveAsync(ct => SelectProjectCoreAsync(SelectedProject.Id, ct, SelectedStage?.Id), cancellationToken);
+        }
+
+        public Task CreateProjectAsync(CancellationToken cancellationToken)
+        {
+            return RunExclusiveAsync(CreateProjectCoreAsync, cancellationToken);
+        }
+
+        public Task LoadProjectAsync(CancellationToken cancellationToken)
+        {
+            return RunExclusiveAsync(LoadProjectCoreAsync, cancellationToken);
+        }
+
+        private async Task CreateProjectCoreAsync(CancellationToken cancellationToken)
+        {
+            var project = await _projectLauncher.CreateProjectAsync(cancellationToken).ConfigureAwait(false);
+            if (project is null)
+            {
+                return;
+            }
+
+            Projects = await _store.GetProjectsAsync(cancellationToken).ConfigureAwait(false);
+            await SelectProjectCoreAsync(project.Id, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task LoadProjectCoreAsync(CancellationToken cancellationToken)
+        {
+            var project = await _projectLauncher.LoadProjectAsync(cancellationToken).ConfigureAwait(false);
+            if (project is null)
+            {
+                return;
+            }
+
+            Projects = await _store.GetProjectsAsync(cancellationToken).ConfigureAwait(false);
+            await SelectProjectCoreAsync(project.Id, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task SelectProjectCoreAsync(string projectId, CancellationToken cancellationToken, string? stageToMaintain = null)

@@ -17,6 +17,7 @@ LM.Review.Core.Services.IReviewWorkflowStore.GetProjectsAsync(System.Threading.C
 LM.Review.Core.Services.IReviewWorkflowStore.GetStageAsync(string! stageId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<LM.Review.Core.Models.ReviewStage?>!
 LM.Review.Core.Services.IReviewWorkflowStore.GetStagesByProjectAsync(string! projectId, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewStage!>>!
 LM.Review.Core.Services.IReviewWorkflowStore.SaveAssignmentAsync(string! projectId, LM.Review.Core.Models.ScreeningAssignment! assignment, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+LM.Review.Core.Services.IReviewWorkflowStore.SaveProjectAsync(LM.Review.Core.Models.ReviewProject! project, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Review.Core.Services.IReviewWorkflowStore.SaveStageAsync(LM.Review.Core.Models.ReviewStage! stage, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Review.Core.Services.ReviewWorkflowService
 LM.Review.Core.Services.ReviewWorkflowService.CreateStageAsync(string! projectId, string! stageDefinitionId, System.Collections.Generic.IReadOnlyCollection<LM.Review.Core.Services.ReviewerAssignmentRequest!>! assignments, System.Threading.CancellationToken cancellationToken = default) -> LM.Review.Core.Models.ReviewStage!

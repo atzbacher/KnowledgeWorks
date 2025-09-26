@@ -337,6 +337,12 @@ public sealed class ReviewWorkflowServiceTests
             return Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
         }
 
+        public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+        {
+            _projects[project.Id] = project;
+            return Task.CompletedTask;
+        }
+
         public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
         {
             _stages[stage.Id] = stage;
@@ -391,6 +397,14 @@ public sealed class ReviewWorkflowServiceTests
         public sealed record TestHookContext(string Action, Dictionary<string, string> Tags) : IReviewHookContext;
 
         public List<TestHookContext> Contexts { get; } = new();
+
+        public IReviewHookContext CreateProjectCreated(ReviewProject project)
+        {
+            return Record("project.created", new Dictionary<string, string>
+            {
+                ["projectId"] = project.Id
+            });
+        }
 
         public IReviewHookContext CreateAssignmentUpdated(ReviewStage stage, ScreeningAssignment assignment)
         {
