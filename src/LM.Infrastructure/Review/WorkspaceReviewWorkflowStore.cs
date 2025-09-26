@@ -59,6 +59,13 @@ public sealed class WorkspaceReviewWorkflowStore : IReviewWorkflowStore
         return await _store.GetAssignmentsByStageAsync(stageId, cancellationToken).ConfigureAwait(false);
     }
 
+    public async Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);
+        await _store.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
     {
         await EnsureInitializedAsync(cancellationToken).ConfigureAwait(false);

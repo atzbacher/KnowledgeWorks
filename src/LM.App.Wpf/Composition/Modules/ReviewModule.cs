@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using LM.App.Wpf.Services;
+using LM.App.Wpf.Services.Review;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Infrastructure.Review;
 using LM.Review.Core.Services;
@@ -25,6 +26,8 @@ internal sealed class ReviewModule : IAppModule
         services.AddSingleton<IReviewAnalyticsService, ReviewAnalyticsService>();
 
         services.AddSingleton<IUserContext, UserContext>();
+
+        services.AddTransient<IReviewProjectLauncher, ReviewProjectLauncher>();
 
         services.AddTransient<ProjectDashboardViewModel>();
         services.AddTransient<ScreeningQueueViewModel>();
