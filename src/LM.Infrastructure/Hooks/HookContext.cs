@@ -10,6 +10,7 @@ namespace LM.Infrastructure.Hooks
     {
         public HookM.ArticleHook? Article { get; init; }
         public HookM.AttachmentHook? Attachments { get; init; }
+        public HookM.DataExtractionHook? DataExtraction { get; init; }
         public HookM.EntryChangeLogHook? ChangeLog { get; init; }
     }
 }
