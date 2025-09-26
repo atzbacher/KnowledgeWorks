@@ -139,6 +139,19 @@ namespace LM.App.Wpf.ViewModels
         }
 
         public ObservableCollection<SearchHit> Results => _providers.Results;
+
+        private SearchHit? _selectedResult;
+        public SearchHit? SelectedResult
+        {
+            get => _selectedResult;
+            set
+            {
+                if (ReferenceEquals(_selectedResult, value))
+                    return;
+                _selectedResult = value;
+                OnPropertyChanged();
+            }
+        }
         public ObservableCollection<PreviousSearchSummary> PreviousRuns { get; } = new();
         public ReadOnlyObservableCollection<SearchHistoryEntry> RecentSearchHistory => _history.RecentSearchHistory;
 
@@ -231,7 +244,18 @@ namespace LM.App.Wpf.ViewModels
         }
 
         private void OnResultsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-            => RaiseCanExec();
+        {
+            if (_providers.Results.Count == 0)
+            {
+                SelectedResult = null;
+            }
+            else if (SelectedResult is null || !_providers.Results.Contains(SelectedResult))
+            {
+                SelectedResult = _providers.Results[0];
+            }
+
+            RaiseCanExec();
+        }
 
         private async Task LoadPreferencesAsync()
         {

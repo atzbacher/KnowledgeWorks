@@ -4,153 +4,452 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:common="clr-namespace:LM.App.Wpf.Common"
+             xmlns:coreModels="clr-namespace:LM.Core.Models;assembly=LM.Core"
              mc:Ignorable="d">
   <UserControl.Resources>
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="#D9DFE8" />
+    <SolidColorBrush x:Key="CardHeaderBrush" Color="#1F2937" />
+    <SolidColorBrush x:Key="CardSubtleBrush" Color="#4B5563" />
+
     <common:BooleanToOpacityConverter x:Key="AlreadyInDbOpacityConverter"
                                        TrueOpacity="1"
                                        FalseOpacity="0" />
+
+    <DataTemplate x:Key="SearchHitPreviewTemplate" DataType="{x:Type coreModels:SearchHit}">
+      <StackPanel>
+        <Border Background="#E6F4EA"
+                CornerRadius="6"
+                Padding="8"
+                Margin="0,0,0,12">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding AlreadyInDb}" Value="True">
+                  <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="&#xE73E;"
+                       FontFamily="Segoe MDL2 Assets"
+                       Margin="0,0,8,0"
+                       Foreground="#166534" />
+            <TextBlock Text="Already added to your library"
+                       Foreground="#14532D"
+                       FontWeight="SemiBold" />
+          </StackPanel>
+        </Border>
+
+        <TextBlock Text="{Binding Title}"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap" />
+        <TextBlock Text="{Binding Authors}"
+                   Margin="0,6,0,0"
+                   Foreground="#4B5563"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Orientation="Horizontal"
+                    Margin="0,10,0,0"
+                    VerticalAlignment="Center">
+          <TextBlock Text="{Binding JournalOrSource}"
+                     FontWeight="SemiBold"
+                     Foreground="#1F2937"
+                     TextWrapping="Wrap"
+                     Width="Auto" />
+          <TextBlock Text="{Binding Year}"
+                     Margin="8,0,0,0"
+                     Foreground="#1F2937" />
+        </StackPanel>
+
+        <Separator Margin="0,12,0,12" />
+
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <TextBlock Grid.Row="0" Grid.Column="0" Text="Database" FontWeight="SemiBold" />
+          <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Source}" />
+
+          <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6,0,0" Text="Record ID" FontWeight="SemiBold" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Text="{Binding ExternalId}" />
+
+          <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,6,0,0" Text="DOI" FontWeight="SemiBold" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,6,0,0" Text="{Binding Doi}" TextWrapping="Wrap" />
+        </Grid>
+
+        <TextBlock Margin="0,12,0,0"
+                   Text="{Binding Url}"
+                   TextWrapping="Wrap"
+                   Foreground="#2563EB"
+                   TextDecorations="Underline" />
+      </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SearchHitPreviewPlaceholderTemplate">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+        <TextBlock Text="Select a result to preview"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="Choose an item from the list to see details here."
+                   Margin="0,6,0,0"
+                   Foreground="#6B7280"
+                   HorizontalAlignment="Center" />
+      </StackPanel>
+    </DataTemplate>
+
+    <Style x:Key="SearchPreviewContentStyle" TargetType="ContentControl">
+      <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewTemplate}" />
+      <Style.Triggers>
+        <Trigger Property="Content" Value="{x:Null}">
+          <Setter Property="ContentTemplate" Value="{StaticResource SearchHitPreviewPlaceholderTemplate}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
   </UserControl.Resources>
 
-  <Grid Margin="12">
+  <Grid Margin="24">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="8" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
-      <RowDefinition Height="8" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <!-- Controls -->
-    <StackPanel Grid.Row="0" Orientation="Horizontal">
-      <TextBox Width="420"
-               Text="{Binding Providers.Query, UpdateSourceTrigger=PropertyChanged}" />
-      <ComboBox Width="200"
-                ItemsSource="{Binding Providers.Databases}"
-                SelectedValuePath="Value"
-                DisplayMemberPath="DisplayName"
-                SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}" />
-      <DatePicker Width="140" SelectedDate="{Binding Providers.From}" />
-      <DatePicker Width="140" SelectedDate="{Binding Providers.To}" />
-      <Button Content="Run search" Command="{Binding Providers.RunSearchCommand}" />
-      <Button Content="Save Search" Command="{Binding SaveSearchCommand}" />
-      <Button Content="Load Search" Command="{Binding LoadSearchCommand}" />
-      <Button Content="Export Search" Command="{Binding ExportSearchCommand}" />
+    <StackPanel Grid.Row="0">
+      <TextBlock Text="Explore the knowledge library"
+                 FontSize="26"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource CardHeaderBrush}" />
+      <TextBlock Text="Search across connected databases, review rich metadata, and capture the runs that matter."
+                 Margin="0,6,0,0"
+                 Foreground="{StaticResource CardSubtleBrush}" />
     </StackPanel>
 
-    <!-- Results -->
-    <DataGrid Grid.Row="2"
-              ItemsSource="{Binding Providers.Results}"
-              AutoGenerateColumns="False"
-              IsReadOnly="False"
-              CanUserAddRows="False">
-      <DataGrid.Columns>
-        <DataGridCheckBoxColumn Header=""
-                                 Binding="{Binding Selected, Mode=TwoWay}"
-                                 Width="40" />
-        <DataGridTemplateColumn Header="DB" Width="40">
-          <DataGridTemplateColumn.CellTemplate>
-            <DataTemplate>
-              <TextBlock Text="&#xE105;"
-                         FontFamily="Segoe MDL2 Assets"
-                         HorizontalAlignment="Center"
-                         Opacity="{Binding AlreadyInDb, Converter={StaticResource AlreadyInDbOpacityConverter}}"
-                         ToolTip="Already in DB" />
-            </DataTemplate>
-          </DataGridTemplateColumn.CellTemplate>
-        </DataGridTemplateColumn>
-        <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="60" />
-        <DataGridTextColumn Header="Authors" Binding="{Binding Authors}" Width="260" />
-        <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*" />
-        <DataGridTextColumn Header="Source" Binding="{Binding JournalOrSource}" Width="200" />
-        <DataGridTextColumn Header="DOI/ID" Binding="{Binding Doi}" Width="140" />
-        <DataGridHyperlinkColumn Header="Link" Binding="{Binding Url}" Width="140" />
-        <DataGridTextColumn Header="DB"
-                             Binding="{Binding AlreadyInDb}"
-                             Visibility="Collapsed" />
-      </DataGrid.Columns>
-    </DataGrid>
+    <Border Grid.Row="1"
+            Margin="0,20,0,0"
+            Background="{StaticResource CardBackgroundBrush}"
+            BorderBrush="{StaticResource CardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="20">
+      <StackPanel>
+        <TextBlock Text="Search criteria"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource CardHeaderBrush}" />
 
-    <!-- Previous runs (simple) -->
-    <GroupBox Grid.Row="4">
-      <GroupBox.Header>
-        <TextBlock Text="{Binding PreviousRunsCount, StringFormat=Previous runs ({0})}" />
-      </GroupBox.Header>
-      <DataGrid ItemsSource="{Binding PreviousRuns}"
-                AutoGenerateColumns="False"
-                IsReadOnly="True"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedPreviousRun, Mode=TwoWay}">
-        <DataGrid.Resources>
-          <Style TargetType="DataGridRow">
-            <Setter Property="ContextMenu">
-              <Setter.Value>
-                <ContextMenu>
-                  <MenuItem Header="Show details"
-                            Command="{Binding DataContext.ShowRunDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                            CommandParameter="{Binding}" />
-                </ContextMenu>
-              </Setter.Value>
-            </Setter>
-          </Style>
-        </DataGrid.Resources>
-        <DataGrid.Columns>
-          <DataGridTemplateColumn Header="★" Width="40">
-            <DataGridTemplateColumn.CellTemplate>
-              <DataTemplate>
-                <Button Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding}"
-                        HorizontalAlignment="Center"
-                        Padding="0"
-                        Background="Transparent"
-                        BorderBrush="{x:Null}"
-                        BorderThickness="0"
-                        Focusable="False"
-                        ToolTip="Toggle favorite">
-                  <TextBlock Text="★" Foreground="Goldenrod">
-                    <TextBlock.Style>
-                      <Style TargetType="TextBlock">
-                        <Setter Property="Opacity" Value="0.2" />
-                        <Style.Triggers>
-                          <DataTrigger Binding="{Binding IsFavorite}" Value="True">
-                            <Setter Property="Opacity" Value="1" />
-                          </DataTrigger>
-                        </Style.Triggers>
-                      </Style>
-                    </TextBlock.Style>
-                  </TextBlock>
-                </Button>
-              </DataTemplate>
-            </DataGridTemplateColumn.CellTemplate>
-          </DataGridTemplateColumn>
-          <DataGridTextColumn Header="Last search"
-                               Binding="{Binding LastRunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
-                               Width="160" />
-          <DataGridTextColumn Header="Provider"
-                               Binding="{Binding Provider}"
-                               Width="100" />
-          <DataGridTextColumn Header="Name"
-                               Binding="{Binding DisplayName}"
-                               Width="200" />
-          <DataGridTextColumn Header="Tags"
-                               Binding="{Binding TagsDisplay}"
-                               Width="200" />
-          <DataGridTextColumn Header="Query"
-                               Binding="{Binding Query}"
-                               Width="*" />
-          <DataGridTextColumn Header="From"
-                               Binding="{Binding LastFrom, StringFormat=\{0:yyyy-MM-dd\}}"
-                               Width="120" />
-          <DataGridTextColumn Header="To"
-                               Binding="{Binding LastTo, StringFormat=\{0:yyyy-MM-dd\}}"
-                               Width="120" />
-          <DataGridTextColumn Header="Total"
-                               Binding="{Binding TotalHits}"
-                               Width="80" />
-          <DataGridTextColumn Header="Runs"
-                               Binding="{Binding RunCount}"
-                               Width="80" />
-        </DataGrid.Columns>
-      </DataGrid>
-    </GroupBox>
+        <Grid Margin="0,12,0,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5">
+            <TextBlock Text="Search for"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource CardSubtleBrush}" />
+            <TextBox Margin="0,6,0,0"
+                     Height="36"
+                     Padding="10,4"
+                     Text="{Binding Providers.Query, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Grid.Column="0">
+            <TextBlock Text="Database"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource CardSubtleBrush}" />
+            <ComboBox Margin="0,6,0,0"
+                      Height="36"
+                      ItemsSource="{Binding Providers.Databases}"
+                      SelectedValuePath="Value"
+                      DisplayMemberPath="DisplayName"
+                      SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Grid.Column="2">
+            <TextBlock Text="From"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource CardSubtleBrush}" />
+            <DatePicker Margin="0,6,0,0"
+                        Height="36"
+                        SelectedDate="{Binding Providers.From}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Grid.Column="4">
+            <TextBlock Text="To"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource CardSubtleBrush}" />
+            <DatePicker Margin="0,6,0,0"
+                        Height="36"
+                        SelectedDate="{Binding Providers.To}" />
+          </StackPanel>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,18,0,0">
+          <Button Content="Export"
+                  MinWidth="110"
+                  Height="36"
+                  Command="{Binding ExportSearchCommand}" />
+          <Button Content="Load"
+                  MinWidth="110"
+                  Height="36"
+                  Margin="10,0,0,0"
+                  Command="{Binding LoadSearchCommand}" />
+          <Button Content="Save"
+                  MinWidth="110"
+                  Height="36"
+                  Margin="10,0,0,0"
+                  Command="{Binding SaveSearchCommand}" />
+          <Button Content="Run search"
+                  MinWidth="120"
+                  Height="36"
+                  Margin="10,0,0,0"
+                  Background="#2563EB"
+                  Foreground="White"
+                  Command="{Binding Providers.RunSearchCommand}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="2" Margin="0,24,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="3*" />
+        <ColumnDefinition Width="8" />
+        <ColumnDefinition Width="2*" />
+      </Grid.ColumnDefinitions>
+
+      <Border Background="{StaticResource CardBackgroundBrush}"
+              BorderBrush="{StaticResource CardBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="12"
+              Padding="0">
+        <DockPanel LastChildFill="True">
+          <Grid DockPanel.Dock="Top" Margin="20,20,20,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Results"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource CardHeaderBrush}" />
+            <TextBlock Grid.Column="1"
+                       Text="{Binding Providers.Results.Count, StringFormat={}{0} matches}"
+                       HorizontalAlignment="Right"
+                       Foreground="{StaticResource CardSubtleBrush}" />
+          </Grid>
+
+          <DataGrid Margin="20"
+                    ItemsSource="{Binding Providers.Results}"
+                    SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="False"
+                    CanUserAddRows="False"
+                    HeadersVisibility="Column"
+                    GridLinesVisibility="None"
+                    RowHeaderWidth="0"
+                    AlternationCount="2"
+                    AlternatingRowBackground="#F9FAFB"
+                    SelectionMode="Extended"
+                    SelectionUnit="FullRow"
+                    EnableRowVirtualization="True"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+              <DataGridCheckBoxColumn Header=""
+                                       Binding="{Binding Selected, Mode=TwoWay}"
+                                       Width="40" />
+              <DataGridTemplateColumn Header=""
+                                      Width="40">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Border Background="#E6F4EA"
+                            CornerRadius="999"
+                            Width="24"
+                            Height="24"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Opacity="{Binding AlreadyInDb, Converter={StaticResource AlreadyInDbOpacityConverter}}">
+                      <TextBlock Text="&#xE73E;"
+                                 FontFamily="Segoe MDL2 Assets"
+                                 Foreground="#15803D"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                    </Border>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="70" />
+              <DataGridTextColumn Header="Authors" Binding="{Binding Authors}" Width="220" />
+              <DataGridTextColumn Header="Title" Binding="{Binding Title}" Width="*" />
+              <DataGridTextColumn Header="Source" Binding="{Binding JournalOrSource}" Width="200" />
+              <DataGridTextColumn Header="DOI/ID" Binding="{Binding Doi}" Width="150" />
+              <DataGridHyperlinkColumn Header="Link" Binding="{Binding Url}" Width="160" />
+              <DataGridTextColumn Header="DB"
+                                   Binding="{Binding AlreadyInDb}"
+                                   Visibility="Collapsed" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </Border>
+
+      <GridSplitter Grid.Column="1"
+                    Margin="12,0"
+                    Width="8"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Stretch"
+                    Background="#D9DFE8" />
+
+      <Border Grid.Column="2"
+              Background="{StaticResource CardBackgroundBrush}"
+              BorderBrush="{StaticResource CardBorderBrush}"
+              BorderThickness="1"
+              CornerRadius="12"
+              Padding="20">
+        <StackPanel>
+          <TextBlock Text="Result details"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource CardHeaderBrush}" />
+          <ContentControl Margin="0,16,0,0"
+                          Content="{Binding SelectedResult}"
+                          Style="{StaticResource SearchPreviewContentStyle}" />
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <Border Grid.Row="3"
+            Margin="0,24,0,0"
+            Background="{StaticResource CardBackgroundBrush}"
+            BorderBrush="{StaticResource CardBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="20">
+      <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="Saved runs"
+                     FontSize="18"
+                     FontWeight="SemiBold"
+                     Foreground="{StaticResource CardHeaderBrush}" />
+          <TextBlock Grid.Column="1"
+                     Margin="16,0,0,0"
+                     Text="Recent favorites and search history"
+                     Foreground="{StaticResource CardSubtleBrush}" />
+          <TextBlock Grid.Column="2"
+                     Text="{Binding PreviousRunsCount, StringFormat={}{0} total}"
+                     Foreground="{StaticResource CardSubtleBrush}" />
+        </Grid>
+
+        <DataGrid Margin="0,16,0,0"
+                  ItemsSource="{Binding PreviousRuns}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding SelectedPreviousRun, Mode=TwoWay}"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="None"
+                  RowHeaderWidth="0"
+                  AlternationCount="2"
+                  AlternatingRowBackground="#F9FAFB"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+          <DataGrid.Resources>
+            <Style TargetType="DataGridRow">
+              <Setter Property="ContextMenu">
+                <Setter.Value>
+                  <ContextMenu>
+                    <MenuItem Header="Show details"
+                              Command="{Binding DataContext.ShowRunDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              CommandParameter="{Binding}" />
+                  </ContextMenu>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </DataGrid.Resources>
+          <DataGrid.Columns>
+            <DataGridTemplateColumn Header="★" Width="40">
+              <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                  <Button Command="{Binding DataContext.ToggleFavoriteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding}"
+                          HorizontalAlignment="Center"
+                          Padding="0"
+                          Background="Transparent"
+                          BorderBrush="{x:Null}"
+                          BorderThickness="0"
+                          Focusable="False"
+                          ToolTip="Toggle favorite">
+                    <TextBlock Text="★" Foreground="Goldenrod">
+                      <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                          <Setter Property="Opacity" Value="0.2" />
+                          <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                              <Setter Property="Opacity" Value="1" />
+                            </DataTrigger>
+                          </Style.Triggers>
+                        </Style>
+                      </TextBlock.Style>
+                    </TextBlock>
+                  </Button>
+                </DataTemplate>
+              </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+            <DataGridTextColumn Header="Last search"
+                                 Binding="{Binding LastRunUtc, StringFormat=\{0:yyyy-MM-dd HH:mm\}}"
+                                 Width="160" />
+            <DataGridTextColumn Header="Provider"
+                                 Binding="{Binding Provider}"
+                                 Width="100" />
+            <DataGridTextColumn Header="Name"
+                                 Binding="{Binding DisplayName}"
+                                 Width="200" />
+            <DataGridTextColumn Header="Tags"
+                                 Binding="{Binding TagsDisplay}"
+                                 Width="200" />
+            <DataGridTextColumn Header="Query"
+                                 Binding="{Binding Query}"
+                                 Width="*" />
+            <DataGridTextColumn Header="From"
+                                 Binding="{Binding LastFrom, StringFormat=\{0:yyyy-MM-dd\}}"
+                                 Width="120" />
+            <DataGridTextColumn Header="To"
+                                 Binding="{Binding LastTo, StringFormat=\{0:yyyy-MM-dd\}}"
+                                 Width="120" />
+            <DataGridTextColumn Header="Total"
+                                 Binding="{Binding TotalHits}"
+                                 Width="80" />
+            <DataGridTextColumn Header="Runs"
+                                 Binding="{Binding RunCount}"
+                                 Width="80" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </DockPanel>
+    </Border>
   </Grid>
 </UserControl>
