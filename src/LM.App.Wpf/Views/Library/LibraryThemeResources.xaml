@@ -1,15 +1,15 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <SolidColorBrush x:Key="LibrarySurfaceBackgroundBrush" Color="#FF101216" />
-  <SolidColorBrush x:Key="LibraryPrimaryForegroundBrush" Color="#FFF3F4F6" />
-  <SolidColorBrush x:Key="LibrarySecondaryForegroundBrush" Color="#FFA0A7B4" />
-  <SolidColorBrush x:Key="LibraryPanelBackgroundBrush" Color="#FF171A1F" />
-  <SolidColorBrush x:Key="LibraryPanelSubtleBrush" Color="#FF1F232B" />
-  <SolidColorBrush x:Key="LibraryPanelBorderBrush" Color="#FF2A3039" />
+  <SolidColorBrush x:Key="LibrarySurfaceBackgroundBrush" Color="#FFF8FAFC" />
+  <SolidColorBrush x:Key="LibraryPrimaryForegroundBrush" Color="#FF1F2937" />
+  <SolidColorBrush x:Key="LibrarySecondaryForegroundBrush" Color="#FF64748B" />
+  <SolidColorBrush x:Key="LibraryPanelBackgroundBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="LibraryPanelSubtleBrush" Color="#FFF1F5F9" />
+  <SolidColorBrush x:Key="LibraryPanelBorderBrush" Color="#FFCBD5E1" />
   <SolidColorBrush x:Key="LibraryAccentBrush" Color="#FF3B82F6" />
   <SolidColorBrush x:Key="LibraryAccentForegroundBrush" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="LibraryMutedForegroundBrush" Color="#FF808697" />
-  <SolidColorBrush x:Key="LibraryEmphasisForegroundBrush" Color="#FF60A5FA" />
+  <SolidColorBrush x:Key="LibraryMutedForegroundBrush" Color="#FF94A3B8" />
+  <SolidColorBrush x:Key="LibraryEmphasisForegroundBrush" Color="#FF1D4ED8" />
   <CornerRadius x:Key="LibraryCardCornerRadius">4</CornerRadius>
 
   <Style x:Key="LibraryHeaderButtonStyle" TargetType="Button">
@@ -38,12 +38,12 @@
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="Background" Value="#FF202530" />
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF343B48" />
+              <Setter TargetName="Chrome" Property="Background" Value="#FFE2E8F0" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="Chrome" Property="Background" Value="#FF262D38" />
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3F4756" />
+              <Setter TargetName="Chrome" Property="Background" Value="#FFD1D9E6" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsKeyboardFocused" Value="True">
               <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource LibraryAccentBrush}" />
@@ -63,12 +63,12 @@
     <Setter Property="BorderBrush" Value="{StaticResource LibraryAccentBrush}" />
     <Style.Triggers>
       <Trigger Property="IsMouseOver" Value="True">
-        <Setter Property="Background" Value="#FF1D4ED8" />
-        <Setter Property="BorderBrush" Value="#FF1E40AF" />
+        <Setter Property="Background" Value="#FF3B82F6" />
+        <Setter Property="BorderBrush" Value="#FF1D4ED8" />
       </Trigger>
       <Trigger Property="IsPressed" Value="True">
-        <Setter Property="Background" Value="#FF1E3A8A" />
-        <Setter Property="BorderBrush" Value="#FF1E3A8A" />
+        <Setter Property="Background" Value="#FF1D4ED8" />
+        <Setter Property="BorderBrush" Value="#FF1D4ED8" />
       </Trigger>
       <Trigger Property="IsKeyboardFocused" Value="True">
         <Setter Property="BorderBrush" Value="#FF1E40AF" />
@@ -167,9 +167,9 @@
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsEnabled" Value="False">
-              <Setter TargetName="Chrome" Property="Background" Value="#FF1A1E25" />
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF2F3540" />
-              <Setter Property="Foreground" Value="#FF636B7A" />
+              <Setter TargetName="Chrome" Property="Background" Value="#FFF1F5F9" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FFE2E8F0" />
+              <Setter Property="Foreground" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsKeyboardFocusWithin" Value="True">
               <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource LibraryAccentBrush}" />

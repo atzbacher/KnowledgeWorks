@@ -18,7 +18,7 @@
 
       <DataTemplate x:Key="SearchHitPreviewTemplate" DataType="{x:Type coreModels:SearchHit}">
         <StackPanel>
-          <Border Background="#FF143029"
+          <Border Background="#FFE6F4EA"
                   CornerRadius="4"
                   Padding="8"
                   Margin="0,0,0,10">
@@ -36,9 +36,9 @@
               <TextBlock Text="&#xE73E;"
                          FontFamily="Segoe MDL2 Assets"
                          Margin="0,0,6,0"
-                         Foreground="#FF34D399" />
+                         Foreground="#FF15803D" />
               <TextBlock Text="Already added to your library"
-                         Foreground="#FF6EE7B7"
+                         Foreground="#FF166534"
                          FontWeight="SemiBold" />
             </StackPanel>
           </Border>
@@ -353,8 +353,8 @@
                     EnableRowVirtualization="True"
                     Background="Transparent"
                     Foreground="{StaticResource SearchPrimaryTextBrush}"
-                    RowBackground="#FF1F242D"
-                    AlternatingRowBackground="#FF1A1F27"
+                    RowBackground="#FFFFFFFF"
+                    AlternatingRowBackground="#FFF1F5F9"
                     HorizontalScrollBarVisibility="Auto"
                     VerticalScrollBarVisibility="Auto">
             <DataGrid.ColumnHeaderStyle>
@@ -485,8 +485,8 @@
                   AlternationCount="2"
                   Background="Transparent"
                   Foreground="{StaticResource SearchPrimaryTextBrush}"
-                  RowBackground="#FF1F242D"
-                  AlternatingRowBackground="#FF1A1F27">
+                  RowBackground="#FFFFFFFF"
+                  AlternatingRowBackground="#FFF1F5F9">
           <DataGrid.ColumnHeaderStyle>
             <Style TargetType="DataGridColumnHeader">
               <Setter Property="Background" Value="{StaticResource SearchPanelSubtleBrush}" />

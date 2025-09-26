@@ -1,15 +1,15 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <SolidColorBrush x:Key="SearchSurfaceBrush" Color="#FF101216" />
-  <SolidColorBrush x:Key="SearchPanelBrush" Color="#FF171A1F" />
-  <SolidColorBrush x:Key="SearchPanelBorderBrush" Color="#FF2A3039" />
-  <SolidColorBrush x:Key="SearchPanelSubtleBrush" Color="#FF1F232B" />
-  <SolidColorBrush x:Key="SearchPrimaryTextBrush" Color="#FFF3F4F6" />
-  <SolidColorBrush x:Key="SearchSecondaryTextBrush" Color="#FFA0A7B4" />
-  <SolidColorBrush x:Key="SearchDividerBrush" Color="#FF2F3540" />
+  <SolidColorBrush x:Key="SearchSurfaceBrush" Color="#FFF8FAFC" />
+  <SolidColorBrush x:Key="SearchPanelBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="SearchPanelBorderBrush" Color="#FFCBD5E1" />
+  <SolidColorBrush x:Key="SearchPanelSubtleBrush" Color="#FFF1F5F9" />
+  <SolidColorBrush x:Key="SearchPrimaryTextBrush" Color="#FF1F2937" />
+  <SolidColorBrush x:Key="SearchSecondaryTextBrush" Color="#FF64748B" />
+  <SolidColorBrush x:Key="SearchDividerBrush" Color="#FFE2E8F0" />
   <SolidColorBrush x:Key="SearchAccentBrush" Color="#FF3B82F6" />
   <SolidColorBrush x:Key="SearchAccentForegroundBrush" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="SearchGlyphBrush" Color="#FFD1D5DB" />
+  <SolidColorBrush x:Key="SearchGlyphBrush" Color="#FF475569" />
   <SolidColorBrush x:Key="SearchDangerBrush" Color="#FFEF4444" />
 
   <Thickness x:Key="SearchPanelPadding">12</Thickness>
@@ -51,12 +51,12 @@
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="Background" Value="#FF1F2731" />
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+              <Setter TargetName="Chrome" Property="Background" Value="#FFE2E8F0" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-              <Setter TargetName="Chrome" Property="Background" Value="#FF24303D" />
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF4B5666" />
+              <Setter TargetName="Chrome" Property="Background" Value="#FFD1D9E6" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
@@ -85,7 +85,7 @@
   </Style>
 
   <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
-    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="Background" Value="#FFFFFFFF" />
     <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
@@ -94,7 +94,7 @@
   </Style>
 
   <Style x:Key="SearchComboBoxStyle" TargetType="ComboBox">
-    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="Background" Value="#FFFFFFFF" />
     <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
@@ -141,7 +141,7 @@
               <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsDropDownOpen" Value="True">
               <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource SearchAccentBrush}" />
@@ -154,7 +154,7 @@
 
   <Style x:Key="SearchDatePickerStyle" TargetType="DatePicker">
     <Setter Property="Foreground" Value="{StaticResource SearchPrimaryTextBrush}" />
-    <Setter Property="Background" Value="#FF11141B" />
+    <Setter Property="Background" Value="#FFFFFFFF" />
     <Setter Property="BorderBrush" Value="{StaticResource SearchPanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Template">
@@ -188,7 +188,7 @@
               <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
             </Trigger>
             <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF3B4452" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="#FF94A3B8" />
             </Trigger>
             <Trigger Property="IsDropDownOpen" Value="True">
               <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource SearchAccentBrush}" />
