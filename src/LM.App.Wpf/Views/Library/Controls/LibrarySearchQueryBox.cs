@@ -275,7 +275,6 @@ namespace LM.App.Wpf.Views.Library.Controls
                     navigator = navigator.GetNextContextPosition(System.Windows.Documents.LogicalDirection.Forward);
                 }
             }
-
             return navigator ?? Document.ContentEnd;
         }
 
@@ -319,7 +318,7 @@ namespace LM.App.Wpf.Views.Library.Controls
 
             return text;
         }
-
+        
         private void OnPaste(object? sender, System.Windows.DataObjectPastingEventArgs e)
         {
             if (!e.SourceDataObject.GetDataPresent(System.Windows.DataFormats.UnicodeText, true))

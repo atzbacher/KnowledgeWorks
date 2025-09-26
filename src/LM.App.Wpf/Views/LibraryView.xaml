@@ -61,6 +61,38 @@
                      Margin="0,4,0,0"/>
         </StackPanel>
 
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+          <Button Margin="0,0,8,0"
+                  Padding="10,4"
+                  Command="{Binding ToggleLeftPanelCommand}"
+                  ToolTip="Show or hide the saved searches panel">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Content" Value="Hide saved" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="Show saved" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+          <Button Padding="10,4"
+                  Command="{Binding ToggleRightPanelCommand}"
+                  ToolTip="Show or hide the entry details panel">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Content" Value="Hide details" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="Show details" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+        </StackPanel>
+
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,8,0,0">
           <Button Content="Search"
                   Margin="0,0,8,0"
@@ -139,6 +171,7 @@
       </ScrollViewer>
     </Border>
 
+
     <Button Grid.Row="1"
             Grid.Column="1"
             Command="{Binding DataContext.Filters.ToggleLeftPanelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -186,6 +219,7 @@
         </Style>
       </GridSplitter.Style>
     </GridSplitter>
+
 
     <!-- Results -->
     <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}">
@@ -292,6 +326,7 @@
       </StackPanel>
     </Grid>
 
+
     <GridSplitter Grid.Row="1"
                   Grid.Column="3"
                   HorizontalAlignment="Left"
@@ -339,6 +374,7 @@
         </Style>
       </Button.Style>
     </Button>
+
 
     <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
