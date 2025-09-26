@@ -15,6 +15,7 @@ using LM.App.Wpf.ViewModels;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.DataExtraction;
+using LM.Core.Utils;
 using LM.Infrastructure.Hooks;
 using HookM = LM.HubSpoke.Models;
 
@@ -311,8 +312,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
         private static string GetCurrentUserName()
         {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+            return SystemUser.GetCurrent();
         }
     }
 }

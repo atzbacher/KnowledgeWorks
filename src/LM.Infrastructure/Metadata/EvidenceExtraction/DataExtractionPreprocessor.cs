@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
 using LM.Core.Models.DataExtraction;
+using LM.Core.Utils;
 using LM.Infrastructure.Metadata.EvidenceExtraction;
 using UglyToad.PdfPig;
 
@@ -52,7 +53,7 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
                 SourceSha256 = $"sha256-{hash.ToLowerInvariant()}",
                 SourceFileName = Path.GetFileName(pdfPath) ?? string.Empty,
                 ExtractedAtUtc = DateTime.UtcNow,
-                ExtractedBy = Environment.UserName ?? string.Empty,
+                ExtractedBy = SystemUser.GetCurrent(),
                 AdditionalMetadata = new Dictionary<string, string>
                 {
                     ["source_pdf"] = pdfPath,

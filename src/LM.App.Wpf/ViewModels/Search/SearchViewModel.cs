@@ -3,6 +3,7 @@ using LM.App.Wpf.Common;             // ViewModelBase, AsyncRelayCommand, RelayC
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;            // LitSearchHook, LitSearchRun, JsonStd
+using LM.Core.Utils;
 using LM.Core.Models.Search;
 using LM.HubSpoke.Models;
 using LM.App.Wpf.ViewModels.Search;
@@ -385,7 +386,7 @@ namespace LM.App.Wpf.ViewModels
             {
                 var now = DateTime.UtcNow;
                 var provider = SelectedDatabase == SearchDatabase.PubMed ? "pubmed" : "ctgov";
-                var user = Environment.UserName;
+                var user = SystemUser.GetCurrent();
 
                 var run = new LitSearchRun
                 {

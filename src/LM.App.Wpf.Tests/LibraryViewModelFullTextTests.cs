@@ -16,6 +16,7 @@ using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Core.Models.Filters;
+using LM.Core.Utils;
 using LM.Core.Models.Search;
 using LM.HubSpoke.Models;
 using LM.Infrastructure.Hooks;
@@ -301,7 +302,7 @@ namespace LM.App.Wpf.Tests
             Assert.Contains(vm.Results.Selected.Entry.Attachments, a => a.RelativePath == attachment.RelativePath);
             Assert.Equal("paper", attachment.Title);
             Assert.Equal(AttachmentKind.Supplement, attachment.Kind);
-            var expectedUser = string.IsNullOrWhiteSpace(Environment.UserName) ? "unknown" : Environment.UserName;
+            var expectedUser = SystemUser.GetCurrent();
             Assert.Equal(expectedUser, attachment.AddedBy);
             Assert.NotEqual(default, attachment.AddedUtc);
 

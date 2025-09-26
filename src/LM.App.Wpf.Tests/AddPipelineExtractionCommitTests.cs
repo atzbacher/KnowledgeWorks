@@ -139,10 +139,7 @@ namespace LM.App.Wpf.Tests
         }
 
         private static string GetCurrentUserName()
-        {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
-        }
+            => SystemUser.GetCurrent();
 
         private static HookM.DataExtractionHook CreateExtractionHook()
         {

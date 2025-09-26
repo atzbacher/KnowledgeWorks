@@ -277,7 +277,7 @@ namespace LM.App.Wpf.ViewModels
                     // Append to target entry (Attachment has only RelativePath in your model)
                     target.Attachments ??= new List<Attachment>();
                     var now = DateTime.UtcNow;
-                    var addedBy = Environment.UserName ?? string.Empty;
+                    var addedBy = SystemUser.GetCurrent();
                     var title = Path.GetFileNameWithoutExtension(r.FilePath) ?? string.Empty;
                     target.Attachments.Add(new Attachment
                     {
@@ -1014,8 +1014,7 @@ namespace LM.App.Wpf.ViewModels
 
         private static string GetCurrentUserName()
         {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+            return SystemUser.GetCurrent();
         }
 
         private static List<string> SplitList(string? csv, bool distinct = false)

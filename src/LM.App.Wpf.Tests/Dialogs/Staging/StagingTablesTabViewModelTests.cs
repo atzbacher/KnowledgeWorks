@@ -7,6 +7,7 @@ using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.Core.Models;
 using LM.Core.Models.DataExtraction;
+using LM.Core.Utils;
 using LM.HubSpoke.Models;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Hooks;
@@ -69,7 +70,7 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             Assert.Single(item.PendingChangeLogEvents);
             var change = item.PendingChangeLogEvents[0];
             Assert.Equal("DigitizedCsvUpdated", change.Action);
-            Assert.Equal(Environment.UserName ?? "unknown", change.PerformedBy);
+            Assert.Equal(SystemUser.GetCurrent(), change.PerformedBy);
             Assert.Equal(item.DataExtractionHook.ExtractedBy, change.PerformedBy);
         }
 

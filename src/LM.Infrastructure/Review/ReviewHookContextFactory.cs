@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using LM.Core.Utils;
 using LM.Infrastructure.Hooks;
 using LM.Review.Core.Models;
 using LM.Review.Core.Services;
@@ -115,7 +116,7 @@ public sealed class ReviewHookContextFactory : IReviewHookContextFactory
 
     private static HookM.EntryChangeLogEvent CreateEvent(string action, IEnumerable<string> tags)
     {
-        var userName = Environment.UserName ?? string.Empty;
+        var userName = SystemUser.GetCurrent();
         var sanitizedTags = new List<string>();
         foreach (var tag in tags)
         {
@@ -133,7 +134,7 @@ public sealed class ReviewHookContextFactory : IReviewHookContextFactory
         return new HookM.EntryChangeLogEvent
         {
             Action = action,
-            PerformedBy = string.IsNullOrWhiteSpace(userName) ? "unknown" : userName,
+            PerformedBy = userName,
             TimestampUtc = DateTime.UtcNow,
             Details = details
         };

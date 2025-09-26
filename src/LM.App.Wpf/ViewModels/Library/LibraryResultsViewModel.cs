@@ -16,6 +16,7 @@ using LM.App.Wpf.Views.Behaviors;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
+using LM.Core.Utils;
 using LM.Infrastructure.Hooks;
 using HookM = LM.HubSpoke.Models;
 
@@ -727,8 +728,7 @@ namespace LM.App.Wpf.ViewModels.Library
 
         private static string GetCurrentUserName()
         {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+            return SystemUser.GetCurrent();
         }
 
         private static void ExecuteOnDispatcher(Action action)
