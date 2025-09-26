@@ -57,7 +57,7 @@ namespace LM.App.Wpf.Services.Review
         {
             try
             {
-                var selection = await _runPicker.PickAsync(cancellationToken).ConfigureAwait(false);
+                var selection = await _runPicker.PickAsync(cancellationToken);
                 if (selection is null)
 
                 {
@@ -66,15 +66,15 @@ namespace LM.App.Wpf.Services.Review
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken).ConfigureAwait(false);
+                var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
 
                 var project = CreateProject(selection, entry);
 
 
-                await _workflowStore.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
+                await _workflowStore.SaveProjectAsync(project, cancellationToken);
 
                 var context = _hookContextFactory.CreateProjectCreated(project);
-                await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken).ConfigureAwait(false);
+                await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken);
 
                 var tags = BuildCreationTags(project, selection, entry);
 
@@ -84,7 +84,7 @@ namespace LM.App.Wpf.Services.Review
                     _userContext.UserName,
                     "review.ui.project.created",
                     tags,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
 
                 return project;
             }
@@ -126,11 +126,11 @@ namespace LM.App.Wpf.Services.Review
                     return null;
                 }
 
-                var project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken).ConfigureAwait(false);
+                var project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken);
                 if (project is null)
                 {
-                    await _workflowStore.GetProjectsAsync(cancellationToken).ConfigureAwait(false);
-                    project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken).ConfigureAwait(false);
+                    await _workflowStore.GetProjectsAsync(cancellationToken);
+                    project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken);
                 }
 
                 if (project is null)
@@ -150,7 +150,7 @@ namespace LM.App.Wpf.Services.Review
                     _userContext.UserName,
                     "review.ui.project.load-requested",
                     tags,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
 
                 return project;
             }
