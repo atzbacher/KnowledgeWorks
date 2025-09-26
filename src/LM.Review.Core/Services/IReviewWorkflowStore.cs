@@ -9,6 +9,8 @@ public interface IReviewWorkflowStore
 {
     Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken);
+
     Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken);
