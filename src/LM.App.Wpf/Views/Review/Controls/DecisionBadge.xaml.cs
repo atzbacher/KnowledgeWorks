@@ -12,7 +12,7 @@ namespace LM.App.Wpf.Views.Review.Controls
             Loaded += OnLoaded;
         }
 
-        public static readonly System.Windows.DependencyProperty StatusProperty = System.Windows.DependencyProperty.Register(
+        private static readonly System.Windows.DependencyProperty StatusProperty = System.Windows.DependencyProperty.Register(
             nameof(Status),
             typeof(ScreeningStatus),
             typeof(DecisionBadge),

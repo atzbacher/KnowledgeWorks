@@ -624,6 +624,20 @@ field System.Windows.DependencyProperty! LM.App.Wpf.Views.Library.TagTokenSelect
 LM.App.Wpf.Views.LibraryPresetPrompt
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
 LM.App.Wpf.Views.LibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
+LM.App.Wpf.Views.Review.Controls.DecisionBadge
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.DecisionBadge() -> void
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.Status.get -> LM.Review.Core.Models.ScreeningStatus
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.Status.set -> void
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor.ExtractionFieldEditor() -> void
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl.ScreeningQueueControl() -> void
+LM.App.Wpf.Views.Review.ReviewView
+LM.App.Wpf.Views.Review.ReviewView.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.ReviewView.ReviewView() -> void
 LM.App.Wpf.Views.SearchSavePrompt
 LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
 LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
