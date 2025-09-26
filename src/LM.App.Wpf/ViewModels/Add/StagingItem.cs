@@ -92,5 +92,7 @@ namespace LM.App.Wpf.ViewModels
         public HookM.DataExtractionHook? DataExtractionHook { get; set; }
         public List<HookM.EntryChangeLogEvent> PendingChangeLogEvents { get; } = new();
         public StagingEvidencePreview? EvidencePreview { get; set; }
+
+        public bool CommitMetadataOnly { get; set; }
     }
 }

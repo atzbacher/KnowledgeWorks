@@ -254,6 +254,7 @@ LM.App.Wpf.ViewModels.StagingListViewModel
 LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.StagingListViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.StagingListViewModel.CommitSelectedAsync(System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! items, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.StagingListViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
 LM.App.Wpf.ViewModels.StagingListViewModel.Current.set -> void
 LM.App.Wpf.ViewModels.StagingListViewModel.Dispose() -> void
@@ -563,6 +564,8 @@ LM.App.Wpf.ViewModels.StagingItem.SimilarToTitle.set -> void
 LM.App.Wpf.ViewModels.StagingItem.Source.get -> string?
 LM.App.Wpf.ViewModels.StagingItem.Source.set -> void
 LM.App.Wpf.ViewModels.StagingItem.StagingItem() -> void
+LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.CommitMetadataOnly.set -> void
 LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.get -> string!
 LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.set -> void
 LM.App.Wpf.ViewModels.StagingItem.TagsCsv.get -> string?
