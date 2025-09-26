@@ -7,7 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LM.Core\LM.Core.csproj" />
-	<ProjectReference Include="..\LM.HubAndSpoke\LM.HubSpoke.csproj" />
+    <ProjectReference Include="..\LM.HubAndSpoke\LM.HubSpoke.csproj" />
+    <ProjectReference Include="..\LM.Review.Core\LM.Review.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
