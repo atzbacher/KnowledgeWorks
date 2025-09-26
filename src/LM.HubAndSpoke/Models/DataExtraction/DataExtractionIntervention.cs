@@ -26,6 +26,9 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("dosage")]
         public string? Dosage { get; init; }
 
+        [JsonPropertyName("comparator")]
+        public string? Comparator { get; init; }
+
         [JsonPropertyName("notes")]
         public string? Notes { get; init; }
     }

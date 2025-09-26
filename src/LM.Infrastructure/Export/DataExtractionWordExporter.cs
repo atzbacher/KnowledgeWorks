@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using LM.Core.Abstractions;
@@ -91,7 +92,7 @@ namespace LM.Infrastructure.Export
 
             if (rows.Count == 0)
             {
-                tableElement.Append(new TableRow(new TableCell(new Paragraph(new Run(new Text("No CSV data found") { Space = SpaceProcessingModeValues.Preserve })))));
+                tableElement.Append(new TableRow(new TableCell(new Paragraph(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text("No CSV data found") { Space = SpaceProcessingModeValues.Preserve })))));
             }
             else
             {
@@ -100,7 +101,7 @@ namespace LM.Infrastructure.Export
                     var tableRow = new TableRow();
                     foreach (var cell in row)
                     {
-                        tableRow.Append(new TableCell(new Paragraph(new Run(new Text(cell ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve }))));
+                        tableRow.Append(new TableCell(new Paragraph(new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(cell ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve }))));
                     }
 
                     tableElement.Append(tableRow);
@@ -128,7 +129,7 @@ namespace LM.Infrastructure.Export
 
         private static void AppendParagraph(Body body, string text, bool bold = false, int size = 24)
         {
-            var run = new Run(new Text(text ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
+            var run = new Run(new DocumentFormat.OpenXml.Wordprocessing.Text(text ?? string.Empty) { Space = SpaceProcessingModeValues.Preserve });
             if (bold)
             {
                 run.PrependChild(new RunProperties(new Bold(), new FontSize { Val = size.ToString(CultureInfo.InvariantCulture) }));

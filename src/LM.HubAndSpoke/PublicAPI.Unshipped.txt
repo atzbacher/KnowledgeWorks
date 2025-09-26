@@ -343,6 +343,8 @@ LM.HubSpoke.Models.DataExtractionFigure
 LM.HubSpoke.Models.DataExtractionFigure.DataExtractionFigure() -> void
 LM.HubSpoke.Models.DataExtractionFigure.FigureLabel.get -> string?
 LM.HubSpoke.Models.DataExtractionFigure.FigureLabel.init -> void
+LM.HubSpoke.Models.DataExtractionFigure.ThumbnailPath.get -> string?
+LM.HubSpoke.Models.DataExtractionFigure.ThumbnailPath.init -> void
 LM.HubSpoke.Models.DataExtractionHook
 LM.HubSpoke.Models.DataExtractionHook.DataExtractionHook() -> void
 LM.HubSpoke.Models.DataExtractionHook.Endpoints.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionEndpoint!>!
@@ -377,6 +379,8 @@ LM.HubSpoke.Models.DataExtractionIntervention.Notes.get -> string?
 LM.HubSpoke.Models.DataExtractionIntervention.Notes.init -> void
 LM.HubSpoke.Models.DataExtractionIntervention.PopulationIds.get -> System.Collections.Generic.List<string!>!
 LM.HubSpoke.Models.DataExtractionIntervention.PopulationIds.init -> void
+LM.HubSpoke.Models.DataExtractionIntervention.Comparator.get -> string?
+LM.HubSpoke.Models.DataExtractionIntervention.Comparator.init -> void
 LM.HubSpoke.Models.DataExtractionIntervention.Type.get -> string?
 LM.HubSpoke.Models.DataExtractionIntervention.Type.init -> void
 LM.HubSpoke.Models.DataExtractionEndpoint

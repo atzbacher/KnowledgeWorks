@@ -12,7 +12,7 @@ using LM.Infrastructure.Utils;
 
 namespace LM.App.Wpf.ViewModels.Dialogs
 {
-    public sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
+    internal sealed partial class StagingEditorViewModel : DialogViewModelBase, IDisposable
     {
         private readonly StagingReviewCommitTabViewModel _reviewTab;
         private StagingTabViewModel? _selectedTab;

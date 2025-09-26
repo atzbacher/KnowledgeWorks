@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Library;
@@ -494,7 +495,11 @@ namespace LM.App.Wpf.Tests
                                                        ILibraryDocumentService? documentService = null,
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
-                                                       IUserPreferencesStore? preferencesStore = null)
+                                                       IUserPreferencesStore? preferencesStore = null,
+                                                       IDialogService? dialogs = null,
+                                                       IDataExtractionPowerPointExporter? powerPointExporter = null,
+                                                       IDataExtractionWordExporter? wordExporter = null,
+                                                       IDataExtractionExcelExporter? excelExporter = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -505,7 +510,11 @@ namespace LM.App.Wpf.Tests
             orchestrator ??= new HookOrchestrator(ws);
             var filters = new LibraryFiltersViewModel(presetStore, prompt, store, ws);
             documentService ??= new NoopDocumentService();
-            var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator);
+            dialogs ??= new NoopDialogService();
+            powerPointExporter ??= new NoopDataExtractionExporter();
+            wordExporter ??= new NoopDataExtractionExporter();
+            excelExporter ??= new NoopDataExtractionExporter();
+            var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator, dialogs, powerPointExporter, wordExporter, excelExporter);
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
@@ -535,6 +544,22 @@ namespace LM.App.Wpf.Tests
             {
                 LastPath = path;
             }
+        }
+
+        private sealed class NoopDialogService : IDialogService
+        {
+            public string[]? ShowOpenFileDialog(FilePickerOptions options) => Array.Empty<string>();
+            public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
+            public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
+            public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
+        }
+
+        private sealed class NoopDataExtractionExporter : IDataExtractionPowerPointExporter, IDataExtractionWordExporter, IDataExtractionExcelExporter
+        {
+            public Task<bool> CanExportAsync(string entryId, CancellationToken ct = default) => Task.FromResult(false);
+
+            public Task<string> ExportAsync(string entryId, string outputPath, CancellationToken ct = default)
+                => Task.FromResult(outputPath);
         }
 
         private sealed class InMemoryPreferencesStore : IUserPreferencesStore
