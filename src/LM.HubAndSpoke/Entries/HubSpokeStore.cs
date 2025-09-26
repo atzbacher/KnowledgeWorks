@@ -8,6 +8,7 @@ using LM.HubSpoke.FileSystem;
 using LM.HubSpoke.Hubs;
 using LM.HubSpoke.Indexing;
 using LM.HubSpoke.Storage;
+using LM.HubSpoke.Hubs.KnowledgeGraph;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,6 +29,7 @@ namespace LM.HubSpoke.Entries
         private readonly IContentExtractor? _extract;
         private readonly SqliteSearchIndex _index;
         private readonly Dictionary<EntryType, ISpokeHandler> _handlers;
+        private readonly IKnowledgeGraphHub? _graphHub;
 
         private readonly IdIndex _idIndex;
         private volatile bool _idIndexBuilt = false;
@@ -41,12 +43,14 @@ namespace LM.HubSpoke.Entries
             IWorkSpaceService ws,
             IHasher hasher,
             IEnumerable<ISpokeHandler> handlers,
-            IContentExtractor? contentExtractor = null)
+            IContentExtractor? contentExtractor = null,
+            IKnowledgeGraphHub? graphHub = null)
             : this(
                 ws, hasher, handlers,
                 normDoi: FallbackNormalizeDoi,
                 normPmid: FallbackNormalizePmid,
-                contentExtractor: contentExtractor)
+                contentExtractor: contentExtractor,
+                graphHub: graphHub)
         { }
 
         // PREFERRED CTOR — inject shared normalizers from composition root
@@ -56,12 +60,14 @@ namespace LM.HubSpoke.Entries
             IEnumerable<ISpokeHandler> handlers,
             IDoiNormalizer doiNormalizer,
             IPmidNormalizer pmidNormalizer,
-            IContentExtractor? contentExtractor = null)
+            IContentExtractor? contentExtractor = null,
+            IKnowledgeGraphHub? graphHub = null)
             : this(
                 ws, hasher, handlers,
                 normDoi: (doiNormalizer ?? throw new ArgumentNullException(nameof(doiNormalizer))).Normalize,
                 normPmid: (pmidNormalizer ?? throw new ArgumentNullException(nameof(pmidNormalizer))).Normalize,
-                contentExtractor: contentExtractor)
+                contentExtractor: contentExtractor,
+                graphHub: graphHub)
         { }
 
         // INTERNAL CTOR — single place for initialization
@@ -71,7 +77,8 @@ namespace LM.HubSpoke.Entries
             IEnumerable<ISpokeHandler> handlers,
             Func<string?, string?> normDoi,
             Func<string?, string?> normPmid,
-            IContentExtractor? contentExtractor)
+            IContentExtractor? contentExtractor,
+            IKnowledgeGraphHub? graphHub)
         {
             _ws = ws;
             _content = new ContentStore(ws, hasher);
@@ -79,6 +86,7 @@ namespace LM.HubSpoke.Entries
             _index = new SqliteSearchIndex(ws);
             _handlers = handlers.ToDictionary(h => h.Handles);
             _idIndex = new IdIndex(normDoi, normPmid);
+            _graphHub = graphHub;
         }
 
         public async Task InitializeAsync(CancellationToken ct = default)
@@ -113,6 +121,13 @@ namespace LM.HubSpoke.Entries
             var updatedBy = BuildPersonRef(entry.AddedBy, now);
             var hasNotes = !string.IsNullOrWhiteSpace(entry.Notes) || !string.IsNullOrWhiteSpace(entry.UserNotes);
 
+            EntryHooks? previousHooks = null;
+            if (!isNew)
+            {
+                var existingHub = await HubJsonStore.LoadAsync(_ws, entryId, ct).ConfigureAwait(false);
+                previousHooks = existingHub?.Hooks;
+            }
+
             var hub = new EntryHub
             {
                 EntryId = entryId,
@@ -131,7 +146,8 @@ namespace LM.HubSpoke.Entries
                     Article = isPublication ? "hooks/article.json" : null,
                     Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
                     LitSearch = isLitSearch ? "hooks/litsearch.json" : null,
-                    Notes = hasNotes ? "hooks/notes.json" : null
+                    Notes = hasNotes ? "hooks/notes.json" : null,
+                    DataExtraction = previousHooks?.DataExtraction
                 }
             };
             await HubJsonStore.SaveAsync(_ws, hub, ct);
@@ -181,6 +197,18 @@ namespace LM.HubSpoke.Entries
 
             // update in-memory ID index
             _idIndex.AddOrUpdate(entry.Doi, entry.Pmid, entryId);
+
+            if (_graphHub is not null)
+            {
+                try
+                {
+                    await _graphHub.RefreshEntryAsync(entryId, ct).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // Swallow graph failures so core save logic remains resilient.
+                }
+            }
         }
 
         private async Task PersistNotesAsync(Entry entry, object? hook, string entryId, DateTime now, bool hasNotes, CancellationToken ct)
