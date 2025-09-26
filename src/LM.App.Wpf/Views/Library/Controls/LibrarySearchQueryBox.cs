@@ -160,6 +160,8 @@ namespace LM.App.Wpf.Views.Library.Controls
                 }
 
                 segments.Add(new HighlightSegment(match.Index, length, KeywordBrush, System.Windows.FontWeights.SemiBold));
+
+
             }
 
             foreach (Match match in OperatorRegex.Matches(text))
@@ -228,6 +230,7 @@ namespace LM.App.Wpf.Views.Library.Controls
             var clampedEnd = Math.Max(clampedStart, start + length);
             var startPointer = GetTextPointerAtOffset(clampedStart) ?? Document.ContentStart;
             var endPointer = GetTextPointerAtOffset(clampedEnd) ?? startPointer;
+
             Selection.Select(startPointer, endPointer);
         }
 
@@ -239,12 +242,15 @@ namespace LM.App.Wpf.Views.Library.Controls
             }
 
             return Document.ContentStart.GetOffsetToPosition(pointer);
+
         }
 
         private System.Windows.Documents.TextPointer? GetTextPointerAtOffset(int offset)
         {
+
             var clamped = Math.Max(0, offset);
             return Document.ContentStart.GetPositionAtOffset(clamped, System.Windows.Documents.LogicalDirection.Forward);
+
         }
 
         private System.Windows.Documents.Run CreateRun(string text, System.Windows.Media.Brush? foreground, System.Windows.FontWeight fontWeight)

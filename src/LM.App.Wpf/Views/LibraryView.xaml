@@ -33,6 +33,7 @@
       <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="Auto"/>
+
       <ColumnDefinition Width="{Binding DataContext.Filters.RightPanelWidth, ElementName=LibraryViewControl, Mode=TwoWay}" MinWidth="0"/>
     </Grid.ColumnDefinitions>
 
@@ -59,6 +60,38 @@
                      FontSize="11"
                      Foreground="DimGray"
                      Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+          <Button Margin="0,0,8,0"
+                  Padding="10,4"
+                  Command="{Binding ToggleLeftPanelCommand}"
+                  ToolTip="Show or hide the saved searches panel">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Content" Value="Hide saved" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsLeftPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="Show saved" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+          <Button Padding="10,4"
+                  Command="{Binding ToggleRightPanelCommand}"
+                  ToolTip="Show or hide the entry details panel">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Content" Value="Hide details" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsRightPanelCollapsed}" Value="True">
+                    <Setter Property="Content" Value="Show details" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,8,0,0">
@@ -139,6 +172,7 @@
       </ScrollViewer>
     </Border>
 
+
     <Grid Grid.Row="1" Grid.Column="1">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
@@ -190,6 +224,7 @@
         </GridSplitter.Style>
       </GridSplitter>
     </Grid>
+
 
     <!-- Results -->
     <Grid Grid.Row="1" Grid.Column="2" DataContext="{Binding Results}">
@@ -296,6 +331,7 @@
       </StackPanel>
     </Grid>
 
+
     <Grid Grid.Row="1" Grid.Column="3">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="5" />
@@ -347,6 +383,7 @@
         </Button.Style>
       </Button>
     </Grid>
+
 
     <Border Grid.Row="1" Grid.Column="4" BorderBrush="#FFE0E0E0" BorderThickness="1,0,0,0" Background="#FFFDFDFD">
       <ScrollViewer VerticalScrollBarVisibility="Auto"
