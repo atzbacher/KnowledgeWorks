@@ -9,6 +9,7 @@ using LM.Infrastructure.Content;
 using LM.Infrastructure.Entries;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Hooks;
+using LM.Infrastructure.Metadata.EvidenceExtraction;
 using LM.Infrastructure.Metadata;
 using LM.Infrastructure.PubMed;
 using LM.Infrastructure.Settings;
@@ -44,6 +45,9 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<IDoiNormalizer, DoiNormalizer>();
             services.AddSingleton<IPmidNormalizer, PmidNormalizer>();
             services.AddSingleton<IPublicationLookup, PubMedClient>();
+            services.AddSingleton<IDataExtractionPreprocessor>(sp => new DataExtractionPreprocessor(
+                sp.GetRequiredService<IHasher>(),
+                sp.GetRequiredService<IWorkSpaceService>()));
 
             services.AddSingleton<ISpokeHandler, ArticleSpokeHandler>();
             services.AddSingleton<ISpokeHandler, DocumentSpokeHandler>();

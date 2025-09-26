@@ -87,7 +87,9 @@ namespace LM.App.Wpf.ViewModels
 
         public bool Internal { get => IsInternal; set => IsInternal = value; }
 
-        // NEW: the fully-populated PubMed hook built at staging
+        // NEW: the fully-populated hooks built at staging
         public ArticleHook? ArticleHook { get; set; }
+        public HookM.DataExtractionHook? DataExtractionHook { get; set; }
+        public StagingEvidencePreview? EvidencePreview { get; set; }
     }
 }
