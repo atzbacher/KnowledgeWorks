@@ -20,6 +20,7 @@ namespace LM.App.Wpf.Services.Review
     internal sealed class ReviewProjectLauncher : IReviewProjectLauncher
     {
         private readonly IDialogService _dialogService;
+        private readonly IMessageBoxService _messageBoxService;
         private readonly IEntryStore _entryStore;
         private readonly IReviewWorkflowStore _workflowStore;
         private readonly IReviewHookContextFactory _hookContextFactory;
@@ -39,7 +40,8 @@ namespace LM.App.Wpf.Services.Review
             HookOrchestrator changeLogOrchestrator,
             IUserContext userContext,
             IWorkSpaceService workspace,
-            ILitSearchRunPicker runPicker)
+            ILitSearchRunPicker runPicker,
+            IMessageBoxService messageBoxService)
 
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -51,6 +53,7 @@ namespace LM.App.Wpf.Services.Review
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
+            _messageBoxService = messageBoxService ?? throw new ArgumentNullException(nameof(messageBoxService));
 
         }
 
@@ -70,8 +73,7 @@ namespace LM.App.Wpf.Services.Review
                 var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
                 var checkedEntryIds = selection.CheckedEntryIds.Count > 0
                     ? selection.CheckedEntryIds
-                    : await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken)
-                        .ConfigureAwait(false);
+                    : await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken);
 
                 var project = CreateProject(selection, entry);
 
@@ -99,7 +101,7 @@ namespace LM.App.Wpf.Services.Review
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                _messageBoxService.Show(
                     ex.Message,
                     "Create review project",
                     System.Windows.MessageBoxButton.OK,
@@ -123,7 +125,7 @@ namespace LM.App.Wpf.Services.Review
                 var reference = ResolveProjectReference(projectPath);
                 if (string.IsNullOrWhiteSpace(reference.ProjectId))
                 {
-                    System.Windows.MessageBox.Show(
+                    _messageBoxService.Show(
                         "Select a review project JSON inside the workspace to continue.",
                         "Load review project",
                         System.Windows.MessageBoxButton.OK,
@@ -140,7 +142,7 @@ namespace LM.App.Wpf.Services.Review
 
                 if (project is null)
                 {
-                    System.Windows.MessageBox.Show(
+                    _messageBoxService.Show(
                         $"Project '{reference.ProjectId}' could not be loaded from the workspace.",
                         "Load review project",
                         System.Windows.MessageBoxButton.OK,
@@ -165,7 +167,7 @@ namespace LM.App.Wpf.Services.Review
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show(
+                _messageBoxService.Show(
                     ex.Message,
                     "Load review project",
                     System.Windows.MessageBoxButton.OK,
