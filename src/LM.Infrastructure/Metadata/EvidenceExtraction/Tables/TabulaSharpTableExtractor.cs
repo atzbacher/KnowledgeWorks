@@ -372,10 +372,12 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction.Tables
 
         private static string CreateBoundsKey(int pageNumber, TabulaSharpBoundingBox bounds)
         {
-            return FormattableString.Invariant($"{pageNumber}:{Math.Round(bounds.Left, 2, MidpointRounding.AwayFromZero)}:" +
-                                               $"{Math.Round(bounds.Bottom, 2, MidpointRounding.AwayFromZero)}:" +
-                                               $"{Math.Round(bounds.Width, 2, MidpointRounding.AwayFromZero)}:" +
-                                               $"{Math.Round(bounds.Height, 2, MidpointRounding.AwayFromZero)}");
+            var left = Math.Round(bounds.Left, 2, MidpointRounding.AwayFromZero);
+            var bottom = Math.Round(bounds.Bottom, 2, MidpointRounding.AwayFromZero);
+            var width = Math.Round(bounds.Width, 2, MidpointRounding.AwayFromZero);
+            var height = Math.Round(bounds.Height, 2, MidpointRounding.AwayFromZero);
+
+            return FormattableString.Invariant($"{pageNumber}:{left}:{bottom}:{width}:{height}");
         }
 
         private static double Clamp01(double value)
