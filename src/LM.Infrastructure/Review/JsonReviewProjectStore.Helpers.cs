@@ -194,65 +194,16 @@ internal sealed partial class JsonReviewProjectStore
         var directory = Path.GetDirectoryName(path)!;
         Directory.CreateDirectory(directory);
 
-        var tmpPath = path + ".tmp";
+        await using var stream = new FileStream(
+            path,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.Read,
+            bufferSize: 4096,
+            useAsync: true);
 
-        try
-        {
-            var legacyLockPath = path + ".lock";
-            if (File.Exists(legacyLockPath))
-            {
-                try
-                {
-                    File.Delete(legacyLockPath);
-                }
-                catch
-                {
-                    // Ignore cleanup issues for legacy lock files.
-                }
-            }
-
-            await using var stream = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
-            await JsonSerializer.SerializeAsync(stream, payload, _jsonOptions, ct).ConfigureAwait(false);
-            await stream.FlushAsync(ct).ConfigureAwait(false);
-
-            await ReplaceFileWithRetryAsync(tmpPath, path, ct).ConfigureAwait(false);
-        }
-        finally
-        {
-            if (File.Exists(tmpPath))
-            {
-                try { File.Delete(tmpPath); } catch { }
-            }
-        }
-    }
-
-    private async Task ReplaceFileWithRetryAsync(string sourcePath, string destinationPath, CancellationToken ct)
-    {
-        var waitStart = DateTime.UtcNow;
-
-        while (true)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                if (File.Exists(destinationPath))
-                {
-                    File.Delete(destinationPath);
-                }
-
-                File.Move(sourcePath, destinationPath, overwrite: true);
-                return;
-            }
-            catch (IOException) when (DateTime.UtcNow - waitStart < _lockTimeout)
-            {
-                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException) when (DateTime.UtcNow - waitStart < _lockTimeout)
-            {
-                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
-            }
-        }
+        await JsonSerializer.SerializeAsync(stream, payload, _jsonOptions, ct).ConfigureAwait(false);
+        await stream.FlushAsync(ct).ConfigureAwait(false);
     }
 
     private string GetProjectPath(string projectId) => Path.Combine(_reviewsRoot, projectId, "project.json");

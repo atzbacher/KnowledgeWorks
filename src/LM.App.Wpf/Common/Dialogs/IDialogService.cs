@@ -1,5 +1,6 @@
 #nullable enable
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Review;
 
 namespace LM.App.Wpf.Common.Dialogs
 {
@@ -19,5 +20,6 @@ namespace LM.App.Wpf.Common.Dialogs
         string[]? ShowOpenFileDialog(FilePickerOptions options);
         string? ShowFolderBrowserDialog(FolderPickerOptions options);
         bool? ShowStagingEditor(StagingListViewModel stagingList);
+        bool? ShowProjectEditor(ProjectEditorViewModel editor);
     }
 }
