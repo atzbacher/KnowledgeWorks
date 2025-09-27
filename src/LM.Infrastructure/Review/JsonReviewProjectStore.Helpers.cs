@@ -194,12 +194,23 @@ internal sealed partial class JsonReviewProjectStore
         var directory = Path.GetDirectoryName(path)!;
         Directory.CreateDirectory(directory);
 
-        var lockPath = path + ".lock";
         var tmpPath = path + ".tmp";
 
-        var lockHandle = await AcquireLockAsync(lockPath, ct).ConfigureAwait(false);
         try
         {
+            var legacyLockPath = path + ".lock";
+            if (File.Exists(legacyLockPath))
+            {
+                try
+                {
+                    File.Delete(legacyLockPath);
+                }
+                catch
+                {
+                    // Ignore cleanup issues for legacy lock files.
+                }
+            }
+
             await using var stream = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true);
             await JsonSerializer.SerializeAsync(stream, payload, _jsonOptions, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
@@ -208,17 +219,6 @@ internal sealed partial class JsonReviewProjectStore
         }
         finally
         {
-            await lockHandle.DisposeAsync().ConfigureAwait(false);
-
-            try
-            {
-                File.Delete(lockPath);
-            }
-            catch
-            {
-                // Ignore lock cleanup issues.
-            }
-
             if (File.Exists(tmpPath))
             {
                 try { File.Delete(tmpPath); } catch { }
@@ -252,73 +252,6 @@ internal sealed partial class JsonReviewProjectStore
             {
                 await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
             }
-        }
-    }
-
-    private async Task<FileStream> AcquireLockAsync(string lockPath, CancellationToken ct)
-    {
-        var waitStart = DateTime.UtcNow;
-
-        while (true)
-        {
-            ct.ThrowIfCancellationRequested();
-            try
-            {
-                var stream = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
-                stream.SetLength(0);
-                return stream;
-            }
-            catch (IOException ex) when (File.Exists(lockPath))
-            {
-                if (TryBreakStaleLock(lockPath))
-                {
-                    continue;
-                }
-
-                if (DateTime.UtcNow - waitStart >= _lockTimeout)
-                {
-                    throw new IOException($"Timed out acquiring workspace lock for '{lockPath}'. The file appears to be in use by another process.", ex);
-                }
-
-                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException ex) when (File.Exists(lockPath))
-            {
-                if (TryBreakStaleLock(lockPath))
-                {
-                    continue;
-                }
-
-                if (DateTime.UtcNow - waitStart >= _lockTimeout)
-                {
-                    throw new IOException($"Timed out acquiring workspace lock for '{lockPath}'. The file appears to be in use by another process.", ex);
-                }
-
-                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
-            }
-        }
-    }
-
-    private bool TryBreakStaleLock(string lockPath)
-    {
-        var lastWrite = File.GetLastWriteTimeUtc(lockPath);
-        if (lastWrite != DateTime.MinValue && DateTime.UtcNow - lastWrite <= _lockTimeout)
-        {
-            return false;
-        }
-
-        try
-        {
-            File.Delete(lockPath);
-            return true;
-        }
-        catch (IOException)
-        {
-            return false;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return false;
         }
     }
 

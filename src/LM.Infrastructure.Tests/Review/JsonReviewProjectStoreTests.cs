@@ -150,13 +150,33 @@ public sealed class JsonReviewProjectStoreTests
     }
 
     [Fact]
-    public async Task SaveAssignmentAsync_WhenLockIsFresh_ThrowsIOException()
+    public async Task SaveProjectAsync_DoesNotCreateLockFile()
     {
         using var workspace = new TempWorkspace();
         var store = await CreateStoreAsync(workspace.Path);
 
         var definition = CreateStageDefinition();
-        var project = ReviewProject.Create("proj-3", "Conflicts", DateTimeOffset.UtcNow, new[] { definition }, ReviewAuditTrail.Create());
+        var project = ReviewProject.Create(
+            "proj-3",
+            "Lock Free",
+            DateTimeOffset.UtcNow,
+            new[] { definition },
+            ReviewAuditTrail.Create());
+
+        await store.SaveProjectAsync(project);
+
+        var lockPath = Path.Combine(workspace.Path, "reviews", project.Id, "project.json.lock");
+        Assert.False(File.Exists(lockPath));
+    }
+
+    [Fact]
+    public async Task SaveAssignmentAsync_RemovesLegacyLockFile()
+    {
+        using var workspace = new TempWorkspace();
+        var store = await CreateStoreAsync(workspace.Path);
+
+        var definition = CreateStageDefinition();
+        var project = ReviewProject.Create("proj-4", "Legacy", DateTimeOffset.UtcNow, new[] { definition }, ReviewAuditTrail.Create());
         await store.SaveProjectAsync(project);
 
         var stage = ReviewStage.Create(
@@ -192,108 +212,16 @@ public sealed class JsonReviewProjectStoreTests
             DateTimeOffset.UtcNow,
             ReviewerDecision.Create("assign-1", "reviewer-1", ScreeningStatus.Included, DateTimeOffset.UtcNow));
 
+        var lockPath = Path.Combine(workspace.Path, "reviews", project.Id, "assignments", "assign-1.json.lock");
+        Directory.CreateDirectory(Path.GetDirectoryName(lockPath)!);
+        await File.WriteAllTextAsync(lockPath, string.Empty);
+
         await store.SaveAssignmentAsync(project.Id, assignment);
 
-        var concurrent = Task.WhenAll(
-            store.SaveAssignmentAsync(project.Id, assignment),
-            store.SaveAssignmentAsync(project.Id, assignment));
-
-        await Assert.ThrowsAsync<IOException>(async () => await concurrent);
-
-        var assignments = await store.GetAssignmentsByStageAsync(stage.Id);
-        Assert.Single(assignments);
-    }
-
-    [Fact]
-    public async Task SaveProjectAsync_HonorsCancellationWhenLockCannotBeAcquired()
-    {
-        using var workspace = new TempWorkspace();
-        var store = await CreateStoreAsync(workspace.Path);
-
-        var definition = CreateStageDefinition();
-        var project = ReviewProject.Create(
-            "proj-timeout",
-            "Timeout",
-            DateTimeOffset.UtcNow,
-            new[] { definition },
-            ReviewAuditTrail.Create());
-
-        var reviewsRoot = Path.Combine(workspace.Path, "reviews", project.Id);
-        Directory.CreateDirectory(reviewsRoot);
-        var lockPath = Path.Combine(reviewsRoot, "project.json.lock");
-
-        await using (new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-        {
-            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
-
-            await Assert.ThrowsAsync<TaskCanceledException>(() => store.SaveProjectAsync(project, cts.Token));
-        }
-    }
-
-    [Fact]
-    public async Task SaveAssignmentAsync_IgnoresStaleLock()
-    {
-        using var workspace = new TempWorkspace();
-        var store = await CreateStoreAsync(workspace.Path);
-
-        var definition = CreateStageDefinition();
-        var project = ReviewProject.Create("proj-4", "Stale", DateTimeOffset.UtcNow, new[] { definition }, ReviewAuditTrail.Create());
-        await store.SaveProjectAsync(project);
-
-        var stage = ReviewStage.Create(
-            "stage-1",
-            project.Id,
-            definition,
-            new[]
-            {
-                ScreeningAssignment.Create(
-                    "assign-1",
-                    "stage-1",
-                    "reviewer-1",
-                    ReviewerRole.Primary,
-                    ScreeningStatus.Included,
-                    DateTimeOffset.UtcNow.AddMinutes(-15),
-                    DateTimeOffset.UtcNow,
-                    ReviewerDecision.Create("assign-1", "reviewer-1", ScreeningStatus.Included, DateTimeOffset.UtcNow))
-            },
-            ConflictState.None,
-            DateTimeOffset.UtcNow,
-            null,
-            null);
-
-        await store.SaveStageAsync(stage);
-
-        var initial = ScreeningAssignment.Create(
-            "assign-1",
-            "stage-1",
-            "reviewer-1",
-            ReviewerRole.Primary,
-            ScreeningStatus.Included,
-            DateTimeOffset.UtcNow.AddMinutes(-10),
-            DateTimeOffset.UtcNow,
-            ReviewerDecision.Create("assign-1", "reviewer-1", ScreeningStatus.Included, DateTimeOffset.UtcNow));
-
-        await store.SaveAssignmentAsync(project.Id, initial);
-
-        var lockPath = Path.Combine(workspace.Path, "reviews", project.Id, "assignments", "assign-1.json.lock");
-        await File.WriteAllTextAsync(lockPath, string.Empty);
-        File.SetLastWriteTimeUtc(lockPath, DateTime.UtcNow.AddMinutes(-6));
-
-        var updated = ScreeningAssignment.Create(
-            "assign-1",
-            "stage-1",
-            "reviewer-1",
-            ReviewerRole.Primary,
-            ScreeningStatus.Included,
-            DateTimeOffset.UtcNow.AddMinutes(-8),
-            DateTimeOffset.UtcNow,
-            ReviewerDecision.Create("assign-1", "reviewer-1", ScreeningStatus.Included, DateTimeOffset.UtcNow, "refresh"));
-
-        await store.SaveAssignmentAsync(project.Id, updated);
+        Assert.False(File.Exists(lockPath));
 
         var stored = await store.GetAssignmentAsync("assign-1");
         Assert.NotNull(stored);
-        Assert.Equal("refresh", stored!.Decision!.Notes);
     }
 
     private static StageDefinition CreateStageDefinition()
