@@ -200,19 +200,76 @@ namespace LM.App.Wpf.Tests.Review
                 new FakeRunPicker(selection),
                 messageBox,
                 diagnostics,
-                TimeSpan.FromMilliseconds(50));
+                TimeSpan.FromMilliseconds(20),
+                TimeSpan.FromMilliseconds(40));
 
             var result = await launcher.CreateProjectAsync(CancellationToken.None);
 
             Assert.Null(result);
 
-            var invocation = Assert.Single(messageBox.Invocations);
+            Assert.Equal(2, messageBox.Invocations.Count);
+
+            var info = messageBox.Invocations[0];
+            Assert.Equal(
+                "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
+                info.Message);
+            Assert.Equal("Create review project", info.Caption);
+            Assert.Equal(System.Windows.MessageBoxButton.OK, info.Buttons);
+            Assert.Equal(System.Windows.MessageBoxImage.Information, info.Image);
+
+            var error = messageBox.Invocations[1];
             Assert.Equal(
                 "Saving the review project took too long. Ensure workspace sync has finished and try again.",
-                invocation.Message);
-            Assert.Equal("Create review project", invocation.Caption);
-            Assert.Equal(System.Windows.MessageBoxButton.OK, invocation.Buttons);
-            Assert.Equal(System.Windows.MessageBoxImage.Error, invocation.Image);
+                error.Message);
+            Assert.Equal("Create review project", error.Caption);
+            Assert.Equal(System.Windows.MessageBoxButton.OK, error.Buttons);
+            Assert.Equal(System.Windows.MessageBoxImage.Error, error.Image);
+        }
+
+        [Fact]
+        public async Task CreateProjectAsync_ContinuesWaiting_WhenSaveCompletesAfterInitialTimeout()
+        {
+            var selection = new LitSearchRunSelection(
+                "entry-1",
+                "hooks/run.json",
+                "hooks/run.json",
+                "run-1",
+                null,
+                null,
+                Array.Empty<string>());
+
+            var messageBox = new FakeMessageBoxService();
+            using var workspace = new FakeWorkSpaceService();
+            var diagnostics = new FakeReviewCreationDiagnostics();
+            var workflowStore = new DelayedWorkflowStore(TimeSpan.FromMilliseconds(60));
+            var launcher = new ReviewProjectLauncher(
+                new FakeDialogService(),
+                new FakeEntryStore(new Entry
+                {
+                    Id = selection.EntryId,
+                    Title = "Sample Entry"
+                }),
+                workflowStore,
+                new FakeReviewHookContextFactory(),
+                new FakeReviewHookOrchestrator(),
+                new HookOrchestrator(workspace),
+                new FakeUserContext("tester"),
+                workspace,
+                new FakeRunPicker(selection),
+                messageBox,
+                diagnostics,
+                TimeSpan.FromMilliseconds(10),
+                TimeSpan.FromMilliseconds(200));
+
+            var result = await launcher.CreateProjectAsync(CancellationToken.None);
+
+            Assert.NotNull(result);
+            Assert.Single(messageBox.Invocations);
+            var info = messageBox.Invocations[0];
+            Assert.Equal(
+                "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
+                info.Message);
+            Assert.Equal(System.Windows.MessageBoxImage.Information, info.Image);
         }
 
         private sealed class FakeDialogService : IDialogService
@@ -451,6 +508,45 @@ namespace LM.App.Wpf.Tests.Review
 
             public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
                 => Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+
+            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+
+            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+        }
+
+        private sealed class DelayedWorkflowStore : IReviewWorkflowStore
+        {
+            private readonly TimeSpan _delay;
+
+            public DelayedWorkflowStore(TimeSpan delay)
+            {
+                _delay = delay;
+            }
+
+            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewProject?>(null);
+
+            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewProject>>(Array.Empty<ReviewProject>());
+
+            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewStage?>(null);
+
+            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+
+            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
+                => Task.FromResult<ScreeningAssignment?>(null);
+
+            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+
+            public async Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+            {
+                await Task.Delay(_delay, cancellationToken).ConfigureAwait(false);
+            }
 
             public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
                 => Task.CompletedTask;
