@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.Services.Review;
 using LM.App.Wpf.ViewModels.Dialogs;
@@ -30,6 +31,7 @@ internal sealed class ReviewModule : IAppModule
         services.AddSingleton<IUserContext, UserContext>();
 
         services.AddTransient<ILitSearchRunPicker, LitSearchRunPicker>();
+        services.AddSingleton<IMessageBoxService, WpfMessageBoxService>();
         services.AddTransient<IReviewProjectLauncher, ReviewProjectLauncher>();
         services.AddTransient<LitSearchRunPickerViewModel>();
         services.AddTransient<LitSearchRunPickerWindow>();
