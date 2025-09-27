@@ -3,9 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LM.Core.Models.DataExtraction;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Dialogs.Staging
@@ -201,6 +203,67 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             }
 
             return vm;
+        }
+
+        internal void ApplyExtraction(PreprocessedTable table)
+        {
+            if (table is null)
+                throw new ArgumentNullException(nameof(table));
+            if (_kind != DataExtractionAssetKind.Table)
+                throw new InvalidOperationException("Extraction results can only be applied to tables.");
+
+            if (!string.IsNullOrWhiteSpace(table.Title))
+            {
+                Title = table.Title;
+            }
+
+            Caption = table.Classification.ToString();
+            Pages = string.Join(", ", table.PageNumbers.Select(static p => p.ToString(CultureInfo.InvariantCulture)));
+            SourcePath = table.CsvRelativePath;
+            ProvenanceHash = table.ProvenanceHash;
+            TableImagePath = table.ImageRelativePath;
+            ImageProvenanceHash = table.ImageProvenanceHash;
+            Tags = string.Join(", ", table.Tags);
+
+            if (!string.IsNullOrWhiteSpace(table.FriendlyName))
+            {
+                FriendlyName = table.FriendlyName;
+            }
+
+            ColumnHint = table.Columns.Count > 0 ? table.Columns.Count : null;
+
+            if (table.Regions.Count > 0)
+            {
+                Regions.Clear();
+                foreach (var region in table.Regions)
+                {
+                    var created = CreateRegion(region.PageNumber, region.X, region.Y, region.Width, region.Height);
+                    if (!string.IsNullOrWhiteSpace(region.Label))
+                    {
+                        created.Label = region.Label;
+                    }
+                }
+            }
+
+            if (table.PageLocations.Count > 0)
+            {
+                PagePositions.Clear();
+                foreach (var location in table.PageLocations)
+                {
+                    var vm = new DataExtractionPagePositionViewModel
+                    {
+                        PageNumber = location.PageNumber,
+                        Left = location.Left,
+                        Top = location.Top,
+                        Width = location.Width,
+                        Height = location.Height,
+                        PageWidth = location.PageWidth,
+                        PageHeight = location.PageHeight
+                    };
+
+                    PagePositions.Add(vm);
+                }
+            }
         }
 
         public static DataExtractionAssetViewModel FromFigure(HookM.DataExtractionFigure figure)

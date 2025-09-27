@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
+using LM.Core.Abstractions;
+using LM.Core.Models.DataExtraction;
 using LM.Core.Utils;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Hooks;
@@ -185,6 +188,93 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
         }
 
         [Fact]
+        public async Task ExtractSelectedAssetCommand_Populates_Table_Metadata()
+        {
+            var table = new PreprocessedTable
+            {
+                Id = "table-01",
+                Title = "Baseline characteristics",
+                Classification = TableClassificationKind.Baseline,
+                PageNumbers = new[] { 1 },
+                CsvRelativePath = "staging/manual/tables/table-01.csv",
+                ImageRelativePath = "staging/manual/tables/table-01.png",
+                ProvenanceHash = "sha256-hash",
+                ImageProvenanceHash = "img-hash",
+                Tags = new List<string> { "baseline" },
+                FriendlyName = "Baseline characteristics",
+                Columns = new List<TableColumnMapping>
+                {
+                    new() { ColumnIndex = 0, Header = "Group", Role = TableColumnRole.Population },
+                    new() { ColumnIndex = 1, Header = "Value", Role = TableColumnRole.Value }
+                },
+                Regions = new List<TableRegion>
+                {
+                    new() { PageNumber = 1, X = 0.1, Y = 0.2, Width = 0.3, Height = 0.4, Label = "Region 1" }
+                },
+                PageLocations = new List<TablePageLocation>
+                {
+                    new()
+                    {
+                        PageNumber = 1,
+                        Left = 72,
+                        Top = 144,
+                        Width = 320,
+                        Height = 200,
+                        PageWidth = 612,
+                        PageHeight = 792
+                    }
+                }
+            };
+
+            var preprocessResult = new DataExtractionPreprocessResult
+            {
+                Tables = new[] { table }
+            };
+
+            var preprocessor = new FakeDataExtractionPreprocessor(preprocessResult);
+
+            var item = new StagingItem
+            {
+                FilePath = "/tmp/sample.pdf"
+            };
+
+            var viewModel = new DataExtractionWorkspaceViewModel(item, _orchestrator, preprocessor);
+
+            viewModel.AddTableCommand.Execute(null);
+            var asset = Assert.IsType<DataExtractionAssetViewModel>(viewModel.SelectedAsset);
+
+            var draft = new PdfRegionDraft(1, 0.1, 0.2, 0.3, 0.4);
+            viewModel.CreateRegionFromViewerCommand.Execute(draft);
+
+            Assert.True(viewModel.ExtractSelectedAssetCommand.CanExecute(null));
+
+            await viewModel.ExtractSelectedAssetCommand.ExecuteAsync(null);
+
+            Assert.Equal("Baseline characteristics", asset.Title);
+            Assert.Equal("Baseline", asset.Caption);
+            Assert.Equal("staging/manual/tables/table-01.csv", asset.SourcePath);
+            Assert.Equal("sha256-hash", asset.ProvenanceHash);
+            Assert.Equal("staging/manual/tables/table-01.png", asset.TableImagePath);
+            Assert.Equal("img-hash", asset.ImageProvenanceHash);
+            Assert.Equal("baseline", asset.Tags);
+            Assert.Equal(2, asset.ColumnHint);
+            Assert.Equal("Baseline characteristics", asset.FriendlyName);
+            Assert.Equal("1", asset.Pages);
+            Assert.Single(asset.Regions);
+            Assert.Equal("Region 1", asset.Regions[0].Label);
+            Assert.Single(asset.PagePositions);
+            var position = asset.PagePositions[0];
+            Assert.Equal(1, position.PageNumber);
+            Assert.Equal(72, position.Left);
+            Assert.Equal(144, position.Top);
+            Assert.Equal(320, position.Width);
+            Assert.Equal(200, position.Height);
+            Assert.Equal(612, position.PageWidth);
+            Assert.Equal(792, position.PageHeight);
+            Assert.Same(asset.Regions[0], viewModel.SelectedRegion);
+        }
+
+        [Fact]
         public void ViewerRegionCommandsUpdateSelectedAsset()
         {
             var item = new StagingItem
@@ -231,6 +321,21 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             }
             catch
             {
+            }
+        }
+
+        private sealed class FakeDataExtractionPreprocessor : IDataExtractionPreprocessor
+        {
+            private readonly DataExtractionPreprocessResult _result;
+
+            public FakeDataExtractionPreprocessor(DataExtractionPreprocessResult result)
+            {
+                _result = result ?? throw new ArgumentNullException(nameof(result));
+            }
+
+            public Task<DataExtractionPreprocessResult> PreprocessAsync(DataExtractionPreprocessRequest request, CancellationToken ct = default)
+            {
+                return Task.FromResult(_result);
             }
         }
     }
