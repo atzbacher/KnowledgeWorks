@@ -3,7 +3,9 @@ using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.Views.Dialogs.Staging;
+using LM.App.Wpf.Views.Playground;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
+using LM.App.Wpf.ViewModels.Playground;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.HubSpoke.Abstractions;
@@ -51,6 +53,9 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<DataExtractionWorkspaceWindow>();
             services.AddTransient<StagingEditorViewModel>();
             services.AddTransient<StagingEditorWindow>();
+            services.AddTransient<TabulaSharpPlaygroundEngine>();
+            services.AddTransient<TabulaSharpPlaygroundViewModel>();
+            services.AddTransient<TabulaSharpPlaygroundWindow>();
 
             services.AddSingleton<StagingListViewModel>(sp => new StagingListViewModel(sp.GetRequiredService<IAddPipeline>()));
             services.AddSingleton<WatchedFoldersViewModel>(sp => new WatchedFoldersViewModel(
