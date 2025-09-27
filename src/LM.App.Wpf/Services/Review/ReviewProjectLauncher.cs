@@ -31,6 +31,7 @@ namespace LM.App.Wpf.Services.Review
         private readonly ILitSearchRunPicker _runPicker;
         private readonly IReviewCreationDiagnostics _diagnostics;
         private readonly TimeSpan _saveProjectTimeout;
+        private readonly TimeSpan _saveProjectHardTimeout;
 
 
         public ReviewProjectLauncher(
@@ -45,7 +46,8 @@ namespace LM.App.Wpf.Services.Review
             ILitSearchRunPicker runPicker,
             IMessageBoxService messageBoxService,
             IReviewCreationDiagnostics diagnostics,
-            TimeSpan? saveProjectTimeout = null)
+            TimeSpan? saveProjectTimeout = null,
+            TimeSpan? saveProjectHardTimeout = null)
 
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -63,6 +65,20 @@ namespace LM.App.Wpf.Services.Review
             if (_saveProjectTimeout <= TimeSpan.Zero)
             {
                 throw new ArgumentOutOfRangeException(nameof(saveProjectTimeout), saveProjectTimeout, "Save timeout must be positive.");
+            }
+
+            _saveProjectHardTimeout = saveProjectHardTimeout ?? TimeSpan.FromMinutes(5);
+            if (_saveProjectHardTimeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(saveProjectHardTimeout), saveProjectHardTimeout, "Hard save timeout must be positive.");
+            }
+
+            if (_saveProjectHardTimeout <= _saveProjectTimeout)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(saveProjectHardTimeout),
+                    saveProjectHardTimeout,
+                    "Hard save timeout must exceed the initial save timeout.");
             }
 
         }
@@ -102,10 +118,28 @@ namespace LM.App.Wpf.Services.Review
 
                 _diagnostics.RecordStep($"Created in-memory review project '{project.Id}' with name '{project.Name}'.");
                 using var saveTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                saveTimeoutCts.CancelAfter(_saveProjectTimeout);
+                saveTimeoutCts.CancelAfter(_saveProjectHardTimeout);
+                var saveTask = _workflowStore.SaveProjectAsync(project, saveTimeoutCts.Token);
+
+                if (!saveTask.IsCompleted)
+                {
+                    var timeoutTask = Task.Delay(_saveProjectTimeout, CancellationToken.None);
+                    var completed = await Task.WhenAny(saveTask, timeoutTask).ConfigureAwait(false);
+                    if (completed != saveTask)
+                    {
+                        _diagnostics.RecordStep(
+                            $"Save for review project '{project.Id}' exceeded {_saveProjectTimeout.TotalSeconds:F0}s. Waiting for workspace sync to release locks.");
+                        _messageBoxService.Show(
+                            "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
+                            "Create review project",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Information);
+                    }
+                }
+
                 try
                 {
-                    await _workflowStore.SaveProjectAsync(project, saveTimeoutCts.Token).ConfigureAwait(false);
+                    await saveTask.ConfigureAwait(false);
                 }
                 catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested && saveTimeoutCts.IsCancellationRequested)
                 {
