@@ -370,9 +370,9 @@ LIMIT 500;";
             var sql = @"
 SELECT e.entry_id,
        bm25(entry_text) AS raw_score,
-       snippet(entry_text, 'title', '[', ']', '…', 12) AS snip_title,
-       snippet(entry_text, 'abstract', '[', ']', '…', 12) AS snip_abstract,
-       snippet(entry_text, 'content', '[', ']', '…', 20) AS snip_content
+       snippet(entry_text, 1, '[', ']', '…', 12) AS snip_title,
+       snippet(entry_text, 2, '[', ']', '…', 12) AS snip_abstract,
+       snippet(entry_text, 6, '[', ']', '…', 20) AS snip_content
 FROM entry_text
 JOIN entries e ON e.entry_id = entry_text.entry_id
 WHERE entry_text MATCH $match
