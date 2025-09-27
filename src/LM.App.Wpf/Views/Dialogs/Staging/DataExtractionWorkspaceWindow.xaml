@@ -75,6 +75,9 @@
                       Command="{Binding BeginRegionCreationCommand}" />
           <swc:Button Content="Re-detect"
                       Command="{Binding RedetectRegionsCommand}" />
+          <swc:Button Content="Extract"
+                      Margin="4,0,0,0"
+                      Command="{Binding ExtractSelectedAssetCommand}" />
         </swc:StackPanel>
 
         <controls:PdfDocumentView Grid.Row="1"

@@ -31,6 +31,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
         private DataExtractionAssetViewModel? _selectedAsset;
         private DataExtractionRegionViewModel? _selectedRegion;
         private INotifyCollectionChanged? _trackedRegionCollection;
+        private Task<DataExtractionPreprocessResult>? _preprocessTask;
+        private DataExtractionPreprocessResult? _cachedPreprocess;
         private int _currentPage = 1;
         private int _pageCount;
         private double _zoom = 1d;
@@ -250,6 +252,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             SelectedRegion = region;
             EnsureCurrentPage(region.PageNumber);
             IsRegionCreationMode = false;
+            ExtractSelectedAssetCommand.NotifyCanExecuteChanged();
         }
 
         [RelayCommand]
@@ -267,6 +270,40 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             EnsureCurrentPage(update.Region.PageNumber);
         }
 
+        [RelayCommand(CanExecute = nameof(CanExtractSelectedAsset))]
+        private async Task ExtractSelectedAssetAsync()
+        {
+            if (SelectedAsset is null)
+                return;
+
+            var result = await GetPreprocessResultAsync().ConfigureAwait(true);
+            if (result is null)
+                return;
+
+            var match = FindBestTableMatch(SelectedAsset, result.Tables);
+            if (match is null)
+                return;
+
+            SelectedAsset.ApplyExtraction(match);
+            SelectedRegion = SelectedAsset.Regions.FirstOrDefault();
+
+            if (SelectedRegion is not null)
+            {
+                EnsureCurrentPage(SelectedRegion.PageNumber);
+            }
+            else
+            {
+                EnsureCurrentPage(GetPrimaryPageNumber(SelectedAsset));
+            }
+        }
+
+        private bool CanExtractSelectedAsset()
+        {
+            return HasPdf &&
+                   SelectedAsset?.Kind == DataExtractionAssetKind.Table &&
+                   SelectedAsset.Regions.Count > 0;
+        }
+
         private async Task RedetectRegionsAsync()
         {
             if (SelectedAsset is null)
@@ -274,8 +311,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
             try
             {
-                var request = new DataExtractionPreprocessRequest(PdfPath);
-                var result = await _preprocessor.PreprocessAsync(request, CancellationToken.None).ConfigureAwait(true);
+                var result = await GetPreprocessResultAsync().ConfigureAwait(true);
+                if (result is null)
+                    return;
 
                 var targetPages = ParsePages(SelectedAsset.Pages);
                 var anchorPage = SelectedRegion?.PageNumber ?? (targetPages.Count > 0 ? targetPages[0] : 0);
@@ -543,6 +581,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 SelectedRegion = null;
                 CurrentPage = 1;
                 RedetectRegionsCommand.NotifyCanExecuteChanged();
+                ExtractSelectedAssetCommand.NotifyCanExecuteChanged();
                 return;
             }
 
@@ -567,6 +606,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             }
 
             RedetectRegionsCommand.NotifyCanExecuteChanged();
+            ExtractSelectedAssetCommand.NotifyCanExecuteChanged();
         }
 
         private void OnSelectedRegionChanged(DataExtractionRegionViewModel? previous, DataExtractionRegionViewModel? current)
@@ -632,6 +672,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             {
                 SelectedRegion = SelectedAsset?.Regions.FirstOrDefault();
             }
+
+            ExtractSelectedAssetCommand.NotifyCanExecuteChanged();
         }
 
         private void DetachRegionCollection()
@@ -661,6 +703,110 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
         {
             GoToNextPageCommand.NotifyCanExecuteChanged();
             GoToPreviousPageCommand.NotifyCanExecuteChanged();
+        }
+
+        private async Task<DataExtractionPreprocessResult?> GetPreprocessResultAsync()
+        {
+            if (!HasPdf)
+                return null;
+
+            if (_cachedPreprocess is not null)
+                return _cachedPreprocess;
+
+            if (_preprocessTask is null)
+            {
+                var request = new DataExtractionPreprocessRequest(PdfPath);
+                _preprocessTask = _preprocessor.PreprocessAsync(request, CancellationToken.None);
+            }
+
+            try
+            {
+                var result = await _preprocessTask.ConfigureAwait(true);
+                _cachedPreprocess = result;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(FormattableString.Invariant($"[DataExtractionWorkspace] Preprocess failed: {ex.Message}"));
+                _preprocessTask = null;
+                return null;
+            }
+        }
+
+        private static PreprocessedTable? FindBestTableMatch(DataExtractionAssetViewModel asset,
+                                                             IReadOnlyList<PreprocessedTable> tables)
+        {
+            if (tables.Count == 0)
+                return null;
+
+            var best = tables
+                .Select(table => new
+                {
+                    Table = table,
+                    Score = ScoreTableAgainstRegions(table, asset)
+                })
+                .OrderByDescending(t => t.Score)
+                .FirstOrDefault(t => t.Score > 0.1d);
+
+            return best?.Table;
+        }
+
+        private static double ScoreTableAgainstRegions(PreprocessedTable table, DataExtractionAssetViewModel asset)
+        {
+            if (asset.Regions.Count == 0)
+                return 0d;
+
+            var score = 0d;
+            foreach (var region in asset.Regions)
+            {
+                var bestOverlap = table.Regions
+                    .Where(r => r.PageNumber == region.PageNumber)
+                    .Select(r => CalculateRegionOverlap(region, r))
+                    .DefaultIfEmpty(0d)
+                    .Max();
+
+                score += bestOverlap;
+            }
+
+            var targetPages = ParsePages(asset.Pages);
+            if (targetPages.Count > 0)
+            {
+                var sharedPages = table.PageNumbers.Intersect(targetPages).Count();
+                score += sharedPages * 0.25d;
+            }
+
+            if (!string.IsNullOrWhiteSpace(asset.Caption) &&
+                string.Equals(asset.Caption, table.Classification.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                score += 0.5d;
+            }
+
+            return score;
+        }
+
+        private static double CalculateRegionOverlap(DataExtractionRegionViewModel region, TableRegion candidate)
+        {
+            var left = Math.Max(region.X, candidate.X);
+            var top = Math.Max(region.Y, candidate.Y);
+            var right = Math.Min(region.X + region.Width, candidate.X + candidate.Width);
+            var bottom = Math.Min(region.Y + region.Height, candidate.Y + candidate.Height);
+
+            var width = right - left;
+            var height = bottom - top;
+            if (width <= 0d || height <= 0d)
+                return 0d;
+
+            var intersection = width * height;
+            var regionArea = Math.Max(0d, region.Width) * Math.Max(0d, region.Height);
+            var candidateArea = Math.Max(0d, candidate.Width) * Math.Max(0d, candidate.Height);
+            if (regionArea <= 0d || candidateArea <= 0d)
+                return 0d;
+
+            var union = regionArea + candidateArea - intersection;
+            if (union <= 0d)
+                return 0d;
+
+            return intersection / union;
         }
 
         private static PdfRegionDraft ClampRegionDraft(PdfRegionDraft draft)
