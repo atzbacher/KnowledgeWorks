@@ -16,12 +16,12 @@ namespace LM.App.Wpf.Tests.Review
             {
                 new("entry-alpha", "Alpha", "query alpha", "abs-alpha", "entries/entry-alpha/hooks/litsearch.json", new[]
                 {
-                    new LitSearchRunOptionRun("run-1", DateTime.SpecifyKind(new DateTime(2024, 1, 1, 9, 0, 0), DateTimeKind.Utc), 42, "alice", true),
-                    new LitSearchRunOptionRun("run-2", DateTime.SpecifyKind(new DateTime(2024, 2, 1, 9, 0, 0), DateTimeKind.Utc), 64, "alice", false)
+                    new LitSearchRunOptionRun("run-1", DateTime.SpecifyKind(new DateTime(2024, 1, 1, 9, 0, 0), DateTimeKind.Utc), 42, "alice", true, "alpha-run-1.json", "hooks/alpha-run-1.json", Array.Empty<string>()),
+                    new LitSearchRunOptionRun("run-2", DateTime.SpecifyKind(new DateTime(2024, 2, 1, 9, 0, 0), DateTimeKind.Utc), 64, "alice", false, "alpha-run-2.json", "hooks/alpha-run-2.json", Array.Empty<string>())
                 }),
                 new("entry-bravo", "Bravo", "query bravo", "abs-bravo", "entries/entry-bravo/hooks/litsearch.json", new[]
                 {
-                    new LitSearchRunOptionRun("run-3", DateTime.SpecifyKind(new DateTime(2024, 3, 1, 9, 0, 0), DateTimeKind.Utc), 12, "bob", false)
+                    new LitSearchRunOptionRun("run-3", DateTime.SpecifyKind(new DateTime(2024, 3, 1, 9, 0, 0), DateTimeKind.Utc), 12, "bob", false, "bravo-run-3.json", "hooks/bravo-run-3.json", Array.Empty<string>())
                 })
             };
 
@@ -45,12 +45,12 @@ namespace LM.App.Wpf.Tests.Review
             {
                 new("entry-alpha", "Alpha", "query alpha", "abs-alpha", "entries/entry-alpha/hooks/litsearch.json", new[]
                 {
-                    new LitSearchRunOptionRun("run-1", DateTime.SpecifyKind(new DateTime(2024, 1, 1, 9, 0, 0), DateTimeKind.Utc), 42, "alice", true),
-                    new LitSearchRunOptionRun("run-2", DateTime.SpecifyKind(new DateTime(2024, 2, 1, 9, 0, 0), DateTimeKind.Utc), 64, "alice", false)
+                    new LitSearchRunOptionRun("run-1", DateTime.SpecifyKind(new DateTime(2024, 1, 1, 9, 0, 0), DateTimeKind.Utc), 42, "alice", true, "alpha-run-1.json", "hooks/alpha-run-1.json", Array.Empty<string>()),
+                    new LitSearchRunOptionRun("run-2", DateTime.SpecifyKind(new DateTime(2024, 2, 1, 9, 0, 0), DateTimeKind.Utc), 64, "alice", false, "alpha-run-2.json", "hooks/alpha-run-2.json", Array.Empty<string>())
                 }),
                 new("entry-bravo", "Bravo", "query bravo", "abs-bravo", "entries/entry-bravo/hooks/litsearch.json", new[]
                 {
-                    new LitSearchRunOptionRun("run-3", DateTime.SpecifyKind(new DateTime(2024, 3, 1, 9, 0, 0), DateTimeKind.Utc), 12, "bob", false)
+                    new LitSearchRunOptionRun("run-3", DateTime.SpecifyKind(new DateTime(2024, 3, 1, 9, 0, 0), DateTimeKind.Utc), 12, "bob", false, "bravo-run-3.json", "hooks/bravo-run-3.json", Array.Empty<string>())
                 })
             };
 

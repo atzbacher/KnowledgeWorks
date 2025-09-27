@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 
 namespace LM.App.Wpf.Services.Review
 {
@@ -6,5 +7,8 @@ namespace LM.App.Wpf.Services.Review
         string EntryId,
         string HookAbsolutePath,
         string HookRelativePath,
-        string RunId);
+        string RunId,
+        string? CheckedEntriesAbsolutePath,
+        string? CheckedEntriesRelativePath,
+        IReadOnlyList<string> CheckedEntryIds);
 }

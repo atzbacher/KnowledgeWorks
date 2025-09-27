@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Review;
@@ -67,6 +68,10 @@ namespace LM.App.Wpf.Services.Review
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
+                var checkedEntryIds = selection.CheckedEntryIds.Count > 0
+                    ? selection.CheckedEntryIds
+                    : await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken)
+                        .ConfigureAwait(false);
 
                 var project = CreateProject(selection, entry);
 
@@ -76,7 +81,7 @@ namespace LM.App.Wpf.Services.Review
                 var context = _hookContextFactory.CreateProjectCreated(project);
                 await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken);
 
-                var tags = BuildCreationTags(project, selection, entry);
+                var tags = BuildCreationTags(project, selection, entry, checkedEntryIds);
 
                 await ReviewChangeLogWriter.WriteAsync(
                     _changeLogOrchestrator,
@@ -276,7 +281,11 @@ namespace LM.App.Wpf.Services.Review
             return $"Review – {label.Trim()}";
         }
 
-        private static IEnumerable<string> BuildCreationTags(ReviewProject project, LitSearchRunSelection selection, Entry? entry)
+        private static IEnumerable<string> BuildCreationTags(
+            ReviewProject project,
+            LitSearchRunSelection selection,
+            Entry? entry,
+            IReadOnlyCollection<string> checkedEntryIds)
 
         {
             var tags = new List<string>
@@ -286,6 +295,37 @@ namespace LM.App.Wpf.Services.Review
                 $"litsearchRun:{selection.RunId}",
                 $"litsearchEntry:{selection.EntryId}"
             };
+
+            if (checkedEntryIds.Count > 0)
+            {
+                tags.Add($"litsearchEntryCount:{checkedEntryIds.Count}");
+
+                var preview = new List<string>(capacity: Math.Min(checkedEntryIds.Count, 5));
+                var added = 0;
+                foreach (var id in checkedEntryIds)
+                {
+                    if (string.IsNullOrWhiteSpace(id))
+                    {
+                        continue;
+                    }
+
+                    preview.Add(id);
+                    added++;
+                    if (added == 5)
+                    {
+                        break;
+                    }
+                }
+
+                if (preview.Count > 0)
+                {
+                    tags.Add($"litsearchEntryPreview:{string.Join(',', preview)}");
+                }
+            }
+            else
+            {
+                tags.Add("litsearchEntryCount:0");
+            }
 
             if (!string.IsNullOrWhiteSpace(selection.HookRelativePath))
             {
@@ -303,6 +343,52 @@ namespace LM.App.Wpf.Services.Review
             }
 
             return tags;
+        }
+
+        private async Task<IReadOnlyList<string>> LoadCheckedEntryIdsAsync(string? absolutePath, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(absolutePath) || !File.Exists(absolutePath))
+            {
+                return Array.Empty<string>();
+            }
+
+            try
+            {
+                await using var stream = new FileStream(
+                    absolutePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                using var document = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (!document.RootElement.TryGetProperty("checkedEntries", out var checkedEntries) ||
+                    !checkedEntries.TryGetProperty("entryIds", out var entryIdsElement) ||
+                    entryIdsElement.ValueKind != JsonValueKind.Array)
+                {
+                    return Array.Empty<string>();
+                }
+
+                var ids = new List<string>();
+                foreach (var element in entryIdsElement.EnumerateArray())
+                {
+                    if (element.ValueKind == JsonValueKind.String)
+                    {
+                        var value = element.GetString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                        {
+                            ids.Add(value.Trim());
+                        }
+                    }
+                }
+
+                return ids;
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+            {
+                return Array.Empty<string>();
+            }
         }
 
         private static IEnumerable<string> BuildLoadTags(ReviewProject project, ProjectReference reference)

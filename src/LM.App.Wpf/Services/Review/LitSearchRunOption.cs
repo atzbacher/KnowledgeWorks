@@ -17,5 +17,8 @@ namespace LM.App.Wpf.Services.Review
         DateTime RunUtc,
         int TotalHits,
         string? ExecutedBy,
-        bool IsFavorite);
+        bool IsFavorite,
+        string? CheckedEntriesAbsolutePath,
+        string? CheckedEntriesRelativePath,
+        IReadOnlyList<string> CheckedEntryIds);
 }
