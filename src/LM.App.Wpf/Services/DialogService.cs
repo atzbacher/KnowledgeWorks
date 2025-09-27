@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using LM.App.Wpf.ViewModels.Add;
+using LM.App.Wpf.ViewModels.Review;
 using LM.App.Wpf.Views;
 
 namespace LM.App.Wpf.Services
@@ -48,7 +49,19 @@ namespace LM.App.Wpf.Services
                               .FirstOrDefault(w => w.IsActive)
                         ?? Application.Current?.MainWindow;
 
-            var window = new StagingEditorWindow(stagingViewModel)
+            var runLabels = new List<string>();
+            if (stagingViewModel.Items.Count > 0)
+            {
+                runLabels.Add($"Imported files ({stagingViewModel.Items.Count})");
+            }
+
+            var suggestedTitle = stagingViewModel.Current?.Title
+                                 ?? stagingViewModel.Items.FirstOrDefault()?.Title;
+
+            var auditService = new ReviewAuditService();
+            var reviewVm = new ReviewWorkflowViewModel(runLabels, auditService, suggestedTitle);
+
+            var window = new ReviewWorkflowWindow(reviewVm)
             {
                 Owner = owner
             };

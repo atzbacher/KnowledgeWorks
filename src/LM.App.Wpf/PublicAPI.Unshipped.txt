@@ -232,6 +232,9 @@ LM.App.Wpf.Views.SearchView.SearchView() -> void
 LM.App.Wpf.Views.ShellWindow
 LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
+LM.App.Wpf.Views.ReviewWorkflowWindow
+LM.App.Wpf.Views.ReviewWorkflowWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.ReviewWorkflowWindow.ReviewWorkflowWindow(LM.App.Wpf.ViewModels.Review.ReviewWorkflowViewModel! viewModel) -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.AddViewModel! vm) -> void
