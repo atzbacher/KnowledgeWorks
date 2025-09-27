@@ -86,7 +86,7 @@ namespace LM.App.Wpf.Services.Review
 
                 try
                 {
-                    await using var stream = File.OpenRead(hookAbsolutePath);
+                    await using var stream = OpenSharedReadStream(hookAbsolutePath);
                     var hook = await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
                         .ConfigureAwait(false);
                     if (hook?.Runs is null || hook.Runs.Count == 0)
@@ -122,6 +122,11 @@ namespace LM.App.Wpf.Services.Review
 
             options.Sort(static (left, right) => string.Compare(left.Label, right.Label, true, CultureInfo.CurrentCulture));
             return options;
+        }
+
+        private static FileStream OpenSharedReadStream(string path)
+        {
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
         }
 
         private static bool IsLitSearchEntry(Entry entry)
