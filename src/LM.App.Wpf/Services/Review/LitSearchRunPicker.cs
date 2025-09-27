@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
@@ -73,55 +74,263 @@ namespace LM.App.Wpf.Services.Review
             await foreach (var entry in _entryStore.EnumerateAsync(cancellationToken))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (!IsLitSearchEntry(entry))
+                if (!IsLitSearchEntry(entry) || string.IsNullOrWhiteSpace(entry.Id))
                 {
                     continue;
                 }
 
                 var hookAbsolutePath = ResolveHookAbsolutePath(workspaceRoot, entry);
-                if (hookAbsolutePath is null || !File.Exists(hookAbsolutePath))
+                if (!string.IsNullOrWhiteSpace(hookAbsolutePath) && !File.Exists(hookAbsolutePath))
+                {
+                    hookAbsolutePath = null;
+                }
+
+                var hookRelativePath = string.Empty;
+                if (!string.IsNullOrWhiteSpace(hookAbsolutePath))
+                {
+                    try
+                    {
+                        hookRelativePath = NormalizeRelativePath(Path.GetRelativePath(workspaceRoot, hookAbsolutePath!));
+                    }
+                    catch (Exception)
+                    {
+                        hookRelativePath = string.Empty;
+                    }
+                }
+
+                var sidecars = await LoadRunSidecarsAsync(workspaceRoot, entry, cancellationToken).ConfigureAwait(false);
+
+                LitSearchHook? hook = null;
+                var runs = new List<LitSearchRunOptionRun>();
+
+                if (!string.IsNullOrWhiteSpace(hookAbsolutePath))
+                {
+                    hook = await TryReadHookAsync(hookAbsolutePath!, cancellationToken).ConfigureAwait(false);
+                    if (hook is not null)
+                    {
+                        runs.AddRange(BuildRunsFromHook(hook, workspaceRoot, sidecars));
+                    }
+                }
+
+                if (runs.Count == 0 && sidecars.Count > 0)
+                {
+                    runs.AddRange(BuildRunsFromSidecars(sidecars.Values));
+                }
+
+                if (runs.Count == 0)
                 {
                     continue;
                 }
 
-                try
-                {
-                    await using var stream = File.OpenRead(hookAbsolutePath);
-                    var hook = await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
-                        .ConfigureAwait(false);
-                    if (hook?.Runs is null || hook.Runs.Count == 0)
-                    {
-                        continue;
-                    }
+                var label = hook is not null ? ResolveLabel(entry, hook) : ResolveFallbackLabel(entry);
+                var query = hook?.Query ?? string.Empty;
 
-                    var runs = hook.Runs
-                        .OrderByDescending(static r => r.RunUtc)
-                        .Select(static run => new LitSearchRunOptionRun(
-                            run.RunId,
-                            run.RunUtc,
-                            run.TotalHits,
-                            run.ExecutedBy,
-                            run.IsFavorite))
-                        .ToList();
-
-                    var label = ResolveLabel(entry, hook);
-                    var relative = NormalizeRelativePath(Path.GetRelativePath(workspaceRoot, hookAbsolutePath));
-                    options.Add(new LitSearchRunOption(
-                        entry.Id,
-                        label,
-                        hook.Query ?? string.Empty,
-                        hookAbsolutePath,
-                        relative,
-                        runs));
-                }
-                catch (Exception ex) when (ex is IOException or JsonException)
-                {
-                    // Swallow malformed hooks so the picker can proceed with the remaining entries.
-                }
+                options.Add(new LitSearchRunOption(
+                    entry.Id,
+                    label,
+                    query,
+                    hookAbsolutePath ?? string.Empty,
+                    hookRelativePath,
+                    runs.OrderByDescending(static run => run.RunUtc).ToList()));
             }
 
             options.Sort(static (left, right) => string.Compare(left.Label, right.Label, true, CultureInfo.CurrentCulture));
             return options;
+        }
+
+        private static async Task<LitSearchHook?> TryReadHookAsync(string hookAbsolutePath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await using var stream = await TryOpenHookStreamAsync(hookAbsolutePath, cancellationToken).ConfigureAwait(false);
+                if (stream is null)
+                {
+                    return null;
+                }
+
+                return await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+
+        private static async Task<FileStream?> TryOpenHookStreamAsync(string path, CancellationToken cancellationToken)
+        {
+            const int maxAttempts = 3;
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                try
+                {
+                    return new FileStream(
+                        path,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete,
+                        bufferSize: 4096,
+                        useAsync: true);
+                }
+                catch (IOException) when (attempt + 1 < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+                }
+                catch (UnauthorizedAccessException) when (attempt + 1 < maxAttempts)
+                {
+                    await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            return null;
+        }
+
+        private async Task<Dictionary<string, RunSidecarInfo>> LoadRunSidecarsAsync(
+            string workspaceRoot,
+            Entry entry,
+            CancellationToken cancellationToken)
+        {
+            var results = new Dictionary<string, RunSidecarInfo>(StringComparer.OrdinalIgnoreCase);
+            var entryId = entry.Id;
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                return results;
+            }
+
+            var hooksDir = Path.Combine(workspaceRoot, "entries", entryId, "hooks");
+            if (!Directory.Exists(hooksDir))
+            {
+                return results;
+            }
+
+            foreach (var file in Directory.EnumerateFiles(hooksDir, "litsearch_run_*_checked.json", SearchOption.TopDirectoryOnly))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    await using var stream = new FileStream(
+                        file,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete,
+                        bufferSize: 4096,
+                        useAsync: true);
+
+                    var sidecar = await JsonSerializer.DeserializeAsync<CheckedEntryIdsSidecar>(stream, JsonStd.Options, cancellationToken)
+                        .ConfigureAwait(false);
+                    if (sidecar is null || string.IsNullOrWhiteSpace(sidecar.RunId))
+                    {
+                        continue;
+                    }
+
+                    var entryIds = sidecar.CheckedEntries?.EntryIds ?? Array.Empty<string>();
+                    var filteredCount = entryIds.Count(id => !string.IsNullOrWhiteSpace(id));
+                    if (filteredCount == 0)
+                    {
+                        continue;
+                    }
+
+                    var savedUtc = sidecar.SavedUtc;
+                    if (savedUtc == default)
+                    {
+                        savedUtc = File.GetLastWriteTimeUtc(file);
+                    }
+
+                    if (savedUtc.Kind != DateTimeKind.Utc)
+                    {
+                        savedUtc = DateTime.SpecifyKind(savedUtc, DateTimeKind.Utc);
+                    }
+
+                    string relativePath;
+                    try
+                    {
+                        relativePath = NormalizeRelativePath(Path.GetRelativePath(workspaceRoot, file));
+                    }
+                    catch (Exception)
+                    {
+                        relativePath = NormalizeRelativePath(file);
+                    }
+
+                    var info = new RunSidecarInfo(
+                        sidecar.RunId,
+                        savedUtc,
+                        filteredCount,
+                        file,
+                        relativePath);
+
+                    results[sidecar.RunId] = info;
+                }
+                catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+                {
+                    // Ignore locked or malformed sidecar files.
+                }
+            }
+
+            return results;
+        }
+
+        private static IEnumerable<LitSearchRunOptionRun> BuildRunsFromHook(
+            LitSearchHook hook,
+            string workspaceRoot,
+            IDictionary<string, RunSidecarInfo> sidecars)
+        {
+            var runs = new List<LitSearchRunOptionRun>();
+            if (hook.Runs is null || hook.Runs.Count == 0)
+            {
+                return runs;
+            }
+
+            foreach (var run in hook.Runs.OrderByDescending(static r => r.RunUtc))
+            {
+                if (string.IsNullOrWhiteSpace(run.RunId))
+                {
+                    continue;
+                }
+
+                var (absolute, relative) = ResolveCheckedEntriesPaths(workspaceRoot, run.CheckedEntryIdsPath);
+                var entryCount = 0;
+
+                if (sidecars.TryGetValue(run.RunId, out var sidecar))
+                {
+                    entryCount = sidecar.EntryCount;
+                    absolute ??= sidecar.AbsolutePath;
+                    relative ??= sidecar.RelativePath;
+                    sidecars.Remove(run.RunId);
+                }
+
+                if (absolute is null)
+                {
+                    continue;
+                }
+
+                var totalHits = run.TotalHits > 0 ? run.TotalHits : entryCount;
+                runs.Add(new LitSearchRunOptionRun(
+                    run.RunId,
+                    run.RunUtc,
+                    totalHits,
+                    run.ExecutedBy,
+                    run.IsFavorite,
+                    absolute,
+                    relative));
+            }
+
+            return runs;
+        }
+
+        private static IEnumerable<LitSearchRunOptionRun> BuildRunsFromSidecars(IEnumerable<RunSidecarInfo> sidecars)
+        {
+            return sidecars
+                .Where(static info => !string.IsNullOrWhiteSpace(info.AbsolutePath))
+                .OrderByDescending(static info => info.SavedUtc)
+                .Select(static info => new LitSearchRunOptionRun(
+                    info.RunId,
+                    info.SavedUtc,
+                    info.EntryCount,
+                    null,
+                    false,
+                    info.AbsolutePath,
+                    info.RelativePath));
         }
 
         private static bool IsLitSearchEntry(Entry entry)
@@ -186,9 +395,89 @@ namespace LM.App.Wpf.Services.Review
             return entry.Id;
         }
 
-        private static string NormalizeRelativePath(string relativePath)
+        private static string NormalizeRelativePath(string? relativePath)
         {
-            return relativePath.Replace('\\', '/');
+            return string.IsNullOrWhiteSpace(relativePath)
+                ? string.Empty
+                : relativePath.Replace('\\', '/');
+        }
+
+        private static string ResolveFallbackLabel(Entry entry)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.DisplayName))
+            {
+                return entry.DisplayName.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.Title))
+            {
+                return entry.Title.Trim();
+            }
+
+            return entry.Id;
+        }
+
+        private static (string? AbsolutePath, string? RelativePath) ResolveCheckedEntriesPaths(string workspaceRoot, string? storedPath)
+        {
+            if (string.IsNullOrWhiteSpace(storedPath))
+            {
+                return (null, null);
+            }
+
+            string absolute;
+            if (Path.IsPathRooted(storedPath))
+            {
+                absolute = storedPath;
+            }
+            else
+            {
+                var normalized = storedPath.Replace('/', Path.DirectorySeparatorChar);
+                absolute = Path.Combine(workspaceRoot, normalized);
+            }
+
+            if (!File.Exists(absolute))
+            {
+                return (null, null);
+            }
+
+            string relative;
+            try
+            {
+                relative = NormalizeRelativePath(Path.GetRelativePath(workspaceRoot, absolute));
+            }
+            catch (Exception)
+            {
+                relative = NormalizeRelativePath(storedPath);
+            }
+
+            return (absolute, relative);
+        }
+
+        private sealed record RunSidecarInfo(
+            string RunId,
+            DateTime SavedUtc,
+            int EntryCount,
+            string AbsolutePath,
+            string RelativePath);
+
+        private sealed record CheckedEntryIdsSidecar
+        {
+            [JsonPropertyName("runId")]
+            public string RunId { get; init; } = string.Empty;
+
+            [JsonPropertyName("savedUtc")]
+            [JsonConverter(typeof(UtcDateTimeConverter))]
+            public DateTime SavedUtc { get; init; }
+                = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+
+            [JsonPropertyName("checkedEntries")]
+            public CheckedEntriesPayload CheckedEntries { get; init; } = new();
+        }
+
+        private sealed record CheckedEntriesPayload
+        {
+            [JsonPropertyName("entryIds")]
+            public List<string> EntryIds { get; init; } = new();
         }
     }
 }

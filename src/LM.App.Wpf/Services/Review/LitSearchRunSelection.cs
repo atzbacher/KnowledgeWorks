@@ -6,5 +6,7 @@ namespace LM.App.Wpf.Services.Review
         string EntryId,
         string HookAbsolutePath,
         string HookRelativePath,
-        string RunId);
+        string RunId,
+        string? CheckedEntriesAbsolutePath,
+        string? CheckedEntriesRelativePath);
 }
