@@ -351,7 +351,12 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Tables = tables,
                 Notes = hook.Notes,
                 StudyDesign = StudyDetails.StudyDesign,
-                StudySetting = StudyDetails.StudySetting
+                StudySetting = StudyDetails.StudySetting,
+                SiteCount = StudyDetails.SiteCount,
+                TrialClassification = StudyDetails.TrialClassification,
+                IsRegistryStudy = StudyDetails.IsRegistryStudy,
+                IsCohortStudy = StudyDetails.IsCohortStudy,
+                GeographyScope = StudyDetails.GeographyScope
             };
 
             _item.DataExtractionHook = updated;
@@ -396,9 +401,51 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                     Title = title,
                     LibraryPath = libraryPath,
                     Purpose = AttachmentKind.Supplement,
-                    Tags = new List<string> { "DataExtraction", "Manual" }
+                    Tags = BuildMetadataTags(hook)
                 }
             };
+        }
+
+        private static List<string> BuildMetadataTags(HookM.DataExtractionHook hook)
+        {
+            var tags = new List<string> { "DataExtraction", "Manual" };
+
+            if (!string.IsNullOrWhiteSpace(hook.StudyDesign))
+            {
+                tags.Add(FormattableString.Invariant($"StudyDesign:{hook.StudyDesign}"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(hook.StudySetting))
+            {
+                tags.Add(FormattableString.Invariant($"StudySetting:{hook.StudySetting}"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(hook.TrialClassification))
+            {
+                tags.Add(FormattableString.Invariant($"TrialClassification:{hook.TrialClassification}"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(hook.GeographyScope))
+            {
+                tags.Add(FormattableString.Invariant($"GeographyScope:{hook.GeographyScope}"));
+            }
+
+            if (hook.SiteCount is int siteCount && siteCount > 0)
+            {
+                tags.Add(FormattableString.Invariant($"SiteCount:{siteCount}"));
+            }
+
+            if (hook.IsRegistryStudy == true)
+            {
+                tags.Add("RegistryStudy");
+            }
+
+            if (hook.IsCohortStudy == true)
+            {
+                tags.Add("CohortStudy");
+            }
+
+            return tags;
         }
 
         private void LoadFromItem()

@@ -11,6 +11,11 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
     {
         private string? _studyDesign;
         private string? _studySetting;
+        private int? _siteCount;
+        private string? _trialClassification;
+        private bool _isRegistryStudy;
+        private bool _isCohortStudy;
+        private string? _geographyScope;
 
         public DataExtractionStudyDetailsViewModel()
         {
@@ -34,6 +39,25 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             "Other"
         };
 
+        public IReadOnlyList<string> TrialClassificationOptions { get; } = new[]
+        {
+            "Randomized controlled trial",
+            "Non-randomized trial",
+            "Meta-analysis",
+            "Systematic review",
+            "Observational study",
+            "Other"
+        };
+
+        public IReadOnlyList<string> GeographyScopeOptions { get; } = new[]
+        {
+            "International",
+            "National",
+            "Regional",
+            "Local",
+            "Other"
+        };
+
         public string? StudyDesign
         {
             get => _studyDesign;
@@ -46,6 +70,44 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             set => SetProperty(ref _studySetting, value);
         }
 
+        public int? SiteCount
+        {
+            get => _siteCount;
+            set
+            {
+                if (value is < 0)
+                {
+                    value = 0;
+                }
+
+                SetProperty(ref _siteCount, value);
+            }
+        }
+
+        public string? TrialClassification
+        {
+            get => _trialClassification;
+            set => SetProperty(ref _trialClassification, value);
+        }
+
+        public bool IsRegistryStudy
+        {
+            get => _isRegistryStudy;
+            set => SetProperty(ref _isRegistryStudy, value);
+        }
+
+        public bool IsCohortStudy
+        {
+            get => _isCohortStudy;
+            set => SetProperty(ref _isCohortStudy, value);
+        }
+
+        public string? GeographyScope
+        {
+            get => _geographyScope;
+            set => SetProperty(ref _geographyScope, value);
+        }
+
         public void Load(HookM.DataExtractionHook? hook)
         {
             if (hook is null)
@@ -53,6 +115,11 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
             StudyDesign = hook.StudyDesign;
             StudySetting = hook.StudySetting;
+            SiteCount = hook.SiteCount;
+            TrialClassification = hook.TrialClassification;
+            IsRegistryStudy = hook.IsRegistryStudy.GetValueOrDefault();
+            IsCohortStudy = hook.IsCohortStudy.GetValueOrDefault();
+            GeographyScope = hook.GeographyScope;
         }
 
     }

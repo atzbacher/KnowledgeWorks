@@ -44,5 +44,20 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("study_setting")]
         public string? StudySetting { get; init; }
+
+        [JsonPropertyName("site_count")]
+        public int? SiteCount { get; init; }
+
+        [JsonPropertyName("trial_classification")]
+        public string? TrialClassification { get; init; }
+
+        [JsonPropertyName("is_registry_study")]
+        public bool? IsRegistryStudy { get; init; }
+
+        [JsonPropertyName("is_cohort_study")]
+        public bool? IsCohortStudy { get; init; }
+
+        [JsonPropertyName("geography_scope")]
+        public string? GeographyScope { get; init; }
     }
 }
