@@ -4,7 +4,7 @@ using LM.Review.Core.Models;
 
 namespace LM.App.Wpf.Services.Review.Design;
 
-internal sealed class StageBlueprint
+public sealed class StageBlueprint
 {
     public StageBlueprint(
         string stageId,
