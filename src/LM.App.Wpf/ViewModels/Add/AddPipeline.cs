@@ -726,14 +726,38 @@ namespace LM.App.Wpf.ViewModels
                 var hookTable = new HookM.DataExtractionTable
                 {
                     Title = string.IsNullOrWhiteSpace(table.Title) ? "Table" : table.Title,
+                    FriendlyName = string.IsNullOrWhiteSpace(table.FriendlyName) ? null : table.FriendlyName,
                     Caption = table.Classification.ToString(),
                     SourcePath = NormalizeWorkspacePath(table.CsvRelativePath),
+                    ImagePath = NormalizeWorkspacePath(table.ImageRelativePath),
                     Pages = table.PageNumbers.Select(p => p.ToString(CultureInfo.InvariantCulture)).ToList(),
-                    ProvenanceHash = FormatProvenanceHash(table.ProvenanceHash)
+                    ProvenanceHash = FormatProvenanceHash(table.ProvenanceHash),
+                    ImageProvenanceHash = FormatProvenanceHash(table.ImageProvenanceHash)
                 };
 
                 hookTable.LinkedEndpointIds.AddRange(linkedEndpoints);
                 hookTable.LinkedInterventionIds.AddRange(linkedInterventions);
+                hookTable.Tags.AddRange(table.Tags);
+                hookTable.Regions.AddRange(table.Regions.Select(static region => new HookM.DataExtractionRegion
+                {
+                    PageNumber = region.PageNumber,
+                    X = region.X,
+                    Y = region.Y,
+                    Width = region.Width,
+                    Height = region.Height,
+                    Label = region.Label
+                }));
+                hookTable.PagePositions.AddRange(table.PageLocations.Select(static location => new HookM.DataExtractionPagePosition
+                {
+                    PageNumber = location.PageNumber,
+                    Left = location.Left,
+                    Top = location.Top,
+                    Width = location.Width,
+                    Height = location.Height,
+                    PageWidth = location.PageWidth,
+                    PageHeight = location.PageHeight
+                }));
+
                 tableHooks.Add(hookTable);
             }
 

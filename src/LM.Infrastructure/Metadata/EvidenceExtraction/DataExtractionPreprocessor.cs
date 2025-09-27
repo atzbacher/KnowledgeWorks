@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using LM.Core.Abstractions;
 using LM.Core.Models.DataExtraction;
 using LM.Core.Utils;
-using LM.Infrastructure.Metadata.EvidenceExtraction;
+using LM.Infrastructure.Metadata.EvidenceExtraction.Tables;
 using UglyToad.PdfPig;
 
 namespace LM.Infrastructure.Metadata.EvidenceExtraction
@@ -45,7 +45,7 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
             using var document = PdfDocument.Open(pdfPath);
 
             var sections = SectionExtractor.Extract(document);
-            var tables = await ExtractTablesAsync(document, stagingRoot, hash, ct).ConfigureAwait(false);
+            var tables = await ExtractTablesAsync(document, pdfPath, stagingRoot, hash, ct).ConfigureAwait(false);
             var figures = await ExtractFiguresAsync(document, stagingRoot, hash, ct).ConfigureAwait(false);
 
             var provenance = new EvidenceProvenance
@@ -70,30 +70,44 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
             };
         }
 
-        private Task<IReadOnlyList<PreprocessedTable>> ExtractTablesAsync(PdfDocument document, string stagingRoot, string hash, CancellationToken ct)
+        private async Task<IReadOnlyList<PreprocessedTable>> ExtractTablesAsync(PdfDocument document,
+                                                                                string pdfPath,
+                                                                                string stagingRoot,
+                                                                                string hash,
+                                                                                CancellationToken ct)
         {
-            var extractor = new SimpleTableExtractor();
-            var tables = extractor.Extract(document, Path.Combine(stagingRoot, "tables"), hash);
-            var normalized = new List<PreprocessedTable>();
+            var extractor = new TabulaTableExtractor(new TabulaTableImageWriter());
+            var absoluteTablesRoot = Path.Combine(stagingRoot, "tables");
+            var tables = await extractor.ExtractAsync(document, pdfPath, absoluteTablesRoot, hash, ct).ConfigureAwait(false);
+
+            var normalized = new List<PreprocessedTable>(tables.Count);
             foreach (var table in tables)
             {
-                var normalizedPath = EvidenceStagingLayout.NormalizeRelative(_workspace, table.CsvRelativePath);
+                var normalizedCsv = EvidenceStagingLayout.NormalizeRelative(_workspace, table.CsvRelativePath);
+                var normalizedImage = EvidenceStagingLayout.NormalizeRelative(_workspace, table.ImageRelativePath);
+
                 normalized.Add(new PreprocessedTable
                 {
                     Id = table.Id,
                     Title = table.Title,
+                    FriendlyName = table.FriendlyName,
                     Classification = table.Classification,
                     Columns = table.Columns,
                     Rows = table.Rows,
                     PageNumbers = table.PageNumbers,
-                    CsvRelativePath = normalizedPath,
+                    CsvRelativePath = normalizedCsv,
+                    ImageRelativePath = normalizedImage,
                     DetectedPopulations = table.DetectedPopulations,
                     DetectedEndpoints = table.DetectedEndpoints,
-                    ProvenanceHash = table.ProvenanceHash
+                    Tags = table.Tags,
+                    Regions = table.Regions.ToArray(),
+                    PageLocations = table.PageLocations.ToArray(),
+                    ProvenanceHash = table.ProvenanceHash,
+                    ImageProvenanceHash = table.ImageProvenanceHash
                 });
             }
 
-            return Task.FromResult<IReadOnlyList<PreprocessedTable>>(normalized);
+            return normalized;
         }
 
         private async Task<IReadOnlyList<PreprocessedFigure>> ExtractFiguresAsync(PdfDocument document, string stagingRoot, string hash, CancellationToken ct)

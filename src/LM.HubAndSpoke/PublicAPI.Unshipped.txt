@@ -343,6 +343,22 @@ LM.HubSpoke.Models.DataExtractionArtifact.Tags.get -> System.Collections.Generic
 LM.HubSpoke.Models.DataExtractionArtifact.Tags.init -> void
 LM.HubSpoke.Models.DataExtractionArtifact.Title.get -> string!
 LM.HubSpoke.Models.DataExtractionArtifact.Title.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition
+LM.HubSpoke.Models.DataExtractionPagePosition.DataExtractionPagePosition() -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.Height.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.Height.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.Left.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.Left.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.PageHeight.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.PageHeight.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.PageNumber.get -> int
+LM.HubSpoke.Models.DataExtractionPagePosition.PageNumber.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.PageWidth.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.PageWidth.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.Top.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.Top.init -> void
+LM.HubSpoke.Models.DataExtractionPagePosition.Width.get -> double
+LM.HubSpoke.Models.DataExtractionPagePosition.Width.init -> void
 LM.HubSpoke.Models.DataExtractionFigure
 LM.HubSpoke.Models.DataExtractionFigure.DataExtractionFigure() -> void
 LM.HubSpoke.Models.DataExtractionFigure.FigureLabel.get -> string?
@@ -457,6 +473,14 @@ LM.HubSpoke.Models.DataExtractionTable.ColumnCountHint.get -> int?
 LM.HubSpoke.Models.DataExtractionTable.ColumnCountHint.init -> void
 LM.HubSpoke.Models.DataExtractionTable.DictionaryPath.get -> string?
 LM.HubSpoke.Models.DataExtractionTable.DictionaryPath.init -> void
+LM.HubSpoke.Models.DataExtractionTable.FriendlyName.get -> string?
+LM.HubSpoke.Models.DataExtractionTable.FriendlyName.init -> void
+LM.HubSpoke.Models.DataExtractionTable.ImagePath.get -> string?
+LM.HubSpoke.Models.DataExtractionTable.ImagePath.init -> void
+LM.HubSpoke.Models.DataExtractionTable.ImageProvenanceHash.get -> string?
+LM.HubSpoke.Models.DataExtractionTable.ImageProvenanceHash.init -> void
+LM.HubSpoke.Models.DataExtractionTable.PagePositions.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionPagePosition!>!
+LM.HubSpoke.Models.DataExtractionTable.PagePositions.init -> void
 LM.HubSpoke.Models.EntryHub
 LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.get -> string!
 LM.HubSpoke.Models.EntryHub.ConcurrencyStamp.init -> void
