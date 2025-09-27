@@ -16,6 +16,9 @@ namespace LM.Infrastructure.Hooks
     /// </summary>
     internal sealed class HookWriter
     {
+        private const int RetryDelayMilliseconds = 200;
+        private static readonly TimeSpan s_lockTimeout = TimeSpan.FromMinutes(5);
+
         private readonly IWorkSpaceService _workspace;
 
         private static readonly JsonSerializerOptions s_jsonOptions = new()
@@ -45,16 +48,7 @@ namespace LM.Infrastructure.Hooks
 
             var absPath = Path.Combine(absDir, "article.json");
 
-            await using var fs = new FileStream(
-                absPath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 4096,
-                useAsync: true);
-
-            await JsonSerializer.SerializeAsync(fs, hook, s_jsonOptions, ct).ConfigureAwait(false);
-            await fs.FlushAsync(ct).ConfigureAwait(false);
+            await WriteJsonAsync(absPath, hook, ct).ConfigureAwait(false);
         }
 
         public async Task SaveAttachmentsAsync(string entryId, HookM.AttachmentHook hook, CancellationToken ct)
@@ -70,16 +64,7 @@ namespace LM.Infrastructure.Hooks
 
             var absPath = Path.Combine(absDir, "attachments.json");
 
-            await using var fs = new FileStream(
-                absPath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 4096,
-                useAsync: true);
-
-            await JsonSerializer.SerializeAsync(fs, hook, s_jsonOptions, ct).ConfigureAwait(false);
-            await fs.FlushAsync(ct).ConfigureAwait(false);
+            await WriteJsonAsync(absPath, hook, ct).ConfigureAwait(false);
         }
 
         public async Task AppendChangeLogAsync(string entryId, HookM.EntryChangeLogHook hook, CancellationToken ct)
@@ -96,51 +81,206 @@ namespace LM.Infrastructure.Hooks
             Directory.CreateDirectory(absDir);
 
             var absPath = Path.Combine(absDir, "changelog.json");
-            HookM.EntryChangeLogHook existing;
 
-            if (File.Exists(absPath))
+            await WithFileLockAsync(
+                absPath,
+                async (context, token) =>
+                {
+                    var existing = await ReadChangeLogAsync(context.Path, token).ConfigureAwait(false)
+                                   ?? new HookM.EntryChangeLogHook();
+
+                    existing.Events ??= new List<HookM.EntryChangeLogEvent>();
+
+                    foreach (var evt in hook.Events)
+                    {
+                        if (evt is not null)
+                        {
+                            existing.Events.Add(evt);
+                        }
+                    }
+
+                    await SerializeToTempAsync(context.TempPath, existing, token).ConfigureAwait(false);
+                    await MoveTempIntoPlaceAsync(context.TempPath, context.Path, token).ConfigureAwait(false);
+                },
+                ct).ConfigureAwait(false);
+        }
+
+        private static Task WriteJsonAsync<T>(string path, T payload, CancellationToken ct)
+            => WithFileLockAsync(
+                path,
+                async (context, token) =>
+                {
+                    await SerializeToTempAsync(context.TempPath, payload, token).ConfigureAwait(false);
+                    await MoveTempIntoPlaceAsync(context.TempPath, context.Path, token).ConfigureAwait(false);
+                },
+                ct);
+
+        private static async Task WithFileLockAsync(string path, Func<FileLockContext, CancellationToken, Task> callback, CancellationToken ct)
+        {
+            ArgumentNullException.ThrowIfNull(callback);
+
+            var directory = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(directory))
             {
+                Directory.CreateDirectory(directory);
+            }
+
+            var lockPath = path + ".lock";
+            var tempPath = path + ".tmp";
+
+            var lockHandle = AcquireLock(lockPath);
+            try
+            {
+                await callback(new FileLockContext(path, tempPath), ct).ConfigureAwait(false);
+            }
+            finally
+            {
+                await lockHandle.DisposeAsync().ConfigureAwait(false);
+
                 try
                 {
-                    await using var readStream = new FileStream(
-                        absPath,
-                        FileMode.Open,
-                        FileAccess.Read,
-                        FileShare.Read,
-                        bufferSize: 4096,
-                        useAsync: true);
-
-                    existing = await JsonSerializer.DeserializeAsync<HookM.EntryChangeLogHook>(readStream, s_jsonOptions, ct).ConfigureAwait(false)
-                               ?? new HookM.EntryChangeLogHook();
+                    File.Delete(lockPath);
                 }
                 catch
                 {
-                    existing = new HookM.EntryChangeLogHook();
+                    // Ignore lock cleanup issues.
+                }
+
+                if (File.Exists(tempPath))
+                {
+                    try { File.Delete(tempPath); }
+                    catch { /* best effort cleanup */ }
                 }
             }
-            else
+        }
+
+        private static async Task<HookM.EntryChangeLogHook?> ReadChangeLogAsync(string path, CancellationToken ct)
+        {
+            if (!File.Exists(path))
             {
-                existing = new HookM.EntryChangeLogHook();
+                return null;
             }
 
-            existing.Events ??= new List<HookM.EntryChangeLogEvent>();
-
-            foreach (var evt in hook.Events)
+            try
             {
-                if (evt is not null)
-                    existing.Events.Add(evt);
-            }
+                await using var readStream = new FileStream(
+                    path,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete,
+                    bufferSize: 4096,
+                    useAsync: true);
 
-            await using var fs = new FileStream(
-                absPath,
+                return await JsonSerializer.DeserializeAsync<HookM.EntryChangeLogHook>(readStream, s_jsonOptions, ct).ConfigureAwait(false);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static async Task SerializeToTempAsync<T>(string tempPath, T payload, CancellationToken ct)
+        {
+            await using var stream = new FileStream(
+                tempPath,
                 FileMode.Create,
                 FileAccess.Write,
                 FileShare.None,
                 bufferSize: 4096,
                 useAsync: true);
 
-            await JsonSerializer.SerializeAsync(fs, existing, s_jsonOptions, ct).ConfigureAwait(false);
-            await fs.FlushAsync(ct).ConfigureAwait(false);
+            await JsonSerializer.SerializeAsync(stream, payload, s_jsonOptions, ct).ConfigureAwait(false);
+            await stream.FlushAsync(ct).ConfigureAwait(false);
         }
+
+        private static async Task MoveTempIntoPlaceAsync(string tempPath, string destinationPath, CancellationToken ct)
+        {
+            var waitStart = DateTime.UtcNow;
+
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                try
+                {
+                    File.Move(tempPath, destinationPath, overwrite: true);
+                    return;
+                }
+                catch (IOException) when (ShouldRetry(waitStart))
+                {
+                    await Task.Delay(RetryDelayMilliseconds, ct).ConfigureAwait(false);
+                }
+                catch (UnauthorizedAccessException) when (ShouldRetry(waitStart))
+                {
+                    await Task.Delay(RetryDelayMilliseconds, ct).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static bool ShouldRetry(DateTime waitStart)
+            => DateTime.UtcNow - waitStart < s_lockTimeout;
+
+        private static FileStream AcquireLock(string lockPath)
+        {
+            var waitStart = DateTime.UtcNow;
+
+            while (true)
+            {
+                try
+                {
+                    var stream = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                    stream.SetLength(0);
+                    return stream;
+                }
+                catch (IOException) when (File.Exists(lockPath))
+                {
+                    if (ShouldBreakLock(lockPath, waitStart))
+                    {
+                        continue;
+                    }
+
+                    Thread.Sleep(RetryDelayMilliseconds);
+                }
+                catch (UnauthorizedAccessException) when (File.Exists(lockPath))
+                {
+                    if (ShouldBreakLock(lockPath, waitStart))
+                    {
+                        continue;
+                    }
+
+                    Thread.Sleep(RetryDelayMilliseconds);
+                }
+            }
+        }
+
+        private static bool ShouldBreakLock(string lockPath, DateTime waitStart)
+        {
+            if (DateTime.UtcNow - waitStart >= s_lockTimeout)
+            {
+                throw new IOException($"Timed out acquiring lock for '{lockPath}'.");
+            }
+
+            var lastWrite = File.GetLastWriteTimeUtc(lockPath);
+            if (lastWrite == DateTime.MinValue || DateTime.UtcNow - lastWrite > s_lockTimeout)
+            {
+                try
+                {
+                    File.Delete(lockPath);
+                    return true;
+                }
+                catch (IOException)
+                {
+                    // Someone else still holds the lock.
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    // Someone else still holds the lock.
+                }
+            }
+
+            return false;
+        }
+
+        private readonly record struct FileLockContext(string Path, string TempPath);
     }
 }
