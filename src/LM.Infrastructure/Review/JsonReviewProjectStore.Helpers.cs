@@ -204,12 +204,7 @@ internal sealed partial class JsonReviewProjectStore
             await JsonSerializer.SerializeAsync(stream, payload, _jsonOptions, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
 
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
-
-            File.Move(tmpPath, path, overwrite: true);
+            await ReplaceFileWithRetryAsync(tmpPath, path, ct).ConfigureAwait(false);
         }
         finally
         {
@@ -227,6 +222,35 @@ internal sealed partial class JsonReviewProjectStore
             if (File.Exists(tmpPath))
             {
                 try { File.Delete(tmpPath); } catch { }
+            }
+        }
+    }
+
+    private async Task ReplaceFileWithRetryAsync(string sourcePath, string destinationPath, CancellationToken ct)
+    {
+        var waitStart = DateTime.UtcNow;
+
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            try
+            {
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath);
+                }
+
+                File.Move(sourcePath, destinationPath, overwrite: true);
+                return;
+            }
+            catch (IOException) when (DateTime.UtcNow - waitStart < _lockTimeout)
+            {
+                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
+            }
+            catch (UnauthorizedAccessException) when (DateTime.UtcNow - waitStart < _lockTimeout)
+            {
+                await Task.Delay(_ioRetryDelay, ct).ConfigureAwait(false);
             }
         }
     }
