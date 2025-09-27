@@ -143,21 +143,33 @@ LM.Core.Models.DataExtraction.PreprocessedTable.Columns.get -> System.Collection
 LM.Core.Models.DataExtraction.PreprocessedTable.Columns.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.CsvRelativePath.get -> string!
 LM.Core.Models.DataExtraction.PreprocessedTable.CsvRelativePath.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.FriendlyName.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.FriendlyName.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.ImageProvenanceHash.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.ImageProvenanceHash.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.ImageRelativePath.get -> string!
+LM.Core.Models.DataExtraction.PreprocessedTable.ImageRelativePath.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.DetectedEndpoints.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.Core.Models.DataExtraction.PreprocessedTable.DetectedEndpoints.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.DetectedPopulations.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.Core.Models.DataExtraction.PreprocessedTable.DetectedPopulations.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.Id.get -> string!
 LM.Core.Models.DataExtraction.PreprocessedTable.Id.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.PageLocations.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TablePageLocation!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.PageLocations.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.PageNumbers.get -> System.Collections.Generic.IReadOnlyList<int>!
 LM.Core.Models.DataExtraction.PreprocessedTable.PageNumbers.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.PreprocessedTable() -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.ProvenanceHash.get -> string!
 LM.Core.Models.DataExtraction.PreprocessedTable.ProvenanceHash.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Regions.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TableRegion!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.Regions.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.Rows.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TableRowMapping!>!
 LM.Core.Models.DataExtraction.PreprocessedTable.Rows.init -> void
 LM.Core.Models.DataExtraction.PreprocessedTable.Title.get -> string!
 LM.Core.Models.DataExtraction.PreprocessedTable.Title.init -> void
+LM.Core.Models.DataExtraction.PreprocessedTable.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.Core.Models.DataExtraction.PreprocessedTable.Tags.init -> void
 LM.Core.Models.DataExtraction.StructuredSection
 LM.Core.Models.DataExtraction.StructuredSection.Body.get -> string!
 LM.Core.Models.DataExtraction.StructuredSection.Body.init -> void
@@ -183,6 +195,22 @@ LM.Core.Models.DataExtraction.TableColumnMapping.NormalizedHeader.init -> void
 LM.Core.Models.DataExtraction.TableColumnMapping.Role.get -> LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnMapping.Role.init -> void
 LM.Core.Models.DataExtraction.TableColumnMapping.TableColumnMapping() -> void
+LM.Core.Models.DataExtraction.TablePageLocation
+LM.Core.Models.DataExtraction.TablePageLocation.Create(int, double, double, double, double, double, double) -> LM.Core.Models.DataExtraction.TablePageLocation
+LM.Core.Models.DataExtraction.TablePageLocation.Height.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Height.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Left.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Left.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.get -> int
+LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Top.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Top.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Width.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Width.init -> void
 LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnRole.Intervention = 2 -> LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnRole.Measure = 6 -> LM.Core.Models.DataExtraction.TableColumnRole
@@ -199,6 +227,21 @@ LM.Core.Models.DataExtraction.TableRowMapping.Role.init -> void
 LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.get -> int
 LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.init -> void
 LM.Core.Models.DataExtraction.TableRowMapping.TableRowMapping() -> void
+LM.Core.Models.DataExtraction.TableRegion
+LM.Core.Models.DataExtraction.TableRegion.Create(int, double, double, double, double, string?) -> LM.Core.Models.DataExtraction.TableRegion
+LM.Core.Models.DataExtraction.TableRegion.Height.get -> double
+LM.Core.Models.DataExtraction.TableRegion.Height.init -> void
+LM.Core.Models.DataExtraction.TableRegion.Label.get -> string?
+LM.Core.Models.DataExtraction.TableRegion.Label.init -> void
+LM.Core.Models.DataExtraction.TableRegion.PageNumber.get -> int
+LM.Core.Models.DataExtraction.TableRegion.PageNumber.init -> void
+LM.Core.Models.DataExtraction.TableRegion.TableRegion() -> void
+LM.Core.Models.DataExtraction.TableRegion.Width.get -> double
+LM.Core.Models.DataExtraction.TableRegion.Width.init -> void
+LM.Core.Models.DataExtraction.TableRegion.X.get -> double
+LM.Core.Models.DataExtraction.TableRegion.X.init -> void
+LM.Core.Models.DataExtraction.TableRegion.Y.get -> double
+LM.Core.Models.DataExtraction.TableRegion.Y.init -> void
 LM.Core.Models.DataExtraction.TableRowRole
 LM.Core.Models.DataExtraction.TableRowRole.Baseline = 2 -> LM.Core.Models.DataExtraction.TableRowRole
 LM.Core.Models.DataExtraction.TableRowRole.Footnote = 4 -> LM.Core.Models.DataExtraction.TableRowRole

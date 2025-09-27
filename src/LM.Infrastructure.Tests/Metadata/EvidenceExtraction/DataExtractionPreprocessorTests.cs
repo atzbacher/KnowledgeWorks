@@ -40,9 +40,24 @@ namespace LM.Infrastructure.Tests.Metadata.EvidenceExtraction
             Assert.Contains("Baseline Control", table.DetectedPopulations, StringComparer.OrdinalIgnoreCase);
             Assert.Contains("Baseline Treatment", table.DetectedPopulations, StringComparer.OrdinalIgnoreCase);
             Assert.Equal(TableClassificationKind.Baseline, table.Classification);
+            Assert.False(string.IsNullOrWhiteSpace(table.FriendlyName));
+            Assert.NotEmpty(table.Tags);
+            Assert.NotEmpty(table.Regions);
+            Assert.NotEmpty(table.PageLocations);
+            Assert.False(string.IsNullOrWhiteSpace(table.ImageRelativePath));
+            Assert.False(string.IsNullOrWhiteSpace(table.ImageProvenanceHash));
 
             var absoluteTable = workspace.GetAbsolutePath(table.CsvRelativePath.Replace('/', Path.DirectorySeparatorChar));
             Assert.True(File.Exists(absoluteTable));
+            var absoluteImage = workspace.GetAbsolutePath(table.ImageRelativePath.Replace('/', Path.DirectorySeparatorChar));
+            Assert.True(File.Exists(absoluteImage));
+            foreach (var region in table.Regions)
+            {
+                Assert.InRange(region.X, 0d, 1d);
+                Assert.InRange(region.Y, 0d, 1d);
+                Assert.InRange(region.Width, 0d, 1d);
+                Assert.InRange(region.Height, 0d, 1d);
+            }
 
             Assert.NotEmpty(result.Figures);
             var figure = Assert.Single(result.Figures);

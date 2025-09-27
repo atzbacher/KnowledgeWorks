@@ -14,6 +14,8 @@
   <ItemGroup>
     <!-- Versions are supplied centrally -->
     <PackageReference Include="PdfPig" />
+    <PackageReference Include="Tabula" />
+    <PackageReference Include="Docnet.Core" />
     <PackageReference Include="DocumentFormat.OpenXml" />
     <PackageReference Include="EPPlus" />
     <PackageReference Include="SkiaSharp" />

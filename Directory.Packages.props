@@ -7,6 +7,8 @@
   <ItemGroup>
     <!-- === Text extraction & metadata === -->
     <PackageVersion Include="PdfPig" Version="0.1.10" />
+    <PackageVersion Include="Tabula" Version="0.1.5" />
+    <PackageVersion Include="Docnet.Core" Version="2.6.0" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
     <PackageVersion Include="SkiaSharp" Version="2.88.7" />
     <PackageVersion Include="EPPlus" Version="7.0.0" />
