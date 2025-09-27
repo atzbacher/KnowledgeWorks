@@ -55,13 +55,5 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             StudySetting = hook.StudySetting;
         }
 
-        public void ApplyTo(HookM.DataExtractionHook hook)
-        {
-            if (hook is null)
-                throw new ArgumentNullException(nameof(hook));
-
-            hook.StudyDesign = StudyDesign;
-            hook.StudySetting = StudySetting;
-        }
     }
 }

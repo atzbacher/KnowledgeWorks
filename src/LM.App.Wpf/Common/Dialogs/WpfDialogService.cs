@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.Views.Dialogs.Staging;
 using Microsoft.Extensions.DependencyInjection;

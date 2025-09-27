@@ -1,0 +1,23 @@
+<UserControl x:Class="LM.App.Wpf.Views.Controls.PdfDocumentView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework">
+  <swc:Grid>
+    <swc:ScrollViewer x:Name="PART_ScrollViewer"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto">
+      <swc:Grid x:Name="PART_PageRoot">
+        <swc:Image x:Name="PART_Image"
+                   Stretch="None"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   SnapsToDevicePixels="True" />
+        <swc:Canvas x:Name="PART_Overlay"
+                    Background="Transparent"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top" />
+      </swc:Grid>
+    </swc:ScrollViewer>
+  </swc:Grid>
+</UserControl>

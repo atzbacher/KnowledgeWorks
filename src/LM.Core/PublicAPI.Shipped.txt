@@ -1,1 +1,27 @@
 #nullable enable
+LM.Core.Models.DataExtraction.TablePageLocation
+LM.Core.Models.DataExtraction.TablePageLocation.TablePageLocation() -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Height.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Height.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Left.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Left.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.get -> int
+LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Top.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Top.init -> void
+LM.Core.Models.DataExtraction.TablePageLocation.Width.get -> double
+LM.Core.Models.DataExtraction.TablePageLocation.Width.init -> void
+LM.Core.Models.DataExtraction.TableRegion
+LM.Core.Models.DataExtraction.TableRegion.TableRegion() -> void
+LM.Core.Models.DataExtraction.TableRegion.Height.get -> double
+LM.Core.Models.DataExtraction.TableRegion.Height.init -> void
+LM.Core.Models.DataExtraction.TableRegion.Label.get -> string?
+LM.Core.Models.DataExtraction.TableRegion.Label.init -> void
+LM.Core.Models.DataExtraction.TableRegion.PageNumber.get -> int
+LM.Core.Models.DataExtraction.TableRegion.PageNumber.init -> void
+LM.Core.Models.DataExtraction.TableRegion.Width.get -> double
+LM.Core.Models.DataExtraction.TableRegion.Width.init -> void

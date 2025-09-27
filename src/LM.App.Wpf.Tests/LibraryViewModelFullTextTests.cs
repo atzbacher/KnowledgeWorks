@@ -553,6 +553,7 @@ namespace LM.App.Wpf.Tests
             public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
             public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
+            public bool? ShowDataExtractionWorkspace(StagingItem stagingItem) => null;
         }
 
         private sealed class NoopDataExtractionExporter : IDataExtractionPowerPointExporter, IDataExtractionWordExporter, IDataExtractionExcelExporter

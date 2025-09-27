@@ -26,6 +26,7 @@ namespace LM.App.Wpf.ViewModels
             public IReadOnlyList<string> Populations { get; init; } = Array.Empty<string>();
             public IReadOnlyList<string> Endpoints { get; init; } = Array.Empty<string>();
             public IReadOnlyList<int> Pages { get; init; } = Array.Empty<int>();
+            public IReadOnlyList<TableRegion> Regions { get; init; } = Array.Empty<TableRegion>();
         }
 
         public sealed class FigurePreview

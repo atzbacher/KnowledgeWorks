@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Models.DataExtraction;
+using LM.Review.Core.DataExtraction;
 using Tabula;
 using Tabula.Detectors;
 using Tabula.Extractors;
@@ -227,11 +228,43 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction.Tables
                 normalizedY = Math.Max(0d, 1d - normalizedHeight);
             }
 
-            var region = TableRegion.Create(pageNumber, normalizedX, normalizedY, normalizedWidth, normalizedHeight);
+            var region = new TableRegion
+            {
+                PageNumber = Math.Max(1, pageNumber),
+                X = Clamp01(normalizedX),
+                Y = Clamp01(normalizedY),
+                Width = Clamp01(normalizedWidth),
+                Height = Clamp01(normalizedHeight)
+            };
 
             var topFromTop = Math.Max(0d, pageHeight - Math.Max(0d, table.Top - pageArea.Bottom));
-            var location = TablePageLocation.Create(pageNumber, left, topFromTop, width, height, pageWidth, pageHeight);
+            if (pageWidth <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(pageWidth));
+            if (pageHeight <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(pageHeight));
+
+            var location = new TablePageLocation
+            {
+                PageNumber = Math.Max(1, pageNumber),
+                Left = Math.Max(0d, left),
+                Top = Math.Max(0d, topFromTop),
+                Width = Math.Max(0d, width),
+                Height = Math.Max(0d, height),
+                PageWidth = pageWidth,
+                PageHeight = pageHeight
+            };
             return (region, location);
+        }
+
+        private static double Clamp01(double value)
+        {
+            if (double.IsNaN(value))
+                return 0d;
+            if (value < 0d)
+                return 0d;
+            if (value > 1d)
+                return 1d;
+            return value;
         }
 
         private static IReadOnlyList<TableColumnMapping> BuildColumnMappings(IReadOnlyList<string> headerRow)

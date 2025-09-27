@@ -77,6 +77,15 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             Label = region.Label;
         }
 
+        public void Apply(int pageNumber, double x, double y, double width, double height)
+        {
+            PageNumber = pageNumber;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
+        }
+
         private static double Clamp01(double value)
         {
             if (double.IsNaN(value))
