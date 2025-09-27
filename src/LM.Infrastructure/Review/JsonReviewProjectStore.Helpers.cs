@@ -233,29 +233,42 @@ internal sealed partial class JsonReviewProjectStore
 
     private FileStream AcquireLock(string lockPath)
     {
+        var waitStart = DateTime.UtcNow;
+
         while (true)
         {
             try
             {
-                return new FileStream(lockPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                var stream = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+                stream.SetLength(0);
+                return stream;
             }
             catch (IOException) when (File.Exists(lockPath))
             {
                 var lastWrite = File.GetLastWriteTimeUtc(lockPath);
-                if (lastWrite == DateTime.MinValue || DateTime.UtcNow - lastWrite <= _lockTimeout)
+                if (lastWrite == DateTime.MinValue || DateTime.UtcNow - lastWrite > _lockTimeout)
+                {
+                    try
+                    {
+                        File.Delete(lockPath);
+                        continue;
+                    }
+                    catch (IOException)
+                    {
+                        // lock file is still busy; fall through to retry loop.
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // lock file is still busy; fall through to retry loop.
+                    }
+                }
+
+                if (DateTime.UtcNow - waitStart >= _lockTimeout)
                 {
                     throw;
                 }
 
-                try
-                {
-                    File.Delete(lockPath);
-                    continue;
-                }
-                catch
-                {
-                    throw;
-                }
+                Thread.Sleep(TimeSpan.FromMilliseconds(200));
             }
         }
     }
