@@ -29,6 +29,7 @@ namespace LM.App.Wpf.Services.Review
         private readonly IUserContext _userContext;
         private readonly IWorkSpaceService _workspace;
         private readonly ILitSearchRunPicker _runPicker;
+        private readonly IReviewCreationDiagnostics _diagnostics;
 
 
         public ReviewProjectLauncher(
@@ -41,7 +42,8 @@ namespace LM.App.Wpf.Services.Review
             IUserContext userContext,
             IWorkSpaceService workspace,
             ILitSearchRunPicker runPicker,
-            IMessageBoxService messageBoxService)
+            IMessageBoxService messageBoxService,
+            IReviewCreationDiagnostics diagnostics)
 
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -54,6 +56,7 @@ namespace LM.App.Wpf.Services.Review
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
             _messageBoxService = messageBoxService ?? throw new ArgumentNullException(nameof(messageBoxService));
+            _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
 
         }
 
@@ -61,16 +64,25 @@ namespace LM.App.Wpf.Services.Review
         {
             try
             {
+                _diagnostics.RecordStep("Starting review project creation flow.");
                 var selection = await _runPicker.PickAsync(cancellationToken);
                 if (selection is null)
 
                 {
+                    _diagnostics.RecordStep("Review project creation cancelled before selecting a run.");
                     return null;
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
 
+                _diagnostics.RecordStep($"Selected LitSearch run '{selection.RunId}' from entry '{selection.EntryId}'.");
+
                 var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
+                if (entry is null)
+                {
+                    _diagnostics.RecordStep($"No entry metadata loaded for '{selection.EntryId}'. Proceeding with defaults.");
+                }
+
                 var checkedEntryIds = selection.CheckedEntryIds.Count > 0
                     ? selection.CheckedEntryIds
                     : await LoadCheckedEntryIdsAsync(
@@ -81,10 +93,14 @@ namespace LM.App.Wpf.Services.Review
                 var project = CreateProject(selection, entry);
 
 
+                _diagnostics.RecordStep($"Created in-memory review project '{project.Id}' with name '{project.Name}'.");
                 await _workflowStore.SaveProjectAsync(project, cancellationToken);
+                _diagnostics.RecordStep($"Persisted review project '{project.Id}'.");
+                TryRecordProjectFileState(project);
 
                 var context = _hookContextFactory.CreateProjectCreated(project);
                 await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken);
+                _diagnostics.RecordStep($"Executed review hook orchestrator for project '{project.Id}'.");
 
                 var tags = BuildCreationTags(project, selection, entry, checkedEntryIds);
 
@@ -96,6 +112,8 @@ namespace LM.App.Wpf.Services.Review
                     tags,
                     cancellationToken);
 
+                _diagnostics.RecordStep($"Wrote change log entry for project '{project.Id}' as user '{_userContext.UserName}'.");
+
                 return project;
             }
             catch (OperationCanceledException)
@@ -104,6 +122,7 @@ namespace LM.App.Wpf.Services.Review
             }
             catch (Exception ex)
             {
+                _diagnostics.RecordException("Review project creation failed", ex);
                 _messageBoxService.Show(
                     ex.Message,
                     "Create review project",
@@ -117,17 +136,22 @@ namespace LM.App.Wpf.Services.Review
         {
             try
             {
+                _diagnostics.RecordStep("Starting review project load flow.");
                 var projectPath = PromptForProjectPath();
                 if (projectPath is null)
                 {
+                    _diagnostics.RecordStep("Review project load cancelled before selecting a file.");
                     return null;
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
 
+                _diagnostics.RecordStep($"Attempting to load review project from '{projectPath}'.");
+
                 var reference = ResolveProjectReference(projectPath);
                 if (string.IsNullOrWhiteSpace(reference.ProjectId))
                 {
+                    _diagnostics.RecordStep("Selected file was not a review project JSON inside the workspace.");
                     _messageBoxService.Show(
                         "Select a review project JSON inside the workspace to continue.",
                         "Load review project",
@@ -139,12 +163,14 @@ namespace LM.App.Wpf.Services.Review
                 var project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken);
                 if (project is null)
                 {
+                    _diagnostics.RecordStep($"Cache miss for project '{reference.ProjectId}'. Refreshing store.");
                     await _workflowStore.GetProjectsAsync(cancellationToken);
                     project = await _workflowStore.GetProjectAsync(reference.ProjectId!, cancellationToken);
                 }
 
                 if (project is null)
                 {
+                    _diagnostics.RecordStep($"Project '{reference.ProjectId}' could not be loaded from workspace cache.");
                     _messageBoxService.Show(
                         $"Project '{reference.ProjectId}' could not be loaded from the workspace.",
                         "Load review project",
@@ -162,6 +188,8 @@ namespace LM.App.Wpf.Services.Review
                     tags,
                     cancellationToken);
 
+                _diagnostics.RecordStep($"Recorded load request change log for project '{project.Id}'.");
+
                 return project;
             }
             catch (OperationCanceledException)
@@ -170,6 +198,7 @@ namespace LM.App.Wpf.Services.Review
             }
             catch (Exception ex)
             {
+                _diagnostics.RecordException("Review project load failed", ex);
                 _messageBoxService.Show(
                     ex.Message,
                     "Load review project",
@@ -450,5 +479,28 @@ namespace LM.App.Wpf.Services.Review
 
 
         private sealed record ProjectReference(string AbsolutePath, string? ProjectId, string? RelativePath);
+
+        private void TryRecordProjectFileState(ReviewProject project)
+        {
+            try
+            {
+                var workspaceRoot = _workspace.GetWorkspaceRoot();
+                var projectDirectory = Path.Combine(workspaceRoot, "reviews", project.Id);
+                var projectFile = Path.Combine(projectDirectory, "project.json");
+
+                if (File.Exists(projectFile))
+                {
+                    _diagnostics.RecordStep($"Confirmed project file exists at '{projectFile}'.");
+                }
+                else
+                {
+                    _diagnostics.RecordStep($"Project file missing after save. Expected path '{projectFile}'.");
+                }
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or PathTooLongException)
+            {
+                _diagnostics.RecordException("Failed to verify project file existence", ex);
+            }
+        }
     }
 }
