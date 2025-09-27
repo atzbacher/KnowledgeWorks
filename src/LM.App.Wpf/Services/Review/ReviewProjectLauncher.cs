@@ -30,6 +30,7 @@ namespace LM.App.Wpf.Services.Review
         private readonly IWorkSpaceService _workspace;
         private readonly ILitSearchRunPicker _runPicker;
         private readonly IReviewCreationDiagnostics _diagnostics;
+        private readonly TimeSpan _saveProjectTimeout;
 
 
         public ReviewProjectLauncher(
@@ -43,7 +44,8 @@ namespace LM.App.Wpf.Services.Review
             IWorkSpaceService workspace,
             ILitSearchRunPicker runPicker,
             IMessageBoxService messageBoxService,
-            IReviewCreationDiagnostics diagnostics)
+            IReviewCreationDiagnostics diagnostics,
+            TimeSpan? saveProjectTimeout = null)
 
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -57,6 +59,11 @@ namespace LM.App.Wpf.Services.Review
             _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
             _messageBoxService = messageBoxService ?? throw new ArgumentNullException(nameof(messageBoxService));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
+            _saveProjectTimeout = saveProjectTimeout ?? TimeSpan.FromSeconds(30);
+            if (_saveProjectTimeout <= TimeSpan.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(saveProjectTimeout), saveProjectTimeout, "Save timeout must be positive.");
+            }
 
         }
 
@@ -94,7 +101,18 @@ namespace LM.App.Wpf.Services.Review
 
 
                 _diagnostics.RecordStep($"Created in-memory review project '{project.Id}' with name '{project.Name}'.");
-                await _workflowStore.SaveProjectAsync(project, cancellationToken);
+                using var saveTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                saveTimeoutCts.CancelAfter(_saveProjectTimeout);
+                try
+                {
+                    await _workflowStore.SaveProjectAsync(project, saveTimeoutCts.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested && saveTimeoutCts.IsCancellationRequested)
+                {
+                    throw new TimeoutException(
+                        "Saving the review project took too long. Ensure workspace sync has finished and try again.",
+                        ex);
+                }
                 _diagnostics.RecordStep($"Persisted review project '{project.Id}'.");
                 TryRecordProjectFileState(project);
 
