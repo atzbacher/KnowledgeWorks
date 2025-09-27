@@ -1,0 +1,265 @@
+<Window x:Class="LM.App.Wpf.Views.ReviewWorkflowWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Review"
+        mc:Ignorable="d"
+        Title="Create review project"
+        Height="620"
+        Width="980"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+    </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Key="Enter" Modifiers="Control" Command="{Binding NextCommand}"/>
+        <KeyBinding Key="Right" Modifiers="Alt" Command="{Binding NextCommand}"/>
+        <KeyBinding Key="Left" Modifiers="Alt" Command="{Binding BackCommand}"/>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveCommand}"/>
+        <KeyBinding Key="N" Modifiers="Control" Command="{Binding AddLayerCommand}"/>
+        <KeyBinding Key="Delete" Command="{Binding RemoveLayerCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding CancelCommand}"/>
+    </Window.InputBindings>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Step indicator -->
+        <ItemsControl Grid.Row="0" ItemsSource="{Binding Steps}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:ReviewStepViewModel}">
+                    <Border x:Name="StepBorder"
+                            Margin="0,0,12,0"
+                            Padding="14,8"
+                            CornerRadius="6"
+                            Background="#FFE6E6E6">
+                        <TextBlock x:Name="StepText"
+                                   Text="{Binding Title}"
+                                   FontWeight="SemiBold"
+                                   Foreground="#FF2D2D2D"/>
+                    </Border>
+                    <DataTemplate.Triggers>
+                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                            <Setter TargetName="StepBorder" Property="Border.Background" Value="#FF0057B8"/>
+                            <Setter TargetName="StepText" Property="TextBlock.Foreground" Value="White"/>
+                        </DataTrigger>
+                    </DataTemplate.Triggers>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- Step content -->
+        <Grid Grid.Row="1">
+            <!-- Step 1: select run -->
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ReviewWorkflowStep.SelectRun}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                    <TextBlock Text="1. Choose the source run" FontWeight="Bold" FontSize="16"/>
+                    <TextBlock Text="Litsearch run" Margin="0,12,0,2"/>
+                    <ComboBox ItemsSource="{Binding LitSearchRuns}"
+                              SelectedItem="{Binding SelectedLitSearchRun, Mode=TwoWay}"
+                              IsEditable="False"/>
+                    <TextBlock Text="No litsearch runs detected. You can continue without linking a run."
+                               Foreground="#FF8A6E00"
+                               Margin="0,4,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasLitSearchRuns}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Text="Review type" Margin="0,18,0,2"/>
+                    <ComboBox ItemsSource="{Binding ProjectTypes}"
+                              SelectedItem="{Binding SelectedProjectType, Mode=TwoWay}"
+                              IsEditable="False"/>
+
+                    <TextBlock Text="Review title" Margin="0,18,0,2"/>
+                    <TextBox Text="{Binding ReviewTitle, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="14"
+                             Padding="6"/>
+
+                    <TextBlock Text="Metadata notes" Margin="0,18,0,2"/>
+                    <TextBox Text="{Binding MetadataNotes, UpdateSourceTrigger=PropertyChanged}"
+                             Height="140"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Padding="6"/>
+                </StackPanel>
+
+                <Border Grid.Column="1" Background="#FFF5F8FF" Padding="16" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Quick tips" FontWeight="Bold" FontSize="15"/>
+                        <TextBlock Text="• Select the litsearch run you want to base this review on." Margin="0,12,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="• Choose PICOS or a custom structure for screening." Margin="0,6,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="• Add any context, contact details or scope in metadata notes." Margin="0,6,0,0" TextWrapping="Wrap"/>
+                        <TextBlock Text="Created by:" Margin="0,18,0,2" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding CreatedBy}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Step 2: configure layers -->
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ReviewWorkflowStep.ConfigureLayers}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,18,0">
+                    <DockPanel>
+                        <TextBlock Text="2. Review layers" FontWeight="Bold" FontSize="16" DockPanel.Dock="Left"/>
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                            <Button Content="Add layer" Command="{Binding AddLayerCommand}" ToolTip="Ctrl+N" Margin="0,0,6,0"/>
+                            <Button Content="Remove" Command="{Binding RemoveLayerCommand}" ToolTip="Delete"/>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <ListBox ItemsSource="{Binding Layers}" SelectedItem="{Binding SelectedLayer, Mode=TwoWay}"
+                             Margin="0,12,0,0" DisplayMemberPath="Name">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ReviewLayerViewModel}">
+                                <StackPanel Margin="0,4">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding DisplayFieldsPreview}" FontSize="11" Foreground="#FF555555"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+
+                <Border Grid.Column="1" Padding="16" Background="#FFF8F8F8" CornerRadius="8">
+                    <ContentControl Content="{Binding SelectedLayer}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate DataType="{x:Type vm:ReviewLayerViewModel}">
+                                <StackPanel>
+                                    <TextBlock Text="Layer name"/>
+                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Padding="6" Margin="0,2,0,8"/>
+
+                                    <TextBlock Text="Layer kind"/>
+                                    <ComboBox ItemsSource="{Binding DataContext.LayerKinds, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              SelectedItem="{Binding Kind, Mode=TwoWay}"
+                                              Margin="0,2,0,8"/>
+
+                                    <TextBlock Text="Display mode"/>
+                                    <ComboBox ItemsSource="{Binding DataContext.DisplayModes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                              SelectedItem="{Binding DisplayMode, Mode=TwoWay}"
+                                              Margin="0,2,0,8"/>
+
+                                    <TextBlock Text="Visible fields (comma-separated)"/>
+                                    <TextBox Text="{Binding FieldsCsv, UpdateSourceTrigger=PropertyChanged}"
+                                             Margin="0,2,0,8" Padding="6" AcceptsReturn="False"/>
+
+                                    <TextBlock Text="Reviewer instructions"/>
+                                    <TextBox Text="{Binding Instructions, UpdateSourceTrigger=PropertyChanged}"
+                                             Height="120"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             Padding="6"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Border>
+            </Grid>
+
+            <!-- Step 3: overview -->
+            <Grid>
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ReviewWorkflowStep.Overview}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+
+                <StackPanel>
+                    <TextBlock Text="3. Overview" FontWeight="Bold" FontSize="16"/>
+                    <Border Margin="0,12,0,0" Padding="16" Background="#FFF7FBFF" CornerRadius="8">
+                        <StackPanel>
+                            <TextBlock Text="{Binding ReviewTitle}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding SelectedProjectType}" Margin="0,6,0,0"/>
+                            <TextBlock Text="{Binding SelectedLitSearchRun, StringFormat=Litsearch run: {0}}" Margin="0,6,0,0"/>
+                            <TextBlock Text="{Binding CreatedBy, StringFormat=Created by: {0}}" Margin="0,6,0,0"/>
+                            <TextBlock Text="{Binding MetadataNotes}" Margin="0,12,0,0" TextWrapping="Wrap" Foreground="#FF444444"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Layers" FontWeight="SemiBold" Margin="0,18,0,4"/>
+                    <ItemsControl ItemsSource="{Binding OverviewLayers}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:ReviewLayerViewModel}">
+                                <Border Margin="0,0,0,8" Padding="12" Background="#FFFFFFFF" CornerRadius="6" BorderBrush="#FFE0E0E0" BorderThickness="1">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Kind}" Margin="0,2,0,0" FontSize="11" Foreground="#FF666666"/>
+                                        <TextBlock Text="{Binding DisplayFieldsPreview}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Instructions}" Margin="0,6,0,0" TextWrapping="Wrap" Foreground="#FF444444"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Footer -->
+        <DockPanel Grid.Row="2" Margin="0,18,0,0">
+            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                <TextBlock Text="Ctrl+Enter / Alt+→ to advance" Foreground="#FF666666" Margin="0,0,12,0"/>
+                <TextBlock Text="Ctrl+S to save" Foreground="#FF666666"/>
+            </StackPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Back" Command="{Binding BackCommand}" MinWidth="90" Margin="0,0,8,0"/>
+                <Button Content="Next" Command="{Binding NextCommand}" MinWidth="90" Margin="0,0,8,0"/>
+                <Button Content="Save" Command="{Binding SaveCommand}" MinWidth="110" Margin="0,0,8,0"/>
+                <Button Content="Cancel" Command="{Binding CancelCommand}" MinWidth="90"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>
