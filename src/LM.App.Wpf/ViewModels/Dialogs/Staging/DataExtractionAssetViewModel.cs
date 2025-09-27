@@ -30,6 +30,12 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
         private string? _figureLabel;
         private string? _thumbnailPath;
         private string? _imagePath;
+        private string? _friendlyName;
+        private string? _notes;
+        private string? _linkedEndpointIds;
+        private string? _linkedInterventionIds;
+        private string? _tableImagePath;
+        private string? _imageProvenanceHash;
 
         public DataExtractionAssetViewModel(DataExtractionAssetKind kind,
                                             string id,
@@ -40,6 +46,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             _title = string.IsNullOrWhiteSpace(title) ? (kind == DataExtractionAssetKind.Table ? "Table" : "Figure") : title;
             _pages = string.Empty;
             Regions = new ObservableCollection<DataExtractionRegionViewModel>();
+            PagePositions = new ObservableCollection<DataExtractionPagePositionViewModel>();
+            _friendlyName = kind == DataExtractionAssetKind.Table ? _title : null;
         }
 
         public string Id { get; }
@@ -114,6 +122,44 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
             set => SetProperty(ref _imagePath, value);
         }
 
+        public string? FriendlyName
+        {
+            get => _friendlyName;
+            set => SetProperty(ref _friendlyName, value);
+        }
+
+        public string? Notes
+        {
+            get => _notes;
+            set => SetProperty(ref _notes, value);
+        }
+
+        public string? LinkedEndpointIds
+        {
+            get => _linkedEndpointIds;
+            set => SetProperty(ref _linkedEndpointIds, value);
+        }
+
+        public string? LinkedInterventionIds
+        {
+            get => _linkedInterventionIds;
+            set => SetProperty(ref _linkedInterventionIds, value);
+        }
+
+        public string? TableImagePath
+        {
+            get => _tableImagePath;
+            set => SetProperty(ref _tableImagePath, value);
+        }
+
+        public string? ImageProvenanceHash
+        {
+            get => _imageProvenanceHash;
+            set => SetProperty(ref _imageProvenanceHash, value);
+        }
+
+        public ObservableCollection<DataExtractionPagePositionViewModel> PagePositions { get; }
+
         public string DisplayName => _kind == DataExtractionAssetKind.Table
             ? FormattableString.Invariant($"Table · {Title}")
             : FormattableString.Invariant($"Figure · {Title}");
@@ -131,7 +177,13 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 ProvenanceHash = table.ProvenanceHash,
                 Tags = string.Join(", ", table.Tags),
                 ColumnHint = table.ColumnCountHint,
-                DictionaryPath = table.DictionaryPath
+                DictionaryPath = table.DictionaryPath,
+                FriendlyName = table.FriendlyName,
+                Notes = table.Notes,
+                LinkedEndpointIds = string.Join(", ", table.LinkedEndpointIds),
+                LinkedInterventionIds = string.Join(", ", table.LinkedInterventionIds),
+                TableImagePath = table.ImagePath,
+                ImageProvenanceHash = table.ImageProvenanceHash
             };
 
             foreach (var region in table.Regions)
@@ -139,6 +191,13 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 var regionVm = new DataExtractionRegionViewModel();
                 regionVm.Load(region);
                 vm.Regions.Add(regionVm);
+            }
+
+            foreach (var position in table.PagePositions)
+            {
+                var positionVm = new DataExtractionPagePositionViewModel();
+                positionVm.Load(position);
+                vm.PagePositions.Add(positionVm);
             }
 
             return vm;
@@ -158,7 +217,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Tags = string.Join(", ", figure.Tags),
                 FigureLabel = figure.FigureLabel,
                 ThumbnailPath = figure.ThumbnailPath,
-                ImagePath = figure.ImagePath
+                ImagePath = figure.ImagePath,
+                Notes = figure.Notes,
+                LinkedEndpointIds = string.Join(", ", figure.LinkedEndpointIds),
+                LinkedInterventionIds = string.Join(", ", figure.LinkedInterventionIds)
             };
 
             foreach (var region in figure.Regions)
@@ -189,7 +251,14 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 ColumnCountHint = ColumnHint,
                 DictionaryPath = DictionaryPath,
                 TableLabel = Caption,
-                Summary = Caption
+                Summary = Caption,
+                FriendlyName = string.IsNullOrWhiteSpace(FriendlyName) ? null : FriendlyName,
+                Notes = Notes,
+                LinkedEndpointIds = SplitCsv(LinkedEndpointIds),
+                LinkedInterventionIds = SplitCsv(LinkedInterventionIds),
+                ImagePath = TableImagePath,
+                ImageProvenanceHash = ImageProvenanceHash,
+                PagePositions = PagePositions.Select(static p => p.ToHookModel()).ToList()
             };
         }
 
@@ -210,7 +279,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Tags = SplitCsv(Tags),
                 FigureLabel = FigureLabel,
                 ThumbnailPath = ThumbnailPath,
-                ImagePath = ImagePath
+                ImagePath = ImagePath,
+                Notes = Notes,
+                LinkedEndpointIds = SplitCsv(LinkedEndpointIds),
+                LinkedInterventionIds = SplitCsv(LinkedInterventionIds)
             };
         }
 
@@ -269,6 +341,87 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 .Select(static part => part.Trim())
                 .Where(static part => !string.IsNullOrEmpty(part))
                 .ToList();
+        }
+    }
+
+    internal sealed class DataExtractionPagePositionViewModel : ObservableObject
+    {
+        private int _pageNumber;
+        private double _left;
+        private double _top;
+        private double _width;
+        private double _height;
+        private double _pageWidth;
+        private double _pageHeight;
+
+        public int PageNumber
+        {
+            get => _pageNumber;
+            set => SetProperty(ref _pageNumber, value);
+        }
+
+        public double Left
+        {
+            get => _left;
+            set => SetProperty(ref _left, value);
+        }
+
+        public double Top
+        {
+            get => _top;
+            set => SetProperty(ref _top, value);
+        }
+
+        public double Width
+        {
+            get => _width;
+            set => SetProperty(ref _width, value);
+        }
+
+        public double Height
+        {
+            get => _height;
+            set => SetProperty(ref _height, value);
+        }
+
+        public double PageWidth
+        {
+            get => _pageWidth;
+            set => SetProperty(ref _pageWidth, value);
+        }
+
+        public double PageHeight
+        {
+            get => _pageHeight;
+            set => SetProperty(ref _pageHeight, value);
+        }
+
+        public void Load(HookM.DataExtractionPagePosition position)
+        {
+            if (position is null)
+                throw new ArgumentNullException(nameof(position));
+
+            PageNumber = position.PageNumber;
+            Left = position.Left;
+            Top = position.Top;
+            Width = position.Width;
+            Height = position.Height;
+            PageWidth = position.PageWidth;
+            PageHeight = position.PageHeight;
+        }
+
+        public HookM.DataExtractionPagePosition ToHookModel()
+        {
+            return new HookM.DataExtractionPagePosition
+            {
+                PageNumber = PageNumber,
+                Left = Left,
+                Top = Top,
+                Width = Width,
+                Height = Height,
+                PageWidth = PageWidth,
+                PageHeight = PageHeight
+            };
         }
     }
 }
