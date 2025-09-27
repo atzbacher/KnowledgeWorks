@@ -6,7 +6,7 @@ using LM.Review.Core.Models;
 
 namespace LM.App.Wpf.ViewModels.Review;
 
-internal sealed class StageBlueprintViewModel : ObservableObject
+public sealed class StageBlueprintViewModel : ObservableObject
 {
     private string _name = string.Empty;
     private ReviewStageType _stageType;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LM.App.Wpf.Services.Review.Design;
 
-internal sealed class ProjectBlueprint
+public sealed class ProjectBlueprint
 {
     public ProjectBlueprint(
         string projectId,

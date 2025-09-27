@@ -13,7 +13,7 @@ using LM.Review.Core.Models;
 
 namespace LM.App.Wpf.ViewModels.Review;
 
-internal sealed class ProjectEditorViewModel : DialogViewModelBase
+public sealed class ProjectEditorViewModel : DialogViewModelBase
 {
     private readonly IReadOnlyList<ReviewStageType> _stageTypes = Enum.GetValues<ReviewStageType>();
     private readonly ObservableCollection<StageBlueprintViewModel> _stages;
