@@ -177,6 +177,7 @@ namespace LM.App.Wpf.Services.Review
                     continue;
                 }
                 catch (UnauthorizedAccessException) when (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
+t
                 {
                     continue;
                 }
@@ -218,8 +219,49 @@ namespace LM.App.Wpf.Services.Review
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                var label = hook is not null ? ResolveLabel(entry, hook) : ResolveFallbackLabel(entry);
+                var query = hook?.Query ?? string.Empty;
+
+                options.Add(new LitSearchRunOption(
+                    entry.Id,
+                    label,
+                    query,
+                    hookAbsolutePath ?? string.Empty,
+                    hookRelativePath,
+                    runs.OrderByDescending(static run => run.RunUtc).ToList()));
+            }
+
+            options.Sort(static (left, right) => string.Compare(left.Label, right.Label, true, CultureInfo.CurrentCulture));
+            return options;
+        }
+
+        private static async Task<LitSearchHook?> TryReadHookAsync(string hookAbsolutePath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await using var stream = await TryOpenHookStreamAsync(hookAbsolutePath, cancellationToken).ConfigureAwait(false);
+                if (stream is null)
+                {
+                    return null;
+                }
+
+                return await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+
+        private static async Task<FileStream?> TryOpenHookStreamAsync(string path, CancellationToken cancellationToken)
+        {
+            const int maxAttempts = 3;
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
                 try
                 {
+
                     await using var stream = new FileStream(
                         file,
                         FileMode.Open,
@@ -231,6 +273,7 @@ namespace LM.App.Wpf.Services.Review
                     var sidecar = await JsonSerializer.DeserializeAsync<CheckedEntryIdsSidecar>(stream, JsonStd.Options, cancellationToken)
                         .ConfigureAwait(false);
                     if (sidecar is null || string.IsNullOrWhiteSpace(sidecar.RunId))
+
                     {
                         continue;
                     }
@@ -240,6 +283,7 @@ namespace LM.App.Wpf.Services.Review
                     {
                         continue;
                     }
+
 
                     var savedUtc = sidecar.SavedUtc;
                     if (savedUtc == default)
@@ -251,6 +295,7 @@ namespace LM.App.Wpf.Services.Review
                     {
                         savedUtc = DateTime.SpecifyKind(savedUtc, DateTimeKind.Utc);
                     }
+
 
                     string relativePath;
                     try
@@ -309,6 +354,7 @@ namespace LM.App.Wpf.Services.Review
                 if (sidecars.TryGetValue(run.RunId, out var sidecar))
                 {
                     entryIds = sidecar.EntryIds;
+
                     absolute ??= sidecar.AbsolutePath;
                     relative ??= sidecar.RelativePath;
                     sidecars.Remove(run.RunId);
@@ -320,6 +366,7 @@ namespace LM.App.Wpf.Services.Review
                 }
 
                 var entryCount = entryIds.Count;
+
                 var totalHits = run.TotalHits > 0 ? run.TotalHits : entryCount;
                 runs.Add(new LitSearchRunOptionRun(
                     run.RunId,
@@ -330,6 +377,7 @@ namespace LM.App.Wpf.Services.Review
                     absolute,
                     relative,
                     entryIds));
+
             }
 
             return runs;
@@ -505,6 +553,7 @@ namespace LM.App.Wpf.Services.Review
             string RunId,
             DateTime SavedUtc,
             IReadOnlyList<string> EntryIds,
+
             string AbsolutePath,
             string RelativePath);
 

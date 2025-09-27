@@ -21,4 +21,5 @@ namespace LM.App.Wpf.Services.Review
         string? CheckedEntriesAbsolutePath,
         string? CheckedEntriesRelativePath,
         IReadOnlyList<string> CheckedEntryIds);
+
 }
