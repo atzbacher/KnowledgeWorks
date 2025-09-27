@@ -27,6 +27,7 @@ internal sealed class ReviewModule : IAppModule
             sp.GetRequiredService<IReviewHookOrchestrator>(),
             sp.GetRequiredService<IReviewHookContextFactory>()));
         services.AddSingleton<IReviewAnalyticsService, ReviewAnalyticsService>();
+        services.AddSingleton<IReviewCreationDiagnostics, ReviewCreationDiagnostics>();
 
         services.AddSingleton<IUserContext, UserContext>();
 

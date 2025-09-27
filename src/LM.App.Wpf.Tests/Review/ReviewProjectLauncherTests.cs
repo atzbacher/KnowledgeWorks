@@ -40,6 +40,7 @@ namespace LM.App.Wpf.Tests.Review
 
             var messageBox = new FakeMessageBoxService();
             using var workspace = new FakeWorkSpaceService();
+            var diagnostics = new FakeReviewCreationDiagnostics();
             var launcher = new ReviewProjectLauncher(
                 new FakeDialogService(),
                 new FakeEntryStore(new Entry
@@ -54,7 +55,8 @@ namespace LM.App.Wpf.Tests.Review
                 new FakeUserContext("tester"),
                 workspace,
                 new FakeRunPicker(selection),
-                messageBox);
+                messageBox,
+                diagnostics);
 
             try
             {
@@ -105,6 +107,7 @@ namespace LM.App.Wpf.Tests.Review
                 using var workspace = new FakeWorkSpaceService(workspaceRoot);
                 var workflowStore = new RecordingWorkflowStore();
                 var changeLogOrchestrator = new HookOrchestrator(workspace);
+                var diagnostics = new FakeReviewCreationDiagnostics();
                 var launcher = new ReviewProjectLauncher(
                     new FakeDialogService(),
                     new FakeEntryStore(new Entry
@@ -119,7 +122,8 @@ namespace LM.App.Wpf.Tests.Review
                     new FakeUserContext("tester"),
                     workspace,
                     new FakeRunPicker(selection),
-                    new FakeMessageBoxService());
+                    new FakeMessageBoxService(),
+                    diagnostics);
 
                 var project = await launcher.CreateProjectAsync(CancellationToken.None);
 
@@ -270,6 +274,21 @@ namespace LM.App.Wpf.Tests.Review
             }
 
             public string UserName { get; }
+        }
+
+        private sealed class FakeReviewCreationDiagnostics : IReviewCreationDiagnostics
+        {
+            public List<string> Entries { get; } = new();
+
+            public void RecordStep(string message)
+            {
+                Entries.Add($"INFO:{message}");
+            }
+
+            public void RecordException(string message, Exception exception)
+            {
+                Entries.Add($"ERROR:{message}:{exception.GetType().Name}");
+            }
         }
 
         private sealed class FakeWorkSpaceService : IWorkSpaceService, IDisposable
