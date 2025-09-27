@@ -172,14 +172,23 @@ namespace LM.App.Wpf.Services.Review
                         bufferSize: 4096,
                         useAsync: true);
                 }
-                catch (IOException) when (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
+                catch (IOException)
                 {
-                    continue;
+                    if (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
+                    {
+                        continue;
+                    }
+
+                    break;
                 }
-                catch (UnauthorizedAccessException) when (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
-t
+                catch (UnauthorizedAccessException)
                 {
-                    continue;
+                    if (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
+                    {
+                        continue;
+                    }
+
+                    break;
                 }
             }
 
@@ -219,49 +228,8 @@ t
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var label = hook is not null ? ResolveLabel(entry, hook) : ResolveFallbackLabel(entry);
-                var query = hook?.Query ?? string.Empty;
-
-                options.Add(new LitSearchRunOption(
-                    entry.Id,
-                    label,
-                    query,
-                    hookAbsolutePath ?? string.Empty,
-                    hookRelativePath,
-                    runs.OrderByDescending(static run => run.RunUtc).ToList()));
-            }
-
-            options.Sort(static (left, right) => string.Compare(left.Label, right.Label, true, CultureInfo.CurrentCulture));
-            return options;
-        }
-
-        private static async Task<LitSearchHook?> TryReadHookAsync(string hookAbsolutePath, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await using var stream = await TryOpenHookStreamAsync(hookAbsolutePath, cancellationToken).ConfigureAwait(false);
-                if (stream is null)
-                {
-                    return null;
-                }
-
-                return await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
-            {
-                return null;
-            }
-        }
-
-        private static async Task<FileStream?> TryOpenHookStreamAsync(string path, CancellationToken cancellationToken)
-        {
-            const int maxAttempts = 3;
-            for (var attempt = 0; attempt < maxAttempts; attempt++)
-            {
                 try
                 {
-
                     await using var stream = new FileStream(
                         file,
                         FileMode.Open,
@@ -273,7 +241,6 @@ t
                     var sidecar = await JsonSerializer.DeserializeAsync<CheckedEntryIdsSidecar>(stream, JsonStd.Options, cancellationToken)
                         .ConfigureAwait(false);
                     if (sidecar is null || string.IsNullOrWhiteSpace(sidecar.RunId))
-
                     {
                         continue;
                     }
@@ -283,7 +250,6 @@ t
                     {
                         continue;
                     }
-
 
                     var savedUtc = sidecar.SavedUtc;
                     if (savedUtc == default)
@@ -295,7 +261,6 @@ t
                     {
                         savedUtc = DateTime.SpecifyKind(savedUtc, DateTimeKind.Utc);
                     }
-
 
                     string relativePath;
                     try
@@ -320,11 +285,6 @@ t
                 {
                     // Ignore locked or malformed sidecar files.
                 }
-            }
-
-            if (results.Count == 0)
-            {
-                return Array.Empty<string>();
             }
 
             return results;
