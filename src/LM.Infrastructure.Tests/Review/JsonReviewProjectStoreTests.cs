@@ -205,6 +205,32 @@ public sealed class JsonReviewProjectStoreTests
     }
 
     [Fact]
+    public async Task SaveProjectAsync_HonorsCancellationWhenLockCannotBeAcquired()
+    {
+        using var workspace = new TempWorkspace();
+        var store = await CreateStoreAsync(workspace.Path);
+
+        var definition = CreateStageDefinition();
+        var project = ReviewProject.Create(
+            "proj-timeout",
+            "Timeout",
+            DateTimeOffset.UtcNow,
+            new[] { definition },
+            ReviewAuditTrail.Create());
+
+        var reviewsRoot = Path.Combine(workspace.Path, "reviews", project.Id);
+        Directory.CreateDirectory(reviewsRoot);
+        var lockPath = Path.Combine(reviewsRoot, "project.json.lock");
+
+        await using (new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+
+            await Assert.ThrowsAsync<TaskCanceledException>(() => store.SaveProjectAsync(project, cts.Token));
+        }
+    }
+
+    [Fact]
     public async Task SaveAssignmentAsync_IgnoresStaleLock()
     {
         using var workspace = new TempWorkspace();

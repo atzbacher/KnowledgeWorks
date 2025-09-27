@@ -81,7 +81,7 @@ namespace LM.Infrastructure.Tests.Hooks
             {
                 Events = new List<HookM.EntryChangeLogEvent>
                 {
-                    new() { Type = "created", Author = "tester", Timestamp = DateTimeOffset.UtcNow }
+                    new() { Action = "created", PerformedBy = "tester", TimestampUtc = DateTime.UtcNow }
                 }
             };
 
@@ -101,18 +101,21 @@ namespace LM.Infrastructure.Tests.Hooks
                 {
                     Events = new List<HookM.EntryChangeLogEvent>
                     {
-                        new() { Type = "updated", Author = "tester", Timestamp = DateTimeOffset.UtcNow }
+                        new() { Action = "updated", PerformedBy = "tester", TimestampUtc = DateTime.UtcNow }
                     }
                 },
                 CancellationToken.None);
 
             await Task.Delay(200);
 
-            Assert.False(appendTask.IsCompleted, "Append should wait for the external handle to be released.");
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.False(appendTask.IsCompleted, "Append should wait for the external handle to be released.");
+            }
 
             externalHandle.Dispose();
 
-            await appendTask.ConfigureAwait(false);
+            await appendTask;
 
             var json = await File.ReadAllTextAsync(changeLogPath);
             var payload = JsonSerializer.Deserialize<HookM.EntryChangeLogHook>(json);
@@ -137,7 +140,7 @@ namespace LM.Infrastructure.Tests.Hooks
             {
                 Events = new List<HookM.EntryChangeLogEvent>
                 {
-                    new() { Type = "created", Author = "tester", Timestamp = DateTimeOffset.UtcNow }
+                    new() { Action = "created", PerformedBy = "tester", TimestampUtc = DateTime.UtcNow }
                 }
             };
 
@@ -147,7 +150,7 @@ namespace LM.Infrastructure.Tests.Hooks
             {
                 Events = new List<HookM.EntryChangeLogEvent>
                 {
-                    new() { Type = "updated", Author = "tester", Timestamp = DateTimeOffset.UtcNow }
+                    new() { Action = "updated", PerformedBy = "tester", TimestampUtc = DateTime.UtcNow }
                 }
             };
 

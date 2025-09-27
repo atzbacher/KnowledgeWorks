@@ -169,6 +169,52 @@ namespace LM.App.Wpf.Tests.Review
             }
         }
 
+        [Fact]
+        public async Task CreateProjectAsync_ShowsTimeoutMessage_WhenSaveProjectTimesOut()
+        {
+            var selection = new LitSearchRunSelection(
+                "entry-1",
+                "hooks/run.json",
+                "hooks/run.json",
+                "run-1",
+                null,
+                null,
+                Array.Empty<string>());
+
+            var messageBox = new FakeMessageBoxService();
+            using var workspace = new FakeWorkSpaceService();
+            var diagnostics = new FakeReviewCreationDiagnostics();
+            var launcher = new ReviewProjectLauncher(
+                new FakeDialogService(),
+                new FakeEntryStore(new Entry
+                {
+                    Id = selection.EntryId,
+                    Title = "Sample Entry"
+                }),
+                new TimeoutWorkflowStore(),
+                new FakeReviewHookContextFactory(),
+                new FakeReviewHookOrchestrator(),
+                new HookOrchestrator(workspace),
+                new FakeUserContext("tester"),
+                workspace,
+                new FakeRunPicker(selection),
+                messageBox,
+                diagnostics,
+                TimeSpan.FromMilliseconds(50));
+
+            var result = await launcher.CreateProjectAsync(CancellationToken.None);
+
+            Assert.Null(result);
+
+            var invocation = Assert.Single(messageBox.Invocations);
+            Assert.Equal(
+                "Saving the review project took too long. Ensure workspace sync has finished and try again.",
+                invocation.Message);
+            Assert.Equal("Create review project", invocation.Caption);
+            Assert.Equal(System.Windows.MessageBoxButton.OK, invocation.Buttons);
+            Assert.Equal(System.Windows.MessageBoxImage.Error, invocation.Image);
+        }
+
         private sealed class FakeDialogService : IDialogService
         {
             public string[]? ShowOpenFileDialog(FilePickerOptions options) => null;
@@ -375,6 +421,36 @@ namespace LM.App.Wpf.Tests.Review
                 _project = project;
                 return Task.CompletedTask;
             }
+
+            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+
+            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+        }
+
+        private sealed class TimeoutWorkflowStore : IReviewWorkflowStore
+        {
+            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewProject?>(null);
+
+            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewProject>>(Array.Empty<ReviewProject>());
+
+            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewStage?>(null);
+
+            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+
+            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
+                => Task.FromResult<ScreeningAssignment?>(null);
+
+            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+
+            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+                => Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
 
             public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
                 => Task.CompletedTask;
