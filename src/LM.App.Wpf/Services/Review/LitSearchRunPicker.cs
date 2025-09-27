@@ -333,6 +333,11 @@ namespace LM.App.Wpf.Services.Review
                     info.RelativePath));
         }
 
+        private static FileStream OpenSharedReadStream(string path)
+        {
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        }
+
         private static bool IsLitSearchEntry(Entry entry)
         {
             if (entry.Type == EntryType.LitSearch)
