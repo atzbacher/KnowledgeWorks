@@ -8,7 +8,7 @@
 
 ## 2. System Architecture Overview
 1. **Asset Preparation Layer**
-   - Deterministic services (PdfPig text parsing, PdfPig rasterization, Tabula-based table extraction, optional Tesseract OCR for image-only regions).
+   - Deterministic services (PdfPig text parsing, PdfPig rasterization, TabulaSharp-based table extraction, optional Tesseract OCR for image-only regions).
    - Writes normalized artifacts (full-page text, page PNGs, extracted tables) into staging storage under the entry workspace layout.
 2. **Staging Storage Schema**
    - `entries/<entryId>/source/` → raw PDFs, parser outputs, page images.
@@ -46,7 +46,7 @@
    - Saving a table region triggers deterministic extraction pipeline:
      1. Crop region using PdfPig rasterization for preview and high-res PNG export.
      2. For text-backed PDFs, clip text by geometry; fall back to Tesseract OCR for image-only sections.
-     3. Run Tabula/Camelot to infer table structure; user can adjust column count hints before regeneration.
+     3. Run TabulaSharp heuristics to infer table structure; user can adjust column count hints before regeneration.
      4. Persist CSV to `extraction/tables/<assetId>.csv` and metadata JSON referencing page, coordinates, hash, OCR transcript path.
    - Figure capture stores thumbnail (`*_thumb.png`) and original-resolution crop (`*_full.png`), along with tags for reuse in presentations.
 4. **Changelog Hook Updates**
@@ -63,7 +63,7 @@
 | `PdfPageImageService` | Deterministically rasterize pages, cache PNGs, supply crops for figures/tables. |
 | `PdfRegionTextExtractor` | Clip embedded text via PdfPig; fallback to OCR provider. |
 | `OcrProvider` | Wrap Tesseract CLI/engine with deterministic configuration, caching transcripts by hash. |
-| `TableStructureExtractor` | Invoke Tabula/Camelot with column hints; produce normalized CSV + diagnostics. |
+| `TableStructureExtractor` | Invoke TabulaSharp heuristics with column hints; produce normalized CSV + diagnostics. |
 | `DataExtractionWorkspaceViewModel` | Manage assets, commands, validation, synchronization with staging item. |
 | `DataExtractionRegionViewModel` | Track page, coordinates, zoom state, selection handles. |
 | `DictionarySuggestionService` | Map text/OCR tokens to canonical keys using configuration dictionaries. |
@@ -79,8 +79,8 @@
    - Implement WPF workspace window with PDF viewer, region selection, asset list management.
    - Wire workspace launch from staging editor via dialog service and command gating.
    - Support table/figure creation, basic metadata editing, and draft save (no commit yet).
-3. **Extraction Automation (Sprint 3)**
-   - Integrate Tabula/Camelot and OCR flows triggered from workspace actions.
+ 3. **Extraction Automation (Sprint 3)**
+   - Integrate TabulaSharp and OCR flows triggered from workspace actions.
    - Generate CSV thumbnails, high-res crops, and attach dictionary hints.
    - Persist outputs to staging storage, update changelog hook.
 4. **Commit & Export Integration (Sprint 4)**
@@ -100,7 +100,7 @@
 - **Security/Compliance**: Verify temporary OCR files are cleaned and sensitive data is stored within staging entry scope only.
 
 ## 7. Next Actions
-1. Confirm availability/licensing for Tabula/Camelot and Tesseract in deployment environments.
+1. Confirm packaging/licensing for TabulaSharp heuristics and Tesseract in deployment environments.
 2. Finalize dictionary syntax and storage location (e.g., `config/dictionaries/*.json`).
 3. Create detailed technical specifications for new services (`PdfRegionTextExtractor`, `EntryChangeLogService`).
 4. Spike workspace PDF viewer performance with representative PDFs.

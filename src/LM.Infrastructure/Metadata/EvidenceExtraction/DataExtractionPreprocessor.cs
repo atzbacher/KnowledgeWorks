@@ -19,11 +19,18 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
     {
         private readonly IHasher _hasher;
         private readonly IWorkSpaceService _workspace;
+        private readonly IPdfTableExtractor _tableExtractor;
 
         public DataExtractionPreprocessor(IHasher hasher, IWorkSpaceService workspace)
+            : this(hasher, workspace, new TabulaSharpTableExtractor(new TabulaTableImageWriter()))
+        {
+        }
+
+        public DataExtractionPreprocessor(IHasher hasher, IWorkSpaceService workspace, IPdfTableExtractor tableExtractor)
         {
             _hasher = hasher ?? throw new ArgumentNullException(nameof(hasher));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _tableExtractor = tableExtractor ?? throw new ArgumentNullException(nameof(tableExtractor));
         }
 
         public async Task<DataExtractionPreprocessResult> PreprocessAsync(DataExtractionPreprocessRequest request, CancellationToken ct = default)
@@ -76,9 +83,8 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction
                                                                                 string hash,
                                                                                 CancellationToken ct)
         {
-            var extractor = new TabulaTableExtractor(new TabulaTableImageWriter());
             var absoluteTablesRoot = Path.Combine(stagingRoot, "tables");
-            var tables = await extractor.ExtractAsync(document, pdfPath, absoluteTablesRoot, hash, ct).ConfigureAwait(false);
+            var tables = await _tableExtractor.ExtractAsync(document, pdfPath, absoluteTablesRoot, hash, ct).ConfigureAwait(false);
 
             var normalized = new List<PreprocessedTable>(tables.Count);
             foreach (var table in tables)

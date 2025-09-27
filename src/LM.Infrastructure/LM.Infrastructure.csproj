@@ -9,12 +9,12 @@
     <ProjectReference Include="..\LM.Core\LM.Core.csproj" />
     <ProjectReference Include="..\LM.HubAndSpoke\LM.HubSpoke.csproj" />
     <ProjectReference Include="..\LM.Review.Core\LM.Review.Core.csproj" />
+    <ProjectReference Include="..\TabulaSharp\TabulaSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Versions are supplied centrally -->
     <PackageReference Include="PdfPig" />
-    <PackageReference Include="Tabula" />
     <PackageReference Include="Docnet.Core" />
     <PackageReference Include="DocumentFormat.OpenXml" />
     <PackageReference Include="EPPlus" />
