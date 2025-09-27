@@ -19,5 +19,7 @@ namespace LM.App.Wpf.Services.Review
         string? ExecutedBy,
         bool IsFavorite,
         string? CheckedEntriesAbsolutePath,
-        string? CheckedEntriesRelativePath);
+        string? CheckedEntriesRelativePath,
+        IReadOnlyList<string> CheckedEntryIds);
+
 }

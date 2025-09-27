@@ -172,17 +172,29 @@ namespace LM.App.Wpf.Services.Review
                         bufferSize: 4096,
                         useAsync: true);
                 }
-                catch (IOException) when (attempt + 1 < maxAttempts)
+                catch (IOException) when (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
                 {
-                    await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+                    continue;
                 }
-                catch (UnauthorizedAccessException) when (attempt + 1 < maxAttempts)
+                catch (UnauthorizedAccessException) when (await HandleRetryAsync(attempt, maxAttempts, cancellationToken).ConfigureAwait(false))
+t
                 {
-                    await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+                    continue;
                 }
             }
 
             return null;
+        }
+
+        private static async Task<bool> HandleRetryAsync(int attempt, int maxAttempts, CancellationToken cancellationToken)
+        {
+            if (attempt + 1 >= maxAttempts)
+            {
+                return false;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+            return true;
         }
 
         private async Task<Dictionary<string, RunSidecarInfo>> LoadRunSidecarsAsync(
@@ -207,8 +219,49 @@ namespace LM.App.Wpf.Services.Review
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                var label = hook is not null ? ResolveLabel(entry, hook) : ResolveFallbackLabel(entry);
+                var query = hook?.Query ?? string.Empty;
+
+                options.Add(new LitSearchRunOption(
+                    entry.Id,
+                    label,
+                    query,
+                    hookAbsolutePath ?? string.Empty,
+                    hookRelativePath,
+                    runs.OrderByDescending(static run => run.RunUtc).ToList()));
+            }
+
+            options.Sort(static (left, right) => string.Compare(left.Label, right.Label, true, CultureInfo.CurrentCulture));
+            return options;
+        }
+
+        private static async Task<LitSearchHook?> TryReadHookAsync(string hookAbsolutePath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await using var stream = await TryOpenHookStreamAsync(hookAbsolutePath, cancellationToken).ConfigureAwait(false);
+                if (stream is null)
+                {
+                    return null;
+                }
+
+                return await JsonSerializer.DeserializeAsync<LitSearchHook>(stream, JsonStd.Options, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+            {
+                return null;
+            }
+        }
+
+        private static async Task<FileStream?> TryOpenHookStreamAsync(string path, CancellationToken cancellationToken)
+        {
+            const int maxAttempts = 3;
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
                 try
                 {
+
                     await using var stream = new FileStream(
                         file,
                         FileMode.Open,
@@ -220,16 +273,17 @@ namespace LM.App.Wpf.Services.Review
                     var sidecar = await JsonSerializer.DeserializeAsync<CheckedEntryIdsSidecar>(stream, JsonStd.Options, cancellationToken)
                         .ConfigureAwait(false);
                     if (sidecar is null || string.IsNullOrWhiteSpace(sidecar.RunId))
+
                     {
                         continue;
                     }
 
-                    var entryIds = sidecar.CheckedEntries?.EntryIds ?? Array.Empty<string>();
-                    var filteredCount = entryIds.Count(id => !string.IsNullOrWhiteSpace(id));
-                    if (filteredCount == 0)
+                    var entryIds = ExtractEntryIds(sidecar.CheckedEntries?.EntryIds);
+                    if (entryIds.Count == 0)
                     {
                         continue;
                     }
+
 
                     var savedUtc = sidecar.SavedUtc;
                     if (savedUtc == default)
@@ -241,6 +295,7 @@ namespace LM.App.Wpf.Services.Review
                     {
                         savedUtc = DateTime.SpecifyKind(savedUtc, DateTimeKind.Utc);
                     }
+
 
                     string relativePath;
                     try
@@ -255,7 +310,7 @@ namespace LM.App.Wpf.Services.Review
                     var info = new RunSidecarInfo(
                         sidecar.RunId,
                         savedUtc,
-                        filteredCount,
+                        entryIds,
                         file,
                         relativePath);
 
@@ -265,6 +320,11 @@ namespace LM.App.Wpf.Services.Review
                 {
                     // Ignore locked or malformed sidecar files.
                 }
+            }
+
+            if (results.Count == 0)
+            {
+                return Array.Empty<string>();
             }
 
             return results;
@@ -289,11 +349,12 @@ namespace LM.App.Wpf.Services.Review
                 }
 
                 var (absolute, relative) = ResolveCheckedEntriesPaths(workspaceRoot, run.CheckedEntryIdsPath);
-                var entryCount = 0;
+                IReadOnlyList<string> entryIds = Array.Empty<string>();
 
                 if (sidecars.TryGetValue(run.RunId, out var sidecar))
                 {
-                    entryCount = sidecar.EntryCount;
+                    entryIds = sidecar.EntryIds;
+
                     absolute ??= sidecar.AbsolutePath;
                     relative ??= sidecar.RelativePath;
                     sidecars.Remove(run.RunId);
@@ -304,6 +365,8 @@ namespace LM.App.Wpf.Services.Review
                     continue;
                 }
 
+                var entryCount = entryIds.Count;
+
                 var totalHits = run.TotalHits > 0 ? run.TotalHits : entryCount;
                 runs.Add(new LitSearchRunOptionRun(
                     run.RunId,
@@ -312,7 +375,9 @@ namespace LM.App.Wpf.Services.Review
                     run.ExecutedBy,
                     run.IsFavorite,
                     absolute,
-                    relative));
+                    relative,
+                    entryIds));
+
             }
 
             return runs;
@@ -326,16 +391,12 @@ namespace LM.App.Wpf.Services.Review
                 .Select(static info => new LitSearchRunOptionRun(
                     info.RunId,
                     info.SavedUtc,
-                    info.EntryCount,
+                    info.EntryIds.Count,
                     null,
                     false,
                     info.AbsolutePath,
-                    info.RelativePath));
-        }
-
-        private static FileStream OpenSharedReadStream(string path)
-        {
-            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    info.RelativePath,
+                    info.EntryIds));
         }
 
         private static bool IsLitSearchEntry(Entry entry)
@@ -458,10 +519,41 @@ namespace LM.App.Wpf.Services.Review
             return (absolute, relative);
         }
 
+        private static IReadOnlyList<string> ExtractEntryIds(IReadOnlyList<string>? entryIds)
+        {
+            if (entryIds is null || entryIds.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            var results = new List<string>(entryIds.Count);
+            foreach (var id in entryIds)
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    continue;
+                }
+
+                var trimmed = id.Trim();
+                if (trimmed.Length > 0)
+                {
+                    results.Add(trimmed);
+                }
+            }
+
+            if (results.Count == 0)
+            {
+                return Array.Empty<string>();
+            }
+
+            return results;
+        }
+
         private sealed record RunSidecarInfo(
             string RunId,
             DateTime SavedUtc,
-            int EntryCount,
+            IReadOnlyList<string> EntryIds,
+
             string AbsolutePath,
             string RelativePath);
 

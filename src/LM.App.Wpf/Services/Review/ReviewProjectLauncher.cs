@@ -68,8 +68,10 @@ namespace LM.App.Wpf.Services.Review
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
-                var checkedEntryIds = await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken)
-                    .ConfigureAwait(false);
+                var checkedEntryIds = selection.CheckedEntryIds.Count > 0
+                    ? selection.CheckedEntryIds
+                    : await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken)
+                        .ConfigureAwait(false);
 
                 var project = CreateProject(selection, entry);
 
