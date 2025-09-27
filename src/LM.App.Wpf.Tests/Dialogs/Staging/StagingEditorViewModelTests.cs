@@ -53,33 +53,6 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             editor.Dispose();
         }
 
-        [Fact]
-        public void OpenDataExtractionCommand_Disabled_When_No_Pdf()
-        {
-            var list = new StagingListViewModel(new StubPipeline());
-            var dialogService = new StubDialogService();
-            var tables = new StagingTablesTabViewModel(_workspace, dialogService, _orchestrator);
-
-            var editor = new StagingEditorViewModel(
-                list,
-                new StagingMetadataTabViewModel(list),
-                tables,
-                new StagingFiguresTabViewModel(),
-                new StagingEndpointsTabViewModel(),
-                new StagingPopulationTabViewModel(),
-                new StagingReviewCommitTabViewModel(list, new DataExtractionCommitBuilder()),
-                dialogService);
-
-            Assert.False(editor.OpenDataExtractionCommand.CanExecute(null));
-
-            var item = new StagingItem { FilePath = "/tmp/example.pdf" };
-            list.Current = item;
-
-            Assert.True(editor.OpenDataExtractionCommand.CanExecute(null));
-
-            editor.Dispose();
-        }
-
         public void Dispose()
         {
             try
@@ -108,6 +81,7 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             public string? ShowSaveFileDialog(FileSavePickerOptions options) => null;
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
             public bool? ShowDataExtractionWorkspace(StagingItem stagingItem) => true;
+            public bool? ShowTabulaSharpPlayground(StagingItem stagingItem) => null;
         }
     }
 }

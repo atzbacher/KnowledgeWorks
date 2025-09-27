@@ -11,6 +11,7 @@
       <Button Content="Add file..." Command="{Binding AddFilesCommand}"/>
       <Button Content="Bulk add folder..." Command="{Binding BulkAddFolderCommand}"/>
       <Button Content="Review staged…" Command="{Binding ReviewStagedCommand}"/>
+      <Button Content="Open and inspect" Command="{Binding OpenInspectCommand}"/>
       <Button Content="Commit selected" Command="{Binding CommitSelectedCommand}"/>
       <Button Content="Clear" Command="{Binding ClearCommand}"/>
     </StackPanel>

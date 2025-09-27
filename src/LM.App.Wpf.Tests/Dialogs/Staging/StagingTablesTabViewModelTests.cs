@@ -147,6 +147,8 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             public bool? ShowStagingEditor(StagingListViewModel stagingList) => false;
 
             public bool? ShowDataExtractionWorkspace(StagingItem stagingItem) => null;
+
+            public bool? ShowTabulaSharpPlayground(StagingItem stagingItem) => null;
         }
     }
 }

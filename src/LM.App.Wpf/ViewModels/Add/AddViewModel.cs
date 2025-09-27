@@ -10,6 +10,8 @@ using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.ViewModels.Playground;
+using LM.App.Wpf.Views.Playground;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
@@ -40,6 +42,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly RelayCommand _commitSelectedCommand;
         private readonly RelayCommand _clearCommand;
         private readonly RelayCommand _reviewStagedCommand;
+        private readonly RelayCommand _openInspectCommand;
         private bool _isInitialized;
         private bool _disposed;
         private bool _isBusy;
@@ -70,6 +73,9 @@ namespace LM.App.Wpf.ViewModels
                 services.AddSingleton(_stagingList);
                 services.AddTransient<StagingEditorViewModel>();
                 services.AddTransient<StagingEditorWindow>();
+                services.AddTransient<TabulaSharpPlaygroundEngine>();
+                services.AddTransient<TabulaSharpPlaygroundViewModel>();
+                services.AddTransient<TabulaSharpPlaygroundWindow>();
                 _dialogServiceProvider = services.BuildServiceProvider();
                 _dialogService = new WpfDialogService(_dialogServiceProvider);
             }
@@ -95,6 +101,7 @@ namespace LM.App.Wpf.ViewModels
             _commitSelectedCommand = new RelayCommand(async _ => await RunGuardedAsync(CommitSelectedAsync), CanCommitSelected);
             _clearCommand = new RelayCommand(_ => ExecuteClear(), _ => !IsBusy);
             _reviewStagedCommand = new RelayCommand(_ => ExecuteReviewStaged(), _ => CanReviewStaged());
+            _openInspectCommand = new RelayCommand(_ => ExecuteOpenInspect(), _ => CanOpenInspect());
         }
 
         public AddViewModel(IEntryStore store,
@@ -201,6 +208,7 @@ namespace LM.App.Wpf.ViewModels
                 _commitSelectedCommand.RaiseCanExecuteChanged();
                 _clearCommand.RaiseCanExecuteChanged();
                 _reviewStagedCommand.RaiseCanExecuteChanged();
+                _openInspectCommand.RaiseCanExecuteChanged();
                 _watchedFolders.UpdateParentBusy(value);
             }
         }
@@ -210,6 +218,7 @@ namespace LM.App.Wpf.ViewModels
         public System.Windows.Input.ICommand CommitSelectedCommand => _commitSelectedCommand;
         public System.Windows.Input.ICommand ClearCommand => _clearCommand;
         public System.Windows.Input.ICommand ReviewStagedCommand => _reviewStagedCommand;
+        public System.Windows.Input.ICommand OpenInspectCommand => _openInspectCommand;
 
         public System.Windows.Input.ICommand AddWatchedFolderCommand => _watchedFolders.AddWatchedFolderCommand;
         public System.Windows.Input.ICommand RemoveWatchedFolderCommand => _watchedFolders.RemoveWatchedFolderCommand;
@@ -288,6 +297,32 @@ namespace LM.App.Wpf.ViewModels
         private bool CanCommitSelected(object? _) => !IsBusy && _stagingList.HasSelectedItems;
         private bool CanReviewStaged() => !IsBusy && _stagingList.HasItems;
 
+        private bool CanOpenInspect()
+        {
+            if (IsBusy)
+            {
+                return false;
+            }
+
+            var current = _stagingList.Current;
+            if (current is null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(current.FilePath))
+            {
+                return false;
+            }
+
+            if (!string.Equals(Path.GetExtension(current.FilePath), ".pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return File.Exists(current.FilePath);
+        }
+
         private async Task RunGuardedAsync(Func<Task> action)
         {
             if (IsBusy)
@@ -313,6 +348,7 @@ namespace LM.App.Wpf.ViewModels
             else if (e.PropertyName == nameof(StagingListViewModel.HasItems))
             {
                 _reviewStagedCommand.RaiseCanExecuteChanged();
+                _openInspectCommand.RaiseCanExecuteChanged();
             }
             else if (e.PropertyName == nameof(StagingListViewModel.IndexLabel))
             {
@@ -322,11 +358,28 @@ namespace LM.App.Wpf.ViewModels
             {
                 OnPropertyChanged(nameof(Current));
                 OnPropertyChanged(nameof(IndexLabel));
+                _openInspectCommand.RaiseCanExecuteChanged();
             }
             else if (e.PropertyName == nameof(StagingListViewModel.SelectedType))
             {
                 OnPropertyChanged(nameof(SelectedType));
             }
+        }
+
+        private void ExecuteOpenInspect()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            var current = _stagingList.Current;
+            if (current is null)
+            {
+                return;
+            }
+
+            _dialogService.ShowTabulaSharpPlayground(current);
         }
     }
 }
