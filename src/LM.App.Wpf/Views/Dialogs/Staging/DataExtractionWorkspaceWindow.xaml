@@ -130,6 +130,22 @@
                       </swc:StackPanel>
 
                       <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Friendly name" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding FriendlyName, UpdateSourceTrigger=PropertyChanged}" Width="250">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <swc:TextBlock Text="Caption" Width="120" VerticalAlignment="Center" />
                         <swc:TextBox Text="{Binding Caption, UpdateSourceTrigger=PropertyChanged}" Width="250" />
                       </swc:StackPanel>
@@ -150,8 +166,55 @@
                       </swc:StackPanel>
 
                       <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Table image" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding TableImagePath}" Width="250" IsReadOnly="True" Background="Transparent">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Image hash" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding ImageProvenanceHash}" Width="250" IsReadOnly="True" Background="Transparent">
+                          <swc:TextBox.Style>
+                            <Style TargetType="swc:TextBox">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:TextBox.Style>
+                        </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <swc:TextBlock Text="Tags" Width="120" VerticalAlignment="Center" />
                         <swc:TextBox Text="{Binding Tags, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Linked endpoints" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding LinkedEndpointIds, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <swc:TextBlock Text="Linked interventions" Width="120" VerticalAlignment="Center" />
+                        <swc:TextBox Text="{Binding LinkedInterventionIds, UpdateSourceTrigger=PropertyChanged}" Width="250" />
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Margin="0,0,0,8">
+                        <swc:TextBlock Text="Notes" Width="120" />
+                        <swc:TextBox Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Width="320" Height="80" AcceptsReturn="True" TextWrapping="Wrap" />
                       </swc:StackPanel>
 
                       <swc:StackPanel Orientation="Horizontal"
@@ -233,6 +296,37 @@
                             </Style>
                           </swc:TextBox.Style>
                         </swc:TextBox>
+                      </swc:StackPanel>
+
+                      <swc:StackPanel Margin="0,0,0,8">
+                        <swc:TextBlock Text="Page positions" Width="120" />
+                        <swc:ItemsControl ItemsSource="{Binding PagePositions}">
+                          <swc:ItemsControl.Style>
+                            <Style TargetType="swc:ItemsControl">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Table">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </swc:ItemsControl.Style>
+                          <swc:ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DataExtractionPagePositionViewModel}">
+                              <swc:Border BorderBrush="#FFD0D5DD" BorderThickness="1" CornerRadius="6" Padding="6" Margin="0,0,0,6">
+                                <swc:StackPanel>
+                                  <swc:TextBlock Text="{Binding PageNumber, StringFormat=Page {0}}" FontWeight="SemiBold" />
+                                  <swc:TextBlock Text="{Binding Left, StringFormat=Left: {0:F2}}" />
+                                  <swc:TextBlock Text="{Binding Top, StringFormat=Top: {0:F2}}" />
+                                  <swc:TextBlock Text="{Binding Width, StringFormat=Width: {0:F2}}" />
+                                  <swc:TextBlock Text="{Binding Height, StringFormat=Height: {0:F2}}" />
+                                  <swc:TextBlock Text="{Binding PageWidth, StringFormat=Page width: {0:F0}}" />
+                                  <swc:TextBlock Text="{Binding PageHeight, StringFormat=Page height: {0:F0}}" />
+                                </swc:StackPanel>
+                              </swc:Border>
+                            </DataTemplate>
+                          </swc:ItemsControl.ItemTemplate>
+                        </swc:ItemsControl>
                       </swc:StackPanel>
 
                       <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">

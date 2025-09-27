@@ -442,7 +442,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 var table = new DataExtractionAssetViewModel(DataExtractionAssetKind.Table, Guid.NewGuid().ToString("N"), preview.Title)
                 {
                     Caption = preview.Classification.ToString(),
-                    Pages = string.Join(", ", preview.Pages)
+                    Pages = string.Join(", ", preview.Pages),
+                    FriendlyName = string.IsNullOrWhiteSpace(preview.Title) ? null : preview.Title,
+                    LinkedEndpointIds = string.Join(", ", preview.Endpoints)
                 };
 
                 foreach (var region in preview.Regions)
