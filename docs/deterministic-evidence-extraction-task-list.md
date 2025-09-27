@@ -8,7 +8,7 @@
 ## 2. Asset Ingestion Spokes
 - [ ] Extend `ArticleHook` ingestion to capture raw PDF assets, PubMed XML, and CT.gov XML in staging storage.
 - [ ] Implement PDF parsing pipeline (sections, captions) leveraging deterministic parsers (PdfPig/Textual structure).
-- [ ] Integrate Tabula/Camelot service for table-to-CSV extraction with checksum logging.
+- [ ] Integrate TabulaSharp heuristics for table-to-CSV extraction with checksum logging.
 - [ ] Add page-image extraction service (PdfPig) that stores per-page PNGs with hash metadata.
 - [ ] Update `TrialHook` to normalize trial registry data schemas and link to article metadata.
 

@@ -62,7 +62,10 @@ LM.Infrastructure.Metadata.CompositeMetadataExtractor.CompositeMetadataExtractor
 LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.FileMetadata!>!
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor! tableExtractor) -> void
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
 LM.Infrastructure.Review.ReviewHookContextFactory
 LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
 LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!

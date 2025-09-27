@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>TabulaSharp</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>KnowledgeWorks</Authors>
+    <Company>KnowledgeWorks</Company>
+    <Description>Lightweight table detection helpers for KnowledgeWorks preprocessing.</Description>
+    <PackageTags>tables;pdf</PackageTags>
+  </PropertyGroup>
+</Project>
