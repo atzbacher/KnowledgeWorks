@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <!-- Versions are supplied centrally -->
-    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="PdfPig" />
     <PackageReference Include="DocumentFormat.OpenXml" />
     <PackageReference Include="EPPlus" />
     <PackageReference Include="SkiaSharp" />
