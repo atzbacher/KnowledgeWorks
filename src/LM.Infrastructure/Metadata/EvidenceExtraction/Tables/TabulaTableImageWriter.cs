@@ -12,7 +12,7 @@ using SkiaSharp;
 
 namespace LM.Infrastructure.Metadata.EvidenceExtraction.Tables
 {
-    internal sealed class TabulaTableImageWriter
+    public sealed class TabulaTableImageWriter
     {
         private readonly PageDimensions _dimensions;
 

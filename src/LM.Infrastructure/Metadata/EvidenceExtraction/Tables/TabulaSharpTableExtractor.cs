@@ -24,7 +24,7 @@ namespace LM.Infrastructure.Metadata.EvidenceExtraction.Tables
                                                              CancellationToken ct);
     }
 
-    internal sealed class TabulaSharpTableExtractor : IPdfTableExtractor
+    public sealed class TabulaSharpTableExtractor : IPdfTableExtractor
     {
         private readonly TabulaSharpExtractor _extractor;
         private readonly TabulaTableImageWriter _imageWriter;

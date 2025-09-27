@@ -66,6 +66,13 @@ LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExt
 LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
 LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor
 LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.TabulaSharpTableExtractor(LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter! imageWriter) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.CreateDocumentReader(string! pdfPath) -> Docnet.Core.Readers.IDocReader!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.TabulaTableImageWriter(double scalingFactor = 2) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.WriteAsync(Docnet.Core.Readers.IDocReader! docReader, int pageNumber, string! tablesRoot, string! fileStem, LM.Core.Models.DataExtraction.TableRegion! region, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Review.ReviewHookContextFactory
 LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
 LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!
