@@ -5,6 +5,8 @@ using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.Views.Dialogs.Staging;
+using LM.App.Wpf.ViewModels.Playground;
+using LM.App.Wpf.Views.Playground;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LM.App.Wpf.Common.Dialogs
@@ -96,6 +98,26 @@ namespace LM.App.Wpf.Common.Dialogs
                 .FirstOrDefault(static w => w.IsActive);
             if (owner is not null)
                 window.Owner = owner;
+
+            return window.ShowDialog();
+        }
+
+        public bool? ShowTabulaSharpPlayground(StagingItem stagingItem)
+        {
+            if (stagingItem is null)
+                throw new ArgumentNullException(nameof(stagingItem));
+
+            using var scope = _services.CreateScope();
+            var viewModel = ActivatorUtilities.CreateInstance<TabulaSharpPlaygroundViewModel>(scope.ServiceProvider, stagingItem);
+            var window = ActivatorUtilities.CreateInstance<TabulaSharpPlaygroundWindow>(scope.ServiceProvider, viewModel);
+
+            var owner = System.Windows.Application.Current?.Windows
+                .OfType<System.Windows.Window>()
+                .FirstOrDefault(static w => w.IsActive);
+            if (owner is not null)
+            {
+                window.Owner = owner;
+            }
 
             return window.ShowDialog();
         }

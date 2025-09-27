@@ -88,9 +88,6 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,8,0,0">
-      <swc:Button Content="Data extraction…"
-                  Margin="0,0,12,0"
-                  Command="{Binding OpenDataExtractionCommand}" />
       <swc:Button Content="◀ Previous"
                   Margin="0,0,8,0"
                   Command="{Binding PrevCommand}" />
