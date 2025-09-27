@@ -627,7 +627,8 @@ namespace LM.App.Wpf.ViewModels
                 Classification = t.Classification,
                 Populations = t.DetectedPopulations,
                 Endpoints = t.DetectedEndpoints,
-                Pages = t.PageNumbers
+                Pages = t.PageNumbers,
+                Regions = t.Regions
             }).ToList();
 
             var figures = result.Figures.Select(f => new StagingEvidencePreview.FigurePreview

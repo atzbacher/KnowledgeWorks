@@ -226,9 +226,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
                 Height = 0.4
             };
 
-            region.Label = _kind == DataExtractionAssetKind.Table
-                ? FormattableString.Invariant($"Table {Regions.Count + 1}")
-                : FormattableString.Invariant($"Figure {Regions.Count + 1}");
+            region.Label = GetRegionLabel(Regions.Count + 1);
 
             Regions.Add(region);
         }
@@ -244,6 +242,22 @@ namespace LM.App.Wpf.ViewModels.Dialogs.Staging
 
         private bool CanRemoveRegion(DataExtractionRegionViewModel? region)
             => region is not null && Regions.Contains(region);
+
+        internal DataExtractionRegionViewModel CreateRegion(int pageNumber, double x, double y, double width, double height)
+        {
+            var region = new DataExtractionRegionViewModel();
+            region.Apply(pageNumber, x, y, width, height);
+            region.Label = GetRegionLabel(Regions.Count + 1);
+            Regions.Add(region);
+            return region;
+        }
+
+        private string GetRegionLabel(int index)
+        {
+            return _kind == DataExtractionAssetKind.Table
+                ? FormattableString.Invariant($"Table {index}")
+                : FormattableString.Invariant($"Figure {index}");
+        }
 
         private static List<string> SplitCsv(string? value)
         {

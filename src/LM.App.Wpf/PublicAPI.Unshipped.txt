@@ -65,6 +65,8 @@ LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Pages.get -> System.Co
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Pages.init -> void
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Populations.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Populations.init -> void
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Regions.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.TableRegion!>!
+LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Regions.init -> void
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.TablePreview() -> void
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Title.get -> string!
 LM.App.Wpf.ViewModels.StagingEvidencePreview.TablePreview.Title.init -> void
@@ -179,6 +181,7 @@ LM.App.Wpf.Common.Dialogs.IDialogService.ShowDataExtractionWorkspace(LM.App.Wpf.
 LM.App.Wpf.Common.Dialogs.WpfDialogService
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowDataExtractionWorkspace(LM.App.Wpf.ViewModels.StagingItem! stagingItem) -> bool?
 LM.App.Wpf.Common.StringJoinConverter
 LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?

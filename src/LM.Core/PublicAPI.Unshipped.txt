@@ -195,22 +195,6 @@ LM.Core.Models.DataExtraction.TableColumnMapping.NormalizedHeader.init -> void
 LM.Core.Models.DataExtraction.TableColumnMapping.Role.get -> LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnMapping.Role.init -> void
 LM.Core.Models.DataExtraction.TableColumnMapping.TableColumnMapping() -> void
-LM.Core.Models.DataExtraction.TablePageLocation
-LM.Core.Models.DataExtraction.TablePageLocation.Create(int, double, double, double, double, double, double) -> LM.Core.Models.DataExtraction.TablePageLocation
-LM.Core.Models.DataExtraction.TablePageLocation.Height.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.Height.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.Left.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.Left.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.PageHeight.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.get -> int
-LM.Core.Models.DataExtraction.TablePageLocation.PageNumber.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.PageWidth.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.Top.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.Top.init -> void
-LM.Core.Models.DataExtraction.TablePageLocation.Width.get -> double
-LM.Core.Models.DataExtraction.TablePageLocation.Width.init -> void
 LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnRole.Intervention = 2 -> LM.Core.Models.DataExtraction.TableColumnRole
 LM.Core.Models.DataExtraction.TableColumnRole.Measure = 6 -> LM.Core.Models.DataExtraction.TableColumnRole
@@ -227,17 +211,6 @@ LM.Core.Models.DataExtraction.TableRowMapping.Role.init -> void
 LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.get -> int
 LM.Core.Models.DataExtraction.TableRowMapping.RowIndex.init -> void
 LM.Core.Models.DataExtraction.TableRowMapping.TableRowMapping() -> void
-LM.Core.Models.DataExtraction.TableRegion
-LM.Core.Models.DataExtraction.TableRegion.Create(int, double, double, double, double, string?) -> LM.Core.Models.DataExtraction.TableRegion
-LM.Core.Models.DataExtraction.TableRegion.Height.get -> double
-LM.Core.Models.DataExtraction.TableRegion.Height.init -> void
-LM.Core.Models.DataExtraction.TableRegion.Label.get -> string?
-LM.Core.Models.DataExtraction.TableRegion.Label.init -> void
-LM.Core.Models.DataExtraction.TableRegion.PageNumber.get -> int
-LM.Core.Models.DataExtraction.TableRegion.PageNumber.init -> void
-LM.Core.Models.DataExtraction.TableRegion.TableRegion() -> void
-LM.Core.Models.DataExtraction.TableRegion.Width.get -> double
-LM.Core.Models.DataExtraction.TableRegion.Width.init -> void
 LM.Core.Models.DataExtraction.TableRegion.X.get -> double
 LM.Core.Models.DataExtraction.TableRegion.X.init -> void
 LM.Core.Models.DataExtraction.TableRegion.Y.get -> double

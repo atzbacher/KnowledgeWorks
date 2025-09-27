@@ -25,28 +25,5 @@ namespace LM.Core.Models.DataExtraction
 
         public string? Label { get; init; }
 
-        public static TableRegion Create(int pageNumber, double x, double y, double width, double height, string? label = null)
-        {
-            return new TableRegion
-            {
-                PageNumber = Math.Max(1, pageNumber),
-                X = Clamp01(x),
-                Y = Clamp01(y),
-                Width = Clamp01(width),
-                Height = Clamp01(height),
-                Label = label
-            };
-        }
-
-        private static double Clamp01(double value)
-        {
-            if (double.IsNaN(value))
-                return 0d;
-            if (value < 0d)
-                return 0d;
-            if (value > 1d)
-                return 1d;
-            return value;
-        }
     }
 }

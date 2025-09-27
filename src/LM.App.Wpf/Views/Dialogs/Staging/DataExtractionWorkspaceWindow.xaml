@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
         xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging"
+        xmlns:controls="clr-namespace:LM.App.Wpf.Views.Controls"
         Title="Data extraction workspace"
         Width="1100"
         Height="720"
@@ -21,30 +22,68 @@
                     VerticalAlignment="Center">
       <swc:TextBlock Text="PDF:" FontWeight="SemiBold" />
       <swc:TextBlock Text="{Binding PdfDisplayName}" Margin="6,0,0,0" />
-      <swc:TextBlock Text="(preview unavailable)"
-                     Margin="12,0,0,0"
-                     Foreground="Gray" />
     </swc:StackPanel>
 
-    <swc:Grid Grid.Row="1" ColumnSpacing="12">
+    <swc:Grid Grid.Row="1">
       <swc:Grid.ColumnDefinitions>
         <swc:ColumnDefinition Width="3*" />
         <swc:ColumnDefinition Width="2*" />
       </swc:Grid.ColumnDefinitions>
 
-      <swc:Border Background="#FFEFF2F5"
-                  BorderBrush="#FFCBD5E1"
-                  BorderThickness="1"
-                  CornerRadius="8"
-                  Padding="12">
-        <swc:StackPanel>
-          <swc:TextBlock Text="PDF region viewer coming soon"
-                         FontWeight="SemiBold"
-                         Margin="0,0,0,4" />
-          <swc:TextBlock Text="Use the controls on the right to describe table and figure selections."
-                         TextWrapping="Wrap" />
+      <swc:Grid>
+        <swc:Grid.RowDefinitions>
+          <swc:RowDefinition Height="Auto" />
+          <swc:RowDefinition Height="*" />
+        </swc:Grid.RowDefinitions>
+
+        <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
+          <swc:Button Content="◀"
+                      Width="28"
+                      Command="{Binding GoToPreviousPageCommand}" />
+          <swc:TextBlock Text="{Binding CurrentPage}"
+                         VerticalAlignment="Center"
+                         FontWeight="SemiBold" />
+          <swc:TextBlock Text="/"
+                         VerticalAlignment="Center"
+                         Margin="2,0" />
+          <swc:TextBlock Text="{Binding PageCount}"
+                         VerticalAlignment="Center" />
+          <swc:Button Content="▶"
+                      Width="28"
+                      Command="{Binding GoToNextPageCommand}" />
+
+          <swc:Separator Margin="12,0" Width="1" />
+
+          <swc:Button Content="-"
+                      Width="28"
+                      Command="{Binding ZoomOutCommand}" />
+          <swc:TextBlock Text="{Binding Zoom, StringFormat={}{0:F2}×}"
+                         VerticalAlignment="Center" />
+          <swc:Button Content="+"
+                      Width="28"
+                      Command="{Binding ZoomInCommand}" />
+          <swc:Button Content="Reset zoom"
+                      Command="{Binding ResetZoomCommand}" />
+
+          <swc:Separator Margin="12,0" Width="1" />
+
+          <swc:Button Content="New region"
+                      Command="{Binding BeginRegionCreationCommand}" />
+          <swc:Button Content="Re-detect"
+                      Command="{Binding RedetectRegionsCommand}" />
         </swc:StackPanel>
-      </swc:Border>
+
+        <controls:PdfDocumentView Grid.Row="1"
+                                  DocumentPath="{Binding PdfPath}"
+                                  PageNumber="{Binding CurrentPage, Mode=TwoWay}"
+                                  PageCount="{Binding PageCount, Mode=OneWayToSource}"
+                                  Zoom="{Binding Zoom, Mode=TwoWay}"
+                                  Regions="{Binding SelectedAsset.Regions}"
+                                  SelectedRegion="{Binding SelectedRegion, Mode=TwoWay}"
+                                  IsCreateRegionMode="{Binding IsRegionCreationMode, Mode=TwoWay}"
+                                  CreateRegionCommand="{Binding CreateRegionFromViewerCommand}"
+                                  UpdateRegionCommand="{Binding UpdateRegionFromViewerCommand}" />
+      </swc:Grid>
 
       <swc:TabControl Grid.Column="1">
         <swc:TabItem Header="Assets">
@@ -198,8 +237,10 @@
 
                       <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,8" VerticalAlignment="Center">
                         <swc:TextBlock Text="Regions" Width="120" />
-                        <swc:Button Content="Add region"
-                                    Command="{Binding AddRegionCommand}" />
+                        <swc:TextBlock Text="Manage regions from the viewer toolbar."
+                                       Foreground="Gray"
+                                       TextWrapping="Wrap"
+                                       Width="220" />
                       </swc:StackPanel>
 
                       <swc:ItemsControl ItemsSource="{Binding Regions}">
