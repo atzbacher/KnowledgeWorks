@@ -807,16 +807,130 @@ namespace LM.App.Wpf.ViewModels
 
             var article = BuildArticleHook(stagingItem, entry, relativePath, sha256);
             var changeLog = BuildEntryCreationChangeLog(entry, addedBy);
+            var normalizedPath = NormalizeStoragePath(relativePath);
 
-            if (article is null && changeLog is null)
+            var extractionEvent = BuildDataExtractionChangeLog(stagingItem, entry, normalizedPath, sha256);
+            if (changeLog is null &&
+                (stagingItem.PendingChangeLogEvents.Count > 0 || extractionEvent is not null))
+            {
+                changeLog = new HookM.EntryChangeLogHook();
+            }
+
+            if (changeLog is not null)
+            {
+                changeLog.Events ??= new List<HookM.EntryChangeLogEvent>();
+
+                if (stagingItem.PendingChangeLogEvents.Count > 0)
+                {
+                    changeLog.Events.AddRange(stagingItem.PendingChangeLogEvents);
+                }
+
+                if (extractionEvent is not null)
+                {
+                    changeLog.Events.Add(extractionEvent);
+                }
+
+                if (changeLog.Events.Count == 0)
+                {
+                    changeLog = null;
+                }
+            }
+
+            var dataExtraction = stagingItem.CommitMetadataOnly ? null : stagingItem.DataExtractionHook;
+
+            if (article is null && changeLog is null && dataExtraction is null)
                 return null;
 
             return new HookContext
             {
                 Article = article,
                 ChangeLog = changeLog,
-                DataExtraction = stagingItem.DataExtractionHook
+                DataExtraction = dataExtraction
             };
+        }
+
+        private HookM.EntryChangeLogEvent? BuildDataExtractionChangeLog(StagingItem stagingItem,
+                                                                        Entry entry,
+                                                                        string normalizedRelativePath,
+                                                                        string sha256)
+        {
+            if (stagingItem is null)
+                throw new ArgumentNullException(nameof(stagingItem));
+            if (entry is null)
+                throw new ArgumentNullException(nameof(entry));
+
+            var hasExtraction = stagingItem.DataExtractionHook is not null && !stagingItem.CommitMetadataOnly;
+
+            var performer = GetCurrentUserName();
+            var title = ResolveEntryTitle(entry, normalizedRelativePath);
+            var libraryPath = string.IsNullOrWhiteSpace(normalizedRelativePath)
+                ? NormalizeStoragePath(entry.MainFilePath)
+                : normalizedRelativePath;
+
+            var tags = new List<string>();
+            if (!string.IsNullOrWhiteSpace(sha256))
+            {
+                tags.Add(FormattableString.Invariant($"asset:article:sha256-{sha256}"));
+            }
+
+            var attachmentId = !string.IsNullOrWhiteSpace(entry.Id)
+                ? entry.Id
+                : (!string.IsNullOrWhiteSpace(sha256)
+                    ? FormattableString.Invariant($"sha256-{sha256}")
+                    : Guid.NewGuid().ToString("N"));
+
+            string action;
+            if (hasExtraction)
+            {
+                action = "DataExtractionCommitted";
+                var hash = ComputeDataExtractionHash(stagingItem.DataExtractionHook!);
+                tags.Add(FormattableString.Invariant($"asset:data-extraction:{hash}"));
+            }
+            else
+            {
+                action = "DataExtractionSkipped";
+                tags.Add("asset:data-extraction:none");
+            }
+
+            return new HookM.EntryChangeLogEvent
+            {
+                EventId = Guid.NewGuid().ToString("N"),
+                TimestampUtc = DateTime.UtcNow,
+                PerformedBy = performer,
+                Action = action,
+                Details = new HookM.ChangeLogAttachmentDetails
+                {
+                    AttachmentId = attachmentId,
+                    Title = title,
+                    LibraryPath = libraryPath,
+                    Purpose = AttachmentKind.Supplement,
+                    Tags = tags
+                }
+            };
+        }
+
+        private static string ResolveEntryTitle(Entry entry, string normalizedPath)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.DisplayName))
+                return entry.DisplayName!;
+            if (!string.IsNullOrWhiteSpace(entry.Title))
+                return entry.Title!;
+            if (!string.IsNullOrWhiteSpace(entry.OriginalFileName))
+                return entry.OriginalFileName!;
+            if (!string.IsNullOrWhiteSpace(normalizedPath))
+                return Path.GetFileName(normalizedPath);
+            if (!string.IsNullOrWhiteSpace(entry.MainFilePath))
+                return Path.GetFileName(entry.MainFilePath);
+            return string.IsNullOrWhiteSpace(entry.Id) ? "Data Extraction" : entry.Id;
+        }
+
+        private static string ComputeDataExtractionHash(HookM.DataExtractionHook hook)
+        {
+            var json = JsonSerializer.Serialize(hook, HookM.JsonStd.Options);
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var hash = sha.ComputeHash(bytes);
+            return FormattableString.Invariant($"sha256-{Convert.ToHexString(hash).ToLowerInvariant()}");
         }
 
         private HookM.ArticleHook? BuildArticleHook(StagingItem stagingItem,
