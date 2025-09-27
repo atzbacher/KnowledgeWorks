@@ -18,8 +18,6 @@ internal sealed partial class JsonReviewProjectStore
     private readonly IWorkSpaceService _workspace;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly SemaphoreSlim _mutex = new(1, 1);
-    private readonly TimeSpan _lockTimeout = TimeSpan.FromMinutes(5);
-    private readonly TimeSpan _ioRetryDelay = TimeSpan.FromMilliseconds(200);
 
     private readonly Dictionary<string, ReviewProject> _projects = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, ReviewStageDto> _stageDtos = new(StringComparer.OrdinalIgnoreCase);

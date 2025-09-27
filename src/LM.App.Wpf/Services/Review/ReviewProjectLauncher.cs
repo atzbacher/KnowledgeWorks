@@ -1,13 +1,13 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.Json;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Services;
+using LM.App.Wpf.Services.Review.Design;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Core.Abstractions;
 using LM.Core.Models;
@@ -30,8 +30,7 @@ namespace LM.App.Wpf.Services.Review
         private readonly IWorkSpaceService _workspace;
         private readonly ILitSearchRunPicker _runPicker;
         private readonly IReviewCreationDiagnostics _diagnostics;
-        private readonly TimeSpan _saveProjectTimeout;
-        private readonly TimeSpan _saveProjectHardTimeout;
+        private readonly Func<ProjectEditorViewModel> _projectEditorFactory;
 
 
         public ReviewProjectLauncher(
@@ -46,8 +45,7 @@ namespace LM.App.Wpf.Services.Review
             ILitSearchRunPicker runPicker,
             IMessageBoxService messageBoxService,
             IReviewCreationDiagnostics diagnostics,
-            TimeSpan? saveProjectTimeout = null,
-            TimeSpan? saveProjectHardTimeout = null)
+            Func<ProjectEditorViewModel> projectEditorFactory)
 
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -61,26 +59,7 @@ namespace LM.App.Wpf.Services.Review
             _runPicker = runPicker ?? throw new ArgumentNullException(nameof(runPicker));
             _messageBoxService = messageBoxService ?? throw new ArgumentNullException(nameof(messageBoxService));
             _diagnostics = diagnostics ?? throw new ArgumentNullException(nameof(diagnostics));
-            _saveProjectTimeout = saveProjectTimeout ?? TimeSpan.FromSeconds(30);
-            if (_saveProjectTimeout <= TimeSpan.Zero)
-            {
-                throw new ArgumentOutOfRangeException(nameof(saveProjectTimeout), saveProjectTimeout, "Save timeout must be positive.");
-            }
-
-            _saveProjectHardTimeout = saveProjectHardTimeout ?? TimeSpan.FromMinutes(5);
-            if (_saveProjectHardTimeout <= TimeSpan.Zero)
-            {
-                throw new ArgumentOutOfRangeException(nameof(saveProjectHardTimeout), saveProjectHardTimeout, "Hard save timeout must be positive.");
-            }
-
-            if (_saveProjectHardTimeout <= _saveProjectTimeout)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(saveProjectHardTimeout),
-                    saveProjectHardTimeout,
-                    "Hard save timeout must exceed the initial save timeout.");
-            }
-
+            _projectEditorFactory = projectEditorFactory ?? throw new ArgumentNullException(nameof(projectEditorFactory));
         }
 
         public async Task<ReviewProject?> CreateProjectAsync(CancellationToken cancellationToken)
@@ -113,48 +92,31 @@ namespace LM.App.Wpf.Services.Review
                         selection.CheckedEntriesRelativePath,
                         cancellationToken);
 
-                var project = CreateProject(selection, entry);
+                var blueprint = ProjectBlueprintFactory.Create(selection, entry, checkedEntryIds, _userContext.UserName);
+                _diagnostics.RecordStep($"Prepared project blueprint '{blueprint.ProjectId}' with name '{blueprint.Name}'.");
 
+                var editor = _projectEditorFactory();
+                editor.Initialize(blueprint);
 
-                _diagnostics.RecordStep($"Created in-memory review project '{project.Id}' with name '{project.Name}'.");
-                using var saveTimeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                saveTimeoutCts.CancelAfter(_saveProjectHardTimeout);
-                var saveTask = _workflowStore.SaveProjectAsync(project, saveTimeoutCts.Token);
-
-                if (!saveTask.IsCompleted)
+                var editorResult = _dialogService.ShowProjectEditor(editor);
+                if (editorResult != true || editor.Result is null)
                 {
-                    var timeoutTask = Task.Delay(_saveProjectTimeout, CancellationToken.None);
-                    var completed = await Task.WhenAny(saveTask, timeoutTask).ConfigureAwait(false);
-                    if (completed != saveTask)
-                    {
-                        _diagnostics.RecordStep(
-                            $"Save for review project '{project.Id}' exceeded {_saveProjectTimeout.TotalSeconds:F0}s. Waiting for workspace sync to release locks.");
-                        _messageBoxService.Show(
-                            "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
-                            "Create review project",
-                            System.Windows.MessageBoxButton.OK,
-                            System.Windows.MessageBoxImage.Information);
-                    }
+                    _diagnostics.RecordStep("Project creation cancelled from project editor dialog.");
+                    return null;
                 }
 
-                try
-                {
-                    await saveTask.ConfigureAwait(false);
-                }
-                catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested && saveTimeoutCts.IsCancellationRequested)
-                {
-                    throw new TimeoutException(
-                        "Saving the review project took too long. Ensure workspace sync has finished and try again.",
-                        ex);
-                }
-                _diagnostics.RecordStep($"Persisted review project '{project.Id}'.");
+                var committedBlueprint = editor.Result;
+                var project = ProjectBlueprintConverter.ToReviewProject(committedBlueprint);
+
+                _diagnostics.RecordStep($"Persisting review project '{project.Id}'.");
+                await _workflowStore.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
                 TryRecordProjectFileState(project);
 
                 var context = _hookContextFactory.CreateProjectCreated(project);
-                await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken);
+                await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken).ConfigureAwait(false);
                 _diagnostics.RecordStep($"Executed review hook orchestrator for project '{project.Id}'.");
 
-                var tags = BuildCreationTags(project, selection, entry, checkedEntryIds);
+                var tags = BuildCreationTags(project, selection, entry, committedBlueprint.CheckedEntryIds);
 
                 await ReviewChangeLogWriter.WriteAsync(
                     _changeLogOrchestrator,
@@ -300,71 +262,6 @@ namespace LM.App.Wpf.Services.Review
             }
 
             return new ProjectReference(absolutePath, projectId, relativePath);
-        }
-
-        private ReviewProject CreateProject(LitSearchRunSelection selection, Entry? entry)
-
-        {
-            var now = DateTimeOffset.UtcNow;
-            var projectId = $"review-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}";
-            var projectName = ResolveProjectName(entry);
-            var definitions = CreateStageDefinitions();
-            var auditDetails = $"litsearch:{selection.EntryId}:run:{selection.RunId}";
-
-
-            var auditEntry = ReviewAuditTrail.AuditEntry.Create(
-                $"audit-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
-                _userContext.UserName,
-                "project.created",
-                now,
-                auditDetails);
-            var auditTrail = ReviewAuditTrail.Create(new[] { auditEntry });
-
-            return ReviewProject.Create(projectId, projectName, now, definitions, auditTrail);
-        }
-
-        private static IReadOnlyList<StageDefinition> CreateStageDefinitions()
-        {
-            var definitions = new List<StageDefinition>
-            {
-                StageDefinition.Create(
-                    $"stage-def-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
-                    "Title screening",
-                    ReviewStageType.TitleScreening,
-                    ReviewerRequirement.Create(new[]
-                    {
-                        new KeyValuePair<ReviewerRole, int>(ReviewerRole.Primary, 1),
-                        new KeyValuePair<ReviewerRole, int>(ReviewerRole.Secondary, 1)
-                    }),
-                    StageConsensusPolicy.RequireAgreement(2, true, null)),
-                StageDefinition.Create(
-                    $"stage-def-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
-                    "Quality assurance",
-                    ReviewStageType.QualityAssurance,
-                    ReviewerRequirement.Create(new[]
-                    {
-                        new KeyValuePair<ReviewerRole, int>(ReviewerRole.Primary, 1)
-                    }),
-                    StageConsensusPolicy.Disabled())
-            };
-
-            return definitions;
-        }
-
-        private static string ResolveProjectName(Entry? entry)
-        {
-            if (entry is null)
-            {
-                return "New evidence review";
-            }
-
-            var label = string.IsNullOrWhiteSpace(entry.DisplayName) ? entry.Title : entry.DisplayName;
-            if (string.IsNullOrWhiteSpace(label))
-            {
-                return $"Review {entry.Id}";
-            }
-
-            return $"Review – {label.Trim()}";
         }
 
         private static IEnumerable<string> BuildCreationTags(

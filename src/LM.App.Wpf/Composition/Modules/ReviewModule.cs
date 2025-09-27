@@ -33,6 +33,9 @@ internal sealed class ReviewModule : IAppModule
 
         services.AddTransient<ILitSearchRunPicker, LitSearchRunPicker>();
         services.AddSingleton<IMessageBoxService, WpfMessageBoxService>();
+        services.AddTransient<ProjectEditorViewModel>();
+        services.AddTransient<Func<ProjectEditorViewModel>>(static sp => () => sp.GetRequiredService<ProjectEditorViewModel>());
+        services.AddTransient<ProjectEditorWindow>();
         services.AddTransient<IReviewProjectLauncher, ReviewProjectLauncher>();
         services.AddTransient<LitSearchRunPickerViewModel>();
         services.AddTransient<LitSearchRunPickerWindow>();

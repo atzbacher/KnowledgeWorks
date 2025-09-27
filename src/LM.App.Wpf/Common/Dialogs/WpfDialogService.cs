@@ -2,7 +2,9 @@
 using System;
 using System.Linq;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Review;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.Views.Review;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LM.App.Wpf.Common.Dialogs
@@ -55,6 +57,24 @@ namespace LM.App.Wpf.Common.Dialogs
 
             using var scope = _services.CreateScope();
             var window = scope.ServiceProvider.GetRequiredService<StagingEditorWindow>();
+            var owner = System.Windows.Application.Current?.Windows
+                .OfType<System.Windows.Window>()
+                .FirstOrDefault(static w => w.IsActive);
+            if (owner is not null)
+                window.Owner = owner;
+
+            return window.ShowDialog();
+        }
+
+        public bool? ShowProjectEditor(ProjectEditorViewModel editor)
+        {
+            if (editor is null)
+                throw new ArgumentNullException(nameof(editor));
+
+            using var scope = _services.CreateScope();
+            var window = scope.ServiceProvider.GetRequiredService<ProjectEditorWindow>();
+            window.Attach(editor);
+
             var owner = System.Windows.Application.Current?.Windows
                 .OfType<System.Windows.Window>()
                 .FirstOrDefault(static w => w.IsActive);

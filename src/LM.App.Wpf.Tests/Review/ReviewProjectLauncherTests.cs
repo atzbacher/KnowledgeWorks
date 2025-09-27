@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Threading.Tasks;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.Services.Review;
+using LM.App.Wpf.ViewModels.Review;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
@@ -21,73 +21,106 @@ namespace LM.App.Wpf.Tests.Review
     public sealed class ReviewProjectLauncherTests
     {
         [Fact]
-        public async Task CreateProjectAsync_ShowsDialog_WhenSaveProjectFailsAfterCheckedEntryLoad()
+        public async Task CreateProjectAsync_ReturnsNull_WhenEditorCancels()
         {
-            var checkedEntriesPath = Path.Combine(Path.GetTempPath(), $"checked-{Guid.NewGuid():N}.json");
-            await File.WriteAllTextAsync(
-                checkedEntriesPath,
-                "{\"checkedEntries\":{\"entryIds\":[\"lit-entry-1\"]}}",
-                CancellationToken.None);
-
             var selection = new LitSearchRunSelection(
                 "entry-1",
                 "hooks/run.json",
                 "hooks/run.json",
                 "run-1",
-                checkedEntriesPath,
-                "hooks/checked.json",
-                Array.Empty<string>());
+                null,
+                null,
+                new List<string>());
 
-            var messageBox = new FakeMessageBoxService();
             using var workspace = new FakeWorkSpaceService();
-            var diagnostics = new FakeReviewCreationDiagnostics();
-            var launcher = new ReviewProjectLauncher(
-                new FakeDialogService(),
-                new FakeEntryStore(new Entry
-                {
-                    Id = selection.EntryId,
-                    Title = "Sample Entry"
-                }),
-                new ThrowingWorkflowStore(),
-                new FakeReviewHookContextFactory(),
-                new FakeReviewHookOrchestrator(),
-                new HookOrchestrator(workspace),
-                new FakeUserContext("tester"),
+            var workflowStore = new RecordingWorkflowStore();
+            var dialogService = new FakeDialogService
+            {
+                ProjectEditorResult = false,
+                OnShowProjectEditor = static _ => { }
+            };
+
+            var launcher = CreateLauncher(
+                dialogService,
+                new FakeEntryStore(new Entry { Id = selection.EntryId, Title = "Seed" }),
+                workflowStore,
                 workspace,
                 new FakeRunPicker(selection),
-                messageBox,
-                diagnostics);
+                new FakeMessageBoxService());
 
-            try
-            {
-                var result = await launcher.CreateProjectAsync(CancellationToken.None);
+            var project = await launcher.CreateProjectAsync(CancellationToken.None);
 
-                Assert.Null(result);
-
-                var invocation = Assert.Single(messageBox.Invocations);
-                Assert.Equal("Create review project", invocation.Caption);
-                Assert.Equal(System.Windows.MessageBoxButton.OK, invocation.Buttons);
-                Assert.Equal(System.Windows.MessageBoxImage.Error, invocation.Image);
-                Assert.Equal("Review project save failed", invocation.Message);
-            }
-            finally
-            {
-                if (File.Exists(checkedEntriesPath))
-                {
-                    File.Delete(checkedEntriesPath);
-                }
-            }
+            Assert.Null(project);
+            Assert.Null(workflowStore.SavedProject);
+            Assert.NotNull(dialogService.LastEditor);
         }
 
         [Fact]
-        public async Task CreateProjectAsync_UsesRelativeCheckedEntriesPath_WhenAbsoluteMissing()
+        public async Task CreateProjectAsync_PersistsProject_WhenEditorCompletes()
+        {
+            var selection = new LitSearchRunSelection(
+                "entry-1",
+                "hooks/run.json",
+                "hooks/run.json",
+                "run-1",
+                null,
+                null,
+                new List<string> { "lit-entry-1" });
+
+            using var workspace = new FakeWorkSpaceService();
+            var workflowStore = new RecordingWorkflowStore();
+            var changeLogOrchestrator = new HookOrchestrator(workspace);
+            var dialogService = new FakeDialogService();
+
+            var launcher = CreateLauncher(
+                dialogService,
+                new FakeEntryStore(new Entry { Id = selection.EntryId, Title = "Seed" }),
+                workflowStore,
+                workspace,
+                new FakeRunPicker(selection),
+                new FakeMessageBoxService(),
+                changeLogOrchestrator);
+
+            var project = await launcher.CreateProjectAsync(CancellationToken.None);
+
+            Assert.NotNull(project);
+            Assert.NotNull(workflowStore.SavedProject);
+            Assert.Equal(project!.Id, workflowStore.SavedProject!.Id);
+            Assert.Equal("Review – Seed", project.Name);
+
+            var changeLogPath = Path.Combine(
+                workspace.GetWorkspaceRoot(),
+                "entries",
+                project.Id,
+                "hooks",
+                "changelog.json");
+            Assert.True(File.Exists(changeLogPath));
+
+            var json = await File.ReadAllTextAsync(changeLogPath, CancellationToken.None);
+            using var document = JsonDocument.Parse(json);
+            var tags = document.RootElement
+                .GetProperty("events")[0]
+                .GetProperty("details")
+                .GetProperty("tags")
+                .EnumerateArray()
+                .Select(element => element.GetString())
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .ToList();
+
+            Assert.Contains("litsearchEntryCount:1", tags);
+            Assert.Contains("litsearchRun:run-1", tags);
+            Assert.Contains("projectId:" + project.Id, tags);
+        }
+
+        [Fact]
+        public async Task CreateProjectAsync_UsesRelativeCheckedEntriesFile_WhenIdsMissing()
         {
             var workspaceRoot = Path.Combine(Path.GetTempPath(), $"kw-review-{Guid.NewGuid():N}");
             Directory.CreateDirectory(workspaceRoot);
 
             try
             {
-                var relativePath = Path.Combine("entries", "entry-1", "hooks", "litsearch_run_seed_checked.json");
+                var relativePath = Path.Combine("entries", "entry-1", "hooks", "litsearch_checked.json");
                 var absolutePath = Path.Combine(workspaceRoot, relativePath);
                 Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
                 await File.WriteAllTextAsync(
@@ -97,8 +130,8 @@ namespace LM.App.Wpf.Tests.Review
 
                 var selection = new LitSearchRunSelection(
                     "entry-1",
-                    "hooks/litsearch.json",
-                    "hooks/litsearch.json",
+                    "hooks/run.json",
+                    "hooks/run.json",
                     "run-1",
                     null,
                     relativePath.Replace('\\', '/'),
@@ -107,28 +140,19 @@ namespace LM.App.Wpf.Tests.Review
                 using var workspace = new FakeWorkSpaceService(workspaceRoot);
                 var workflowStore = new RecordingWorkflowStore();
                 var changeLogOrchestrator = new HookOrchestrator(workspace);
-                var diagnostics = new FakeReviewCreationDiagnostics();
-                var launcher = new ReviewProjectLauncher(
-                    new FakeDialogService(),
-                    new FakeEntryStore(new Entry
-                    {
-                        Id = selection.EntryId,
-                        Title = "Seed Entry"
-                    }),
+                var dialogService = new FakeDialogService();
+
+                var launcher = CreateLauncher(
+                    dialogService,
+                    new FakeEntryStore(new Entry { Id = selection.EntryId, Title = "Seed" }),
                     workflowStore,
-                    new FakeReviewHookContextFactory(),
-                    new FakeReviewHookOrchestrator(),
-                    changeLogOrchestrator,
-                    new FakeUserContext("tester"),
                     workspace,
                     new FakeRunPicker(selection),
                     new FakeMessageBoxService(),
-                    diagnostics);
+                    changeLogOrchestrator);
 
                 var project = await launcher.CreateProjectAsync(CancellationToken.None);
-
                 Assert.NotNull(project);
-                Assert.NotNull(workflowStore.SavedProject);
 
                 var changeLogPath = Path.Combine(
                     workspaceRoot,
@@ -136,9 +160,6 @@ namespace LM.App.Wpf.Tests.Review
                     project!.Id,
                     "hooks",
                     "changelog.json");
-
-                Assert.True(File.Exists(changeLogPath));
-
                 var json = await File.ReadAllTextAsync(changeLogPath, CancellationToken.None);
                 using var document = JsonDocument.Parse(json);
                 var tags = document.RootElement
@@ -164,13 +185,13 @@ namespace LM.App.Wpf.Tests.Review
                 }
                 catch
                 {
-                    // Best effort cleanup.
+                    // ignore cleanup failures
                 }
             }
         }
 
         [Fact]
-        public async Task CreateProjectAsync_ShowsTimeoutMessage_WhenSaveProjectTimesOut()
+        public async Task CreateProjectAsync_ShowsError_WhenSaveFails()
         {
             var selection = new LitSearchRunSelection(
                 "entry-1",
@@ -179,106 +200,75 @@ namespace LM.App.Wpf.Tests.Review
                 "run-1",
                 null,
                 null,
-                Array.Empty<string>());
+                new List<string>());
 
-            var messageBox = new FakeMessageBoxService();
             using var workspace = new FakeWorkSpaceService();
-            var diagnostics = new FakeReviewCreationDiagnostics();
-            var launcher = new ReviewProjectLauncher(
-                new FakeDialogService(),
-                new FakeEntryStore(new Entry
-                {
-                    Id = selection.EntryId,
-                    Title = "Sample Entry"
-                }),
-                new TimeoutWorkflowStore(),
-                new FakeReviewHookContextFactory(),
-                new FakeReviewHookOrchestrator(),
-                new HookOrchestrator(workspace),
-                new FakeUserContext("tester"),
+            var dialogService = new FakeDialogService();
+            var messageBox = new FakeMessageBoxService();
+
+            var launcher = CreateLauncher(
+                dialogService,
+                new FakeEntryStore(new Entry { Id = selection.EntryId, Title = "Seed" }),
+                new ThrowingWorkflowStore(),
                 workspace,
                 new FakeRunPicker(selection),
-                messageBox,
-                diagnostics,
-                TimeSpan.FromMilliseconds(20),
-                TimeSpan.FromMilliseconds(40));
+                messageBox);
 
-            var result = await launcher.CreateProjectAsync(CancellationToken.None);
+            var project = await launcher.CreateProjectAsync(CancellationToken.None);
 
-            Assert.Null(result);
-
-            Assert.Equal(2, messageBox.Invocations.Count);
-
-            var info = messageBox.Invocations[0];
-            Assert.Equal(
-                "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
-                info.Message);
-            Assert.Equal("Create review project", info.Caption);
-            Assert.Equal(System.Windows.MessageBoxButton.OK, info.Buttons);
-            Assert.Equal(System.Windows.MessageBoxImage.Information, info.Image);
-
-            var error = messageBox.Invocations[1];
-            Assert.Equal(
-                "Saving the review project took too long. Ensure workspace sync has finished and try again.",
-                error.Message);
-            Assert.Equal("Create review project", error.Caption);
-            Assert.Equal(System.Windows.MessageBoxButton.OK, error.Buttons);
-            Assert.Equal(System.Windows.MessageBoxImage.Error, error.Image);
+            Assert.Null(project);
+            var invocation = Assert.Single(messageBox.Invocations);
+            Assert.Equal("Create review project", invocation.Caption);
+            Assert.Equal(System.Windows.MessageBoxButton.OK, invocation.Buttons);
+            Assert.Equal(System.Windows.MessageBoxImage.Error, invocation.Image);
         }
 
-        [Fact]
-        public async Task CreateProjectAsync_ContinuesWaiting_WhenSaveCompletesAfterInitialTimeout()
+        private static ReviewProjectLauncher CreateLauncher(
+            FakeDialogService dialogService,
+            IEntryStore entryStore,
+            IReviewWorkflowStore workflowStore,
+            FakeWorkSpaceService workspace,
+            ILitSearchRunPicker runPicker,
+            IMessageBoxService messageBoxService,
+            HookOrchestrator? changeLogOrchestrator = null)
         {
-            var selection = new LitSearchRunSelection(
-                "entry-1",
-                "hooks/run.json",
-                "hooks/run.json",
-                "run-1",
-                null,
-                null,
-                Array.Empty<string>());
-
-            var messageBox = new FakeMessageBoxService();
-            using var workspace = new FakeWorkSpaceService();
-            var diagnostics = new FakeReviewCreationDiagnostics();
-            var workflowStore = new DelayedWorkflowStore(TimeSpan.FromMilliseconds(60));
-            var launcher = new ReviewProjectLauncher(
-                new FakeDialogService(),
-                new FakeEntryStore(new Entry
-                {
-                    Id = selection.EntryId,
-                    Title = "Sample Entry"
-                }),
+            changeLogOrchestrator ??= new HookOrchestrator(workspace);
+            return new ReviewProjectLauncher(
+                dialogService,
+                entryStore,
                 workflowStore,
                 new FakeReviewHookContextFactory(),
                 new FakeReviewHookOrchestrator(),
-                new HookOrchestrator(workspace),
+                changeLogOrchestrator,
                 new FakeUserContext("tester"),
                 workspace,
-                new FakeRunPicker(selection),
-                messageBox,
-                diagnostics,
-                TimeSpan.FromMilliseconds(10),
-                TimeSpan.FromMilliseconds(200));
-
-            var result = await launcher.CreateProjectAsync(CancellationToken.None);
-
-            Assert.NotNull(result);
-            Assert.Single(messageBox.Invocations);
-            var info = messageBox.Invocations[0];
-            Assert.Equal(
-                "Saving the review project is taking longer because the workspace is still syncing files. We'll keep waiting for it to finish.",
-                info.Message);
-            Assert.Equal(System.Windows.MessageBoxImage.Information, info.Image);
+                runPicker,
+                messageBoxService,
+                new FakeReviewCreationDiagnostics(),
+                () => new ProjectEditorViewModel());
         }
 
         private sealed class FakeDialogService : IDialogService
         {
+            public ProjectEditorViewModel? LastEditor { get; private set; }
+
+            public bool? ProjectEditorResult { get; set; } = true;
+
+            public Action<ProjectEditorViewModel>? OnShowProjectEditor { get; set; }
+                = static editor => editor.SaveCommand.Execute(null);
+
             public string[]? ShowOpenFileDialog(FilePickerOptions options) => null;
 
             public string? ShowFolderBrowserDialog(FolderPickerOptions options) => null;
 
             public bool? ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel stagingList) => null;
+
+            public bool? ShowProjectEditor(ProjectEditorViewModel editor)
+            {
+                LastEditor = editor;
+                OnShowProjectEditor?.Invoke(editor);
+                return ProjectEditorResult;
+            }
         }
 
         private sealed class FakeEntryStore : IEntryStore
@@ -337,6 +327,43 @@ namespace LM.App.Wpf.Tests.Review
 
             public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
                 => Task.FromException(new InvalidOperationException("Review project save failed"));
+
+            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+
+            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+        }
+
+        private sealed class RecordingWorkflowStore : IReviewWorkflowStore
+        {
+            public ReviewProject? SavedProject { get; private set; }
+
+            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewProject?>(SavedProject);
+
+            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewProject>>(SavedProject is null
+                    ? Array.Empty<ReviewProject>()
+                    : new[] { SavedProject });
+
+            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewStage?>(null);
+
+            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+
+            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
+                => Task.FromResult<ScreeningAssignment?>(null);
+
+            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+
+            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+            {
+                SavedProject = project;
+                return Task.CompletedTask;
+            }
 
             public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
                 => Task.CompletedTask;
@@ -442,117 +469,9 @@ namespace LM.App.Wpf.Tests.Review
                 }
                 catch
                 {
-                    // best effort cleanup
+                    // ignore cleanup failures
                 }
             }
-        }
-
-        private sealed class RecordingWorkflowStore : IReviewWorkflowStore
-        {
-            private ReviewProject? _project;
-
-            public ReviewProject? SavedProject => _project;
-
-            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult(_project);
-
-            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewProject>>(_project is null
-                    ? Array.Empty<ReviewProject>()
-                    : new[] { _project });
-
-            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewStage?>(null);
-
-            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
-
-            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
-                => Task.FromResult<ScreeningAssignment?>(null);
-
-            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
-
-            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
-            {
-                _project = project;
-                return Task.CompletedTask;
-            }
-
-            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
-                => Task.CompletedTask;
-
-            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
-                => Task.CompletedTask;
-        }
-
-        private sealed class TimeoutWorkflowStore : IReviewWorkflowStore
-        {
-            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewProject?>(null);
-
-            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewProject>>(Array.Empty<ReviewProject>());
-
-            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewStage?>(null);
-
-            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
-
-            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
-                => Task.FromResult<ScreeningAssignment?>(null);
-
-            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
-
-            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
-                => Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
-
-            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
-                => Task.CompletedTask;
-
-            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
-                => Task.CompletedTask;
-        }
-
-        private sealed class DelayedWorkflowStore : IReviewWorkflowStore
-        {
-            private readonly TimeSpan _delay;
-
-            public DelayedWorkflowStore(TimeSpan delay)
-            {
-                _delay = delay;
-            }
-
-            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewProject?>(null);
-
-            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewProject>>(Array.Empty<ReviewProject>());
-
-            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewStage?>(null);
-
-            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
-
-            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
-                => Task.FromResult<ScreeningAssignment?>(null);
-
-            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
-
-            public async Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
-            {
-                await Task.Delay(_delay, cancellationToken).ConfigureAwait(false);
-            }
-
-            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
-                => Task.CompletedTask;
-
-            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
-                => Task.CompletedTask;
         }
 
         private sealed class FakeRunPicker : ILitSearchRunPicker
