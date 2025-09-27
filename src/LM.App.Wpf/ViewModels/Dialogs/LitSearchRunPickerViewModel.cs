@@ -61,7 +61,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs
                 SelectedEntry.EntryId,
                 SelectedEntry.HookAbsolutePath,
                 SelectedEntry.HookRelativePath,
-                SelectedRun.RunId);
+                SelectedRun.RunId,
+                SelectedRun.Run.CheckedEntriesAbsolutePath,
+                SelectedRun.Run.CheckedEntriesRelativePath);
         }
 
         [RelayCommand(CanExecute = nameof(CanConfirm))]
