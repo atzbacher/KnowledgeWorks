@@ -391,10 +391,16 @@ LM.HubSpoke.Models.DataExtractionHook.ExtractedBy.get -> string!
 LM.HubSpoke.Models.DataExtractionHook.ExtractedBy.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Figures.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionFigure!>!
 LM.HubSpoke.Models.DataExtractionHook.Figures.init -> void
+LM.HubSpoke.Models.DataExtractionHook.GeographyScope.get -> string?
+LM.HubSpoke.Models.DataExtractionHook.GeographyScope.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Interventions.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionIntervention!>!
 LM.HubSpoke.Models.DataExtractionHook.Interventions.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Notes.get -> string?
 LM.HubSpoke.Models.DataExtractionHook.Notes.init -> void
+LM.HubSpoke.Models.DataExtractionHook.IsCohortStudy.get -> bool?
+LM.HubSpoke.Models.DataExtractionHook.IsCohortStudy.init -> void
+LM.HubSpoke.Models.DataExtractionHook.IsRegistryStudy.get -> bool?
+LM.HubSpoke.Models.DataExtractionHook.IsRegistryStudy.init -> void
 LM.HubSpoke.Models.DataExtractionHook.StudyDesign.get -> string?
 LM.HubSpoke.Models.DataExtractionHook.StudyDesign.init -> void
 LM.HubSpoke.Models.DataExtractionHook.StudySetting.get -> string?
@@ -403,8 +409,12 @@ LM.HubSpoke.Models.DataExtractionHook.Populations.get -> System.Collections.Gene
 LM.HubSpoke.Models.DataExtractionHook.Populations.init -> void
 LM.HubSpoke.Models.DataExtractionHook.SchemaVersion.get -> string!
 LM.HubSpoke.Models.DataExtractionHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.DataExtractionHook.SiteCount.get -> int?
+LM.HubSpoke.Models.DataExtractionHook.SiteCount.init -> void
 LM.HubSpoke.Models.DataExtractionHook.Tables.get -> System.Collections.Generic.List<LM.HubSpoke.Models.DataExtractionTable!>!
 LM.HubSpoke.Models.DataExtractionHook.Tables.init -> void
+LM.HubSpoke.Models.DataExtractionHook.TrialClassification.get -> string?
+LM.HubSpoke.Models.DataExtractionHook.TrialClassification.init -> void
 LM.HubSpoke.Models.DataExtractionIntervention
 LM.HubSpoke.Models.DataExtractionIntervention.DataExtractionIntervention() -> void
 LM.HubSpoke.Models.DataExtractionIntervention.Description.get -> string?

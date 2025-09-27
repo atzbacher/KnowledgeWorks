@@ -5,11 +5,15 @@
         xmlns:swc="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
         xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Dialogs.Staging"
         xmlns:controls="clr-namespace:LM.App.Wpf.Views.Controls"
+        xmlns:common="clr-namespace:LM.App.Wpf.Common"
         Title="Data extraction workspace"
         Width="1100"
         Height="720"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize">
+  <Window.Resources>
+    <common:NullableIntConverter x:Key="NullableIntConverter" />
+  </Window.Resources>
   <swc:Grid Margin="12">
     <swc:Grid.RowDefinitions>
       <swc:RowDefinition Height="Auto" />
@@ -400,6 +404,31 @@
               <swc:ComboBox Width="240"
                              ItemsSource="{Binding StudyDetails.StudySettingOptions}"
                              SelectedItem="{Binding StudyDetails.StudySetting, Mode=TwoWay}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Site count" Width="140" VerticalAlignment="Center" />
+              <swc:TextBox Width="120"
+                           Text="{Binding StudyDetails.SiteCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NullableIntConverter}}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Trial classification" Width="140" VerticalAlignment="Center" />
+              <swc:ComboBox Width="240"
+                             ItemsSource="{Binding StudyDetails.TrialClassificationOptions}"
+                             SelectedItem="{Binding StudyDetails.TrialClassification, Mode=TwoWay}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Registry study" Width="140" VerticalAlignment="Center" />
+              <swc:CheckBox IsChecked="{Binding StudyDetails.IsRegistryStudy, Mode=TwoWay}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Cohort study" Width="140" VerticalAlignment="Center" />
+              <swc:CheckBox IsChecked="{Binding StudyDetails.IsCohortStudy, Mode=TwoWay}" />
+            </swc:StackPanel>
+            <swc:StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+              <swc:TextBlock Text="Geography scope" Width="140" VerticalAlignment="Center" />
+              <swc:ComboBox Width="240"
+                             ItemsSource="{Binding StudyDetails.GeographyScopeOptions}"
+                             SelectedItem="{Binding StudyDetails.GeographyScope, Mode=TwoWay}" />
             </swc:StackPanel>
           </swc:StackPanel>
         </swc:TabItem>

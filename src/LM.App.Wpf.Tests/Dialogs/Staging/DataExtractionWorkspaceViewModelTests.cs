@@ -40,6 +40,11 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             viewModel.SelectedAsset!.ColumnHint = 3;
             viewModel.SelectedAsset.DictionaryPath = "baseline.dictionary";
             viewModel.StudyDetails.StudyDesign = viewModel.StudyDetails.StudyDesignOptions[0];
+            viewModel.StudyDetails.SiteCount = 5;
+            viewModel.StudyDetails.TrialClassification = viewModel.StudyDetails.TrialClassificationOptions[1];
+            viewModel.StudyDetails.IsRegistryStudy = true;
+            viewModel.StudyDetails.IsCohortStudy = false;
+            viewModel.StudyDetails.GeographyScope = viewModel.StudyDetails.GeographyScopeOptions[0];
 
             await viewModel.SaveAsyncCommand.ExecuteAsync(null);
 
@@ -48,6 +53,49 @@ namespace LM.App.Wpf.Tests.Dialogs.Staging
             Assert.Equal("baseline.dictionary", item.DataExtractionHook.Tables[0].DictionaryPath);
             Assert.Single(item.PendingChangeLogEvents);
             Assert.Equal(viewModel.StudyDetails.StudyDesign, item.DataExtractionHook.StudyDesign);
+            Assert.Equal(5, item.DataExtractionHook.SiteCount);
+            Assert.Equal(viewModel.StudyDetails.TrialClassification, item.DataExtractionHook.TrialClassification);
+            Assert.True(item.DataExtractionHook.IsRegistryStudy.GetValueOrDefault());
+            Assert.False(item.DataExtractionHook.IsCohortStudy.GetValueOrDefault());
+            Assert.Equal(viewModel.StudyDetails.GeographyScope, item.DataExtractionHook.GeographyScope);
+
+            var tags = item.PendingChangeLogEvents[0].Details?.Tags;
+            Assert.NotNull(tags);
+            Assert.Contains("RegistryStudy", tags!);
+            Assert.DoesNotContain("CohortStudy", tags!);
+            Assert.Contains("SiteCount:5", tags!);
+            Assert.Contains(FormattableString.Invariant($"TrialClassification:{viewModel.StudyDetails.TrialClassification}"), tags!);
+        }
+
+        [Fact]
+        public void LoadFromItem_Populates_StudyDetails_Metadata()
+        {
+            var hook = new LM.HubSpoke.Models.DataExtractionHook
+            {
+                StudyDesign = "Randomized controlled trial",
+                StudySetting = "Multicenter",
+                SiteCount = 12,
+                TrialClassification = "Meta-analysis",
+                IsRegistryStudy = true,
+                IsCohortStudy = true,
+                GeographyScope = "International"
+            };
+
+            var item = new StagingItem
+            {
+                FilePath = "/tmp/sample.pdf",
+                DataExtractionHook = hook
+            };
+
+            var viewModel = new DataExtractionWorkspaceViewModel(item, _orchestrator, NullDataExtractionPreprocessor.Instance);
+
+            Assert.Equal(12, viewModel.StudyDetails.SiteCount);
+            Assert.Equal("Meta-analysis", viewModel.StudyDetails.TrialClassification);
+            Assert.True(viewModel.StudyDetails.IsRegistryStudy);
+            Assert.True(viewModel.StudyDetails.IsCohortStudy);
+            Assert.Equal("International", viewModel.StudyDetails.GeographyScope);
+            Assert.Equal("Randomized controlled trial", viewModel.StudyDetails.StudyDesign);
+            Assert.Equal("Multicenter", viewModel.StudyDetails.StudySetting);
         }
 
         [Fact]
