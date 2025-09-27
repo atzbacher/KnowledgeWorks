@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common.Dialogs;
@@ -37,7 +39,7 @@ namespace LM.App.Wpf.Tests.Review
                 Array.Empty<string>());
 
             var messageBox = new FakeMessageBoxService();
-            var workspace = new FakeWorkSpaceService();
+            using var workspace = new FakeWorkSpaceService();
             var launcher = new ReviewProjectLauncher(
                 new FakeDialogService(),
                 new FakeEntryStore(new Entry
@@ -71,6 +73,94 @@ namespace LM.App.Wpf.Tests.Review
                 if (File.Exists(checkedEntriesPath))
                 {
                     File.Delete(checkedEntriesPath);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task CreateProjectAsync_UsesRelativeCheckedEntriesPath_WhenAbsoluteMissing()
+        {
+            var workspaceRoot = Path.Combine(Path.GetTempPath(), $"kw-review-{Guid.NewGuid():N}");
+            Directory.CreateDirectory(workspaceRoot);
+
+            try
+            {
+                var relativePath = Path.Combine("entries", "entry-1", "hooks", "litsearch_run_seed_checked.json");
+                var absolutePath = Path.Combine(workspaceRoot, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
+                await File.WriteAllTextAsync(
+                    absolutePath,
+                    "{\"checkedEntries\":{\"entryIds\":[\"lit-entry-1\",\"lit-entry-2\"]}}",
+                    CancellationToken.None);
+
+                var selection = new LitSearchRunSelection(
+                    "entry-1",
+                    "hooks/litsearch.json",
+                    "hooks/litsearch.json",
+                    "run-1",
+                    null,
+                    relativePath.Replace('\\', '/'),
+                    Array.Empty<string>());
+
+                using var workspace = new FakeWorkSpaceService(workspaceRoot);
+                var workflowStore = new RecordingWorkflowStore();
+                var changeLogOrchestrator = new HookOrchestrator(workspace);
+                var launcher = new ReviewProjectLauncher(
+                    new FakeDialogService(),
+                    new FakeEntryStore(new Entry
+                    {
+                        Id = selection.EntryId,
+                        Title = "Seed Entry"
+                    }),
+                    workflowStore,
+                    new FakeReviewHookContextFactory(),
+                    new FakeReviewHookOrchestrator(),
+                    changeLogOrchestrator,
+                    new FakeUserContext("tester"),
+                    workspace,
+                    new FakeRunPicker(selection),
+                    new FakeMessageBoxService());
+
+                var project = await launcher.CreateProjectAsync(CancellationToken.None);
+
+                Assert.NotNull(project);
+                Assert.NotNull(workflowStore.SavedProject);
+
+                var changeLogPath = Path.Combine(
+                    workspaceRoot,
+                    "entries",
+                    project!.Id,
+                    "hooks",
+                    "changelog.json");
+
+                Assert.True(File.Exists(changeLogPath));
+
+                var json = await File.ReadAllTextAsync(changeLogPath, CancellationToken.None);
+                using var document = JsonDocument.Parse(json);
+                var tags = document.RootElement
+                    .GetProperty("events")[0]
+                    .GetProperty("details")
+                    .GetProperty("tags")
+                    .EnumerateArray()
+                    .Select(element => element.GetString())
+                    .Where(value => value is not null)
+                    .Select(value => value!)
+                    .ToList();
+
+                Assert.Contains("litsearchEntryCount:2", tags);
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(workspaceRoot))
+                    {
+                        Directory.Delete(workspaceRoot, recursive: true);
+                    }
+                }
+                catch
+                {
+                    // Best effort cleanup.
                 }
             }
         }
@@ -182,17 +272,95 @@ namespace LM.App.Wpf.Tests.Review
             public string UserName { get; }
         }
 
-        private sealed class FakeWorkSpaceService : IWorkSpaceService
+        private sealed class FakeWorkSpaceService : IWorkSpaceService, IDisposable
         {
-            public string? WorkspacePath => Path.GetTempPath();
+            private readonly string _root;
+            private readonly bool _ownsRoot;
 
-            public string GetWorkspaceRoot() => WorkspacePath!;
+            public FakeWorkSpaceService(string? workspaceRoot = null)
+            {
+                if (string.IsNullOrWhiteSpace(workspaceRoot))
+                {
+                    _root = Path.Combine(Path.GetTempPath(), $"kw-review-{Guid.NewGuid():N}");
+                    _ownsRoot = true;
+                }
+                else
+                {
+                    _root = workspaceRoot;
+                    _ownsRoot = false;
+                }
+
+                Directory.CreateDirectory(_root);
+            }
+
+            public string? WorkspacePath => _root;
+
+            public string GetWorkspaceRoot() => _root;
 
             public string GetLocalDbPath() => Path.Combine(GetWorkspaceRoot(), "workspace.db");
 
             public string GetAbsolutePath(string relativePath) => Path.Combine(GetWorkspaceRoot(), relativePath);
 
             public Task EnsureWorkspaceAsync(string absoluteWorkspacePath, CancellationToken ct = default)
+                => Task.CompletedTask;
+
+            public void Dispose()
+            {
+                if (!_ownsRoot)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (Directory.Exists(_root))
+                    {
+                        Directory.Delete(_root, recursive: true);
+                    }
+                }
+                catch
+                {
+                    // best effort cleanup
+                }
+            }
+        }
+
+        private sealed class RecordingWorkflowStore : IReviewWorkflowStore
+        {
+            private ReviewProject? _project;
+
+            public ReviewProject? SavedProject => _project;
+
+            public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult(_project);
+
+            public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewProject>>(_project is null
+                    ? Array.Empty<ReviewProject>()
+                    : new[] { _project });
+
+            public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<ReviewStage?>(null);
+
+            public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+
+            public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
+                => Task.FromResult<ScreeningAssignment?>(null);
+
+            public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
+                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+
+            public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
+            {
+                _project = project;
+                return Task.CompletedTask;
+            }
+
+            public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+
+            public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
                 => Task.CompletedTask;
         }
 

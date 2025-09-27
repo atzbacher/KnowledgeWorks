@@ -73,7 +73,10 @@ namespace LM.App.Wpf.Services.Review
                 var entry = await _entryStore.GetByIdAsync(selection.EntryId, cancellationToken);
                 var checkedEntryIds = selection.CheckedEntryIds.Count > 0
                     ? selection.CheckedEntryIds
-                    : await LoadCheckedEntryIdsAsync(selection.CheckedEntriesAbsolutePath, cancellationToken);
+                    : await LoadCheckedEntryIdsAsync(
+                        selection.CheckedEntriesAbsolutePath,
+                        selection.CheckedEntriesRelativePath,
+                        cancellationToken);
 
                 var project = CreateProject(selection, entry);
 
@@ -347,9 +350,13 @@ namespace LM.App.Wpf.Services.Review
             return tags;
         }
 
-        private async Task<IReadOnlyList<string>> LoadCheckedEntryIdsAsync(string? absolutePath, CancellationToken cancellationToken)
+        private async Task<IReadOnlyList<string>> LoadCheckedEntryIdsAsync(
+            string? absolutePath,
+            string? relativePath,
+            CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(absolutePath) || !File.Exists(absolutePath))
+            var resolvedPath = ResolveCheckedEntriesPath(absolutePath, relativePath);
+            if (resolvedPath is null)
             {
                 return Array.Empty<string>();
             }
@@ -357,7 +364,7 @@ namespace LM.App.Wpf.Services.Review
             try
             {
                 await using var stream = new FileStream(
-                    absolutePath,
+                    resolvedPath,
                     FileMode.Open,
                     FileAccess.Read,
                     FileShare.ReadWrite | FileShare.Delete,
@@ -390,6 +397,33 @@ namespace LM.App.Wpf.Services.Review
             catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
             {
                 return Array.Empty<string>();
+            }
+        }
+
+        private string? ResolveCheckedEntriesPath(string? absolutePath, string? relativePath)
+        {
+            if (!string.IsNullOrWhiteSpace(absolutePath) && File.Exists(absolutePath))
+            {
+                return absolutePath;
+            }
+
+            if (string.IsNullOrWhiteSpace(relativePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var normalized = relativePath.Replace('/', Path.DirectorySeparatorChar);
+                var candidate = Path.IsPathRooted(normalized)
+                    ? normalized
+                    : Path.Combine(_workspace.GetWorkspaceRoot(), normalized);
+
+                return File.Exists(candidate) ? candidate : null;
+            }
+            catch (Exception ex) when (ex is ArgumentException or PathTooLongException)
+            {
+                return null;
             }
         }
 
