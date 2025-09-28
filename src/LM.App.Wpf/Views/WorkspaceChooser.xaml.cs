@@ -18,6 +18,8 @@ namespace LM.App.Wpf.Views
 
         public string? SelectedWorkspacePath => _viewModel.SelectedWorkspacePath;
 
+        public string? SelectedTessTrainingDataPath => _viewModel.SelectedTessTrainingDataPath;
+
         public void Configure(Action<WorkspaceChooserViewModel> configure)
         {
             configure?.Invoke(_viewModel);

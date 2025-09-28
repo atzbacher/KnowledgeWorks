@@ -18,6 +18,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         private bool enableDebugDump;
 
         [ObservableProperty]
+        private string tessTrainingDataPath = string.Empty;
+
+        [ObservableProperty]
         private string title = "Choose workspace";
 
         public WorkspaceChooserViewModel(IDialogService dialogService)
@@ -26,6 +29,8 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         }
 
         public string? SelectedWorkspacePath { get; private set; }
+
+        public string? SelectedTessTrainingDataPath { get; private set; }
 
         public bool RequireExistingDirectory { get; set; } = true;
 
@@ -42,6 +47,21 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         }
 
         [RelayCommand]
+        private void BrowseTrainingData()
+        {
+            var files = _dialogService.ShowOpenFileDialog(new FilePickerOptions
+            {
+                AllowMultiple = false,
+                Filter = "Tesseract training (*.traineddata)|*.traineddata|All files (*.*)|*.*"
+            });
+
+            if (files is { Length: > 0 })
+            {
+                TessTrainingDataPath = files[0]!;
+            }
+        }
+
+        [RelayCommand]
         private void Confirm()
         {
             var path = WorkspacePath?.Trim();
@@ -53,6 +73,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs
                                                System.Windows.MessageBoxImage.Warning);
                 return;
             }
+
+            string? trainingDestination = null;
+            var workspaceRoot = Path.GetFullPath(path);
 
             try
             {
@@ -78,7 +101,45 @@ namespace LM.App.Wpf.ViewModels.Dialogs
                 return;
             }
 
-            SelectedWorkspacePath = Path.GetFullPath(path);
+            if (!string.IsNullOrWhiteSpace(TessTrainingDataPath))
+            {
+                var trainingPath = TessTrainingDataPath.Trim();
+                if (!File.Exists(trainingPath))
+                {
+                    System.Windows.MessageBox.Show("Please choose an existing Tesseract training file.",
+                                                   "Workspace",
+                                                   System.Windows.MessageBoxButton.OK,
+                                                   System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    var targetDirectory = Path.Combine(workspaceRoot, ".knowledgeworks", "tessdata");
+                    Directory.CreateDirectory(targetDirectory);
+
+                    var sourceFullPath = Path.GetFullPath(trainingPath);
+                    var targetPath = Path.Combine(targetDirectory, Path.GetFileName(sourceFullPath));
+
+                    if (!string.Equals(sourceFullPath, targetPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(sourceFullPath, targetPath, overwrite: true);
+                    }
+
+                    trainingDestination = targetPath;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Unable to import the training data file:{Environment.NewLine}{ex.Message}",
+                                                   "Workspace",
+                                                   System.Windows.MessageBoxButton.OK,
+                                                   System.Windows.MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            SelectedWorkspacePath = workspaceRoot;
+            SelectedTessTrainingDataPath = trainingDestination;
             DebugFlags.DumpStagingJson = EnableDebugDump;
             RequestClose(true);
         }

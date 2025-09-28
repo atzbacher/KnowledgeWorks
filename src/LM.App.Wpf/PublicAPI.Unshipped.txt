@@ -271,9 +271,13 @@ LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Dispose() -> void
 LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> void
 LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.BrowseTrainingDataCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedTessTrainingDataPath.get -> string?
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.get -> string!
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.TessTrainingDataPath.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.TessTrainingDataPath.set -> void
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.get -> bool
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.set -> void
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.WorkspaceChooserViewModel(LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
@@ -813,6 +817,7 @@ override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.Event
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
 LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
+LM.App.Wpf.Views.WorkspaceChooser.SelectedTessTrainingDataPath.get -> string?
 LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser(LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel! viewModel) -> void
 LM.App.Wpf.Views.WorkspaceChooser.Configure(System.Action<LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel!>! configure) -> void
 override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void

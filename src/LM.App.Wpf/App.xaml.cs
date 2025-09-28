@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
@@ -136,6 +138,20 @@ namespace LM.App.Wpf
                 viewModel.RequireExistingDirectory = requireExistingDirectory;
                 viewModel.WorkspacePath = initialPath ?? string.Empty;
                 viewModel.EnableDebugDump = LM.App.Wpf.Diagnostics.DebugFlags.DumpStagingJson;
+
+                if (!string.IsNullOrWhiteSpace(initialPath) && Directory.Exists(initialPath))
+                {
+                    var tessRoot = Path.Combine(initialPath, ".knowledgeworks", "tessdata");
+                    if (Directory.Exists(tessRoot))
+                    {
+                        var existing = Directory.EnumerateFiles(tessRoot, "*.traineddata").FirstOrDefault()
+                                       ?? Directory.EnumerateFiles(tessRoot).FirstOrDefault();
+                        if (!string.IsNullOrWhiteSpace(existing))
+                        {
+                            viewModel.TessTrainingDataPath = existing;
+                        }
+                    }
+                }
             });
 
             var ok = chooser.ShowDialog();
