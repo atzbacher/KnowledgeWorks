@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -57,6 +58,9 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         PageSelection = "1";
 
         Tables = new ObservableCollection<DataExtractionTableViewModel>();
+        HeaderRowOptions = new ObservableCollection<TableRowOption>();
+        RemoveEmptyColumns = true;
+        MergeSignColumns = true;
     }
 
     public IReadOnlyList<ExtractionModeOption> ModeOptions { get; }
@@ -90,7 +94,24 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     [ObservableProperty]
     private DataExtractionTableViewModel? selectedTable;
 
+    [ObservableProperty]
+    private DataView? selectedTableView;
+
+    [ObservableProperty]
+    private bool removeEmptyRows;
+
+    [ObservableProperty]
+    private bool removeEmptyColumns;
+
+    [ObservableProperty]
+    private bool mergeSignColumns;
+
+    [ObservableProperty]
+    private TableRowOption? selectedHeaderRow;
+
     public ObservableCollection<DataExtractionTableViewModel> Tables { get; }
+
+    public ObservableCollection<TableRowOption> HeaderRowOptions { get; }
 
     public bool HasResults => Tables.Count > 0;
 
@@ -145,6 +166,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         StatusMessage = "Configure options and select Extract tables to begin.";
         Tables.Clear();
         SelectedTable = null;
+        SelectedTableView = null;
 
         OnPropertyChanged(nameof(HasResults));
         OnPropertyChanged(nameof(HasPdf));
@@ -166,6 +188,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         StatusMessage = "Extracting tables...";
         Tables.Clear();
         SelectedTable = null;
+        SelectedTableView = null;
         OnPropertyChanged(nameof(HasResults));
         OnPropertyChanged(nameof(CanCopyTable));
 
@@ -197,6 +220,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
             if (Tables.Count == 0)
             {
                 StatusMessage = "No tables were detected with the current settings.";
+                SelectedTableView = null;
             }
             else
             {
@@ -238,7 +262,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
 
         try
         {
-            _clipboard.SetText(table.ToTsv());
+            _clipboard.SetText(table.ToTsv(BuildAdjustmentOptions()));
             StatusMessage = $"Copied table from page {table.PageNumber} to the clipboard.";
         }
         catch (Exception ex)
@@ -255,11 +279,96 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     {
         CopyTableCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(CanCopyTable));
+        UpdateHeaderRowOptions(value);
+        RefreshSelectedTableView();
     }
 
     private bool CanExtractTables()
     {
         return !IsBusy && _pdfPath is not null;
+    }
+
+    partial void OnRemoveEmptyRowsChanged(bool value)
+    {
+        RefreshSelectedTableView();
+    }
+
+    partial void OnRemoveEmptyColumnsChanged(bool value)
+    {
+        RefreshSelectedTableView();
+    }
+
+    partial void OnMergeSignColumnsChanged(bool value)
+    {
+        RefreshSelectedTableView();
+    }
+
+    partial void OnSelectedHeaderRowChanged(TableRowOption? value)
+    {
+        RefreshSelectedTableView();
+    }
+
+    private void RefreshSelectedTableView()
+    {
+        var table = SelectedTable;
+        if (table is null)
+        {
+            SelectedTableView = null;
+            return;
+        }
+
+        var options = BuildAdjustmentOptions();
+        var maxHeaderIndex = table.RowCount - 1;
+        options = TableAdjustmentOptions.ClampHeader(options, maxHeaderIndex);
+        SelectedTableView = table.BuildView(options);
+    }
+
+    private TableAdjustmentOptions BuildAdjustmentOptions()
+    {
+        var headerIndex = SelectedHeaderRow?.RowIndex ?? -1;
+        return new TableAdjustmentOptions(RemoveEmptyRows, RemoveEmptyColumns, MergeSignColumns, headerIndex);
+    }
+
+    private void UpdateHeaderRowOptions(DataExtractionTableViewModel? table)
+    {
+        HeaderRowOptions.Clear();
+        HeaderRowOptions.Add(new TableRowOption(null, "Use detected column names"));
+
+        if (table is null)
+        {
+            SelectedHeaderRow = HeaderRowOptions[0];
+            return;
+        }
+
+        var rows = table.GetRawRows();
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var preview = table.GetRowPreview(i);
+            HeaderRowOptions.Add(new TableRowOption(i, $"Row {i + 1}: {Truncate(preview, 80)}"));
+        }
+
+        var preferred = SelectedHeaderRow?.RowIndex;
+        if (preferred.HasValue)
+        {
+            var match = HeaderRowOptions.FirstOrDefault(option => option.RowIndex == preferred.Value);
+            if (match is not null)
+            {
+                SelectedHeaderRow = match;
+                return;
+            }
+        }
+
+        SelectedHeaderRow = HeaderRowOptions[0];
+    }
+
+    private static string Truncate(string value, int maximumLength)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length <= maximumLength)
+        {
+            return value;
+        }
+
+        return value[..maximumLength] + "…";
     }
 
     private static string ResolveEntryTitle(Entry entry)
@@ -484,6 +593,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     {
         Tables.Clear();
         SelectedTable = null;
+        SelectedTableView = null;
         _entryId = null;
         _pdfPath = null;
         _pdfRelativePath = null;
@@ -493,6 +603,9 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         PdfFileName = string.Empty;
         PageSelection = string.Empty;
         StatusMessage = string.Empty;
+        RemoveEmptyRows = false;
+        RemoveEmptyColumns = true;
+        MergeSignColumns = true;
 
         OnPropertyChanged(nameof(HasResults));
         OnPropertyChanged(nameof(HasPdf));
