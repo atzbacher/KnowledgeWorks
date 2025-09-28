@@ -18,7 +18,8 @@ internal static class StageDefinitionMapper
             StageType = definition.StageType,
             ReviewerRequirements = definition.ReviewerRequirement.Requirements
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value),
-            Consensus = StageConsensusPolicyMapper.ToDto(definition.ConsensusPolicy)
+            Consensus = StageConsensusPolicyMapper.ToDto(definition.ConsensusPolicy),
+            DisplayAreas = definition.DisplayProfile.ContentAreas.ToList()
         };
 
         return ReviewDtoAuditStamp.Stamp(dto);
@@ -31,8 +32,20 @@ internal static class StageDefinitionMapper
         var requirements = dto.ReviewerRequirements ?? new Dictionary<ReviewerRole, int>();
         var requirement = ReviewerRequirement.Create(requirements);
         var consensus = StageConsensusPolicyMapper.ToDomain(dto.Consensus ?? new StageConsensusPolicyDto());
+        var displayAreas = dto.DisplayAreas ?? new List<StageContentArea>();
 
-        return StageDefinition.Create(dto.Id, dto.Name, dto.StageType, requirement, consensus);
+        if (displayAreas.Count == 0)
+        {
+            displayAreas = new List<StageContentArea>
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.ReviewerDecisionPanel
+            };
+        }
+
+        var displayProfile = StageDisplayProfile.Create(displayAreas);
+
+        return StageDefinition.Create(dto.Id, dto.Name, dto.StageType, requirement, consensus, displayProfile);
     }
 }
 

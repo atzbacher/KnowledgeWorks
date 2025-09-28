@@ -20,15 +20,18 @@ public sealed class JsonReviewProjectStoreTests
         var store = await CreateStoreAsync(workspace.Path);
 
         var definition = CreateStageDefinition();
+        var metadata = ReviewProjectMetadata.Create(ReviewTemplateKind.Custom, string.Empty);
+        var auditTrail = ReviewAuditTrail.Create(new[]
+        {
+            ReviewAuditTrail.AuditEntry.Create("audit-1", "alice", "created", DateTimeOffset.UtcNow, "seed")
+        });
         var project = ReviewProject.Create(
             "proj-1",
             "Cardio Screening",
             DateTimeOffset.UtcNow,
             new[] { definition },
-            ReviewAuditTrail.Create(new[]
-            {
-                ReviewAuditTrail.AuditEntry.Create("audit-1", "alice", "created", DateTimeOffset.UtcNow, "seed")
-            }));
+            metadata,
+            auditTrail);
 
         await store.SaveProjectAsync(project);
 
@@ -95,7 +98,13 @@ public sealed class JsonReviewProjectStoreTests
         var store = await CreateStoreAsync(workspace.Path);
 
         var definition = CreateStageDefinition();
-        var project = ReviewProject.Create("proj-2", "Parallel", DateTimeOffset.UtcNow, new[] { definition }, ReviewAuditTrail.Create());
+        var project = ReviewProject.Create(
+            "proj-2",
+            "Parallel",
+            DateTimeOffset.UtcNow,
+            new[] { definition },
+            ReviewProjectMetadata.Create(ReviewTemplateKind.Custom, string.Empty),
+            ReviewAuditTrail.Create());
         await store.SaveProjectAsync(project);
 
         var stage1 = ReviewStage.Create(
@@ -161,6 +170,7 @@ public sealed class JsonReviewProjectStoreTests
             "Lock Free",
             DateTimeOffset.UtcNow,
             new[] { definition },
+            ReviewProjectMetadata.Create(ReviewTemplateKind.Custom, string.Empty),
             ReviewAuditTrail.Create());
 
         await store.SaveProjectAsync(project);
@@ -176,7 +186,13 @@ public sealed class JsonReviewProjectStoreTests
         var store = await CreateStoreAsync(workspace.Path);
 
         var definition = CreateStageDefinition();
-        var project = ReviewProject.Create("proj-4", "Legacy", DateTimeOffset.UtcNow, new[] { definition }, ReviewAuditTrail.Create());
+        var project = ReviewProject.Create(
+            "proj-4",
+            "Legacy",
+            DateTimeOffset.UtcNow,
+            new[] { definition },
+            ReviewProjectMetadata.Create(ReviewTemplateKind.Custom, string.Empty),
+            ReviewAuditTrail.Create());
         await store.SaveProjectAsync(project);
 
         var stage = ReviewStage.Create(
@@ -236,7 +252,13 @@ public sealed class JsonReviewProjectStoreTests
             "Title Screening",
             ReviewStageType.TitleScreening,
             requirement,
-            StageConsensusPolicy.RequireAgreement(1, false, null));
+            StageConsensusPolicy.RequireAgreement(1, false, null),
+            StageDisplayProfile.Create(new[]
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.InclusionExclusionChecklist,
+                StageContentArea.ReviewerDecisionPanel
+            }));
     }
 
     private static async Task<JsonReviewProjectStore> CreateStoreAsync(string workspacePath)

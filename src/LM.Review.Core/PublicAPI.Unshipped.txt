@@ -30,3 +30,22 @@ LM.Review.Core.Services.ReviewerAssignmentRequest.ReviewerId.init -> void
 LM.Review.Core.Services.ReviewerAssignmentRequest.Role.get -> LM.Review.Core.Models.ReviewerRole
 LM.Review.Core.Services.ReviewerAssignmentRequest.Role.init -> void
 LM.Review.Core.Models.ReviewStageType.DataExtraction = 4 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewProjectMetadata
+static LM.Review.Core.Models.ReviewProjectMetadata.Create(LM.Review.Core.Models.ReviewTemplateKind template, string? notes) -> LM.Review.Core.Models.ReviewProjectMetadata!
+LM.Review.Core.Models.ReviewProjectMetadata.Notes.get -> string!
+LM.Review.Core.Models.ReviewProjectMetadata.Template.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.ReviewTemplateKind.Custom = 1 -> LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.ReviewTemplateKind.DataExtraction = 3 -> LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.ReviewTemplateKind.Picos = 0 -> LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.ReviewTemplateKind.RapidAssessment = 2 -> LM.Review.Core.Models.ReviewTemplateKind
+LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.BibliographySummary = 0 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.DataExtractionWorkspace = 4 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.FullTextViewer = 2 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.InclusionExclusionChecklist = 1 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.NotesPane = 5 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageContentArea.ReviewerDecisionPanel = 3 -> LM.Review.Core.Models.StageContentArea
+LM.Review.Core.Models.StageDisplayProfile
+static LM.Review.Core.Models.StageDisplayProfile.Create(System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageContentArea!>! contentAreas) -> LM.Review.Core.Models.StageDisplayProfile!
+LM.Review.Core.Models.StageDisplayProfile.ContentAreas.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.StageContentArea>!

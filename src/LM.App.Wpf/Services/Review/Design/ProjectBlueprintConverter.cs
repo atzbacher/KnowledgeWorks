@@ -31,11 +31,14 @@ internal static class ProjectBlueprintConverter
 
         var auditTrail = ReviewAuditTrail.Create(new[] { auditEntry });
 
+        var metadata = ReviewProjectMetadata.Create(blueprint.Template, blueprint.MetadataNotes);
+
         return ReviewProject.Create(
             blueprint.ProjectId,
             blueprint.Name,
             blueprint.CreatedAtUtc,
             stages,
+            metadata,
             auditTrail);
     }
 
@@ -67,7 +70,8 @@ internal static class ProjectBlueprintConverter
             stage.Name,
             stage.StageType,
             reviewerRequirement,
-            consensus);
+            consensus,
+            stage.DisplayProfile);
     }
 
     private static StageConsensusPolicy ResolveConsensusPolicy(StageBlueprint stage, ReviewerRequirement requirement)

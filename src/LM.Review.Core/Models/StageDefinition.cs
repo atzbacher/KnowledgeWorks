@@ -12,13 +12,15 @@ public sealed record StageDefinition
         string name,
         ReviewStageType stageType,
         ReviewerRequirement reviewerRequirement,
-        StageConsensusPolicy consensusPolicy)
+        StageConsensusPolicy consensusPolicy,
+        StageDisplayProfile displayProfile)
     {
         Id = id;
         Name = name;
         StageType = stageType;
         ReviewerRequirement = reviewerRequirement;
         ConsensusPolicy = consensusPolicy;
+        DisplayProfile = displayProfile;
     }
 
     public string Id { get; }
@@ -31,17 +33,21 @@ public sealed record StageDefinition
 
     public StageConsensusPolicy ConsensusPolicy { get; }
 
+    public StageDisplayProfile DisplayProfile { get; }
+
     public static StageDefinition Create(
         string id,
         string name,
         ReviewStageType stageType,
         ReviewerRequirement reviewerRequirement,
-        StageConsensusPolicy consensusPolicy)
+        StageConsensusPolicy consensusPolicy,
+        StageDisplayProfile displayProfile)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(reviewerRequirement);
         ArgumentNullException.ThrowIfNull(consensusPolicy);
+        ArgumentNullException.ThrowIfNull(displayProfile);
 
         var trimmedId = id.Trim();
         var trimmedName = name.Trim();
@@ -49,7 +55,7 @@ public sealed record StageDefinition
         reviewerRequirement.EnsureHasReviewers();
         consensusPolicy.EnsureCompatibility(reviewerRequirement);
 
-        return new StageDefinition(trimmedId, trimmedName, stageType, reviewerRequirement, consensusPolicy);
+        return new StageDefinition(trimmedId, trimmedName, stageType, reviewerRequirement, consensusPolicy, displayProfile);
     }
 }
 

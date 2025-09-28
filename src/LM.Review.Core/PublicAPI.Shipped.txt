@@ -48,10 +48,11 @@ LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Id.get -> string!
 LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.OccurredAt.get -> System.DateTimeOffset
 LM.Review.Core.Models.ReviewProject
 LM.Review.Core.Models.ReviewProject.AuditTrail.get -> LM.Review.Core.Models.ReviewAuditTrail!
-static LM.Review.Core.Models.ReviewProject.Create(string! id, string! name, System.DateTimeOffset createdAtUtc, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageDefinition!>! stageDefinitions, LM.Review.Core.Models.ReviewAuditTrail? auditTrail = null) -> LM.Review.Core.Models.ReviewProject!
+static LM.Review.Core.Models.ReviewProject.Create(string! id, string! name, System.DateTimeOffset createdAtUtc, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageDefinition!>! stageDefinitions, LM.Review.Core.Models.ReviewProjectMetadata? metadata = null, LM.Review.Core.Models.ReviewAuditTrail? auditTrail = null) -> LM.Review.Core.Models.ReviewProject!
 LM.Review.Core.Models.ReviewProject.CreatedAt.get -> System.DateTimeOffset
 LM.Review.Core.Models.ReviewProject.Id.get -> string!
 LM.Review.Core.Models.ReviewProject.Name.get -> string!
+LM.Review.Core.Models.ReviewProject.Metadata.get -> LM.Review.Core.Models.ReviewProjectMetadata!
 LM.Review.Core.Models.ReviewProject.StageDefinitions.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.StageDefinition!>!
 LM.Review.Core.Models.ReviewStage
 LM.Review.Core.Models.ReviewStage.ActivatedAt.get -> System.DateTimeOffset
@@ -66,11 +67,12 @@ LM.Review.Core.Models.ReviewStage.IsComplete.get -> bool
 LM.Review.Core.Models.ReviewStage.ProjectId.get -> string!
 LM.Review.Core.Models.StageDefinition
 LM.Review.Core.Models.StageDefinition.ConsensusPolicy.get -> LM.Review.Core.Models.StageConsensusPolicy!
-static LM.Review.Core.Models.StageDefinition.Create(string! id, string! name, LM.Review.Core.Models.ReviewStageType stageType, LM.Review.Core.Models.ReviewerRequirement! reviewerRequirement, LM.Review.Core.Models.StageConsensusPolicy! consensusPolicy) -> LM.Review.Core.Models.StageDefinition!
+static LM.Review.Core.Models.StageDefinition.Create(string! id, string! name, LM.Review.Core.Models.ReviewStageType stageType, LM.Review.Core.Models.ReviewerRequirement! reviewerRequirement, LM.Review.Core.Models.StageConsensusPolicy! consensusPolicy, LM.Review.Core.Models.StageDisplayProfile! displayProfile) -> LM.Review.Core.Models.StageDefinition!
 LM.Review.Core.Models.StageDefinition.Id.get -> string!
 LM.Review.Core.Models.StageDefinition.Name.get -> string!
 LM.Review.Core.Models.StageDefinition.ReviewerRequirement.get -> LM.Review.Core.Models.ReviewerRequirement!
 LM.Review.Core.Models.StageDefinition.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.StageDefinition.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
 LM.Review.Core.Models.StageConsensusPolicy
 LM.Review.Core.Models.StageConsensusPolicy.ArbitrationRole.get -> LM.Review.Core.Models.ReviewerRole?
 static LM.Review.Core.Models.StageConsensusPolicy.Disabled() -> LM.Review.Core.Models.StageConsensusPolicy!

@@ -1,5 +1,8 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LM.App.Wpf.Services.Review.Design;
 using LM.Review.Core.Models;
@@ -15,6 +18,7 @@ public sealed class StageBlueprintViewModel : ObservableObject
     private bool _requiresConsensus;
     private int _minimumAgreements;
     private bool _escalateOnDisagreement;
+    private readonly ObservableCollection<StageDisplayOptionViewModel> _displayOptions;
 
     public StageBlueprintViewModel(StageBlueprint blueprint)
     {
@@ -27,6 +31,8 @@ public sealed class StageBlueprintViewModel : ObservableObject
         _requiresConsensus = blueprint.RequiresConsensus;
         _minimumAgreements = blueprint.MinimumAgreements;
         _escalateOnDisagreement = blueprint.EscalateOnDisagreement;
+        _displayOptions = new ObservableCollection<StageDisplayOptionViewModel>();
+        RefreshDisplayOptions(_stageType, blueprint.DisplayProfile);
     }
 
     public string StageId { get; }
@@ -48,7 +54,13 @@ public sealed class StageBlueprintViewModel : ObservableObject
     public ReviewStageType StageType
     {
         get => _stageType;
-        set => SetProperty(ref _stageType, value);
+        set
+        {
+            if (SetProperty(ref _stageType, value))
+            {
+                RefreshDisplayOptions(value, null);
+            }
+        }
     }
 
     public int PrimaryReviewers
@@ -109,6 +121,8 @@ public sealed class StageBlueprintViewModel : ObservableObject
 
     public int TotalReviewers => PrimaryReviewers + SecondaryReviewers;
 
+    public ObservableCollection<StageDisplayOptionViewModel> DisplayOptions => _displayOptions;
+
     public bool TryBuild(out StageBlueprint stage, out string? errorMessage)
     {
         stage = default!;
@@ -127,6 +141,17 @@ public sealed class StageBlueprintViewModel : ObservableObject
             return false;
         }
 
+        var selectedAreas = _displayOptions
+            .Where(option => option.IsSelected)
+            .Select(option => option.Area)
+            .ToList();
+
+        if (selectedAreas.Count == 0)
+        {
+            errorMessage = $"Stage '{trimmedName}' must display at least one workspace area.";
+            return false;
+        }
+
         var minimum = RequiresConsensus
             ? Math.Clamp(MinimumAgreements <= 0 ? TotalReviewers : MinimumAgreements, 1, TotalReviewers)
             : 0;
@@ -139,7 +164,8 @@ public sealed class StageBlueprintViewModel : ObservableObject
             SecondaryReviewers,
             RequiresConsensus,
             minimum,
-            EscalateOnDisagreement);
+            EscalateOnDisagreement,
+            StageDisplayProfile.Create(selectedAreas));
         return true;
     }
 
@@ -155,6 +181,20 @@ public sealed class StageBlueprintViewModel : ObservableObject
         {
             _minimumAgreements = total;
             OnPropertyChanged(nameof(MinimumAgreements));
+        }
+    }
+
+    private void RefreshDisplayOptions(ReviewStageType stageType, StageDisplayProfile? blueprintProfile)
+    {
+        var availableAreas = StageDisplayProfileFactory.GetAvailableAreas(stageType);
+        var selectedAreas = blueprintProfile?.ContentAreas ?? availableAreas;
+
+        _displayOptions.Clear();
+        foreach (var area in availableAreas)
+        {
+            var option = new StageDisplayOptionViewModel(area, selectedAreas.Contains(area));
+            option.PropertyChanged += (_, _) => OnPropertyChanged(nameof(DisplayOptions));
+            _displayOptions.Add(option);
         }
     }
 }
