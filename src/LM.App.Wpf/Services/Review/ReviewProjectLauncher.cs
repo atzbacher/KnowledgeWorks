@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.Json;
@@ -113,6 +114,8 @@ namespace LM.App.Wpf.Services.Review
                 await _workflowStore.SaveProjectAsync(project, cancellationToken).ConfigureAwait(false);
                 TryRecordProjectFileState(project);
 
+                await BootstrapStagesAsync(project, committedBlueprint, cancellationToken).ConfigureAwait(false);
+
                 var context = _hookContextFactory.CreateProjectCreated(project);
                 await _reviewHookOrchestrator.ProcessAsync(project.Id, context, cancellationToken).ConfigureAwait(false);
                 _diagnostics.RecordStep($"Executed review hook orchestrator for project '{project.Id}'.");
@@ -145,6 +148,124 @@ namespace LM.App.Wpf.Services.Review
                     System.Windows.MessageBoxImage.Error);
                 return null;
             }
+        }
+
+        private async Task BootstrapStagesAsync(
+            ReviewProject project,
+            ProjectBlueprint blueprint,
+            CancellationToken cancellationToken)
+        {
+            var definitions = project.StageDefinitions;
+            if (definitions.Count == 0)
+            {
+                return;
+            }
+
+            _diagnostics.RecordStep($"Bootstrapping {definitions.Count} stage(s) for project '{project.Id}'.");
+
+            foreach (var definition in definitions)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var stageId = $"stage-{Guid.NewGuid():N}";
+                var activatedAt = blueprint.CreatedAtUtc;
+                var assignments = CreateBootstrapAssignments(stageId, definition, blueprint.CreatedBy, activatedAt);
+
+                var stage = ReviewStage.Create(
+                    stageId,
+                    project.Id,
+                    definition,
+                    assignments,
+                    ConflictState.None,
+                    activatedAt);
+
+                await _workflowStore.SaveStageAsync(stage, cancellationToken).ConfigureAwait(false);
+                foreach (var assignment in assignments)
+                {
+                    await _workflowStore.SaveAssignmentAsync(project.Id, assignment, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                var tags = BuildStageBootstrapTags(project.Id, definition, assignments);
+                await ReviewChangeLogWriter.WriteAsync(
+                    _changeLogOrchestrator,
+                    stage.Id,
+                    _userContext.UserName,
+                    "review.ui.stage.bootstrapped",
+                    tags,
+                    cancellationToken).ConfigureAwait(false);
+
+                _diagnostics.RecordStep(
+                    $"Bootstrapped stage '{definition.Name}' ({definition.Id}) with {assignments.Count} assignment(s).");
+            }
+        }
+
+        private static IReadOnlyList<ScreeningAssignment> CreateBootstrapAssignments(
+            string stageId,
+            StageDefinition definition,
+            string createdBy,
+            DateTimeOffset activatedAt)
+        {
+            var normalizedCreator = NormalizeReviewer(createdBy);
+            var assignments = new List<ScreeningAssignment>();
+
+            foreach (var (role, count) in definition.ReviewerRequirement.Requirements)
+            {
+                for (var index = 0; index < count; index++)
+                {
+                    var reviewerId = BuildBootstrapReviewerId(normalizedCreator, role, index);
+                    var assignment = ScreeningAssignment.Create(
+                        $"assignment-{Guid.NewGuid():N}",
+                        stageId,
+                        reviewerId,
+                        role,
+                        ScreeningStatus.Pending,
+                        activatedAt);
+                    assignments.Add(assignment);
+                }
+            }
+
+            return assignments;
+        }
+
+        private static IEnumerable<string> BuildStageBootstrapTags(
+            string projectId,
+            StageDefinition definition,
+            IReadOnlyCollection<ScreeningAssignment> assignments)
+        {
+            yield return $"projectId:{projectId}";
+            yield return $"definitionId:{definition.Id}";
+            yield return $"stageType:{definition.StageType}";
+            yield return $"assignmentCount:{assignments.Count}";
+
+            var roleSummary = definition.ReviewerRequirement.Requirements
+                .Select(static pair => $"{pair.Key}={pair.Value}")
+                .ToArray();
+
+            if (roleSummary.Length > 0)
+            {
+                yield return $"roles:{string.Join(';', roleSummary)}";
+            }
+        }
+
+        private static string BuildBootstrapReviewerId(string normalizedCreator, ReviewerRole role, int index)
+        {
+            var suffix = index + 1;
+            var roleSegment = role.ToString().ToLowerInvariant();
+            return suffix == 1
+                ? $"{normalizedCreator}.{roleSegment}"
+                : $"{normalizedCreator}.{roleSegment}.{suffix}";
+        }
+
+        private static string NormalizeReviewer(string createdBy)
+        {
+            if (string.IsNullOrWhiteSpace(createdBy))
+            {
+                return "reviewer";
+            }
+
+            var trimmed = createdBy.Trim();
+            return trimmed.Replace(' ', '-');
         }
 
         public async Task<ReviewProject?> LoadProjectAsync(CancellationToken cancellationToken)
