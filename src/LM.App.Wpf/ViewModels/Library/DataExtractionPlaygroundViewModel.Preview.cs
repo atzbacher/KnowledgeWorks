@@ -58,6 +58,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         {
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+            AddHighlightCommand.NotifyCanExecuteChanged();
+            AddAnnotationCommand.NotifyCanExecuteChanged();
         };
         PreviewStatusMessage = "Select a page to render.";
     }
@@ -74,8 +76,11 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         PreviewStatusMessage = "Select a page to render.";
         _roiSelection.Clear();
         PreviewPages.Clear();
+        PdfAnnotations.Clear();
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     partial void ApplyPreviewPages(IReadOnlyList<int> pages)
@@ -104,6 +109,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         OnPropertyChanged(nameof(HasPreview));
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedPreviewPageChanged(int? value)
@@ -120,12 +127,16 @@ internal sealed partial class DataExtractionPlaygroundViewModel
     {
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsPreviewBusyChanged(bool value)
     {
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     public async Task LoadPreviewAsync(int pageNumber)
@@ -168,6 +179,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             IsPreviewBusy = false;
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+            AddHighlightCommand.NotifyCanExecuteChanged();
+            AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -183,6 +196,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _roiSelection.Begin(clamped);
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     public void UpdateRegionSelection(System.Windows.Point point)
@@ -194,6 +209,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 
         var rect = NormalizeRect(_selectionStart.Value, ClampPoint(point));
         _roiSelection.Update(rect);
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     public void CompleteRegionSelection(System.Windows.Point point)
@@ -214,6 +231,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _selectionStart = null;
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     public void CancelRegionSelection()
@@ -222,6 +241,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _roiSelection.Clear();
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        AddHighlightCommand.NotifyCanExecuteChanged();
+        AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -331,6 +352,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             ExtractRegionTablesCommand.NotifyCanExecuteChanged();
             CopyTableCommand.NotifyCanExecuteChanged();
             RunRegionOcrCommand.NotifyCanExecuteChanged();
+            AddHighlightCommand.NotifyCanExecuteChanged();
+            AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -438,12 +461,101 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         {
             IsBusy = false;
             RunRegionOcrCommand.NotifyCanExecuteChanged();
+            AddHighlightCommand.NotifyCanExecuteChanged();
+            AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
 
     private bool CanRunRegionOcr()
     {
         return !IsBusy && !IsPreviewBusy && RoiSelection.HasSelection && PreviewBitmap is not null && SelectedPreviewPage.HasValue;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCreateAnnotation))]
+    private async Task AddHighlightAsync()
+    {
+        if (!TryCreateAnnotationBounds(out var selection, out var pdfRectangle, out var bounds))
+        {
+            return;
+        }
+
+        var annotation = new PdfAnnotationViewModel(
+            PdfAnnotationKind.Highlight,
+            SelectedPreviewPage!.Value,
+            bounds,
+            null,
+            DateTime.UtcNow);
+        PdfAnnotations.Add(annotation);
+
+        await WriteAnnotationChangeLogAsync(
+            annotation,
+            selection,
+            pdfRectangle,
+            null).ConfigureAwait(true);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCreateAnnotation))]
+    private async Task AddAnnotationAsync()
+    {
+        if (!TryCreateAnnotationBounds(out var selection, out var pdfRectangle, out var bounds))
+        {
+            return;
+        }
+
+        var note = string.IsNullOrWhiteSpace(AnnotationNote) ? null : AnnotationNote.Trim();
+        var annotation = new PdfAnnotationViewModel(
+            PdfAnnotationKind.Note,
+            SelectedPreviewPage!.Value,
+            bounds,
+            note,
+            DateTime.UtcNow);
+        PdfAnnotations.Add(annotation);
+        AnnotationNote = string.Empty;
+
+        await WriteAnnotationChangeLogAsync(
+            annotation,
+            selection,
+            pdfRectangle,
+            note).ConfigureAwait(true);
+    }
+
+    private bool CanCreateAnnotation()
+    {
+        return !IsBusy && !IsPreviewBusy && RoiSelection.HasSelection && SelectedPreviewPage.HasValue;
+    }
+
+    private bool TryCreateAnnotationBounds(out System.Windows.Rect selection,
+                                           out PdfRectangle pdfRectangle,
+                                           out System.Drawing.RectangleF bounds)
+    {
+        selection = default;
+        pdfRectangle = default;
+        bounds = default;
+
+        if (!RoiSelection.HasSelection || !SelectedPreviewPage.HasValue)
+        {
+            return false;
+        }
+
+        selection = RoiSelection.GetSelectionRect();
+        var pdf = BuildPdfRectangle(selection);
+        if (pdf is null)
+        {
+            System.Windows.MessageBox.Show(
+                "Selected region could not be mapped to the PDF coordinates.",
+                "Annotations",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+            return false;
+        }
+
+        pdfRectangle = pdf.Value;
+        bounds = new System.Drawing.RectangleF(
+            (float)pdfRectangle.Left,
+            (float)pdfRectangle.Bottom,
+            (float)Math.Abs(pdfRectangle.Right - pdfRectangle.Left),
+            (float)Math.Abs(pdfRectangle.Top - pdfRectangle.Bottom));
+        return true;
     }
 
     private System.Windows.Point ClampPoint(System.Windows.Point point)
@@ -720,6 +832,64 @@ internal sealed partial class DataExtractionPlaygroundViewModel
                     TimestampUtc = DateTime.UtcNow,
                     PerformedBy = GetCurrentUser(),
                     Action = "DataExtractionRegionOcr",
+                    Details = new HookM.ChangeLogAttachmentDetails
+                    {
+                        Title = DocumentTitle,
+                        LibraryPath = NormalizeLibraryPath(_pdfRelativePath ?? _pdfPath),
+                        Purpose = AttachmentKind.Metadata,
+                        AttachmentId = _pdfAttachmentId ?? string.Empty,
+                        Tags = tags
+                    }
+                }
+            }
+        };
+
+        try
+        {
+            await _hookOrchestrator.ProcessAsync(
+                _entryId,
+                new HookContext { ChangeLog = hook },
+                System.Threading.CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Ignore hook failures.
+        }
+    }
+
+    private async Task WriteAnnotationChangeLogAsync(PdfAnnotationViewModel annotation,
+                                                     System.Windows.Rect selection,
+                                                     PdfRectangle rectangle,
+                                                     string? note)
+    {
+        if (_entryId is null)
+        {
+            return;
+        }
+
+        var tags = new List<string>
+        {
+            $"annotation:{annotation.Kind}",
+            $"page:{annotation.PageNumber}",
+            $"roiPx:{selection.X.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Y.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Width.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Height.ToString("F0", CultureInfo.InvariantCulture)}",
+            $"roiPts:{rectangle.Left.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Bottom.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Right.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Top.ToString("F1", CultureInfo.InvariantCulture)}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(note))
+        {
+            tags.Add($"note:{TruncateForTag(note, 64)}");
+        }
+
+        var hook = new HookM.EntryChangeLogHook
+        {
+            Events = new List<HookM.EntryChangeLogEvent>
+            {
+                new()
+                {
+                    EventId = Guid.NewGuid().ToString("N"),
+                    TimestampUtc = DateTime.UtcNow,
+                    PerformedBy = GetCurrentUser(),
+                    Action = "DataExtractionAnnotation",
                     Details = new HookM.ChangeLogAttachmentDetails
                     {
                         Title = DocumentTitle,

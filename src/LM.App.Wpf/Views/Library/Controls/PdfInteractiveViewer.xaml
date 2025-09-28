@@ -1,0 +1,14 @@
+<UserControl x:Class="LM.App.Wpf.Views.Library.Controls.PdfInteractiveViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pdf="clr-namespace:PdfiumViewer;assembly=PdfiumViewer"
+             x:Name="Root"
+             x:ClassModifier="internal">
+    <Border Background="Transparent">
+        <pdf:PdfRenderer x:Name="Renderer"
+                         Background="Transparent"
+                         Focusable="True"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto" />
+    </Border>
+</UserControl>

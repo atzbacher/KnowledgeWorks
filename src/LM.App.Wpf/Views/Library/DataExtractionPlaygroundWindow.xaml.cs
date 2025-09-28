@@ -14,65 +14,44 @@ namespace LM.App.Wpf.Views.Library
             InitializeComponent();
             _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             DataContext = _viewModel;
+
+            PdfViewer.RegionSelectionStarted += OnRegionSelectionStarted;
+            PdfViewer.RegionSelectionUpdated += OnRegionSelectionUpdated;
+            PdfViewer.RegionSelectionCompleted += OnRegionSelectionCompleted;
+            PdfViewer.RegionSelectionCanceled += OnRegionSelectionCanceled;
         }
 
-        private void OnRoiCanvasMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnRegionSelectionStarted(object? sender, System.Windows.Point position)
         {
-            var position = e.GetPosition(RoiCanvas);
             _viewModel.BeginRegionSelection(position);
-
-            if (_viewModel.RoiSelection.IsSelecting)
-            {
-                _isDragging = true;
-                RoiCanvas.CaptureMouse();
-                e.Handled = true;
-            }
+            _isDragging = _viewModel.RoiSelection.IsSelecting;
         }
 
-        private void OnRoiCanvasMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void OnRegionSelectionUpdated(object? sender, System.Windows.Point position)
         {
             if (!_isDragging)
             {
                 return;
             }
 
-            var position = e.GetPosition(RoiCanvas);
             _viewModel.UpdateRegionSelection(position);
         }
 
-        private void OnRoiCanvasMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnRegionSelectionCompleted(object? sender, System.Windows.Point position)
         {
             if (!_isDragging)
             {
                 return;
             }
 
-            var position = e.GetPosition(RoiCanvas);
             _viewModel.CompleteRegionSelection(position);
-            RoiCanvas.ReleaseMouseCapture();
-            _isDragging = false;
-            e.Handled = true;
-        }
-
-        private void OnRoiCanvasMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            if (!_isDragging)
-            {
-                return;
-            }
-
-            var position = e.GetPosition(RoiCanvas);
-            _viewModel.CompleteRegionSelection(position);
-            RoiCanvas.ReleaseMouseCapture();
             _isDragging = false;
         }
 
-        private void OnRoiCanvasMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnRegionSelectionCanceled(object? sender, EventArgs e)
         {
             _viewModel.CancelRegionSelection();
-            RoiCanvas.ReleaseMouseCapture();
             _isDragging = false;
-            e.Handled = true;
         }
     }
 }
