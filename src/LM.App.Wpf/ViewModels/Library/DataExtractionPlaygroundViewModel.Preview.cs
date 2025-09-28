@@ -44,9 +44,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 
     public bool HasPreview => PreviewBitmap is not null;
 
-    public double PreviewWidth => PreviewBitmap?.PixelWidth ?? 0;
+    public double PreviewWidth => _currentPageBitmap is { } bitmap
+        ? ConvertPixelsToDip(bitmap.PixelWidth, bitmap.DpiX)
+        : 0d;
 
-    public double PreviewHeight => PreviewBitmap?.PixelHeight ?? 0;
+    public double PreviewHeight => _currentPageBitmap is { } bitmap
+        ? ConvertPixelsToDip(bitmap.PixelHeight, bitmap.DpiY)
+        : 0d;
 
     partial void InitializePreviewState()
     {
@@ -467,10 +471,18 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             return null;
         }
 
-        var x = (int)Math.Max(0, Math.Floor(rect.X));
-        var y = (int)Math.Max(0, Math.Floor(rect.Y));
-        var width = (int)Math.Min(_currentPageBitmap.PixelWidth - x, Math.Ceiling(rect.Width));
-        var height = (int)Math.Min(_currentPageBitmap.PixelHeight - y, Math.Ceiling(rect.Height));
+        var dpiX = GetEffectiveDpi(_currentPageBitmap.DpiX);
+        var dpiY = GetEffectiveDpi(_currentPageBitmap.DpiY);
+
+        var leftPixels = ConvertDipToPixels(rect.X, dpiX);
+        var topPixels = ConvertDipToPixels(rect.Y, dpiY);
+        var rightPixels = ConvertDipToPixels(rect.X + rect.Width, dpiX);
+        var bottomPixels = ConvertDipToPixels(rect.Y + rect.Height, dpiY);
+
+        var x = (int)Math.Max(0, Math.Floor(leftPixels));
+        var y = (int)Math.Max(0, Math.Floor(topPixels));
+        var width = (int)Math.Min(_currentPageBitmap.PixelWidth - x, Math.Ceiling(rightPixels - leftPixels));
+        var height = (int)Math.Min(_currentPageBitmap.PixelHeight - y, Math.Ceiling(bottomPixels - topPixels));
 
         if (width <= 0 || height <= 0)
         {
@@ -497,10 +509,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         var scaleX = _currentPageWidthPoints / pixelWidth;
         var scaleY = _currentPageHeightPoints / pixelHeight;
 
-        var leftPixels = Math.Max(0d, Math.Min(selection.X, pixelWidth));
-        var rightPixels = Math.Max(0d, Math.Min(selection.X + selection.Width, pixelWidth));
-        var topPixels = Math.Max(0d, Math.Min(selection.Y, pixelHeight));
-        var bottomPixels = Math.Max(0d, Math.Min(selection.Y + selection.Height, pixelHeight));
+        var dpiX = GetEffectiveDpi(_currentPageBitmap.DpiX);
+        var dpiY = GetEffectiveDpi(_currentPageBitmap.DpiY);
+
+        var leftPixels = Math.Max(0d, Math.Min(ConvertDipToPixels(selection.X, dpiX), pixelWidth));
+        var rightPixels = Math.Max(0d, Math.Min(ConvertDipToPixels(selection.X + selection.Width, dpiX), pixelWidth));
+        var topPixels = Math.Max(0d, Math.Min(ConvertDipToPixels(selection.Y, dpiY), pixelHeight));
+        var bottomPixels = Math.Max(0d, Math.Min(ConvertDipToPixels(selection.Y + selection.Height, dpiY), pixelHeight));
 
         var left = leftPixels * scaleX;
         var right = rightPixels * scaleX;
@@ -523,6 +538,23 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         }
 
         return new PdfRectangle(left, bottom, right, top);
+    }
+
+    private static double ConvertPixelsToDip(int pixels, double dpi)
+    {
+        var effectiveDpi = GetEffectiveDpi(dpi);
+        return pixels * 96d / effectiveDpi;
+    }
+
+    private static double ConvertDipToPixels(double dip, double dpi)
+    {
+        var effectiveDpi = GetEffectiveDpi(dpi);
+        return dip * effectiveDpi / 96d;
+    }
+
+    private static double GetEffectiveDpi(double dpi)
+    {
+        return dpi > 0.1d ? dpi : 96d;
     }
 
     private async Task<OcrRegionTableResult?> RecognizeRegionAsync(System.Windows.Int32Rect crop)
