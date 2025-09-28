@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Common.Dialogs;
 using LM.App.Wpf.ViewModels.Dialogs;
+using LM.App.Wpf.ViewModels.TabulaSharp;
 using LM.App.Wpf.Views;
+using LM.App.Wpf.Views.TabulaSharp;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
@@ -40,6 +42,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly RelayCommand _commitSelectedCommand;
         private readonly RelayCommand _clearCommand;
         private readonly RelayCommand _reviewStagedCommand;
+        private readonly RelayCommand _openTabulaSharpPlaygroundCommand;
         private bool _isInitialized;
         private bool _disposed;
         private bool _isBusy;
@@ -95,6 +98,7 @@ namespace LM.App.Wpf.ViewModels
             _commitSelectedCommand = new RelayCommand(async _ => await RunGuardedAsync(CommitSelectedAsync), CanCommitSelected);
             _clearCommand = new RelayCommand(_ => ExecuteClear(), _ => !IsBusy);
             _reviewStagedCommand = new RelayCommand(_ => ExecuteReviewStaged(), _ => CanReviewStaged());
+            _openTabulaSharpPlaygroundCommand = new RelayCommand(_ => OpenTabulaSharpPlayground(), _ => !IsBusy);
         }
 
         public AddViewModel(IEntryStore store,
@@ -201,6 +205,7 @@ namespace LM.App.Wpf.ViewModels
                 _commitSelectedCommand.RaiseCanExecuteChanged();
                 _clearCommand.RaiseCanExecuteChanged();
                 _reviewStagedCommand.RaiseCanExecuteChanged();
+                _openTabulaSharpPlaygroundCommand.RaiseCanExecuteChanged();
                 _watchedFolders.UpdateParentBusy(value);
             }
         }
@@ -210,6 +215,7 @@ namespace LM.App.Wpf.ViewModels
         public System.Windows.Input.ICommand CommitSelectedCommand => _commitSelectedCommand;
         public System.Windows.Input.ICommand ClearCommand => _clearCommand;
         public System.Windows.Input.ICommand ReviewStagedCommand => _reviewStagedCommand;
+        public System.Windows.Input.ICommand OpenTabulaSharpPlaygroundCommand => _openTabulaSharpPlaygroundCommand;
 
         public System.Windows.Input.ICommand AddWatchedFolderCommand => _watchedFolders.AddWatchedFolderCommand;
         public System.Windows.Input.ICommand RemoveWatchedFolderCommand => _watchedFolders.RemoveWatchedFolderCommand;
@@ -283,6 +289,36 @@ namespace LM.App.Wpf.ViewModels
                 return;
 
             _dialogService.ShowStagingEditor(_stagingList);
+        }
+
+        private void OpenTabulaSharpPlayground()
+        {
+            void ShowWindow()
+            {
+                var viewModel = new TabulaSharpPlaygroundViewModel();
+                var window = new TabulaSharpPlaygroundWindow
+                {
+                    DataContext = viewModel
+                };
+
+                window.Closed += (_, _) => viewModel.Dispose();
+
+                if (System.Windows.Application.Current?.MainWindow is System.Windows.Window owner)
+                {
+                    window.Owner = owner;
+                }
+
+                window.Show();
+            }
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                dispatcher.Invoke(ShowWindow);
+                return;
+            }
+
+            ShowWindow();
         }
 
         private bool CanCommitSelected(object? _) => !IsBusy && _stagingList.HasSelectedItems;
