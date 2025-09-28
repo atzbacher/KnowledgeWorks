@@ -19,6 +19,9 @@ namespace LM.App.Wpf
     {
         private AppHost? _host;
         private AddViewModel? _addViewModel;
+        private ShellWindow? _shell;
+        private WorkspacePreferenceStore? _workspacePreferences;
+        private bool _isInitializingWorkspace;
 
         protected override async void OnStartup(System.Windows.StartupEventArgs e)
         {
@@ -43,68 +46,206 @@ namespace LM.App.Wpf
             };
 
             var shell = new ShellWindow();
+            _shell = shell;
+            shell.NewWorkspaceRequested += OnNewWorkspaceRequested;
+            shell.LoadWorkspaceRequested += OnLoadWorkspaceRequested;
             this.MainWindow = shell;
             shell.Show();
 
-            using var startupServices = new ServiceCollection()
+            _workspacePreferences = new WorkspacePreferenceStore();
+            var lastWorkspace = _workspacePreferences.TryGetLastWorkspacePath();
+            var initialized = false;
+
+            if (!string.IsNullOrWhiteSpace(lastWorkspace))
+            {
+                initialized = await LoadWorkspaceAsync(lastWorkspace);
+            }
+
+            if (!initialized)
+            {
+                var selectedWorkspacePath = ShowWorkspaceDialog("Select or create workspace", requireExistingDirectory: false, initialPath: lastWorkspace);
+                if (string.IsNullOrWhiteSpace(selectedWorkspacePath))
+                {
+                    shell.Close();
+                    Shutdown();
+                    return;
+                }
+
+                initialized = await LoadWorkspaceAsync(selectedWorkspacePath);
+                if (!initialized)
+                {
+                    shell.Close();
+                    Shutdown();
+                    return;
+                }
+            }
+        }
+
+        protected override void OnExit(System.Windows.ExitEventArgs e)
+        {
+            if (_shell is not null)
+            {
+                _shell.NewWorkspaceRequested -= OnNewWorkspaceRequested;
+                _shell.LoadWorkspaceRequested -= OnLoadWorkspaceRequested;
+            }
+            _addViewModel?.Dispose();
+            _host?.Dispose();
+            base.OnExit(e);
+        }
+
+        private async void OnNewWorkspaceRequested(object? sender, EventArgs e)
+        {
+            var selected = ShowWorkspaceDialog("Create workspace", requireExistingDirectory: false, initialPath: null);
+            if (string.IsNullOrWhiteSpace(selected))
+            {
+                return;
+            }
+
+            await LoadWorkspaceAsync(selected);
+        }
+
+        private async void OnLoadWorkspaceRequested(object? sender, EventArgs e)
+        {
+            var initial = _workspacePreferences?.TryGetLastWorkspacePath();
+            var selected = ShowWorkspaceDialog("Load workspace", requireExistingDirectory: true, initialPath: initial);
+            if (string.IsNullOrWhiteSpace(selected))
+            {
+                return;
+            }
+
+            await LoadWorkspaceAsync(selected);
+        }
+
+        private string? ShowWorkspaceDialog(string title, bool requireExistingDirectory, string? initialPath)
+        {
+            using var services = new ServiceCollection()
                 .AddSingleton<IDialogService, WpfDialogService>()
                 .AddTransient<WorkspaceChooserViewModel>()
                 .AddTransient<WorkspaceChooser>()
                 .BuildServiceProvider();
 
-            var chooser = startupServices.GetRequiredService<WorkspaceChooser>();
-            chooser.Owner = shell;
-            var ok = chooser.ShowDialog();
-            var selectedWorkspacePath = chooser.SelectedWorkspacePath;
-            if (ok != true || string.IsNullOrWhiteSpace(selectedWorkspacePath))
+            var chooser = services.GetRequiredService<WorkspaceChooser>();
+            if (_shell is not null)
             {
-                shell.Close();
-                Shutdown();
-                return;
+                chooser.Owner = _shell;
             }
-            var ws = new WorkspaceService();
-            await ws.EnsureWorkspaceAsync(selectedWorkspacePath);
 
-            var host = AppHostBuilder.Create()
-                                     .AddModule(new CoreModule(ws))
-                                     .AddModule(new AddModule())
-                                     .AddModule(new LibraryModule())
-                                     .AddModule(new ReviewModule())
-                                     .AddModule(new SearchModule())
-                                     .Build();
-            _host = host;
+            chooser.Configure(viewModel =>
+            {
+                viewModel.Title = title;
+                viewModel.RequireExistingDirectory = requireExistingDirectory;
+                viewModel.WorkspacePath = initialPath ?? string.Empty;
+                viewModel.EnableDebugDump = LM.App.Wpf.Diagnostics.DebugFlags.DumpStagingJson;
+            });
 
-            var store = host.GetRequiredService<IEntryStore>();
-            await store.InitializeAsync();
-
-            var libraryVm = host.GetRequiredService<LibraryViewModel>();
-            var addVm = host.GetRequiredService<AddViewModel>();
-            await addVm.InitializeAsync();
-            _addViewModel = addVm;
-            var searchVm = host.GetRequiredService<SearchViewModel>();
-            var reviewVm = host.GetRequiredService<ReviewViewModel>();
-
-            // Bind – resolve the views by name because the generated fields are not
-            // available when building from the command line (designer-only feature).
-            if (shell.FindName("LibraryViewControl") is LibraryView libraryView)
-                libraryView.DataContext = libraryVm;
-
-            if (shell.FindName("AddViewControl") is AddView addView)
-                addView.DataContext = addVm;
-
-            if (shell.FindName("SearchViewControl") is SearchView searchView)
-                searchView.DataContext = searchVm;
-
-            if (shell.FindName("ReviewViewControl") is ReviewView reviewView)
-                reviewView.DataContext = reviewVm;
-
+            var ok = chooser.ShowDialog();
+            return ok == true ? chooser.SelectedWorkspacePath : null;
         }
 
-        protected override void OnExit(System.Windows.ExitEventArgs e)
+        private async Task<bool> LoadWorkspaceAsync(string workspacePath)
         {
-            _addViewModel?.Dispose();
-            _host?.Dispose();
-            base.OnExit(e);
+            if (_shell is null)
+            {
+                return false;
+            }
+
+            if (_isInitializingWorkspace)
+            {
+                return false;
+            }
+
+            _isInitializingWorkspace = true;
+            var previousCursor = System.Windows.Input.Mouse.OverrideCursor;
+            System.Windows.Input.Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+            _shell.IsEnabled = false;
+
+            AppHost? newHost = null;
+            AddViewModel? newAddViewModel = null;
+
+            try
+            {
+                var workspaceService = new WorkspaceService();
+                await workspaceService.EnsureWorkspaceAsync(workspacePath);
+
+                newHost = AppHostBuilder.Create()
+                                        .AddModule(new CoreModule(workspaceService))
+                                        .AddModule(new AddModule())
+                                        .AddModule(new LibraryModule())
+                                        .AddModule(new ReviewModule())
+                                        .AddModule(new SearchModule())
+                                        .Build();
+
+                var store = newHost.GetRequiredService<IEntryStore>();
+                await store.InitializeAsync();
+
+                var libraryVm = newHost.GetRequiredService<LibraryViewModel>();
+                newAddViewModel = newHost.GetRequiredService<AddViewModel>();
+                await newAddViewModel.InitializeAsync();
+                var searchVm = newHost.GetRequiredService<SearchViewModel>();
+                var reviewVm = newHost.GetRequiredService<ReviewViewModel>();
+
+                AttachViewModels(libraryVm, newAddViewModel, searchVm, reviewVm);
+
+                var previousHost = _host;
+                var previousAdd = _addViewModel;
+
+                _host = newHost;
+                _addViewModel = newAddViewModel;
+
+                _workspacePreferences?.SetLastWorkspacePath(workspaceService.GetWorkspaceRoot());
+
+                previousAdd?.Dispose();
+                previousHost?.Dispose();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                newAddViewModel?.Dispose();
+                newHost?.Dispose();
+                System.Windows.MessageBox.Show($"Failed to open workspace:{Environment.NewLine}{ex.Message}",
+                                               "Workspace",
+                                               System.Windows.MessageBoxButton.OK,
+                                               System.Windows.MessageBoxImage.Error);
+                return false;
+            }
+            finally
+            {
+                System.Windows.Input.Mouse.OverrideCursor = previousCursor;
+                _shell.IsEnabled = true;
+                _isInitializingWorkspace = false;
+            }
+        }
+
+        private void AttachViewModels(LibraryViewModel libraryVm,
+                                      AddViewModel addVm,
+                                      SearchViewModel searchVm,
+                                      ReviewViewModel reviewVm)
+        {
+            if (_shell is null)
+            {
+                return;
+            }
+
+            if (_shell.FindName("LibraryViewControl") is LibraryView libraryView)
+            {
+                libraryView.DataContext = libraryVm;
+            }
+
+            if (_shell.FindName("AddViewControl") is AddView addView)
+            {
+                addView.DataContext = addVm;
+            }
+
+            if (_shell.FindName("SearchViewControl") is SearchView searchView)
+            {
+                searchView.DataContext = searchVm;
+            }
+
+            if (_shell.FindName("ReviewViewControl") is ReviewView reviewView)
+            {
+                reviewView.DataContext = reviewVm;
+            }
         }
     }
 }
