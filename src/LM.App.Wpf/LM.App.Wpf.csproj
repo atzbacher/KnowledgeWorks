@@ -43,6 +43,30 @@
     <NoWarn>$(NoWarn);RS0017</NoWarn>
   </PropertyGroup>
 
+  <Target Name="EnsurePdfiumViewerRuntime" AfterTargets="CopyFilesToOutputDirectory">
+    <PropertyGroup>
+      <_PdfiumX64Source>$(OutDir)x64\pdfium.dll</_PdfiumX64Source>
+      <_PdfiumX86Source>$(OutDir)x86\pdfium.dll</_PdfiumX86Source>
+      <_PdfiumDestination>$(OutDir)pdfium.dll</_PdfiumDestination>
+    </PropertyGroup>
+
+    <!-- Prefer the PdfiumViewer-provided binary when present to avoid Docnet's legacy build. -->
+    <Copy
+      SourceFiles="$(_PdfiumX64Source)"
+      DestinationFiles="$(_PdfiumDestination)"
+      OverwriteReadOnlyFiles="true"
+      SkipUnchangedFiles="false"
+      Condition="Exists('$(_PdfiumX64Source)')" />
+
+    <!-- Fall back to the 32-bit runtime if that is the only asset produced. -->
+    <Copy
+      SourceFiles="$(_PdfiumX86Source)"
+      DestinationFiles="$(_PdfiumDestination)"
+      OverwriteReadOnlyFiles="true"
+      SkipUnchangedFiles="false"
+      Condition="!Exists('$(_PdfiumX64Source)') and Exists('$(_PdfiumX86Source)')" />
+  </Target>
+
   <ItemGroup>
     <Folder Include="Application\" />
     <Folder Include="ViewModels\Library\" />
