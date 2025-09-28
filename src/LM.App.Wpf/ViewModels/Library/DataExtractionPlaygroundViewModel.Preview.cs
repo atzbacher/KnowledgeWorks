@@ -18,6 +18,7 @@ namespace LM.App.Wpf.ViewModels.Library;
 
 internal sealed partial class DataExtractionPlaygroundViewModel
 {
+    private const double OcrTargetDpi = 300d;
     private readonly RoiSelectionViewModel _roiSelection = new();
     private System.Windows.Point? _selectionStart;
     private System.Windows.Media.Imaging.BitmapSource? _currentPageBitmap;
@@ -358,7 +359,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
         var cropped = new System.Windows.Media.Imaging.CroppedBitmap(_currentPageBitmap, crop);
         cropped.Freeze();
-        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(cropped));
+        var prepared = PrepareBitmapForOcr(cropped);
+        encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(prepared));
 
         await using var memory = new MemoryStream();
         encoder.Save(memory);
@@ -377,6 +379,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         }
 
         using var engine = new TesseractEngine(tessData, "eng", EngineMode.Default);
+        engine.SetVariable("user_defined_dpi", OcrTargetDpi.ToString(CultureInfo.InvariantCulture));
+        engine.SetVariable("preserve_interword_spaces", "1");
         using var pix = Pix.LoadFromMemory(image);
         using var page = engine.Process(pix, PageSegMode.SingleBlock);
 
@@ -396,6 +400,52 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 
         var confidence = page.GetMeanConfidence() * 100d;
         return new OcrRegionTableResult(table.Rows, table.ColumnCount, confidence);
+    }
+
+    private static System.Windows.Media.Imaging.BitmapSource PrepareBitmapForOcr(System.Windows.Media.Imaging.BitmapSource source)
+    {
+        var working = source;
+
+        if (working.Format != System.Windows.Media.PixelFormats.Gray8)
+        {
+            var converted = new System.Windows.Media.Imaging.FormatConvertedBitmap();
+            converted.BeginInit();
+            converted.Source = working;
+            converted.DestinationFormat = System.Windows.Media.PixelFormats.Gray8;
+            converted.EndInit();
+            converted.Freeze();
+            working = converted;
+        }
+
+        if (working.DpiX < OcrTargetDpi - 1d || working.DpiY < OcrTargetDpi - 1d)
+        {
+            var scaleX = OcrTargetDpi / Math.Max(1d, working.DpiX);
+            var scaleY = OcrTargetDpi / Math.Max(1d, working.DpiY);
+            var transform = new System.Windows.Media.ScaleTransform(scaleX, scaleY);
+            var scaled = new System.Windows.Media.Imaging.TransformedBitmap(working, transform);
+            scaled.Freeze();
+            working = scaled;
+        }
+
+        if (Math.Abs(working.DpiX - OcrTargetDpi) > 0.1d || Math.Abs(working.DpiY - OcrTargetDpi) > 0.1d)
+        {
+            var stride = (working.PixelWidth * working.Format.BitsPerPixel + 7) / 8;
+            var pixels = new byte[stride * working.PixelHeight];
+            working.CopyPixels(pixels, stride, 0);
+            var normalized = System.Windows.Media.Imaging.BitmapSource.Create(
+                working.PixelWidth,
+                working.PixelHeight,
+                OcrTargetDpi,
+                OcrTargetDpi,
+                working.Format,
+                null,
+                pixels,
+                stride);
+            normalized.Freeze();
+            working = normalized;
+        }
+
+        return working;
     }
 
     private static System.Windows.Media.Imaging.BitmapSource RenderPageBitmap(string pdfPath, int pageNumber, UglyToad.PdfPig.Content.Page page)
