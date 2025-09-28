@@ -1,6 +1,5 @@
 === Combined Public API for KnowledgeWorks_20250820_082416 ===
 ---------- LM.Core ----------
----------- LM.Infrastructure ----------
 #nullable enable
 LM.Core.Models.DataExtraction.TablePageLocation
 LM.Core.Models.DataExtraction.TablePageLocation.TablePageLocation() -> void
@@ -623,353 +622,6 @@ static readonly LM.Core.Utils.JsonEx.Options -> System.Text.Json.JsonSerializerO
 LM.Core.Abstractions.IDataExtractionPowerPointExporter
 LM.Core.Abstractions.IDataExtractionExcelExporter
 LM.Core.Abstractions.IDataExtractionWordExporter
-#nullable enable
-#nullable enable
-LM.Infrastructure.Content.CompositeContentExtractor
-LM.Infrastructure.Content.CompositeContentExtractor.CompositeContentExtractor() -> void
-LM.Infrastructure.Content.CompositeContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Content.OpenXmlContentExtractor
-LM.Infrastructure.Content.OpenXmlContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Content.OpenXmlContentExtractor.OpenXmlContentExtractor() -> void
-LM.Infrastructure.Content.PdfPigContentExtractor
-LM.Infrastructure.Content.PdfPigContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Content.PdfPigContentExtractor.PdfPigContentExtractor() -> void
-LM.Infrastructure.Content.PlainTextContentExtractor
-LM.Infrastructure.Content.PlainTextContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Content.PlainTextContentExtractor.PlainTextContentExtractor() -> void
-LM.Infrastructure.Entries.JsonEntryStore
-LM.Infrastructure.Entries.JsonEntryStore.EnumerateAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.Entry!>!
-LM.Infrastructure.Entries.JsonEntryStore.FindByHashAsync(string! sha256, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
-LM.Infrastructure.Entries.JsonEntryStore.FindByIdsAsync(string? doi, string? pmid, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
-LM.Infrastructure.Entries.JsonEntryStore.FindSimilarByNameYearAsync(string! title, int? year, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
-LM.Infrastructure.Entries.JsonEntryStore.GetByIdAsync(string! id, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
-LM.Infrastructure.Entries.JsonEntryStore.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Entries.JsonEntryStore.JsonEntryStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IDoiNormalizer? doiNormalizer = null, LM.Core.Abstractions.IPmidNormalizer? pmidNormalizer = null) -> void
-LM.Infrastructure.Entries.JsonEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! f, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
-LM.Infrastructure.Entries.EntryTagVocabularyProvider
-LM.Infrastructure.Entries.EntryTagVocabularyProvider.EntryTagVocabularyProvider(LM.Core.Abstractions.IEntryStore! store) -> void
-LM.Infrastructure.Entries.EntryTagVocabularyProvider.GetAllTagsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
-LM.Infrastructure.Export.DataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
-LM.Infrastructure.Export.DataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Export.DataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
-LM.Infrastructure.Export.DataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Export.DataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
-LM.Infrastructure.Export.DataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Export.MetadataDebugSlideExporter
-LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void
-LM.Infrastructure.FileSystem.WorkspaceService
-LM.Infrastructure.FileSystem.WorkspaceService.EnsureWorkspaceAsync(string! absoluteWorkspacePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.Infrastructure.FileSystem.WorkspaceService.GetAbsolutePath(string! relativePath) -> string!
-LM.Infrastructure.FileSystem.WorkspaceService.GetLocalDbPath() -> string!
-LM.Infrastructure.FileSystem.WorkspaceService.GetWorkspaceRoot() -> string!
-LM.Infrastructure.FileSystem.WorkspaceService.WorkspacePath.get -> string?
-LM.Infrastructure.FileSystem.WorkspaceService.WorkspaceService() -> void
-LM.Infrastructure.Hooks.ArticleHookFactory
-LM.Infrastructure.Hooks.HookContext
-LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
-LM.Infrastructure.Hooks.HookContext.Article.init -> void
-LM.Infrastructure.Hooks.HookContext.Attachments.get -> LM.HubSpoke.Models.AttachmentHook?
-LM.Infrastructure.Hooks.HookContext.Attachments.init -> void
-LM.Infrastructure.Hooks.HookContext.DataExtraction.get -> LM.HubSpoke.Models.DataExtractionHook?
-LM.Infrastructure.Hooks.HookContext.DataExtraction.init -> void
-LM.Infrastructure.Hooks.HookContext.ChangeLog.get -> LM.HubSpoke.Models.EntryChangeLogHook?
-LM.Infrastructure.Hooks.HookContext.ChangeLog.init -> void
-LM.Infrastructure.Hooks.HookContext.HookContext() -> void
-LM.Infrastructure.Hooks.HookOrchestrator
-LM.Infrastructure.Hooks.HookOrchestrator.HookOrchestrator(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Hooks.HookOrchestrator.ProcessAsync(string! entryId, LM.Infrastructure.Hooks.HookContext! ctx, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Hooks.HookPersister
-LM.Infrastructure.Hooks.HookPersister.HookPersister(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Hooks.HookPersister.SaveArticleIfAnyAsync(string! entryId, LM.HubSpoke.Models.ArticleHook? hook, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Metadata.CompositeMetadataExtractor
-LM.Infrastructure.Metadata.CompositeMetadataExtractor.CompositeMetadataExtractor(LM.Core.Abstractions.IContentExtractor! content) -> void
-LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.FileMetadata!>!
-LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor
-LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor! tableExtractor) -> void
-LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.TabulaSharpTableExtractor(LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter! imageWriter) -> void
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.CreateDocumentReader(string! pdfPath) -> Docnet.Core.Readers.IDocReader!
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.TabulaTableImageWriter(double scalingFactor = 2) -> void
-LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.WriteAsync(Docnet.Core.Readers.IDocReader! docReader, int pageNumber, string! tablesRoot, string! fileStem, LM.Core.Models.DataExtraction.TableRegion! region, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Review.ReviewHookContextFactory
-LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
-LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!
-LM.Infrastructure.Review.ReviewHookContextFactory.CreateProjectCreated(LM.Review.Core.Models.ReviewProject! project) -> LM.Review.Core.Services.IReviewHookContext!
-LM.Infrastructure.Review.ReviewHookContextFactory.CreateReviewerDecisionRecorded(LM.Review.Core.Models.ScreeningAssignment! assignment, LM.Review.Core.Models.ReviewerDecision! decision) -> LM.Review.Core.Services.IReviewHookContext!
-LM.Infrastructure.Review.ReviewHookContextFactory.CreateStageTransition(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConflictState previousState, LM.Review.Core.Models.ConflictState currentState) -> LM.Review.Core.Services.IReviewHookContext!
-LM.Infrastructure.Review.ReviewHookContextFactory.ReviewHookContextFactory() -> void
-LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider
-LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
-LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
-LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
-LM.Infrastructure.PubMed.PubMedClient
-LM.Infrastructure.PubMed.PubMedClient.PubMedClient() -> void
-LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
-LM.Infrastructure.Search.PubMedSearchProvider
-LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
-LM.Infrastructure.Search.PubMedSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
-LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
-LM.Infrastructure.Search.PubMedSearchProvider.FetchFullRecordXmlAsync(string! pubmedId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
-LM.Infrastructure.Search.SearchExecutionService
-LM.Infrastructure.Search.SearchExecutionService.SearchExecutionService(System.Collections.Generic.IEnumerable<LM.Core.Abstractions.Search.ISearchProvider!>! providers, LM.Core.Abstractions.IEntryStore! store) -> void
-LM.Infrastructure.Search.SearchExecutionService.ExecuteAsync(LM.Core.Models.Search.SearchExecutionRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchExecutionResult!>!
-LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore
-LM.Infrastructure.Storage.FileStorageService
-LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Storage.FileStorageService.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Text.DoiNormalizer
-LM.Infrastructure.Text.DoiNormalizer.DoiNormalizer() -> void
-LM.Infrastructure.Text.DoiNormalizer.Normalize(string? raw) -> string?
-LM.Infrastructure.Text.PmidNormalizer
-LM.Infrastructure.Text.PmidNormalizer.Normalize(string? raw) -> string?
-LM.Infrastructure.Text.PmidNormalizer.PmidNormalizer() -> void
-LM.Infrastructure.Utils.BibliographyHelper
-LM.Infrastructure.Utils.ContentAwareSimilarityService
-LM.Infrastructure.Utils.ContentAwareSimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
-LM.Infrastructure.Utils.ContentAwareSimilarityService.ContentAwareSimilarityService(LM.Core.Abstractions.IContentExtractor! extractor) -> void
-LM.Infrastructure.Utils.HashingService
-LM.Infrastructure.Utils.HashingService.ComputeSha256Async(string! filePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
-LM.Infrastructure.Utils.HashingService.HashingService() -> void
-LM.Infrastructure.Utils.SimilarityService
-LM.Infrastructure.Utils.SimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
-LM.Infrastructure.Utils.SimilarityService.SimilarityService() -> void
-LM.Infrastructure.Utils.TagMerger
-LM.Infrastructure.Utils.TagNormalizer
-static LM.Infrastructure.Hooks.ArticleHookFactory.CreateFromPublication(LM.Core.Models.PublicationRecord! r) -> LM.HubSpoke.Models.ArticleHook!
-static LM.Infrastructure.Utils.BibliographyHelper.GenerateShortTitle(string? title, System.Collections.Generic.IEnumerable<string!>! authors, string? source, int? year) -> string!
-static LM.Infrastructure.Utils.TagMerger.Merge(string? existingCsv, System.Collections.Generic.IEnumerable<string!>? add) -> string?
-LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.JsonWatchedFolderSettingsStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
-LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Settings.JsonSearchHistoryStore
-LM.Infrastructure.Settings.JsonSearchHistoryStore.JsonSearchHistoryStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Settings.JsonSearchHistoryStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchHistoryDocument!>!
-LM.Infrastructure.Settings.JsonSearchHistoryStore.SaveAsync(LM.Core.Models.Search.SearchHistoryDocument! document, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.Infrastructure.Settings.JsonUserPreferencesStore
-LM.Infrastructure.Settings.JsonUserPreferencesStore.JsonUserPreferencesStore() -> void
-LM.Infrastructure.Settings.JsonUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
-LM.Infrastructure.Settings.JsonUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!
-LM.Infrastructure.Export.DataExtractionPowerPointExporter
-LM.Infrastructure.Export.DataExtractionPowerPointExporter.DataExtractionPowerPointExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionWordExporter
-LM.Infrastructure.Export.DataExtractionWordExporter.DataExtractionWordExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionExcelExporter
-LM.Infrastructure.Export.DataExtractionExcelExporter.DataExtractionExcelExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
-LM.Infrastructure.Export.DataExtractionExportLoader
-LM.Infrastructure.Export.DataExtractionExportLoader.DataExtractionExportLoader(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Export.DataExtractionExportLoader.HasExtractionAsync(string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<bool>!
-LM.Infrastructure.Export.DataExtractionExportLoader.LoadAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Infrastructure.Export.DataExtractionExportContext?>!
-LM.Infrastructure.Export.DataExtractionExportContext
-LM.Infrastructure.Export.DataExtractionExportContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
-LM.Infrastructure.Export.DataExtractionExportContext.DataExtractionExportContext(string! entryId, LM.HubSpoke.Models.EntryHub! hub, LM.HubSpoke.Models.DataExtractionHook! extraction, LM.HubSpoke.Models.ArticleHook? article, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Export.DataExtractionExportContext.EntryId.get -> string!
-LM.Infrastructure.Export.DataExtractionExportContext.Extraction.get -> LM.HubSpoke.Models.DataExtractionHook!
-LM.Infrastructure.Export.DataExtractionExportContext.Hub.get -> LM.HubSpoke.Models.EntryHub!
-LM.Infrastructure.Export.DataExtractionExportContext.TryResolveAbsolutePath(string? relativePath) -> string?
----------- LM.Review.Core ----------
-#nullable enable
-LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ConflictState.None = 0 -> LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ConflictState.Conflict = 1 -> LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ConflictState.Escalated = 2 -> LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ConflictState.Resolved = 3 -> LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ScreeningStatus.Pending = 0 -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ScreeningStatus.InProgress = 1 -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ScreeningStatus.Included = 2 -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ScreeningStatus.Excluded = 3 -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ScreeningStatus.Escalated = 4 -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ReviewerRole.Primary = 0 -> LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ReviewerRole.Secondary = 1 -> LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ReviewerRole.TieBreaker = 2 -> LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ReviewerRole.Arbitrator = 3 -> LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.ReviewStageType.TitleScreening = 0 -> LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.ReviewStageType.FullTextReview = 1 -> LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.ReviewStageType.ConsensusMeeting = 2 -> LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.ReviewStageType.QualityAssurance = 3 -> LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.ReviewerDecision
-LM.Review.Core.Models.ReviewerDecision.AssignmentId.get -> string!
-static LM.Review.Core.Models.ReviewerDecision.Create(string! assignmentId, string! reviewerId, LM.Review.Core.Models.ScreeningStatus decision, System.DateTimeOffset decidedAtUtc, string? notes = null) -> LM.Review.Core.Models.ReviewerDecision!
-LM.Review.Core.Models.ReviewerDecision.DecidedAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ReviewerDecision.Decision.get -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.ReviewerDecision.Notes.get -> string?
-LM.Review.Core.Models.ReviewerDecision.ReviewerId.get -> string!
-LM.Review.Core.Models.ConsensusOutcome
-LM.Review.Core.Models.ConsensusOutcome.Approved.get -> bool
-static LM.Review.Core.Models.ConsensusOutcome.Create(string! stageId, bool approved, LM.Review.Core.Models.ConflictState resultingState, System.DateTimeOffset resolvedAtUtc, string? notes = null, string? resolvedBy = null) -> LM.Review.Core.Models.ConsensusOutcome!
-LM.Review.Core.Models.ConsensusOutcome.Notes.get -> string?
-LM.Review.Core.Models.ConsensusOutcome.ResolvedAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ConsensusOutcome.ResolvedBy.get -> string?
-LM.Review.Core.Models.ConsensusOutcome.ResultingState.get -> LM.Review.Core.Models.ConflictState
-LM.Review.Core.Models.ConsensusOutcome.StageId.get -> string!
-LM.Review.Core.Models.ReviewAuditTrail
-LM.Review.Core.Models.ReviewAuditTrail.Append(LM.Review.Core.Models.ReviewAuditTrail.AuditEntry! entry) -> LM.Review.Core.Models.ReviewAuditTrail!
-static LM.Review.Core.Models.ReviewAuditTrail.Create(System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>? entries = null) -> LM.Review.Core.Models.ReviewAuditTrail!
-LM.Review.Core.Models.ReviewAuditTrail.Entries.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>!
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Action.get -> string!
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Actor.get -> string!
-static LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Create(string! id, string! actor, string! action, System.DateTimeOffset occurredAtUtc, string? details = null) -> LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Details.get -> string?
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Id.get -> string!
-LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.OccurredAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ReviewProject
-LM.Review.Core.Models.ReviewProject.AuditTrail.get -> LM.Review.Core.Models.ReviewAuditTrail!
-static LM.Review.Core.Models.ReviewProject.Create(string! id, string! name, System.DateTimeOffset createdAtUtc, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageDefinition!>! stageDefinitions, LM.Review.Core.Models.ReviewAuditTrail? auditTrail = null) -> LM.Review.Core.Models.ReviewProject!
-LM.Review.Core.Models.ReviewProject.CreatedAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ReviewProject.Id.get -> string!
-LM.Review.Core.Models.ReviewProject.Name.get -> string!
-LM.Review.Core.Models.ReviewProject.StageDefinitions.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.StageDefinition!>!
-LM.Review.Core.Models.ReviewStage
-LM.Review.Core.Models.ReviewStage.ActivatedAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ReviewStage.Assignments.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ScreeningAssignment!>!
-LM.Review.Core.Models.ReviewStage.CompletedAt.get -> System.DateTimeOffset?
-LM.Review.Core.Models.ReviewStage.Consensus.get -> LM.Review.Core.Models.ConsensusOutcome?
-LM.Review.Core.Models.ReviewStage.ConflictState.get -> LM.Review.Core.Models.ConflictState
-static LM.Review.Core.Models.ReviewStage.Create(string! id, string! projectId, LM.Review.Core.Models.StageDefinition! definition, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ScreeningAssignment!>! assignments, LM.Review.Core.Models.ConflictState conflictState, System.DateTimeOffset activatedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ConsensusOutcome? consensus = null) -> LM.Review.Core.Models.ReviewStage!
-LM.Review.Core.Models.ReviewStage.Definition.get -> LM.Review.Core.Models.StageDefinition!
-LM.Review.Core.Models.ReviewStage.Id.get -> string!
-LM.Review.Core.Models.ReviewStage.IsComplete.get -> bool
-LM.Review.Core.Models.ReviewStage.ProjectId.get -> string!
-LM.Review.Core.Models.StageDefinition
-LM.Review.Core.Models.StageDefinition.ConsensusPolicy.get -> LM.Review.Core.Models.StageConsensusPolicy!
-static LM.Review.Core.Models.StageDefinition.Create(string! id, string! name, LM.Review.Core.Models.ReviewStageType stageType, LM.Review.Core.Models.ReviewerRequirement! reviewerRequirement, LM.Review.Core.Models.StageConsensusPolicy! consensusPolicy) -> LM.Review.Core.Models.StageDefinition!
-LM.Review.Core.Models.StageDefinition.Id.get -> string!
-LM.Review.Core.Models.StageDefinition.Name.get -> string!
-LM.Review.Core.Models.StageDefinition.ReviewerRequirement.get -> LM.Review.Core.Models.ReviewerRequirement!
-LM.Review.Core.Models.StageDefinition.StageType.get -> LM.Review.Core.Models.ReviewStageType
-LM.Review.Core.Models.StageConsensusPolicy
-LM.Review.Core.Models.StageConsensusPolicy.ArbitrationRole.get -> LM.Review.Core.Models.ReviewerRole?
-static LM.Review.Core.Models.StageConsensusPolicy.Disabled() -> LM.Review.Core.Models.StageConsensusPolicy!
-LM.Review.Core.Models.StageConsensusPolicy.EscalateOnDisagreement.get -> bool
-LM.Review.Core.Models.StageConsensusPolicy.MinimumAgreements.get -> int
-static LM.Review.Core.Models.StageConsensusPolicy.RequireAgreement(int minimumAgreements, bool escalateOnDisagreement, LM.Review.Core.Models.ReviewerRole? arbitrationRole) -> LM.Review.Core.Models.StageConsensusPolicy!
-LM.Review.Core.Models.StageConsensusPolicy.RequiresConsensus.get -> bool
-LM.Review.Core.Models.ReviewerRequirement
-static LM.Review.Core.Models.ReviewerRequirement.Create(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<LM.Review.Core.Models.ReviewerRole, int>>! requirements) -> LM.Review.Core.Models.ReviewerRequirement!
-LM.Review.Core.Models.ReviewerRequirement.GetRequirement(LM.Review.Core.Models.ReviewerRole role) -> int
-LM.Review.Core.Models.ReviewerRequirement.Requirements.get -> System.Collections.Generic.IReadOnlyDictionary<LM.Review.Core.Models.ReviewerRole, int>!
-LM.Review.Core.Models.ReviewerRequirement.TotalRequired.get -> int
-LM.Review.Core.Models.ScreeningAssignment
-LM.Review.Core.Models.ScreeningAssignment.AssignedAt.get -> System.DateTimeOffset
-LM.Review.Core.Models.ScreeningAssignment.CompletedAt.get -> System.DateTimeOffset?
-static LM.Review.Core.Models.ScreeningAssignment.Create(string! id, string! stageId, string! reviewerId, LM.Review.Core.Models.ReviewerRole role, LM.Review.Core.Models.ScreeningStatus status, System.DateTimeOffset assignedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ReviewerDecision? decision = null) -> LM.Review.Core.Models.ScreeningAssignment!
-LM.Review.Core.Models.ScreeningAssignment.Decision.get -> LM.Review.Core.Models.ReviewerDecision?
-LM.Review.Core.Models.ScreeningAssignment.Id.get -> string!
-LM.Review.Core.Models.ScreeningAssignment.ReviewerId.get -> string!
-LM.Review.Core.Models.ScreeningAssignment.Role.get -> LM.Review.Core.Models.ReviewerRole
-LM.Review.Core.Models.ScreeningAssignment.StageId.get -> string!
-LM.Review.Core.Models.ScreeningAssignment.Status.get -> LM.Review.Core.Models.ScreeningStatus
-LM.Review.Core.Models.Forms.ExtractionForm
-LM.Review.Core.Models.Forms.ExtractionForm.Category.get -> string?
-static LM.Review.Core.Models.Forms.ExtractionForm.Create(string! id, string! name, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>! sections, string? description = null, string? category = null) -> LM.Review.Core.Models.Forms.ExtractionForm!
-LM.Review.Core.Models.Forms.ExtractionForm.Description.get -> string?
-LM.Review.Core.Models.Forms.ExtractionForm.Id.get -> string!
-LM.Review.Core.Models.Forms.ExtractionForm.Name.get -> string!
-LM.Review.Core.Models.Forms.ExtractionForm.Sections.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
-LM.Review.Core.Models.Forms.FormField
-LM.Review.Core.Models.Forms.FormField.AllowFreeTextFallback.get -> bool
-LM.Review.Core.Models.Forms.FormField.Description.get -> string?
-LM.Review.Core.Models.Forms.FormField.FieldType.get -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormField.Id.get -> string!
-LM.Review.Core.Models.Forms.FormField.Options.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormFieldOption!>!
-LM.Review.Core.Models.Forms.FormField.Title.get -> string!
-LM.Review.Core.Models.Forms.FormField.Validation.get -> LM.Review.Core.Models.Forms.FormFieldValidation?
-LM.Review.Core.Models.Forms.FormField.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
-static LM.Review.Core.Models.Forms.FormField.Create(string! id, string! title, LM.Review.Core.Models.Forms.FormFieldType fieldType, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormFieldOption!>? options = null, string? description = null, LM.Review.Core.Models.Forms.FormFieldValidation? validation = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null, bool allowFreeTextFallback = false) -> LM.Review.Core.Models.Forms.FormField!
-LM.Review.Core.Models.Forms.FormFieldOption
-LM.Review.Core.Models.Forms.FormFieldOption.Description.get -> string?
-LM.Review.Core.Models.Forms.FormFieldOption.Id.get -> string!
-LM.Review.Core.Models.Forms.FormFieldOption.IsDefault.get -> bool
-LM.Review.Core.Models.Forms.FormFieldOption.Label.get -> string!
-static LM.Review.Core.Models.Forms.FormFieldOption.Create(string! id, string! label, string? description = null, bool isDefault = false) -> LM.Review.Core.Models.Forms.FormFieldOption!
-LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.SingleSelect = 0 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.MultiSelect = 1 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.Text = 2 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.Numeric = 3 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.Date = 4 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldType.Reference = 5 -> LM.Review.Core.Models.Forms.FormFieldType
-LM.Review.Core.Models.Forms.FormFieldValidation
-LM.Review.Core.Models.Forms.FormFieldValidation.Expression.get -> string?
-LM.Review.Core.Models.Forms.FormFieldValidation.Maximum.get -> decimal?
-LM.Review.Core.Models.Forms.FormFieldValidation.MaximumDateUtc.get -> System.DateTime?
-LM.Review.Core.Models.Forms.FormFieldValidation.Minimum.get -> decimal?
-LM.Review.Core.Models.Forms.FormFieldValidation.MinimumDateUtc.get -> System.DateTime?
-LM.Review.Core.Models.Forms.FormFieldValidation.Mode.get -> LM.Review.Core.Models.Forms.FormValidationMode
-static LM.Review.Core.Models.Forms.FormFieldValidation.CreateDateRange(System.DateTime? minimumUtc, System.DateTime? maximumUtc) -> LM.Review.Core.Models.Forms.FormFieldValidation!
-static LM.Review.Core.Models.Forms.FormFieldValidation.CreateNumericRange(decimal? minimum, decimal? maximum) -> LM.Review.Core.Models.Forms.FormFieldValidation!
-static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRegex(string! pattern) -> LM.Review.Core.Models.Forms.FormFieldValidation!
-static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRequired() -> LM.Review.Core.Models.Forms.FormFieldValidation!
-LM.Review.Core.Models.Forms.FormIdentifier
-static bool LM.Review.Core.Models.Forms.FormIdentifier.IsNormalized(string! identifier) -> bool
-static string LM.Review.Core.Models.Forms.FormIdentifier.Normalize(string! identifier) -> string!
-LM.Review.Core.Models.Forms.FormSection
-LM.Review.Core.Models.Forms.FormSection.Children.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
-LM.Review.Core.Models.Forms.FormSection.Description.get -> string?
-LM.Review.Core.Models.Forms.FormSection.Fields.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormField!>!
-LM.Review.Core.Models.Forms.FormSection.Id.get -> string!
-LM.Review.Core.Models.Forms.FormSection.IsRepeatable.get -> bool
-LM.Review.Core.Models.Forms.FormSection.Title.get -> string!
-LM.Review.Core.Models.Forms.FormSection.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
-static LM.Review.Core.Models.Forms.FormSection.Create(string! id, string! title, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormField!>! fields, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>? children = null, bool isRepeatable = false, string? description = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null) -> LM.Review.Core.Models.Forms.FormSection!
-LM.Review.Core.Models.Forms.FormValidationMode
-LM.Review.Core.Models.Forms.FormValidationMode.Required = 0 -> LM.Review.Core.Models.Forms.FormValidationMode
-LM.Review.Core.Models.Forms.FormValidationMode.Range = 1 -> LM.Review.Core.Models.Forms.FormValidationMode
-LM.Review.Core.Models.Forms.FormValidationMode.Regex = 2 -> LM.Review.Core.Models.Forms.FormValidationMode
-LM.Review.Core.Models.Forms.FormVisibilityRule
-LM.Review.Core.Models.Forms.FormVisibilityRule.ExpectedValues.get -> System.Collections.Generic.IReadOnlyList<string>!
-LM.Review.Core.Models.Forms.FormVisibilityRule.IsVisibleWhenMatches.get -> bool
-LM.Review.Core.Models.Forms.FormVisibilityRule.SourceFieldId.get -> string!
-static LM.Review.Core.Models.Forms.FormVisibilityRule.Create(string! sourceFieldId, System.Collections.Generic.IEnumerable<string>? expectedValues = null, bool isVisibleWhenMatches = true) -> LM.Review.Core.Models.Forms.FormVisibilityRule!
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedBy.get -> string!
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedUtc.get -> System.DateTime
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot.FormId.get -> string!
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, object?>!
-LM.Review.Core.Models.Forms.ExtractionFormSnapshot.VersionId.get -> string!
-static LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Create(string! formId, string! versionId, System.Collections.Generic.IDictionary<string, object?>! values, string? capturedBy = null, System.DateTime? capturedUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormSnapshot!
-LM.Review.Core.Models.Forms.ExtractionFormVersion
-LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedBy.get -> string!
-LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedUtc.get -> System.DateTime
-LM.Review.Core.Models.Forms.ExtractionFormVersion.Form.get -> LM.Review.Core.Models.Forms.ExtractionForm!
-LM.Review.Core.Models.Forms.ExtractionFormVersion.Metadata.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>!
-LM.Review.Core.Models.Forms.ExtractionFormVersion.VersionId.get -> string!
-static LM.Review.Core.Models.Forms.ExtractionFormVersion.Create(string! versionId, LM.Review.Core.Models.Forms.ExtractionForm! form, System.Collections.Generic.IDictionary<string, string>? metadata = null, string? createdBy = null, System.DateTime? createdUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormVersion!
-LM.Review.Core.Validation.FormSchemaIssue
-LM.Review.Core.Validation.FormSchemaIssue.Code.get -> string!
-LM.Review.Core.Validation.FormSchemaIssue.FieldId.get -> string?
-LM.Review.Core.Validation.FormSchemaIssue.Message.get -> string!
-LM.Review.Core.Validation.FormSchemaIssue.SectionId.get -> string?
-LM.Review.Core.Validation.FormSchemaIssue.Severity.get -> LM.Review.Core.Validation.FormSchemaSeverity
-static LM.Review.Core.Validation.FormSchemaIssue.Error(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
-static LM.Review.Core.Validation.FormSchemaIssue.Warning(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
-LM.Review.Core.Validation.FormSchemaSeverity
-LM.Review.Core.Validation.FormSchemaSeverity.Warning = 0 -> LM.Review.Core.Validation.FormSchemaSeverity
-LM.Review.Core.Validation.FormSchemaSeverity.Error = 1 -> LM.Review.Core.Validation.FormSchemaSeverity
-LM.Review.Core.Validation.FormSchemaValidator
-LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionForm! form) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
-LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormSnapshot! snapshot, LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
-LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
-#nullable enable
-LM.Review.Core.DataExtraction.TableVocabulary
-LM.Review.Core.DataExtraction.TableVocabulary.ClassifyColumnHeader(string? header) -> LM.Core.Models.DataExtraction.TableColumnRole
-LM.Review.Core.DataExtraction.TableVocabulary.ClassifyRowLabel(string? label) -> LM.Core.Models.DataExtraction.TableRowRole
-LM.Review.Core.DataExtraction.TableVocabulary.ClassifyTitle(string? title) -> LM.Core.Models.DataExtraction.TableClassificationKind
-LM.Review.Core.DataExtraction.TableVocabulary.NormalizeHeader(string header) -> string!
-LM.Review.Core.DataExtraction.TableVocabulary.TryDetectEndpoint(string? token) -> string?
-LM.Review.Core.DataExtraction.TableVocabulary.TryDetectPopulation(string? token) -> string?
 ---------- LM.HubSpoke ----------
 #nullable enable
 #nullable enable
@@ -1757,6 +1409,354 @@ static LM.HubSpoke.Models.EntryNotesSummary.FromLitSearch(LM.HubSpoke.Models.Lit
 static LM.HubSpoke.Models.EntryNotesSummary.FromRawText(string! text) -> LM.HubSpoke.Models.EntryNotesSummary!
 static LM.HubSpoke.Models.PersonRef.Unknown.get -> LM.HubSpoke.Models.PersonRef
 static readonly LM.HubSpoke.Models.JsonStd.Options -> System.Text.Json.JsonSerializerOptions!
+---------- LM.Infrastructure ----------
+#nullable enable
+#nullable enable
+LM.Infrastructure.Content.CompositeContentExtractor
+LM.Infrastructure.Content.CompositeContentExtractor.CompositeContentExtractor() -> void
+LM.Infrastructure.Content.CompositeContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.OpenXmlContentExtractor
+LM.Infrastructure.Content.OpenXmlContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.OpenXmlContentExtractor.OpenXmlContentExtractor() -> void
+LM.Infrastructure.Content.PdfPigContentExtractor
+LM.Infrastructure.Content.PdfPigContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.PdfPigContentExtractor.PdfPigContentExtractor() -> void
+LM.Infrastructure.Content.PlainTextContentExtractor
+LM.Infrastructure.Content.PlainTextContentExtractor.ExtractTextAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Content.PlainTextContentExtractor.PlainTextContentExtractor() -> void
+LM.Infrastructure.Entries.JsonEntryStore
+LM.Infrastructure.Entries.JsonEntryStore.EnumerateAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<LM.Core.Models.Entry!>!
+LM.Infrastructure.Entries.JsonEntryStore.FindByHashAsync(string! sha256, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.FindByIdsAsync(string? doi, string? pmid, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.FindSimilarByNameYearAsync(string! title, int? year, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Infrastructure.Entries.JsonEntryStore.GetByIdAsync(string! id, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Entry?>!
+LM.Infrastructure.Entries.JsonEntryStore.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Entries.JsonEntryStore.JsonEntryStore(LM.Core.Abstractions.IWorkSpaceService! ws, LM.Core.Abstractions.IDoiNormalizer? doiNormalizer = null, LM.Core.Abstractions.IPmidNormalizer? pmidNormalizer = null) -> void
+LM.Infrastructure.Entries.JsonEntryStore.SaveAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Entries.JsonEntryStore.SearchAsync(LM.Core.Models.Filters.EntryFilter! f, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.Entry!>!>!
+LM.Infrastructure.Entries.EntryTagVocabularyProvider
+LM.Infrastructure.Entries.EntryTagVocabularyProvider.EntryTagVocabularyProvider(LM.Core.Abstractions.IEntryStore! store) -> void
+LM.Infrastructure.Entries.EntryTagVocabularyProvider.GetAllTagsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<string!>!>!
+LM.Infrastructure.Export.DataExtractionExcelExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionExcelExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.DataExtractionPowerPointExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionPowerPointExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.DataExtractionWordExporter.CanExportAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionWordExporter.ExportAsync(string! entryId, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.MetadataDebugSlideExporter
+LM.Infrastructure.Export.MetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Export.MetadataDebugSlideExporter.MetadataDebugSlideExporter() -> void
+LM.Infrastructure.FileSystem.WorkspaceService
+LM.Infrastructure.FileSystem.WorkspaceService.EnsureWorkspaceAsync(string! absoluteWorkspacePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.FileSystem.WorkspaceService.GetAbsolutePath(string! relativePath) -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.GetLocalDbPath() -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.GetWorkspaceRoot() -> string!
+LM.Infrastructure.FileSystem.WorkspaceService.WorkspacePath.get -> string?
+LM.Infrastructure.FileSystem.WorkspaceService.WorkspaceService() -> void
+LM.Infrastructure.Hooks.ArticleHookFactory
+LM.Infrastructure.Hooks.HookContext
+LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
+LM.Infrastructure.Hooks.HookContext.Article.init -> void
+LM.Infrastructure.Hooks.HookContext.Attachments.get -> LM.HubSpoke.Models.AttachmentHook?
+LM.Infrastructure.Hooks.HookContext.Attachments.init -> void
+LM.Infrastructure.Hooks.HookContext.DataExtraction.get -> LM.HubSpoke.Models.DataExtractionHook?
+LM.Infrastructure.Hooks.HookContext.DataExtraction.init -> void
+LM.Infrastructure.Hooks.HookContext.ChangeLog.get -> LM.HubSpoke.Models.EntryChangeLogHook?
+LM.Infrastructure.Hooks.HookContext.ChangeLog.init -> void
+LM.Infrastructure.Hooks.HookContext.HookContext() -> void
+LM.Infrastructure.Hooks.HookOrchestrator
+LM.Infrastructure.Hooks.HookOrchestrator.HookOrchestrator(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Hooks.HookOrchestrator.ProcessAsync(string! entryId, LM.Infrastructure.Hooks.HookContext! ctx, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Hooks.HookPersister
+LM.Infrastructure.Hooks.HookPersister.HookPersister(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Hooks.HookPersister.SaveArticleIfAnyAsync(string! entryId, LM.HubSpoke.Models.ArticleHook? hook, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Metadata.CompositeMetadataExtractor
+LM.Infrastructure.Metadata.CompositeMetadataExtractor.CompositeMetadataExtractor(LM.Core.Abstractions.IContentExtractor! content) -> void
+LM.Infrastructure.Metadata.CompositeMetadataExtractor.ExtractAsync(string! absolutePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.FileMetadata!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor
+LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.DataExtractionPreprocessor(LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor! tableExtractor) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.DataExtractionPreprocessor.PreprocessAsync(LM.Core.Models.DataExtraction.DataExtractionPreprocessRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.DataExtraction.DataExtractionPreprocessResult!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.IPdfTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.ExtractAsync(UglyToad.PdfPig.PdfDocument! document, string! pdfPath, string! tablesRoot, string! hash, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.DataExtraction.PreprocessedTable!>!>!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaSharpTableExtractor.TabulaSharpTableExtractor(LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter! imageWriter) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.CreateDocumentReader(string! pdfPath) -> Docnet.Core.Readers.IDocReader!
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.TabulaTableImageWriter(double scalingFactor = 2) -> void
+LM.Infrastructure.Metadata.EvidenceExtraction.Tables.TabulaTableImageWriter.WriteAsync(Docnet.Core.Readers.IDocReader! docReader, int pageNumber, string! tablesRoot, string! fileStem, LM.Core.Models.DataExtraction.TableRegion! region, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Review.ReviewHookContextFactory
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateAssignmentUpdated(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ScreeningAssignment! assignment) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateConsensusResolved(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConsensusOutcome! consensus) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateProjectCreated(LM.Review.Core.Models.ReviewProject! project) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateReviewerDecisionRecorded(LM.Review.Core.Models.ScreeningAssignment! assignment, LM.Review.Core.Models.ReviewerDecision! decision) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.CreateStageTransition(LM.Review.Core.Models.ReviewStage! stage, LM.Review.Core.Models.ConflictState previousState, LM.Review.Core.Models.ConflictState currentState) -> LM.Review.Core.Services.IReviewHookContext!
+LM.Infrastructure.Review.ReviewHookContextFactory.ReviewHookContextFactory() -> void
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.ClinicalTrialsGovSearchProvider() -> void
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
+LM.Infrastructure.Search.ClinicalTrialsGovSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.PubMed.PubMedClient
+LM.Infrastructure.PubMed.PubMedClient.PubMedClient() -> void
+LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
+LM.Infrastructure.Search.PubMedSearchProvider
+LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
+LM.Infrastructure.Search.PubMedSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
+LM.Infrastructure.Search.PubMedSearchProvider.SearchAsync(string! query, System.DateTime? from, System.DateTime? to, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.SearchHit!>!>!
+LM.Infrastructure.Search.PubMedSearchProvider.FetchFullRecordXmlAsync(string! pubmedId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+LM.Infrastructure.Search.SearchExecutionService
+LM.Infrastructure.Search.SearchExecutionService.SearchExecutionService(System.Collections.Generic.IEnumerable<LM.Core.Abstractions.Search.ISearchProvider!>! providers, LM.Core.Abstractions.IEntryStore! store) -> void
+LM.Infrastructure.Search.SearchExecutionService.ExecuteAsync(LM.Core.Models.Search.SearchExecutionRequest! request, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchExecutionResult!>!
+LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore
+LM.Infrastructure.Storage.FileStorageService
+LM.Infrastructure.Storage.FileStorageService.FileStorageService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Storage.FileStorageService.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Text.DoiNormalizer
+LM.Infrastructure.Text.DoiNormalizer.DoiNormalizer() -> void
+LM.Infrastructure.Text.DoiNormalizer.Normalize(string? raw) -> string?
+LM.Infrastructure.Text.PmidNormalizer
+LM.Infrastructure.Text.PmidNormalizer.Normalize(string? raw) -> string?
+LM.Infrastructure.Text.PmidNormalizer.PmidNormalizer() -> void
+LM.Infrastructure.Utils.BibliographyHelper
+LM.Infrastructure.Utils.ContentAwareSimilarityService
+LM.Infrastructure.Utils.ContentAwareSimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
+LM.Infrastructure.Utils.ContentAwareSimilarityService.ContentAwareSimilarityService(LM.Core.Abstractions.IContentExtractor! extractor) -> void
+LM.Infrastructure.Utils.HashingService
+LM.Infrastructure.Utils.HashingService.ComputeSha256Async(string! filePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Infrastructure.Utils.HashingService.HashingService() -> void
+LM.Infrastructure.Utils.SimilarityService
+LM.Infrastructure.Utils.SimilarityService.ComputeFileSimilarityAsync(string! filePathA, string! filePathB, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<double>!
+LM.Infrastructure.Utils.SimilarityService.SimilarityService() -> void
+LM.Infrastructure.Utils.TagMerger
+LM.Infrastructure.Utils.TagNormalizer
+static LM.Infrastructure.Hooks.ArticleHookFactory.CreateFromPublication(LM.Core.Models.PublicationRecord! r) -> LM.HubSpoke.Models.ArticleHook!
+static LM.Infrastructure.Utils.BibliographyHelper.GenerateShortTitle(string? title, System.Collections.Generic.IEnumerable<string!>! authors, string? source, int? year) -> string!
+static LM.Infrastructure.Utils.TagMerger.Merge(string? existingCsv, System.Collections.Generic.IEnumerable<string!>? add) -> string?
+LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.JsonWatchedFolderSettingsStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.WatchedFolderSettings!>!
+LM.Infrastructure.Settings.JsonWatchedFolderSettingsStore.SaveAsync(LM.Core.Models.WatchedFolderSettings! settings, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Settings.JsonSearchHistoryStore
+LM.Infrastructure.Settings.JsonSearchHistoryStore.JsonSearchHistoryStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Settings.JsonSearchHistoryStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.Search.SearchHistoryDocument!>!
+LM.Infrastructure.Settings.JsonSearchHistoryStore.SaveAsync(LM.Core.Models.Search.SearchHistoryDocument! document, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Settings.JsonUserPreferencesStore
+LM.Infrastructure.Settings.JsonUserPreferencesStore.JsonUserPreferencesStore() -> void
+LM.Infrastructure.Settings.JsonUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
+LM.Infrastructure.Settings.JsonUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+static LM.Infrastructure.Utils.TagNormalizer.SplitAndNormalize(string! raw) -> System.Collections.Generic.IEnumerable<string!>!
+LM.Infrastructure.Export.DataExtractionPowerPointExporter
+LM.Infrastructure.Export.DataExtractionPowerPointExporter.DataExtractionPowerPointExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
+LM.Infrastructure.Export.DataExtractionWordExporter
+LM.Infrastructure.Export.DataExtractionWordExporter.DataExtractionWordExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
+LM.Infrastructure.Export.DataExtractionExcelExporter
+LM.Infrastructure.Export.DataExtractionExcelExporter.DataExtractionExcelExporter(LM.Infrastructure.Export.DataExtractionExportLoader! loader) -> void
+LM.Infrastructure.Export.DataExtractionExportLoader
+LM.Infrastructure.Export.DataExtractionExportLoader.DataExtractionExportLoader(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Export.DataExtractionExportLoader.HasExtractionAsync(string! entryId, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<bool>!
+LM.Infrastructure.Export.DataExtractionExportLoader.LoadAsync(string! entryId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Infrastructure.Export.DataExtractionExportContext?>!
+LM.Infrastructure.Export.DataExtractionExportContext
+LM.Infrastructure.Export.DataExtractionExportContext.Article.get -> LM.HubSpoke.Models.ArticleHook?
+LM.Infrastructure.Export.DataExtractionExportContext.DataExtractionExportContext(string! entryId, LM.HubSpoke.Models.EntryHub! hub, LM.HubSpoke.Models.DataExtractionHook! extraction, LM.HubSpoke.Models.ArticleHook? article, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Export.DataExtractionExportContext.EntryId.get -> string!
+LM.Infrastructure.Export.DataExtractionExportContext.Extraction.get -> LM.HubSpoke.Models.DataExtractionHook!
+LM.Infrastructure.Export.DataExtractionExportContext.Hub.get -> LM.HubSpoke.Models.EntryHub!
+LM.Infrastructure.Export.DataExtractionExportContext.TryResolveAbsolutePath(string? relativePath) -> string?
+---------- LM.Review.Core ----------
+#nullable enable
+LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.None = 0 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Conflict = 1 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Escalated = 2 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConflictState.Resolved = 3 -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Pending = 0 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.InProgress = 1 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Included = 2 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Excluded = 3 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ScreeningStatus.Escalated = 4 -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Primary = 0 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Secondary = 1 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.TieBreaker = 2 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewerRole.Arbitrator = 3 -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.TitleScreening = 0 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.FullTextReview = 1 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.ConsensusMeeting = 2 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewStageType.QualityAssurance = 3 -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.ReviewerDecision
+LM.Review.Core.Models.ReviewerDecision.AssignmentId.get -> string!
+static LM.Review.Core.Models.ReviewerDecision.Create(string! assignmentId, string! reviewerId, LM.Review.Core.Models.ScreeningStatus decision, System.DateTimeOffset decidedAtUtc, string? notes = null) -> LM.Review.Core.Models.ReviewerDecision!
+LM.Review.Core.Models.ReviewerDecision.DecidedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewerDecision.Decision.get -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.ReviewerDecision.Notes.get -> string?
+LM.Review.Core.Models.ReviewerDecision.ReviewerId.get -> string!
+LM.Review.Core.Models.ConsensusOutcome
+LM.Review.Core.Models.ConsensusOutcome.Approved.get -> bool
+static LM.Review.Core.Models.ConsensusOutcome.Create(string! stageId, bool approved, LM.Review.Core.Models.ConflictState resultingState, System.DateTimeOffset resolvedAtUtc, string? notes = null, string? resolvedBy = null) -> LM.Review.Core.Models.ConsensusOutcome!
+LM.Review.Core.Models.ConsensusOutcome.Notes.get -> string?
+LM.Review.Core.Models.ConsensusOutcome.ResolvedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ConsensusOutcome.ResolvedBy.get -> string?
+LM.Review.Core.Models.ConsensusOutcome.ResultingState.get -> LM.Review.Core.Models.ConflictState
+LM.Review.Core.Models.ConsensusOutcome.StageId.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail
+LM.Review.Core.Models.ReviewAuditTrail.Append(LM.Review.Core.Models.ReviewAuditTrail.AuditEntry! entry) -> LM.Review.Core.Models.ReviewAuditTrail!
+static LM.Review.Core.Models.ReviewAuditTrail.Create(System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>? entries = null) -> LM.Review.Core.Models.ReviewAuditTrail!
+LM.Review.Core.Models.ReviewAuditTrail.Entries.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!>!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Action.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Actor.get -> string!
+static LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Create(string! id, string! actor, string! action, System.DateTimeOffset occurredAtUtc, string? details = null) -> LM.Review.Core.Models.ReviewAuditTrail.AuditEntry!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Details.get -> string?
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.Id.get -> string!
+LM.Review.Core.Models.ReviewAuditTrail.AuditEntry.OccurredAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewProject
+LM.Review.Core.Models.ReviewProject.AuditTrail.get -> LM.Review.Core.Models.ReviewAuditTrail!
+static LM.Review.Core.Models.ReviewProject.Create(string! id, string! name, System.DateTimeOffset createdAtUtc, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.StageDefinition!>! stageDefinitions, LM.Review.Core.Models.ReviewAuditTrail? auditTrail = null) -> LM.Review.Core.Models.ReviewProject!
+LM.Review.Core.Models.ReviewProject.CreatedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewProject.Id.get -> string!
+LM.Review.Core.Models.ReviewProject.Name.get -> string!
+LM.Review.Core.Models.ReviewProject.StageDefinitions.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.StageDefinition!>!
+LM.Review.Core.Models.ReviewStage
+LM.Review.Core.Models.ReviewStage.ActivatedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ReviewStage.Assignments.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ScreeningAssignment!>!
+LM.Review.Core.Models.ReviewStage.CompletedAt.get -> System.DateTimeOffset?
+LM.Review.Core.Models.ReviewStage.Consensus.get -> LM.Review.Core.Models.ConsensusOutcome?
+LM.Review.Core.Models.ReviewStage.ConflictState.get -> LM.Review.Core.Models.ConflictState
+static LM.Review.Core.Models.ReviewStage.Create(string! id, string! projectId, LM.Review.Core.Models.StageDefinition! definition, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.ScreeningAssignment!>! assignments, LM.Review.Core.Models.ConflictState conflictState, System.DateTimeOffset activatedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ConsensusOutcome? consensus = null) -> LM.Review.Core.Models.ReviewStage!
+LM.Review.Core.Models.ReviewStage.Definition.get -> LM.Review.Core.Models.StageDefinition!
+LM.Review.Core.Models.ReviewStage.Id.get -> string!
+LM.Review.Core.Models.ReviewStage.IsComplete.get -> bool
+LM.Review.Core.Models.ReviewStage.ProjectId.get -> string!
+LM.Review.Core.Models.StageDefinition
+LM.Review.Core.Models.StageDefinition.ConsensusPolicy.get -> LM.Review.Core.Models.StageConsensusPolicy!
+static LM.Review.Core.Models.StageDefinition.Create(string! id, string! name, LM.Review.Core.Models.ReviewStageType stageType, LM.Review.Core.Models.ReviewerRequirement! reviewerRequirement, LM.Review.Core.Models.StageConsensusPolicy! consensusPolicy) -> LM.Review.Core.Models.StageDefinition!
+LM.Review.Core.Models.StageDefinition.Id.get -> string!
+LM.Review.Core.Models.StageDefinition.Name.get -> string!
+LM.Review.Core.Models.StageDefinition.ReviewerRequirement.get -> LM.Review.Core.Models.ReviewerRequirement!
+LM.Review.Core.Models.StageDefinition.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.Review.Core.Models.StageConsensusPolicy
+LM.Review.Core.Models.StageConsensusPolicy.ArbitrationRole.get -> LM.Review.Core.Models.ReviewerRole?
+static LM.Review.Core.Models.StageConsensusPolicy.Disabled() -> LM.Review.Core.Models.StageConsensusPolicy!
+LM.Review.Core.Models.StageConsensusPolicy.EscalateOnDisagreement.get -> bool
+LM.Review.Core.Models.StageConsensusPolicy.MinimumAgreements.get -> int
+static LM.Review.Core.Models.StageConsensusPolicy.RequireAgreement(int minimumAgreements, bool escalateOnDisagreement, LM.Review.Core.Models.ReviewerRole? arbitrationRole) -> LM.Review.Core.Models.StageConsensusPolicy!
+LM.Review.Core.Models.StageConsensusPolicy.RequiresConsensus.get -> bool
+LM.Review.Core.Models.ReviewerRequirement
+static LM.Review.Core.Models.ReviewerRequirement.Create(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<LM.Review.Core.Models.ReviewerRole, int>>! requirements) -> LM.Review.Core.Models.ReviewerRequirement!
+LM.Review.Core.Models.ReviewerRequirement.GetRequirement(LM.Review.Core.Models.ReviewerRole role) -> int
+LM.Review.Core.Models.ReviewerRequirement.Requirements.get -> System.Collections.Generic.IReadOnlyDictionary<LM.Review.Core.Models.ReviewerRole, int>!
+LM.Review.Core.Models.ReviewerRequirement.TotalRequired.get -> int
+LM.Review.Core.Models.ScreeningAssignment
+LM.Review.Core.Models.ScreeningAssignment.AssignedAt.get -> System.DateTimeOffset
+LM.Review.Core.Models.ScreeningAssignment.CompletedAt.get -> System.DateTimeOffset?
+static LM.Review.Core.Models.ScreeningAssignment.Create(string! id, string! stageId, string! reviewerId, LM.Review.Core.Models.ReviewerRole role, LM.Review.Core.Models.ScreeningStatus status, System.DateTimeOffset assignedAtUtc, System.DateTimeOffset? completedAtUtc = null, LM.Review.Core.Models.ReviewerDecision? decision = null) -> LM.Review.Core.Models.ScreeningAssignment!
+LM.Review.Core.Models.ScreeningAssignment.Decision.get -> LM.Review.Core.Models.ReviewerDecision?
+LM.Review.Core.Models.ScreeningAssignment.Id.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.ReviewerId.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.Role.get -> LM.Review.Core.Models.ReviewerRole
+LM.Review.Core.Models.ScreeningAssignment.StageId.get -> string!
+LM.Review.Core.Models.ScreeningAssignment.Status.get -> LM.Review.Core.Models.ScreeningStatus
+LM.Review.Core.Models.Forms.ExtractionForm
+LM.Review.Core.Models.Forms.ExtractionForm.Category.get -> string?
+static LM.Review.Core.Models.Forms.ExtractionForm.Create(string! id, string! name, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>! sections, string? description = null, string? category = null) -> LM.Review.Core.Models.Forms.ExtractionForm!
+LM.Review.Core.Models.Forms.ExtractionForm.Description.get -> string?
+LM.Review.Core.Models.Forms.ExtractionForm.Id.get -> string!
+LM.Review.Core.Models.Forms.ExtractionForm.Name.get -> string!
+LM.Review.Core.Models.Forms.ExtractionForm.Sections.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
+LM.Review.Core.Models.Forms.FormField
+LM.Review.Core.Models.Forms.FormField.AllowFreeTextFallback.get -> bool
+LM.Review.Core.Models.Forms.FormField.Description.get -> string?
+LM.Review.Core.Models.Forms.FormField.FieldType.get -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormField.Id.get -> string!
+LM.Review.Core.Models.Forms.FormField.Options.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormFieldOption!>!
+LM.Review.Core.Models.Forms.FormField.Title.get -> string!
+LM.Review.Core.Models.Forms.FormField.Validation.get -> LM.Review.Core.Models.Forms.FormFieldValidation?
+LM.Review.Core.Models.Forms.FormField.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
+static LM.Review.Core.Models.Forms.FormField.Create(string! id, string! title, LM.Review.Core.Models.Forms.FormFieldType fieldType, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormFieldOption!>? options = null, string? description = null, LM.Review.Core.Models.Forms.FormFieldValidation? validation = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null, bool allowFreeTextFallback = false) -> LM.Review.Core.Models.Forms.FormField!
+LM.Review.Core.Models.Forms.FormFieldOption
+LM.Review.Core.Models.Forms.FormFieldOption.Description.get -> string?
+LM.Review.Core.Models.Forms.FormFieldOption.Id.get -> string!
+LM.Review.Core.Models.Forms.FormFieldOption.IsDefault.get -> bool
+LM.Review.Core.Models.Forms.FormFieldOption.Label.get -> string!
+static LM.Review.Core.Models.Forms.FormFieldOption.Create(string! id, string! label, string? description = null, bool isDefault = false) -> LM.Review.Core.Models.Forms.FormFieldOption!
+LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.SingleSelect = 0 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.MultiSelect = 1 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Text = 2 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Numeric = 3 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Date = 4 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldType.Reference = 5 -> LM.Review.Core.Models.Forms.FormFieldType
+LM.Review.Core.Models.Forms.FormFieldValidation
+LM.Review.Core.Models.Forms.FormFieldValidation.Expression.get -> string?
+LM.Review.Core.Models.Forms.FormFieldValidation.Maximum.get -> decimal?
+LM.Review.Core.Models.Forms.FormFieldValidation.MaximumDateUtc.get -> System.DateTime?
+LM.Review.Core.Models.Forms.FormFieldValidation.Minimum.get -> decimal?
+LM.Review.Core.Models.Forms.FormFieldValidation.MinimumDateUtc.get -> System.DateTime?
+LM.Review.Core.Models.Forms.FormFieldValidation.Mode.get -> LM.Review.Core.Models.Forms.FormValidationMode
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateDateRange(System.DateTime? minimumUtc, System.DateTime? maximumUtc) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateNumericRange(decimal? minimum, decimal? maximum) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRegex(string! pattern) -> LM.Review.Core.Models.Forms.FormFieldValidation!
+static LM.Review.Core.Models.Forms.FormFieldValidation.CreateRequired() -> LM.Review.Core.Models.Forms.FormFieldValidation!
+LM.Review.Core.Models.Forms.FormIdentifier
+static bool LM.Review.Core.Models.Forms.FormIdentifier.IsNormalized(string! identifier) -> bool
+static string LM.Review.Core.Models.Forms.FormIdentifier.Normalize(string! identifier) -> string!
+LM.Review.Core.Models.Forms.FormSection
+LM.Review.Core.Models.Forms.FormSection.Children.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormSection!>!
+LM.Review.Core.Models.Forms.FormSection.Description.get -> string?
+LM.Review.Core.Models.Forms.FormSection.Fields.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.Forms.FormField!>!
+LM.Review.Core.Models.Forms.FormSection.Id.get -> string!
+LM.Review.Core.Models.Forms.FormSection.IsRepeatable.get -> bool
+LM.Review.Core.Models.Forms.FormSection.Title.get -> string!
+LM.Review.Core.Models.Forms.FormSection.Visibility.get -> LM.Review.Core.Models.Forms.FormVisibilityRule?
+static LM.Review.Core.Models.Forms.FormSection.Create(string! id, string! title, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormField!>! fields, System.Collections.Generic.IEnumerable<LM.Review.Core.Models.Forms.FormSection!>? children = null, bool isRepeatable = false, string? description = null, LM.Review.Core.Models.Forms.FormVisibilityRule? visibility = null) -> LM.Review.Core.Models.Forms.FormSection!
+LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Required = 0 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Range = 1 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormValidationMode.Regex = 2 -> LM.Review.Core.Models.Forms.FormValidationMode
+LM.Review.Core.Models.Forms.FormVisibilityRule
+LM.Review.Core.Models.Forms.FormVisibilityRule.ExpectedValues.get -> System.Collections.Generic.IReadOnlyList<string>!
+LM.Review.Core.Models.Forms.FormVisibilityRule.IsVisibleWhenMatches.get -> bool
+LM.Review.Core.Models.Forms.FormVisibilityRule.SourceFieldId.get -> string!
+static LM.Review.Core.Models.Forms.FormVisibilityRule.Create(string! sourceFieldId, System.Collections.Generic.IEnumerable<string>? expectedValues = null, bool isVisibleWhenMatches = true) -> LM.Review.Core.Models.Forms.FormVisibilityRule!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedBy.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.CapturedUtc.get -> System.DateTime
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.FormId.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Values.get -> System.Collections.Generic.IReadOnlyDictionary<string, object?>!
+LM.Review.Core.Models.Forms.ExtractionFormSnapshot.VersionId.get -> string!
+static LM.Review.Core.Models.Forms.ExtractionFormSnapshot.Create(string! formId, string! versionId, System.Collections.Generic.IDictionary<string, object?>! values, string? capturedBy = null, System.DateTime? capturedUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormSnapshot!
+LM.Review.Core.Models.Forms.ExtractionFormVersion
+LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedBy.get -> string!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.CreatedUtc.get -> System.DateTime
+LM.Review.Core.Models.Forms.ExtractionFormVersion.Form.get -> LM.Review.Core.Models.Forms.ExtractionForm!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.Metadata.get -> System.Collections.Generic.IReadOnlyDictionary<string, string>!
+LM.Review.Core.Models.Forms.ExtractionFormVersion.VersionId.get -> string!
+static LM.Review.Core.Models.Forms.ExtractionFormVersion.Create(string! versionId, LM.Review.Core.Models.Forms.ExtractionForm! form, System.Collections.Generic.IDictionary<string, string>? metadata = null, string? createdBy = null, System.DateTime? createdUtc = null) -> LM.Review.Core.Models.Forms.ExtractionFormVersion!
+LM.Review.Core.Validation.FormSchemaIssue
+LM.Review.Core.Validation.FormSchemaIssue.Code.get -> string!
+LM.Review.Core.Validation.FormSchemaIssue.FieldId.get -> string?
+LM.Review.Core.Validation.FormSchemaIssue.Message.get -> string!
+LM.Review.Core.Validation.FormSchemaIssue.SectionId.get -> string?
+LM.Review.Core.Validation.FormSchemaIssue.Severity.get -> LM.Review.Core.Validation.FormSchemaSeverity
+static LM.Review.Core.Validation.FormSchemaIssue.Error(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
+static LM.Review.Core.Validation.FormSchemaIssue.Warning(string! code, string! message, string? sectionId = null, string? fieldId = null) -> LM.Review.Core.Validation.FormSchemaIssue!
+LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaSeverity.Warning = 0 -> LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaSeverity.Error = 1 -> LM.Review.Core.Validation.FormSchemaSeverity
+LM.Review.Core.Validation.FormSchemaValidator
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionForm! form) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormSnapshot! snapshot, LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
+LM.Review.Core.Validation.FormSchemaValidator.Validate(LM.Review.Core.Models.Forms.ExtractionFormVersion! version) -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Validation.FormSchemaIssue!>!
+#nullable enable
+LM.Review.Core.DataExtraction.TableVocabulary
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyColumnHeader(string? header) -> LM.Core.Models.DataExtraction.TableColumnRole
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyRowLabel(string? label) -> LM.Core.Models.DataExtraction.TableRowRole
+LM.Review.Core.DataExtraction.TableVocabulary.ClassifyTitle(string? title) -> LM.Core.Models.DataExtraction.TableClassificationKind
+LM.Review.Core.DataExtraction.TableVocabulary.NormalizeHeader(string header) -> string!
+LM.Review.Core.DataExtraction.TableVocabulary.TryDetectEndpoint(string? token) -> string?
+LM.Review.Core.DataExtraction.TableVocabulary.TryDetectPopulation(string? token) -> string?
 ---------- LM.App.Wpf ----------
 #nullable enable
 LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.ColumnKeyProperty -> System.Windows.DependencyProperty!

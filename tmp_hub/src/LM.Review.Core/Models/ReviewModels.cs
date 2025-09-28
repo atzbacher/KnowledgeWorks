@@ -1,1 +1,0 @@
-namespace LM.Review.Core.Models { public record Review(string Id, string Title); }
