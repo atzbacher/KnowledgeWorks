@@ -243,6 +243,7 @@ LM.App.Wpf.ViewModels.AddViewModel.InitializeAsync(System.Threading.Cancellation
 LM.App.Wpf.ViewModels.AddViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
 LM.App.Wpf.ViewModels.AddViewModel.ReviewStagedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.OpenTabulaSharpPlaygroundCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.AddViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
@@ -681,6 +682,9 @@ LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.set ->
 LM.App.Wpf.Views.SearchView
 LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
 LM.App.Wpf.Views.SearchView.SearchView() -> void
+LM.App.Wpf.Views.TabulaSharp.TabulaSharpPlaygroundWindow
+LM.App.Wpf.Views.TabulaSharp.TabulaSharpPlaygroundWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.TabulaSharp.TabulaSharpPlaygroundWindow.TabulaSharpPlaygroundWindow() -> void
 LM.App.Wpf.Views.ShellWindow
 LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
