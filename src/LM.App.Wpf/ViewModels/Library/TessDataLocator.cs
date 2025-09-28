@@ -40,6 +40,12 @@ namespace LM.App.Wpf.ViewModels.Library
                 }
             }
 
+            var bootstrapped = TessDataBootstrapper.TryEnsureDefault(workspacePath);
+            if (!string.IsNullOrWhiteSpace(bootstrapped))
+            {
+                return ResolveCandidate(bootstrapped);
+            }
+
             return null;
         }
 
