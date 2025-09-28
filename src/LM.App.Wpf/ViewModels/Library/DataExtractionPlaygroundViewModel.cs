@@ -205,7 +205,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
                 OnPropertyChanged(nameof(CanCopyTable));
             }
 
-            await WriteChangeLogEventAsync(mode, detector, pageNumbers, totalTables).ConfigureAwait(false);
+            await WriteChangeLogEventAsync(mode, detector, pageNumbers, totalTables);
         }
         catch (OperationCanceledException)
         {
