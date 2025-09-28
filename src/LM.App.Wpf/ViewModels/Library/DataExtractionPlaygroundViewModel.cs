@@ -31,6 +31,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     private string? _pdfRelativePath;
     private string? _pdfAttachmentId;
 
+    partial void InitializePreviewState();
+
     public DataExtractionPlaygroundViewModel(HookOrchestrator hookOrchestrator,
                                              IWorkSpaceService workspace,
                                              IClipboardService clipboard)
@@ -61,6 +63,12 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         HeaderRowOptions = new ObservableCollection<TableRowOption>();
         RemoveEmptyColumns = true;
         MergeSignColumns = true;
+
+        PreviewPages = new ObservableCollection<int>();
+        InitializePreviewState();
+        IdeaGroups = new ObservableCollection<OcrIdeaGroupViewModel>();
+        PopulateIdeaBoard();
+        OnPropertyChanged(nameof(HasIdeaGroups));
     }
 
     public IReadOnlyList<ExtractionModeOption> ModeOptions { get; }
@@ -113,6 +121,12 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
 
     public ObservableCollection<TableRowOption> HeaderRowOptions { get; }
 
+    public ObservableCollection<OcrIdeaGroupViewModel> IdeaGroups { get; }
+
+    public ObservableCollection<int> PreviewPages { get; }
+
+    public bool HasIdeaGroups => IdeaGroups.Count > 0;
+
     public bool HasResults => Tables.Count > 0;
 
     public bool HasPdf => PdfSource is not null;
@@ -162,6 +176,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         {
             PageSelection = pageIndexes[0].ToString();
         }
+        ApplyPreviewPages(pageIndexes);
 
         StatusMessage = "Configure options and select Extract tables to begin.";
         Tables.Clear();
@@ -589,6 +604,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         return path.Replace("\\", "/");
     }
 
+    partial void ApplyPreviewPages(IReadOnlyList<int> pages);
+
     private void ResetState()
     {
         Tables.Clear();
@@ -607,6 +624,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         RemoveEmptyColumns = true;
         MergeSignColumns = true;
 
+        ResetPreviewState();
         OnPropertyChanged(nameof(HasResults));
         OnPropertyChanged(nameof(HasPdf));
         OnPropertyChanged(nameof(CanCopyTable));
@@ -614,6 +632,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         ExtractTablesCommand.NotifyCanExecuteChanged();
         CopyTableCommand.NotifyCanExecuteChanged();
     }
+
+    partial void ResetPreviewState();
 
     private PdfSourceInfo? ResolvePdfSource(Entry entry)
     {
