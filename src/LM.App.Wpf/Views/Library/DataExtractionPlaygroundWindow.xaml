@@ -194,14 +194,49 @@
                         BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
                         BorderThickness="1">
                     <Grid>
-                        <TextBlock Text="Table preview"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Text="Table preview"
                                    FontWeight="SemiBold"
                                    Margin="12"
                                    Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
-                        <DataGrid ItemsSource="{Binding SelectedTable.RowsView}"
+
+                        <StackPanel Grid.Row="1" Margin="12,0,12,0">
+                            <TextBlock Text="Adjustments"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                            <WrapPanel Margin="0,4,0,0">
+                                <CheckBox Content="Remove empty columns"
+                                          IsChecked="{Binding RemoveEmptyColumns}"
+                                          Margin="0,0,12,0" />
+                                <CheckBox Content="Remove empty rows"
+                                          IsChecked="{Binding RemoveEmptyRows}"
+                                          Margin="0,0,12,0" />
+                                <CheckBox Content="Merge +/- columns"
+                                          IsChecked="{Binding MergeSignColumns}" />
+                            </WrapPanel>
+                            <StackPanel Orientation="Vertical" Margin="0,8,0,0">
+                                <TextBlock Text="Header row"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                                <ComboBox ItemsSource="{Binding HeaderRowOptions}"
+                                          SelectedItem="{Binding SelectedHeaderRow}"
+                                          DisplayMemberPath="DisplayText"
+                                          Margin="0,4,0,0"
+                                          Width="280" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <DataGrid Grid.Row="2"
+                                  ItemsSource="{Binding SelectedTableView}"
                                   AutoGenerateColumns="True"
                                   IsReadOnly="True"
-                                  Margin="12,40,12,12"
+                                  Margin="12,12,12,12"
                                   HeadersVisibility="Column"
                                   AlternatingRowBackground="{DynamicResource LibraryPanelSubtleBrush}"
                                   GridLinesVisibility="All" />
