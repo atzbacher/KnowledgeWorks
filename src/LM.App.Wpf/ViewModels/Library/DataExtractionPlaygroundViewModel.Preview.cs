@@ -256,7 +256,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
                 region,
                 ocrResult.Rows.Count,
                 ocrResult.ColumnCount,
-                ocrResult.Confidence).ConfigureAwait(false);
+                ocrResult.Confidence).ConfigureAwait(true);
         }
         catch (InvalidOperationException ex)
         {
