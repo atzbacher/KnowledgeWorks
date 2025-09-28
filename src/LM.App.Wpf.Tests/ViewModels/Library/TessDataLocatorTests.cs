@@ -8,12 +8,18 @@ namespace LM.App.Wpf.Tests.ViewModels.Library
     {
         private readonly string _root;
         private readonly string? _previousEnvironmentPrefix;
+        private readonly string? _previousBootstrapSource;
+        private readonly string? _previousBootstrapDirectory;
+        private readonly string? _previousBootstrapDisabled;
 
         public TessDataLocatorTests()
         {
             _root = Path.Combine(Path.GetTempPath(), "kw-tests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_root);
             _previousEnvironmentPrefix = Environment.GetEnvironmentVariable("TESSDATA_PREFIX");
+            _previousBootstrapSource = Environment.GetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_URL");
+            _previousBootstrapDirectory = Environment.GetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_BOOTSTRAP_DIR");
+            _previousBootstrapDisabled = Environment.GetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_BOOTSTRAP_DISABLED");
         }
 
         [Fact]
@@ -56,6 +62,28 @@ namespace LM.App.Wpf.Tests.ViewModels.Library
             Assert.Equal(custom, resolved);
         }
 
+        [Fact]
+        public void Resolve_BootstrapsTrainingData_FromConfiguredSource()
+        {
+            var workspace = Path.Combine(_root, "workspace");
+            Directory.CreateDirectory(workspace);
+
+            var seedDirectory = Path.Combine(_root, "seed");
+            Directory.CreateDirectory(seedDirectory);
+            var seedFile = Path.Combine(seedDirectory, "eng.traineddata");
+            File.WriteAllBytes(seedFile, new byte[2048]);
+
+            Environment.SetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_URL", seedFile);
+            Environment.SetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_BOOTSTRAP_DISABLED", null);
+
+            var resolved = LM.App.Wpf.ViewModels.Library.TessDataLocator.Resolve(workspace);
+
+            Assert.NotNull(resolved);
+            var targetFile = Path.Combine(resolved!, "eng.traineddata");
+            Assert.True(File.Exists(targetFile));
+            Assert.True(new FileInfo(targetFile).Length >= 2048);
+        }
+
         public void Dispose()
         {
             Directory.SetCurrentDirectory(Path.GetTempPath());
@@ -72,6 +100,9 @@ namespace LM.App.Wpf.Tests.ViewModels.Library
             }
 
             Environment.SetEnvironmentVariable("TESSDATA_PREFIX", _previousEnvironmentPrefix);
+            Environment.SetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_URL", _previousBootstrapSource);
+            Environment.SetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_BOOTSTRAP_DIR", _previousBootstrapDirectory);
+            Environment.SetEnvironmentVariable("KNOWLEDGEWORKS_TESSDATA_BOOTSTRAP_DISABLED", _previousBootstrapDisabled);
         }
     }
 }
