@@ -70,6 +70,9 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         IdeaGroups = new ObservableCollection<OcrIdeaGroupViewModel>();
         PopulateIdeaBoard();
         OnPropertyChanged(nameof(HasIdeaGroups));
+
+        PdfAnnotations = new ObservableCollection<PdfAnnotationViewModel>();
+        AnnotationNote = string.Empty;
     }
 
     public IReadOnlyList<ExtractionModeOption> ModeOptions { get; }
@@ -90,6 +93,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
 
     [ObservableProperty]
     private Uri? pdfSource;
+
+    public string? PdfAbsolutePath => _pdfPath;
 
     [ObservableProperty]
     private string pageSelection;
@@ -118,6 +123,9 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     [ObservableProperty]
     private TableRowOption? selectedHeaderRow;
 
+    [ObservableProperty]
+    private string annotationNote = string.Empty;
+
     public ObservableCollection<DataExtractionTableViewModel> Tables { get; }
 
     public ObservableCollection<TableRowOption> HeaderRowOptions { get; }
@@ -125,6 +133,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     public ObservableCollection<OcrIdeaGroupViewModel> IdeaGroups { get; }
 
     public ObservableCollection<int> PreviewPages { get; }
+
+    public ObservableCollection<PdfAnnotationViewModel> PdfAnnotations { get; }
 
     public bool HasIdeaGroups => IdeaGroups.Count > 0;
 
@@ -167,6 +177,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         _pdfPath = pdfSource.AbsolutePath;
         _pdfRelativePath = pdfSource.RelativePath;
         _pdfAttachmentId = pdfSource.AttachmentId;
+        OnPropertyChanged(nameof(PdfAbsolutePath));
 
         DocumentTitle = ResolveEntryTitle(entry);
         PdfFileName = pdfSource.DisplayName;
@@ -605,6 +616,22 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         return path.Replace("\\", "/");
     }
 
+    private static string TruncateForTag(string value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var sanitized = value.ReplaceLineEndings(" ").Trim();
+        if (sanitized.Length <= maxLength)
+        {
+            return sanitized;
+        }
+
+        return sanitized[..maxLength];
+    }
+
     partial void ApplyPreviewPages(IReadOnlyList<int> pages);
 
     private void ResetState()
@@ -612,10 +639,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         Tables.Clear();
         SelectedTable = null;
         SelectedTableView = null;
+        PdfAnnotations.Clear();
         _entryId = null;
         _pdfPath = null;
         _pdfRelativePath = null;
         _pdfAttachmentId = null;
+        AnnotationNote = string.Empty;
+        OnPropertyChanged(nameof(PdfAbsolutePath));
         PdfSource = null;
         DocumentTitle = string.Empty;
         PdfFileName = string.Empty;

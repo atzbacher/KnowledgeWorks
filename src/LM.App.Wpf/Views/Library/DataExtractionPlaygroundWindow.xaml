@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
+        xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
         mc:Ignorable="d"
         x:ClassModifier="internal"
         d:DataContext="{d:DesignInstance Type=viewModels:DataExtractionPlaygroundViewModel}"
@@ -81,31 +82,14 @@
                         Background="White"
                         BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
                         BorderThickness="1">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                                  VerticalScrollBarVisibility="Auto">
-                        <Grid>
-                            <Image Source="{Binding PreviewBitmap}"
-                                   Stretch="None" />
-                            <Canvas x:Name="RoiCanvas"
-                                    Width="{Binding PreviewWidth}"
-                                    Height="{Binding PreviewHeight}"
-                                    Background="Transparent"
-                                    MouseLeftButtonDown="OnRoiCanvasMouseLeftButtonDown"
-                                    MouseMove="OnRoiCanvasMouseMove"
-                                    MouseLeftButtonUp="OnRoiCanvasMouseLeftButtonUp"
-                                    MouseLeave="OnRoiCanvasMouseLeave"
-                                    MouseRightButtonDown="OnRoiCanvasMouseRightButtonDown">
-                                <Rectangle Stroke="#FF1E88E5"
-                                           StrokeThickness="2"
-                                           Fill="#401E88E5"
-                                           Visibility="{Binding RoiSelection.HasVisibleSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                           Width="{Binding RoiSelection.Width}"
-                                           Height="{Binding RoiSelection.Height}"
-                                           Canvas.Left="{Binding RoiSelection.X}"
-                                           Canvas.Top="{Binding RoiSelection.Y}" />
-                            </Canvas>
-                        </Grid>
-                    </ScrollViewer>
+                    <controls:PdfInteractiveViewer x:Name="PdfViewer"
+                                                    SourcePath="{Binding PdfAbsolutePath}"
+                                                    PageNumber="{Binding SelectedPreviewPage}"
+                                                    RoiSelection="{Binding RoiSelection}"
+                                                    Annotations="{Binding PdfAnnotations}"
+                                                    IsSelectionEnabled="{Binding HasPreview}"
+                                                    Width="{Binding PreviewWidth}"
+                                                    Height="{Binding PreviewHeight}" />
                 </Border>
 
                 <StackPanel Grid.Row="3"
@@ -125,6 +109,23 @@
                             Height="32"
                             Margin="8,0,0,0"
                             Command="{Binding ClearRegionSelectionCommand}" />
+                    <Button Content="Highlight selection"
+                            Width="160"
+                            Height="32"
+                            Margin="12,0,0,0"
+                            Command="{Binding AddHighlightCommand}" />
+                    <StackPanel Orientation="Horizontal"
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBox Width="200"
+                                 Margin="0,0,8,0"
+                                 ToolTip="Annotation note"
+                                 Text="{Binding AnnotationNote, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Content="Add annotation"
+                                Width="140"
+                                Height="32"
+                                Command="{Binding AddAnnotationCommand}" />
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
