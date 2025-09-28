@@ -66,6 +66,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
 
         PreviewPages = new ObservableCollection<int>();
         InitializePreviewState();
+
         IdeaGroups = new ObservableCollection<OcrIdeaGroupViewModel>();
         PopulateIdeaBoard();
         OnPropertyChanged(nameof(HasIdeaGroups));
