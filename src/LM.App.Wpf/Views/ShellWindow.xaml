@@ -4,17 +4,23 @@
         xmlns:views="clr-namespace:LM.App.Wpf.Views"
         Title="KnowledgeWorks" Height="700" Width="1100"
         WindowStartupLocation="CenterScreen">
-  <Grid>
+  <DockPanel>
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_Project">
+        <MenuItem Header="_Create…"
+                  Command="{Binding CreateProjectCommand}" />
+      </MenuItem>
+    </Menu>
     <TabControl>
-            <TabItem Header="Library">
-                <views:LibraryView x:Name="LibraryViewControl"/>
-            </TabItem>
-            <TabItem Header="Add">
-        <views:AddView x:Name="AddViewControl"/>
+      <TabItem Header="Library">
+        <views:LibraryView x:Name="LibraryViewControl" />
       </TabItem>
-            <TabItem Header="Search">
-                <views:SearchView x:Name="SearchViewControl" />
-            </TabItem>
-        </TabControl>
-  </Grid>
+      <TabItem Header="Add">
+        <views:AddView x:Name="AddViewControl" />
+      </TabItem>
+      <TabItem Header="Search">
+        <views:SearchView x:Name="SearchViewControl" />
+      </TabItem>
+    </TabControl>
+  </DockPanel>
 </Window>

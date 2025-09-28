@@ -2,9 +2,11 @@
 using System;
 using System.Linq;
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs.Projects;
 using LM.App.Wpf.ViewModels.Dialogs.Staging;
 using LM.App.Wpf.Views;
 using LM.App.Wpf.Views.Dialogs.Staging;
+using LM.App.Wpf.Views.Dialogs.Projects;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LM.App.Wpf.Common.Dialogs
@@ -90,6 +92,24 @@ namespace LM.App.Wpf.Common.Dialogs
             using var scope = _services.CreateScope();
             var viewModel = ActivatorUtilities.CreateInstance<DataExtractionWorkspaceViewModel>(scope.ServiceProvider, stagingItem);
             var window = ActivatorUtilities.CreateInstance<DataExtractionWorkspaceWindow>(scope.ServiceProvider, viewModel);
+
+            var owner = System.Windows.Application.Current?.Windows
+                .OfType<System.Windows.Window>()
+                .FirstOrDefault(static w => w.IsActive);
+            if (owner is not null)
+                window.Owner = owner;
+
+            return window.ShowDialog();
+        }
+
+        public bool? ShowProjectCreation(ProjectCreationRequest request)
+        {
+            if (request is null)
+                throw new ArgumentNullException(nameof(request));
+
+            using var scope = _services.CreateScope();
+            var viewModel = ActivatorUtilities.CreateInstance<ProjectCreationViewModel>(scope.ServiceProvider, request);
+            var window = ActivatorUtilities.CreateInstance<ProjectCreationWindow>(scope.ServiceProvider, viewModel);
 
             var owner = System.Windows.Application.Current?.Windows
                 .OfType<System.Windows.Window>()

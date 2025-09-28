@@ -182,16 +182,74 @@ LM.App.Wpf.Common.Dialogs.IDialogService
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
 LM.App.Wpf.Common.Dialogs.IDialogService.ShowDataExtractionWorkspace(LM.App.Wpf.ViewModels.StagingItem! stagingItem) -> bool?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowProjectCreation(LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest! request) -> bool?
 LM.App.Wpf.Common.Dialogs.WpfDialogService
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
 LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowDataExtractionWorkspace(LM.App.Wpf.ViewModels.StagingItem! stagingItem) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowProjectCreation(LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest! request) -> bool?
 LM.App.Wpf.Common.StringJoinConverter
 LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
 LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.DataExtractionFieldDefinition(string! key, string! label, string! templateKey, string? placeholder, System.Collections.Generic.IEnumerable<string?>? options, string? defaultValue, bool isRequired) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.DefaultValue.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.IsRequired.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.Key.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.Label.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.Options.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.Placeholder.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition.TemplateKey.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition.DataExtractionGroupDefinition(string! name, System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition!>! fields) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition.Fields.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionFieldDefinition!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition.Name.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition.DocumentAttributeDefinition(string! label, string! value) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition.Label.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition.Value.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition.Caption.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition.PageNumber.get -> int
+LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition.PdfPagePreviewDefinition(int pageNumber, string caption, string summary) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition.Summary.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationFieldTemplates
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationFieldTemplates.Choice -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationFieldTemplates.MultiLine -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationFieldTemplates.Text -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.DataExtractionGroups.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.Document.get -> LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.FullTextPdfPages.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.FullTextStage.get -> LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.ProjectCreationRequest(string! projectName, LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition! document, LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition! titleAbstractStage, LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition! fullTextStage, System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.Dialogs.Projects.PdfPagePreviewDefinition!>! fullTextPdfPages, System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.Dialogs.Projects.DataExtractionGroupDefinition!>! dataExtractionGroups) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.ProjectName.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ProjectCreationRequest.TitleAbstractStage.get -> LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition.Description.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition.IsDefaultSelected.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition.Key.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition.Label.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition.ScreeningCriterionDefinition(string! key, string! label, string? description, bool isDefaultSelected) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.AbstractText.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.Attributes.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.Authors.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.Keywords.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.ScreeningDocumentDefinition(string! title, string? abstractText, System.Collections.Generic.IEnumerable<string!>! authors, System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.Dialogs.Projects.DocumentAttributeDefinition!>! attributes, System.Collections.Generic.IEnumerable<string!>! keywords) -> void
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningDocumentDefinition.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.AllowMultipleCriteria.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.AllowNotes.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.Criteria.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition!>!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.Description.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.ExcludeLabel.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.IncludeLabel.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.Name.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningStageDefinition.ScreeningStageDefinition(string! name, string description, string! includeLabel, string! excludeLabel, bool allowMultipleCriteria, bool allowNotes, System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.Dialogs.Projects.ScreeningCriterionDefinition!>! criteria) -> void
 LM.App.Wpf.Library.LibraryFilterPreset
 LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
 LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!

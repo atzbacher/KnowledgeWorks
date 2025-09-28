@@ -79,6 +79,8 @@ namespace LM.App.Wpf
             await addVm.InitializeAsync();
             _addViewModel = addVm;
             var searchVm = host.GetRequiredService<SearchViewModel>();
+            var shellVm = host.GetRequiredService<ShellViewModel>();
+            shell.DataContext = shellVm;
 
             // Bind – resolve the views by name because the generated fields are not
             // available when building from the command line (designer-only feature).

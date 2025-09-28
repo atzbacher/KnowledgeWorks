@@ -1,5 +1,6 @@
 #nullable enable
 using LM.App.Wpf.ViewModels;
+using LM.App.Wpf.ViewModels.Dialogs.Projects;
 
 namespace LM.App.Wpf.Common.Dialogs
 {
@@ -27,5 +28,6 @@ namespace LM.App.Wpf.Common.Dialogs
         string? ShowSaveFileDialog(FileSavePickerOptions options);
         bool? ShowStagingEditor(StagingListViewModel stagingList);
         bool? ShowDataExtractionWorkspace(StagingItem stagingItem);
+        bool? ShowProjectCreation(ProjectCreationRequest request);
     }
 }
