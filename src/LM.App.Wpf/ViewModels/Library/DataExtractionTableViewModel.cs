@@ -12,6 +12,7 @@ namespace LM.App.Wpf.ViewModels.Library;
 internal sealed class DataExtractionTableViewModel
 {
     private readonly IReadOnlyList<IReadOnlyList<string>> _cells;
+    private readonly int _columnCount;
 
     private DataExtractionTableViewModel(int pageNumber,
                                          int tableIndex,
@@ -19,6 +20,7 @@ internal sealed class DataExtractionTableViewModel
                                          TableDetectionStrategy detector,
                                          TableRectangle? region,
                                          IReadOnlyList<IReadOnlyList<string>> cells,
+                                         int columnCount,
                                          DataView dataView,
                                          string preview)
     {
@@ -28,6 +30,7 @@ internal sealed class DataExtractionTableViewModel
         Detector = detector;
         Region = region;
         _cells = cells;
+        _columnCount = columnCount;
         RowsView = dataView ?? throw new ArgumentNullException(nameof(dataView));
         Preview = preview;
     }
@@ -46,7 +49,7 @@ internal sealed class DataExtractionTableViewModel
 
     public int RowCount => _cells.Count;
 
-    public int ColumnCount => _cells.Count == 0 ? 0 : _cells.Max(row => row.Count);
+    public int ColumnCount => _columnCount;
 
     public string Preview { get; }
 
@@ -64,8 +67,9 @@ internal sealed class DataExtractionTableViewModel
         if (table is null)
             throw new ArgumentNullException(nameof(table));
 
-        var cells = NormalizeCells(table.Rows);
-        var dataTable = BuildDataTable(cells);
+        var columnCount = Math.Max(table.ColumnCount, GetMaxRowWidth(table.Rows));
+        var cells = NormalizeCells(table.Rows, columnCount);
+        var dataTable = BuildDataTable(cells, columnCount);
         var preview = BuildPreview(cells);
 
         return new DataExtractionTableViewModel(
@@ -75,6 +79,7 @@ internal sealed class DataExtractionTableViewModel
             detector,
             region,
             cells,
+            columnCount,
             dataTable.DefaultView,
             preview);
     }
@@ -91,7 +96,7 @@ internal sealed class DataExtractionTableViewModel
         return string.Join(Environment.NewLine, rows);
     }
 
-    private static IReadOnlyList<IReadOnlyList<string>> NormalizeCells(IReadOnlyList<IReadOnlyList<Cell>> source)
+    private static IReadOnlyList<IReadOnlyList<string>> NormalizeCells(IReadOnlyList<IReadOnlyList<Cell>> source, int columnCount)
     {
         var rows = new List<IReadOnlyList<string>>();
         if (source is null)
@@ -101,11 +106,11 @@ internal sealed class DataExtractionTableViewModel
         {
             if (row is null)
             {
-                rows.Add(Array.Empty<string>());
+                rows.Add(CreateEmptyRow(columnCount));
                 continue;
             }
 
-            var values = new List<string>(row.Count);
+            var values = new List<string>(Math.Max(columnCount, row.Count));
             foreach (var cell in row)
             {
                 if (cell is null)
@@ -118,16 +123,20 @@ internal sealed class DataExtractionTableViewModel
                 values.Add(text.Trim());
             }
 
+            while (values.Count < columnCount)
+            {
+                values.Add(string.Empty);
+            }
+
             rows.Add(values);
         }
 
         return rows;
     }
 
-    private static DataTable BuildDataTable(IReadOnlyList<IReadOnlyList<string>> rows)
+    private static DataTable BuildDataTable(IReadOnlyList<IReadOnlyList<string>> rows, int columnCount)
     {
         var table = new DataTable();
-        var columnCount = rows.Count == 0 ? 0 : rows.Max(row => row.Count);
 
         for (var column = 0; column < columnCount; column++)
         {
@@ -146,6 +155,39 @@ internal sealed class DataExtractionTableViewModel
         }
 
         return table;
+    }
+
+    private static int GetMaxRowWidth(IReadOnlyList<IReadOnlyList<Cell>> source)
+    {
+        if (source is null || source.Count == 0)
+            return 0;
+
+        var max = 0;
+        foreach (var row in source)
+        {
+            if (row is null)
+            {
+                continue;
+            }
+
+            max = Math.Max(max, row.Count);
+        }
+
+        return max;
+    }
+
+    private static IReadOnlyList<string> CreateEmptyRow(int columnCount)
+    {
+        if (columnCount <= 0)
+            return Array.Empty<string>();
+
+        var values = new string[columnCount];
+        for (var i = 0; i < columnCount; i++)
+        {
+            values[i] = string.Empty;
+        }
+
+        return values;
     }
 
     private static string BuildPreview(IReadOnlyList<IReadOnlyList<string>> rows)
