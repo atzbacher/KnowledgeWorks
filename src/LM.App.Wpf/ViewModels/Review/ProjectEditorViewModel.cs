@@ -36,6 +36,8 @@ public sealed class ProjectEditorViewModel : DialogViewModelBase
     private bool _isBusy;
     private Func<CancellationToken, Task<ProjectBlueprint?>>? _runReloadHandler;
 
+    public event EventHandler<StagePreviewRequestedEventArgs>? StagePreviewRequested;
+
     public ProjectEditorViewModel()
     {
         _stages = new ObservableCollection<StageBlueprintViewModel>();
@@ -63,6 +65,7 @@ public sealed class ProjectEditorViewModel : DialogViewModelBase
         RemoveStageCommand = new RelayCommand<StageBlueprintViewModel>(RemoveStage, CanModifyStage);
         MoveStageUpCommand = new RelayCommand<StageBlueprintViewModel>(MoveStageUp, CanMoveStageUp);
         MoveStageDownCommand = new RelayCommand<StageBlueprintViewModel>(MoveStageDown, CanMoveStageDown);
+        PreviewStageCommand = new RelayCommand<StageBlueprintViewModel>(PreviewStage, CanPreviewStage);
         NextCommand = new RelayCommand(MoveNext, CanMoveNext);
         BackCommand = new RelayCommand(MoveBack, CanMoveBack);
         SaveCommand = new RelayCommand(Save, CanSave);
@@ -227,6 +230,8 @@ public sealed class ProjectEditorViewModel : DialogViewModelBase
 
     public RelayCommand<StageBlueprintViewModel> MoveStageDownCommand { get; }
 
+    public RelayCommand<StageBlueprintViewModel> PreviewStageCommand { get; }
+
     public RelayCommand NextCommand { get; }
 
     public RelayCommand BackCommand { get; }
@@ -285,6 +290,21 @@ public sealed class ProjectEditorViewModel : DialogViewModelBase
 
         var index = _stages.IndexOf(stage!);
         return index >= 0 && index < _stages.Count - 1;
+    }
+
+    private bool CanPreviewStage(StageBlueprintViewModel? stage)
+    {
+        return stage is not null;
+    }
+
+    private void PreviewStage(StageBlueprintViewModel? stage)
+    {
+        if (stage is null)
+        {
+            return;
+        }
+
+        StagePreviewRequested?.Invoke(this, new StagePreviewRequestedEventArgs(stage));
     }
 
     private void AddStage()

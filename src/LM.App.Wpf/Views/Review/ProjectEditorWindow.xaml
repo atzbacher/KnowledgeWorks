@@ -253,6 +253,26 @@
                             </DataTemplate>
                           </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <Border Background="#F3F4F6"
+                              CornerRadius="8"
+                              Padding="16"
+                              Margin="0,20,0,0">
+                          <StackPanel>
+                            <TextBlock Text="Workspace preview"
+                                     FontWeight="SemiBold"
+                                     Margin="0,0,0,4" />
+                            <TextBlock Text="Open a stage-specific layout mockup to fine-tune reviewer tooling."
+                                     Foreground="#4B5563"
+                                     TextWrapping="Wrap"
+                                     Margin="0,0,0,12" />
+                            <Button Content="Preview workspace"
+                                  Padding="16,6"
+                                  HorizontalAlignment="Left"
+                                  Command="{Binding DataContext.PreviewStageCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                  CommandParameter="{Binding}" />
+                          </StackPanel>
+                        </Border>
                       </StackPanel>
                     </StackPanel>
                   </Border>

@@ -18,6 +18,7 @@ public partial class ProjectEditorWindow : System.Windows.Window
         _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         DataContext = _viewModel;
         _viewModel.CloseRequested += OnCloseRequested;
+        _viewModel.StagePreviewRequested += OnStagePreviewRequested;
     }
 
     protected override void OnClosed(EventArgs e)
@@ -25,6 +26,7 @@ public partial class ProjectEditorWindow : System.Windows.Window
         if (_viewModel is not null)
         {
             _viewModel.CloseRequested -= OnCloseRequested;
+            _viewModel.StagePreviewRequested -= OnStagePreviewRequested;
         }
 
         base.OnClosed(e);
@@ -33,5 +35,16 @@ public partial class ProjectEditorWindow : System.Windows.Window
     private void OnCloseRequested(object? sender, LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs e)
     {
         DialogResult = e.DialogResult;
+    }
+
+    private void OnStagePreviewRequested(object? sender, StagePreviewRequestedEventArgs e)
+    {
+        var previewWindow = new StageWorkspacePreviewWindow
+        {
+            Owner = this
+        };
+
+        previewWindow.Attach(e.Stage);
+        previewWindow.Show();
     }
 }

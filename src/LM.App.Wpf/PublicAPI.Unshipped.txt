@@ -341,6 +341,9 @@ LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.LitSearchEntryId.get -> stri
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.LitSearchRunId.get -> string!
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MoveStageDownCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MoveStageUpCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.PreviewStageCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.StagePreviewRequested.add -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.StagePreviewRequested.remove -> void
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectName.get -> string!
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectName.set -> void
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.RemoveStageCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
@@ -374,6 +377,9 @@ LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Label.get -> string!
 LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Description.get -> string!
 LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.get -> bool
 LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.set -> void
+LM.App.Wpf.ViewModels.Review.StagePreviewRequestedEventArgs
+LM.App.Wpf.ViewModels.Review.StagePreviewRequestedEventArgs.StagePreviewRequestedEventArgs(LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel! stage) -> void
+LM.App.Wpf.ViewModels.Review.StagePreviewRequestedEventArgs.Stage.get -> LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageBlueprintViewModel(LM.App.Wpf.Services.Review.Design.StageBlueprint! blueprint) -> void
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.get -> bool
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.set -> void
