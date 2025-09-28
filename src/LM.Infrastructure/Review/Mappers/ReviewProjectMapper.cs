@@ -19,6 +19,7 @@ internal static class ReviewProjectMapper
             StageDefinitions = project.StageDefinitions
                 .Select(StageDefinitionMapper.ToDto)
                 .ToList(),
+            Metadata = ReviewProjectMetadataMapper.ToDto(project.Metadata),
             AuditTrail = project.AuditTrail.Entries
                 .Select(ReviewAuditTrailMapper.ToDto)
                 .ToList()
@@ -39,8 +40,33 @@ internal static class ReviewProjectMapper
             .Select(ReviewAuditTrailMapper.ToDomain)
             .ToList() ?? new List<ReviewAuditTrail.AuditEntry>();
 
+        var metadataDto = dto.Metadata ?? new ReviewProjectMetadataDto();
+        var metadata = ReviewProjectMetadataMapper.ToDomain(metadataDto);
         var auditTrail = ReviewAuditTrail.Create(auditEntries);
 
-        return ReviewProject.Create(dto.Id, dto.Name, dto.CreatedAt, definitions, auditTrail);
+        return ReviewProject.Create(dto.Id, dto.Name, dto.CreatedAt, definitions, metadata, auditTrail);
+    }
+}
+
+internal static class ReviewProjectMetadataMapper
+{
+    public static ReviewProjectMetadataDto ToDto(ReviewProjectMetadata metadata)
+    {
+        ArgumentNullException.ThrowIfNull(metadata);
+
+        var dto = new ReviewProjectMetadataDto
+        {
+            Template = metadata.Template,
+            Notes = metadata.Notes
+        };
+
+        return ReviewDtoAuditStamp.Stamp(dto);
+    }
+
+    public static ReviewProjectMetadata ToDomain(ReviewProjectMetadataDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+
+        return ReviewProjectMetadata.Create(dto.Template, dto.Notes);
     }
 }

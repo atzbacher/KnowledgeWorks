@@ -40,7 +40,8 @@ internal static class ProjectBlueprintFactory
                 secondaryReviewers: 0,
                 requiresConsensus: true,
                 minimumAgreements: 2,
-                escalateOnDisagreement: true),
+                escalateOnDisagreement: true,
+                StageDisplayProfileFactory.CreateDefault(ReviewStageType.TitleScreening)),
             new(
                 $"stage-def-{Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture)}",
                 "Quality assurance",
@@ -49,7 +50,8 @@ internal static class ProjectBlueprintFactory
                 secondaryReviewers: 0,
                 requiresConsensus: false,
                 minimumAgreements: 0,
-                escalateOnDisagreement: false)
+                escalateOnDisagreement: false,
+                StageDisplayProfileFactory.CreateDefault(ReviewStageType.QualityAssurance))
         };
 
         return new ProjectBlueprint(
@@ -61,6 +63,8 @@ internal static class ProjectBlueprintFactory
             selection.RunId,
             normalizedCheckedIds,
             selection.HookRelativePath,
+            ReviewTemplateKind.Picos,
+            string.Empty,
             stages);
     }
 

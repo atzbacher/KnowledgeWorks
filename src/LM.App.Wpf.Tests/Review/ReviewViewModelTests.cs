@@ -179,7 +179,19 @@ namespace LM.App.Wpf.Tests.Review
                     new KeyValuePair<ReviewerRole, int>(ReviewerRole.Secondary, 1)
                 });
                 var policy = StageConsensusPolicy.Disabled();
-                _definition = StageDefinition.Create("def-1", "Screening", ReviewStageType.TitleScreening, requirement, policy);
+                var screeningDisplay = StageDisplayProfile.Create(new[]
+                {
+                    StageContentArea.BibliographySummary,
+                    StageContentArea.InclusionExclusionChecklist,
+                    StageContentArea.ReviewerDecisionPanel
+                });
+                _definition = StageDefinition.Create(
+                    "def-1",
+                    "Screening",
+                    ReviewStageType.TitleScreening,
+                    requirement,
+                    policy,
+                    screeningDisplay);
                 Project1 = ReviewProject.Create("project-1", "Project One", DateTimeOffset.UtcNow, new[] { _definition });
                 var assignments = new List<ScreeningAssignment>
                 {
@@ -197,7 +209,19 @@ namespace LM.App.Wpf.Tests.Review
 
                 _store.Seed(Project1, Stage1, assignments);
 
-                var definition2 = StageDefinition.Create("def-2", "QA", ReviewStageType.QualityAssurance, requirement, policy);
+                var qualityDisplay = StageDisplayProfile.Create(new[]
+                {
+                    StageContentArea.BibliographySummary,
+                    StageContentArea.ReviewerDecisionPanel,
+                    StageContentArea.NotesPane
+                });
+                var definition2 = StageDefinition.Create(
+                    "def-2",
+                    "QA",
+                    ReviewStageType.QualityAssurance,
+                    requirement,
+                    policy,
+                    qualityDisplay);
                 var project2 = ReviewProject.Create("project-2", "Project Two", DateTimeOffset.UtcNow, new[] { definition2 });
                 var stage2Assignments = new List<ScreeningAssignment>
                 {

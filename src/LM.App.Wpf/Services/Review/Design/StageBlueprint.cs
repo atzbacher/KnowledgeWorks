@@ -14,10 +14,12 @@ public sealed class StageBlueprint
         int secondaryReviewers,
         bool requiresConsensus,
         int minimumAgreements,
-        bool escalateOnDisagreement)
+        bool escalateOnDisagreement,
+        StageDisplayProfile displayProfile)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(stageId);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentNullException.ThrowIfNull(displayProfile);
 
         if (primaryReviewers < 0)
         {
@@ -37,6 +39,7 @@ public sealed class StageBlueprint
         RequiresConsensus = requiresConsensus;
         MinimumAgreements = minimumAgreements;
         EscalateOnDisagreement = escalateOnDisagreement;
+        DisplayProfile = displayProfile;
     }
 
     public string StageId { get; }
@@ -54,4 +57,6 @@ public sealed class StageBlueprint
     public int MinimumAgreements { get; }
 
     public bool EscalateOnDisagreement { get; }
+
+    public StageDisplayProfile DisplayProfile { get; }
 }

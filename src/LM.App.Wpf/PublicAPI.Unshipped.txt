@@ -21,8 +21,10 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Common.Converters.ProjectEditorConverters
+LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get -> System.Windows.Data.IMultiValueConverter!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint
-LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, LM.Review.Core.Models.ReviewTemplateKind template, string! metadataNotes, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CheckedEntryIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CreatedAtUtc.get -> System.DateTimeOffset
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CreatedBy.get -> string!
@@ -30,11 +32,13 @@ LM.App.Wpf.Services.Review.Design.ProjectBlueprint.HookRelativePath.get -> strin
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.LitSearchEntryId.get -> string!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.LitSearchRunId.get -> string!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Name.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Template.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.MetadataNotes.get -> string!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectId.get -> string!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Stages.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>!
-LM.App.Wpf.Services.Review.Design.ProjectBlueprint.With(string? name = null, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>? stages = null) -> LM.App.Wpf.Services.Review.Design.ProjectBlueprint!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.With(string? name = null, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>? stages = null, LM.Review.Core.Models.ReviewTemplateKind? template = null, string? metadataNotes = null, string? litSearchEntryId = null, string? litSearchRunId = null, System.Collections.Generic.IReadOnlyList<string!>? checkedEntryIds = null) -> LM.App.Wpf.Services.Review.Design.ProjectBlueprint!
 LM.App.Wpf.Services.Review.Design.StageBlueprint
-LM.App.Wpf.Services.Review.Design.StageBlueprint.StageBlueprint(string! stageId, string! name, LM.Review.Core.Models.ReviewStageType stageType, int primaryReviewers, int secondaryReviewers, bool requiresConsensus, int minimumAgreements, bool escalateOnDisagreement) -> void
+LM.App.Wpf.Services.Review.Design.StageBlueprint.StageBlueprint(string! stageId, string! name, LM.Review.Core.Models.ReviewStageType stageType, int primaryReviewers, int secondaryReviewers, bool requiresConsensus, int minimumAgreements, bool escalateOnDisagreement, LM.Review.Core.Models.StageDisplayProfile! displayProfile) -> void
 LM.App.Wpf.Services.Review.Design.StageBlueprint.EscalateOnDisagreement.get -> bool
 LM.App.Wpf.Services.Review.Design.StageBlueprint.MinimumAgreements.get -> int
 LM.App.Wpf.Services.Review.Design.StageBlueprint.Name.get -> string!
@@ -43,6 +47,7 @@ LM.App.Wpf.Services.Review.Design.StageBlueprint.RequiresConsensus.get -> bool
 LM.App.Wpf.Services.Review.Design.StageBlueprint.SecondaryReviewers.get -> int
 LM.App.Wpf.Services.Review.Design.StageBlueprint.StageId.get -> string!
 LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
@@ -302,6 +307,27 @@ LM.App.Wpf.ViewModels.Library.LinkItemKind
 LM.App.Wpf.ViewModels.Library.LinkItemKind.Url = 0 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
 LM.App.Wpf.ViewModels.Library.LinkItemKind.File = 1 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
 LM.App.Wpf.ViewModels.Library.LinkItemKind.Folder = 2 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.RunAndBasics = 0 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Metadata = 1 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Workflow = 2 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Summary = 3 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.ProjectEditorStepDescriptor(LM.App.Wpf.ViewModels.Review.ProjectEditorStep Step, string! Title, string! Description) -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Step.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Step.init -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Title.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Title.init -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Description.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.ReviewTemplateOption(LM.Review.Core.Models.ReviewTemplateKind Kind, string! Title, string! Description) -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Kind.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Kind.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Title.get -> string!
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Title.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Description.init -> void
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectEditorViewModel() -> void
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.AddStageCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
@@ -324,7 +350,30 @@ LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedStage.get -> LM.App.
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedStage.set -> void
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.StageTypes.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewStageType>!
 LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Stages.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Steps.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.TemplateOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Review.ReviewTemplateOption!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStep.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStepDescriptor.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStepIndex.get -> int
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.IsSummaryStep.get -> bool
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateOption.get -> LM.App.Wpf.ViewModels.Review.ReviewTemplateOption!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateOption.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateKind.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MetadataNotes.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MetadataNotes.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.NextCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.BackCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ChangeRunCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ConfigureRunReloadHandler(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.App.Wpf.Services.Review.Design.ProjectBlueprint?>!>! handler) -> void
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.StageDisplayOptionViewModel(LM.Review.Core.Models.StageContentArea area, bool isSelected) -> void
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Area.get -> LM.Review.Core.Models.StageContentArea
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Label.get -> string!
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.get -> bool
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.set -> void
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageBlueprintViewModel(LM.App.Wpf.Services.Review.Design.StageBlueprint! blueprint) -> void
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.get -> bool
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.set -> void
@@ -342,6 +391,7 @@ LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageId.get -> string!
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageType.get -> LM.Review.Core.Models.ReviewStageType
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageType.set -> void
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.TotalReviewers.get -> int
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.DisplayOptions.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel!>!
 LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.TryBuild(out LM.App.Wpf.Services.Review.Design.StageBlueprint! stage, out string? errorMessage) -> bool
 LM.App.Wpf.ViewModels.StagingListViewModel
 LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!

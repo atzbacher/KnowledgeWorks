@@ -346,8 +346,32 @@ public sealed class ReviewAnalyticsServiceTests
         string name,
         ReviewStageType stageType,
         ReviewerRequirement requirement,
-        StageConsensusPolicy policy) =>
-        StageDefinition.Create(id, name, stageType, requirement, policy);
+        StageConsensusPolicy policy)
+    {
+        var displayProfile = StageDisplayProfile.Create(stageType switch
+        {
+            ReviewStageType.FullTextReview => new[]
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.FullTextViewer,
+                StageContentArea.ReviewerDecisionPanel
+            },
+            ReviewStageType.DataExtraction => new[]
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.DataExtractionWorkspace,
+                StageContentArea.NotesPane
+            },
+            _ => new[]
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.InclusionExclusionChecklist,
+                StageContentArea.ReviewerDecisionPanel
+            }
+        });
+
+        return StageDefinition.Create(id, name, stageType, requirement, policy, displayProfile);
+    }
 
     private static ReviewStage CreateStage(
         string projectId,

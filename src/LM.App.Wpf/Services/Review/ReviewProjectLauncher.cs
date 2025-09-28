@@ -96,6 +96,7 @@ namespace LM.App.Wpf.Services.Review
                 _diagnostics.RecordStep($"Prepared project blueprint '{blueprint.ProjectId}' with name '{blueprint.Name}'.");
 
                 var editor = _projectEditorFactory();
+                editor.ConfigureRunReloadHandler(ct => ReloadBlueprintAsync(editor, ct));
                 editor.Initialize(blueprint);
 
                 var editorResult = _dialogService.ShowProjectEditor(editor);
@@ -222,6 +223,60 @@ namespace LM.App.Wpf.Services.Review
             }
         }
 
+        private async Task<ProjectBlueprint?> ReloadBlueprintAsync(ProjectEditorViewModel editor, CancellationToken cancellationToken)
+        {
+            var reselection = await _runPicker.PickAsync(cancellationToken).ConfigureAwait(false);
+            if (reselection is null)
+            {
+                return null;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            _diagnostics.RecordStep($"Reselected LitSearch run '{reselection.RunId}' from entry '{reselection.EntryId}'.");
+
+            var entry = await _entryStore.GetByIdAsync(reselection.EntryId, cancellationToken).ConfigureAwait(false);
+            var checkedEntryIds = reselection.CheckedEntryIds.Count > 0
+                ? reselection.CheckedEntryIds
+                : await LoadCheckedEntryIdsAsync(
+                    reselection.CheckedEntriesAbsolutePath,
+                    reselection.CheckedEntriesRelativePath,
+                    cancellationToken).ConfigureAwait(false);
+
+            var blueprint = ProjectBlueprintFactory.Create(reselection, entry, checkedEntryIds, _userContext.UserName);
+
+            var preservedStages = TryCaptureStageBlueprints(editor);
+            var preservedName = string.IsNullOrWhiteSpace(editor.ProjectName) ? null : editor.ProjectName;
+            var preservedNotes = editor.MetadataNotes;
+            var preservedTemplate = editor.SelectedTemplateKind;
+
+            return blueprint.With(
+                name: preservedName,
+                stages: preservedStages,
+                template: preservedTemplate,
+                metadataNotes: preservedNotes);
+        }
+
+        private static IReadOnlyList<StageBlueprint>? TryCaptureStageBlueprints(ProjectEditorViewModel editor)
+        {
+            if (editor.Stages.Count == 0)
+            {
+                return null;
+            }
+
+            var blueprints = new List<StageBlueprint>(editor.Stages.Count);
+            foreach (var stage in editor.Stages)
+            {
+                if (!stage.TryBuild(out var blueprint, out _))
+                {
+                    return null;
+                }
+
+                blueprints.Add(blueprint);
+            }
+
+            return blueprints;
+        }
+
         private string? PromptForProjectPath()
         {
             var selection = _dialogService.ShowOpenFileDialog(new FilePickerOptions
@@ -276,7 +331,8 @@ namespace LM.App.Wpf.Services.Review
                 $"projectId:{project.Id}",
                 $"projectName:{project.Name}".Trim(),
                 $"litsearchRun:{selection.RunId}",
-                $"litsearchEntry:{selection.EntryId}"
+                $"litsearchEntry:{selection.EntryId}",
+                $"reviewTemplate:{project.Metadata.Template}"
             };
 
             if (checkedEntryIds.Count > 0)

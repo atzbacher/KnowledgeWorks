@@ -4,206 +4,494 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Review"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:converters="clr-namespace:LM.App.Wpf.Common.Converters"
         mc:Ignorable="d"
-        Title="Design review project"
-        Height="640"
-        Width="960"
+        Title="Create review project"
+        Height="720"
+        Width="1100"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize">
-  <Grid Margin="18">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-      <RowDefinition Height="Auto" />
-    </Grid.RowDefinitions>
+  <Window.InputBindings>
+    <KeyBinding Key="Right"
+                Modifiers="Control"
+                Command="{Binding NextCommand}" />
+    <KeyBinding Key="Left"
+                Modifiers="Control"
+                Command="{Binding BackCommand}" />
+    <KeyBinding Key="S"
+                Modifiers="Control"
+                Command="{Binding SaveCommand}" />
+  </Window.InputBindings>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,16">
-      <TextBlock Text="Project details"
-                 FontSize="18"
-                 FontWeight="SemiBold" />
+  <Window.Resources>
+    <Style x:Key="WizardStepBorderStyle" TargetType="Border">
+      <Setter Property="BorderBrush" Value="#E5E7EB" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12" />
+      <Setter Property="Margin" Value="0,0,0,12" />
+      <Style.Triggers>
+        <DataTrigger Value="True">
+          <DataTrigger.Binding>
+            <MultiBinding Converter="{x:Static converters:ProjectEditorConverters.StageSelectionEquality}">
+              <Binding Path="Step" />
+              <Binding Path="DataContext.CurrentStep" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+            </MultiBinding>
+          </DataTrigger.Binding>
+          <Setter Property="BorderBrush" Value="#2563EB" />
+          <Setter Property="Background" Value="#EEF2FF" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
 
-      <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-        <TextBlock Text="Name"
-                   VerticalAlignment="Center"
-                   Margin="0,0,12,0" />
-        <TextBox Width="360"
-                 Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}" />
+    <DataTemplate x:Key="RunAndBasicsTemplate" DataType="{x:Type vm:ProjectEditorViewModel}">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,12">
+          <TextBlock Text="LitSearch run"
+                     FontSize="20"
+                     FontWeight="SemiBold" />
+          <Button Content="Change run"
+                  Margin="16,0,0,0"
+                  Command="{Binding ChangeRunCommand}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,12" Orientation="Horizontal">
+          <StackPanel Orientation="Vertical" Margin="0,0,24,0">
+            <TextBlock Text="Entry ID"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="{Binding LitSearchEntryId}" />
+          </StackPanel>
+          <StackPanel Orientation="Vertical" Margin="0,0,24,0">
+            <TextBlock Text="Run ID"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="{Binding LitSearchRunId}" />
+          </StackPanel>
+          <StackPanel Orientation="Vertical" Margin="0,0,24,0">
+            <TextBlock Text="Selected entries"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="{Binding CheckedEntryCount}" />
+          </StackPanel>
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="Hook"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="{Binding HookRelativePath}" />
+          </StackPanel>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2"
+                   Text="{Binding CheckedEntrySummary}"
+                   Foreground="#4B5563"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,24" />
+
+        <Grid Grid.Row="3">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Project title"
+                       FontWeight="SemiBold" />
+            <TextBox Text="{Binding ProjectName, UpdateSourceTrigger=PropertyChanged}" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,0,0,16">
+            <TextBlock Text="Review template"
+                       FontWeight="SemiBold" />
+            <ComboBox ItemsSource="{Binding TemplateOptions}"
+                      SelectedItem="{Binding SelectedTemplateOption, Mode=TwoWay}"
+                      DisplayMemberPath="Title"
+                      Width="260" />
+            <TextBlock Text="{Binding SelectedTemplateOption.Description}"
+                       TextWrapping="Wrap"
+                       Margin="0,6,0,0"
+                       Foreground="#4B5563" />
+          </StackPanel>
+
+          <StackPanel Grid.Row="2" Orientation="Vertical">
+            <TextBlock Text="Why this review?"
+                       FontWeight="SemiBold" />
+            <TextBlock Text="Capture the context now—you can refine it later when exporting protocols."
+                       Foreground="#4B5563"
+                       Margin="0,2,0,0" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="MetadataTemplate" DataType="{x:Type vm:ProjectEditorViewModel}">
+      <StackPanel>
+        <TextBlock Text="Working metadata"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,12" />
+        <TextBlock Text="Share reviewer expectations, tagging instructions, or inclusion criteria notes."
+                   Foreground="#4B5563"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,16" />
+        <TextBox Text="{Binding MetadataNotes, UpdateSourceTrigger=PropertyChanged}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 MinHeight="220"
+                 VerticalScrollBarVisibility="Auto" />
       </StackPanel>
+    </DataTemplate>
 
-      <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-        <TextBlock Text="LitSearch entry"
+    <DataTemplate x:Key="WorkflowTemplate" DataType="{x:Type vm:ProjectEditorViewModel}">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,16">
+          <TextBlock Text="Workflow stages"
+                     FontSize="20"
+                     FontWeight="SemiBold"
+                     DockPanel.Dock="Left" />
+          <Button Content="Add stage"
+                  Command="{Binding AddStageCommand}"
+                  DockPanel.Dock="Right" />
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="220" />
+          </Grid.ColumnDefinitions>
+
+          <ListBox Grid.Column="0"
+                   ItemsSource="{Binding Stages}"
+                   SelectedItem="{Binding SelectedStage, Mode=TwoWay}"
+                   BorderThickness="0"
+                   ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="{x:Type vm:StageBlueprintViewModel}">
+                  <Border BorderBrush="#D1D5DB"
+                          BorderThickness="1"
+                          CornerRadius="8"
+                          Padding="14"
+                          Margin="0,0,0,16">
+                    <StackPanel>
+                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Stage name" VerticalAlignment="Center" />
+                        <TextBox Width="260"
+                                 Margin="12,0,0,0"
+                                 Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="Type" VerticalAlignment="Center" Margin="12,0,0,0" />
+                        <ComboBox Width="200"
+                                  Margin="12,0,0,0"
+                                  ItemsSource="{Binding DataContext.StageTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  SelectedItem="{Binding StageType, Mode=TwoWay}" />
+                      </StackPanel>
+
+                      <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                          <TextBlock Text="Primary reviewers" />
+                          <TextBox Width="50"
+                                   Margin="8,0,0,0"
+                                   Text="{Binding PrimaryReviewers, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center">
+                          <TextBlock Text="Secondary reviewers" />
+                          <TextBox Width="50"
+                                   Margin="8,0,0,0"
+                                   Text="{Binding SecondaryReviewers, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center">
+                          <TextBlock Text="Total" />
+                          <TextBlock Text="{Binding TotalReviewers}" FontWeight="SemiBold" Margin="8,0,0,0" />
+                        </StackPanel>
+                      </StackPanel>
+
+                      <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <CheckBox Content="Require consensus"
+                                  IsChecked="{Binding RequiresConsensus}" />
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="16,0,0,0"
+                                    VerticalAlignment="Center">
+                          <TextBlock Text="Minimum agreements" />
+                          <TextBox Width="50"
+                                   Margin="8,0,0,0"
+                                   IsEnabled="{Binding RequiresConsensus}"
+                                   Text="{Binding MinimumAgreements, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <CheckBox Content="Escalate disagreements"
+                                  Margin="16,0,0,0"
+                                  IsEnabled="{Binding RequiresConsensus}"
+                                  IsChecked="{Binding EscalateOnDisagreement}" />
+                      </StackPanel>
+
+                      <StackPanel Margin="0,16,0,0">
+                        <TextBlock Text="Displayed workspace panels" FontWeight="SemiBold" />
+                        <ItemsControl ItemsSource="{Binding DisplayOptions}" Margin="0,6,0,0">
+                          <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                              <WrapPanel ItemHeight="28" ItemWidth="240" />
+                            </ItemsPanelTemplate>
+                          </ItemsControl.ItemsPanel>
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:StageDisplayOptionViewModel}">
+                              <CheckBox Content="{Binding Label}"
+                                        IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                        ToolTip="{Binding Description}" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <StackPanel Grid.Column="1" Margin="24,0,0,0" VerticalAlignment="Top">
+            <Button Content="Move up"
+                    Command="{Binding MoveStageUpCommand}"
+                    CommandParameter="{Binding SelectedStage}" />
+            <Button Content="Move down"
+                    Margin="0,10,0,0"
+                    Command="{Binding MoveStageDownCommand}"
+                    CommandParameter="{Binding SelectedStage}" />
+            <Button Content="Remove"
+                    Margin="0,10,0,0"
+                    Command="{Binding RemoveStageCommand}"
+                    CommandParameter="{Binding SelectedStage}" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SummaryTemplate" DataType="{x:Type vm:ProjectEditorViewModel}">
+      <StackPanel>
+        <TextBlock Text="Review summary"
+                   FontSize="20"
                    FontWeight="SemiBold"
-                   Margin="0,0,8,0" />
-        <TextBlock Text="{Binding LitSearchEntryId}" />
-        <TextBlock Text="Run"
+                   Margin="0,0,0,16" />
+
+        <StackPanel Orientation="Vertical" Margin="0,0,0,16">
+          <TextBlock Text="Title" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding ProjectName}" FontSize="14" />
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Margin="0,0,0,16">
+          <TextBlock Text="Review template" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding SelectedTemplateOption.Title}" />
+          <TextBlock Text="{Binding SelectedTemplateOption.Description}"
+                     Foreground="#4B5563"
+                     TextWrapping="Wrap"
+                     Margin="0,4,0,0" />
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Margin="0,0,0,16">
+          <TextBlock Text="LitSearch run" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding LitSearchEntryId}" />
+          <TextBlock Text="{Binding LitSearchRunId}" />
+          <TextBlock Text="{Binding CheckedEntrySummary}"
+                     Foreground="#4B5563"
+                     TextWrapping="Wrap"
+                     Margin="0,4,0,0" />
+        </StackPanel>
+
+        <StackPanel Orientation="Vertical" Margin="0,0,0,24">
+          <TextBlock Text="Metadata notes" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding MetadataNotes}"
+                     TextWrapping="Wrap"
+                     Foreground="#4B5563" />
+        </StackPanel>
+
+        <TextBlock Text="Stages"
                    FontWeight="SemiBold"
-                   Margin="24,0,8,0" />
-        <TextBlock Text="{Binding LitSearchRunId}" />
-        <TextBlock Text="Selected IDs"
-                   FontWeight="SemiBold"
-                   Margin="24,0,8,0" />
-        <TextBlock Text="{Binding CheckedEntryCount}" />
+                   Margin="0,0,0,8" />
+
+        <ItemsControl ItemsSource="{Binding Stages}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type vm:StageBlueprintViewModel}">
+              <Border BorderBrush="#D1D5DB"
+                      BorderThickness="1"
+                      CornerRadius="6"
+                      Padding="12"
+                      Margin="0,0,0,12">
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding StageType}" Foreground="#4B5563" />
+                  <TextBlock Text="{Binding TotalReviewers, StringFormat=Reviewers: {0}}"
+                             Margin="0,4,0,0" />
+                  <TextBlock Text="Panels"
+                             FontWeight="SemiBold"
+                             Margin="0,8,0,4" />
+                  <ItemsControl ItemsSource="{Binding DisplayOptions}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate DataType="{x:Type vm:StageDisplayOptionViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                          <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                              <Setter Property="Visibility" Value="Collapsed" />
+                              <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                  <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                              </Style.Triggers>
+                            </Style>
+                          </StackPanel.Style>
+                          <TextBlock Text="• " Foreground="#2563EB" />
+                          <TextBlock Text="{Binding Label}" />
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </StackPanel>
+    </DataTemplate>
+  </Window.Resources>
 
-      <TextBlock Text="{Binding CheckedEntrySummary}"
-                 Foreground="Gray"
-                 Margin="0,4,0,0" />
+  <Grid Margin="24">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="260" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
 
-      <TextBlock Margin="0,4,0,0"
-                 Foreground="Gray"
-                 Text="{Binding HookRelativePath, StringFormat=Hook: {0}}">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock">
-            <Setter Property="Visibility" Value="Visible" />
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HookRelativePath}" Value="{x:Null}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-              <DataTrigger Binding="{Binding HookRelativePath}" Value="">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-              <DataTrigger Binding="{Binding HookRelativePath}" Value="{x:Static sys:String.Empty}">
-                <Setter Property="Visibility" Value="Collapsed" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+    <StackPanel Grid.Column="0" Margin="0,0,24,0">
+      <TextBlock Text="Workflow"
+                 FontSize="24"
+                 FontWeight="Bold"
+                 Margin="0,0,0,16" />
+      <ItemsControl ItemsSource="{Binding Steps}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate DataType="{x:Type vm:ProjectEditorStepDescriptor}">
+            <Border Style="{StaticResource WizardStepBorderStyle}">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Description}"
+                           Foreground="#4B5563"
+                           TextWrapping="Wrap"
+                           Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
     </StackPanel>
 
-    <Grid Grid.Row="1">
+    <Grid Grid.Column="1">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
         <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <DockPanel Grid.Row="0" Margin="0,0,0,12">
-        <TextBlock Text="Workflow stages"
-                   FontSize="16"
-                   FontWeight="SemiBold"
-                   DockPanel.Dock="Left" />
-        <Button Content="Add stage"
-                Command="{Binding AddStageCommand}"
-                DockPanel.Dock="Right" />
-      </DockPanel>
-
-      <Grid Grid.Row="1">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-
-        <ListBox Grid.Column="0"
-                 ItemsSource="{Binding Stages}"
-                 SelectedItem="{Binding SelectedStage, Mode=TwoWay}"
-                 BorderBrush="Transparent">
-          <ListBox.ItemTemplate>
-            <DataTemplate DataType="{x:Type vm:StageBlueprintViewModel}">
-              <Border BorderBrush="#FFCCCCCC"
-                      BorderThickness="1"
-                      CornerRadius="6"
-                      Margin="0,0,0,12"
-                      Padding="12">
-                <Grid>
-                  <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                  </Grid.RowDefinitions>
-
-                  <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Stage name"
-                               Margin="0,0,8,0"
-                               VerticalAlignment="Center" />
-                    <TextBox Width="260"
-                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="Type"
-                               Margin="24,0,8,0"
-                               VerticalAlignment="Center" />
-                    <ComboBox Width="180"
-                              ItemsSource="{Binding DataContext.StageTypes, RelativeSource={RelativeSource AncestorType=Window}}"
-                              SelectedItem="{Binding StageType}" />
-                  </StackPanel>
-
-                  <StackPanel Grid.Row="1"
-                              Orientation="Horizontal"
-                              Margin="0,8,0,0">
-                    <TextBlock Text="Primary reviewers"
-                               VerticalAlignment="Center" />
-                    <TextBox Width="60"
-                             Margin="8,0,16,0"
-                             Text="{Binding PrimaryReviewers, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="Secondary reviewers"
-                               VerticalAlignment="Center" />
-                    <TextBox Width="60"
-                             Margin="8,0,16,0"
-                             Text="{Binding SecondaryReviewers, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="Total"
-                               VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding TotalReviewers}"
-                               FontWeight="SemiBold"
-                               Margin="8,0,0,0"
-                               VerticalAlignment="Center" />
-                  </StackPanel>
-
-                  <StackPanel Grid.Row="2"
-                              Orientation="Horizontal"
-                              Margin="0,8,0,0">
-                    <CheckBox Content="Require consensus"
-                              IsChecked="{Binding RequiresConsensus}" />
-                    <TextBlock Text="Minimum agreements"
-                               Margin="24,0,8,0"
-                               VerticalAlignment="Center" />
-                    <TextBox Width="60"
-                             Text="{Binding MinimumAgreements, UpdateSourceTrigger=PropertyChanged}"
-                             IsEnabled="{Binding RequiresConsensus}" />
-                    <CheckBox Content="Escalate when reviewers disagree"
-                              Margin="24,0,0,0"
-                              IsChecked="{Binding EscalateOnDisagreement}"
-                              IsEnabled="{Binding RequiresConsensus}" />
-                  </StackPanel>
-                </Grid>
-              </Border>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
-
-        <StackPanel Grid.Column="1"
-                    Margin="12,0,0,0"
-                    VerticalAlignment="Top">
-          <Button Content="Move up"
-                  Margin="0,0,0,8"
-                  Command="{Binding MoveStageUpCommand}"
-                  CommandParameter="{Binding SelectedStage}" />
-          <Button Content="Move down"
-                  Margin="0,0,0,8"
-                  Command="{Binding MoveStageDownCommand}"
-                  CommandParameter="{Binding SelectedStage}" />
-          <Button Content="Remove"
-                  Command="{Binding RemoveStageCommand}"
-                  CommandParameter="{Binding SelectedStage}" />
-        </StackPanel>
-      </Grid>
-    </Grid>
-
-    <DockPanel Grid.Row="2"
-               LastChildFill="False">
-      <TextBlock Text="{Binding ErrorMessage}"
-                 Foreground="#FFB00020"
-                 Margin="0,0,16,0"
-                 VerticalAlignment="Center"
-                 TextWrapping="Wrap"
-                 Width="480" />
-      <StackPanel Orientation="Horizontal"
-                  HorizontalAlignment="Right">
-        <Button Content="Cancel"
-                Margin="0,0,8,0"
-                Command="{Binding CancelCommand}" />
-        <Button Content="Save project"
-                IsDefault="True"
-                Command="{Binding SaveCommand}" />
+      <StackPanel Grid.Row="0" Margin="0,0,0,20">
+        <TextBlock Text="Design a review project"
+                   FontSize="26"
+                   FontWeight="Bold" />
+        <TextBlock Text="Work through each step to configure screening layers, templates, and metadata."
+                   Foreground="#4B5563"
+                   Margin="0,6,0,0" />
       </StackPanel>
-    </DockPanel>
+
+      <Border Grid.Row="1"
+              Background="White"
+              BorderBrush="#E5E7EB"
+              BorderThickness="1"
+              CornerRadius="10"
+              Padding="24">
+        <ContentControl Content="{Binding}">
+          <ContentControl.Style>
+            <Style TargetType="ContentControl">
+              <Setter Property="ContentTemplate" Value="{StaticResource RunAndBasicsTemplate}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ProjectEditorStep.RunAndBasics}">
+                  <Setter Property="ContentTemplate" Value="{StaticResource RunAndBasicsTemplate}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ProjectEditorStep.Metadata}">
+                  <Setter Property="ContentTemplate" Value="{StaticResource MetadataTemplate}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ProjectEditorStep.Workflow}">
+                  <Setter Property="ContentTemplate" Value="{StaticResource WorkflowTemplate}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ProjectEditorStep.Summary}">
+                  <Setter Property="ContentTemplate" Value="{StaticResource SummaryTemplate}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ContentControl.Style>
+        </ContentControl>
+      </Border>
+
+      <DockPanel Grid.Row="2" Margin="0,20,0,0" LastChildFill="False">
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="#B00020"
+                   TextWrapping="Wrap"
+                   Width="420"
+                   DockPanel.Dock="Left" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+          <Button Content="Back"
+                  Command="{Binding BackCommand}">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding CurrentStep}" Value="{x:Static vm:ProjectEditorStep.RunAndBasics}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+          <Button Content="Next"
+                  Margin="8,0,0,0"
+                  Command="{Binding NextCommand}">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Visibility" Value="Visible" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsSummaryStep}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+          <Button Content="Save project"
+                  Margin="8,0,0,0"
+                  Command="{Binding SaveCommand}"
+                  IsDefault="True">
+            <Button.Style>
+              <Style TargetType="Button">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding IsSummaryStep}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Button.Style>
+          </Button>
+          <Button Content="Cancel"
+                  Margin="8,0,0,0"
+                  Command="{Binding CancelCommand}" />
+        </StackPanel>
+      </DockPanel>
+    </Grid>
   </Grid>
 </Window>

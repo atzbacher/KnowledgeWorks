@@ -11,12 +11,14 @@ public sealed class ReviewProject
         string name,
         DateTimeOffset createdAt,
         IReadOnlyList<StageDefinition> stageDefinitions,
+        ReviewProjectMetadata metadata,
         ReviewAuditTrail auditTrail)
     {
         Id = id;
         Name = name;
         CreatedAt = createdAt;
         StageDefinitions = stageDefinitions;
+        Metadata = metadata;
         AuditTrail = auditTrail;
     }
 
@@ -28,6 +30,8 @@ public sealed class ReviewProject
 
     public IReadOnlyList<StageDefinition> StageDefinitions { get; }
 
+    public ReviewProjectMetadata Metadata { get; }
+
     public ReviewAuditTrail AuditTrail { get; }
 
     public static ReviewProject Create(
@@ -35,6 +39,7 @@ public sealed class ReviewProject
         string name,
         DateTimeOffset createdAtUtc,
         IEnumerable<StageDefinition> stageDefinitions,
+        ReviewProjectMetadata? metadata = null,
         ReviewAuditTrail? auditTrail = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
@@ -70,8 +75,9 @@ public sealed class ReviewProject
 
         var readOnlyDefinitions = new ReadOnlyCollection<StageDefinition>(definitionList);
         var resolvedAuditTrail = auditTrail ?? ReviewAuditTrail.Create();
+        var resolvedMetadata = metadata ?? ReviewProjectMetadata.Create(ReviewTemplateKind.Custom, string.Empty);
 
-        return new ReviewProject(trimmedId, trimmedName, createdAtUtc, readOnlyDefinitions, resolvedAuditTrail);
+        return new ReviewProject(trimmedId, trimmedName, createdAtUtc, readOnlyDefinitions, resolvedMetadata, resolvedAuditTrail);
     }
 
     private static void EnsureUtc(DateTimeOffset timestamp, string parameterName)

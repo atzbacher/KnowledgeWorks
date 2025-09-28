@@ -87,6 +87,8 @@ namespace LM.App.Wpf.Tests.Review
             Assert.NotNull(workflowStore.SavedProject);
             Assert.Equal(project!.Id, workflowStore.SavedProject!.Id);
             Assert.Equal("Review – Seed", project.Name);
+            Assert.Equal(ReviewTemplateKind.Picos, project.Metadata.Template);
+            Assert.Equal(string.Empty, project.Metadata.Notes);
 
             var changeLogPath = Path.Combine(
                 workspace.GetWorkspaceRoot(),
@@ -110,6 +112,7 @@ namespace LM.App.Wpf.Tests.Review
             Assert.Contains("litsearchEntryCount:1", tags);
             Assert.Contains("litsearchRun:run-1", tags);
             Assert.Contains("projectId:" + project.Id, tags);
+            Assert.Contains("reviewTemplate:Picos", tags);
         }
 
         [Fact]

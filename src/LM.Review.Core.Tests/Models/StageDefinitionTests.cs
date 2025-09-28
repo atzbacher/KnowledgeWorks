@@ -21,7 +21,12 @@ public sealed class StageDefinitionTests
             name: "Data Extraction",
             stageType: ReviewStageType.DataExtraction,
             reviewerRequirement: requirement,
-            consensusPolicy: consensus);
+            consensusPolicy: consensus,
+            displayProfile: StageDisplayProfile.Create(new[]
+            {
+                StageContentArea.BibliographySummary,
+                StageContentArea.DataExtractionWorkspace
+            }));
 
         Assert.Equal(ReviewStageType.DataExtraction, definition.StageType);
     }

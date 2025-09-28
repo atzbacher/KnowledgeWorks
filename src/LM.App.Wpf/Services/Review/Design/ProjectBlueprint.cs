@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using LM.Review.Core.Models;
 
 namespace LM.App.Wpf.Services.Review.Design;
 
@@ -15,6 +16,8 @@ public sealed class ProjectBlueprint
         string litSearchRunId,
         IReadOnlyList<string> checkedEntryIds,
         string? hookRelativePath,
+        ReviewTemplateKind template,
+        string metadataNotes,
         IReadOnlyList<StageBlueprint> stages)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(projectId);
@@ -33,6 +36,10 @@ public sealed class ProjectBlueprint
         LitSearchRunId = litSearchRunId.Trim();
         CheckedEntryIds = checkedEntryIds;
         HookRelativePath = hookRelativePath;
+        Template = template;
+        MetadataNotes = string.IsNullOrWhiteSpace(metadataNotes)
+            ? string.Empty
+            : metadataNotes.Trim();
         Stages = stages;
     }
 
@@ -52,21 +59,41 @@ public sealed class ProjectBlueprint
 
     public string? HookRelativePath { get; }
 
+    public ReviewTemplateKind Template { get; }
+
+    public string MetadataNotes { get; }
+
     public IReadOnlyList<StageBlueprint> Stages { get; }
 
-    public ProjectBlueprint With(string? name = null, IReadOnlyList<StageBlueprint>? stages = null)
+    public ProjectBlueprint With(
+        string? name = null,
+        IReadOnlyList<StageBlueprint>? stages = null,
+        ReviewTemplateKind? template = null,
+        string? metadataNotes = null,
+        string? litSearchEntryId = null,
+        string? litSearchRunId = null,
+        IReadOnlyList<string>? checkedEntryIds = null)
     {
         var resolvedName = string.IsNullOrWhiteSpace(name) ? Name : name.Trim();
         var resolvedStages = stages ?? Stages;
+        var resolvedTemplate = template ?? Template;
+        var resolvedNotes = string.IsNullOrWhiteSpace(metadataNotes)
+            ? MetadataNotes
+            : metadataNotes.Trim();
+        var resolvedEntryId = string.IsNullOrWhiteSpace(litSearchEntryId) ? LitSearchEntryId : litSearchEntryId.Trim();
+        var resolvedRunId = string.IsNullOrWhiteSpace(litSearchRunId) ? LitSearchRunId : litSearchRunId.Trim();
+        var resolvedCheckedIds = checkedEntryIds ?? CheckedEntryIds;
         return new ProjectBlueprint(
             ProjectId,
             resolvedName,
             CreatedAtUtc,
             CreatedBy,
-            LitSearchEntryId,
-            LitSearchRunId,
-            CheckedEntryIds,
+            resolvedEntryId,
+            resolvedRunId,
+            resolvedCheckedIds,
             HookRelativePath,
+            resolvedTemplate,
+            resolvedNotes,
             resolvedStages);
     }
 }
