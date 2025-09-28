@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views;
@@ -7,6 +10,7 @@ using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
+using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using LM.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +37,13 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<EntryEditorViewModel>();
             services.AddSingleton<ILibraryEntryEditor, LibraryEntryEditor>();
             services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddTransient<DataExtractionPlaygroundViewModel>();
+            services.AddSingleton<LibraryDataExtractionLauncher>();
+            services.AddSingleton<Func<Entry, CancellationToken, Task<bool>>>(sp =>
+            {
+                var launcher = sp.GetRequiredService<LibraryDataExtractionLauncher>();
+                return (entry, token) => launcher.LaunchAsync(entry, token);
+            });
             services.AddTransient<AttachmentMetadataDialogViewModel>();
             services.AddSingleton<IAttachmentMetadataPrompt, AttachmentMetadataPrompt>();
 
@@ -60,7 +71,8 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IUserPreferencesStore>(),
                 sp.GetRequiredService<IClipboardService>(),
                 sp.GetRequiredService<IFileExplorerService>(),
-                sp.GetRequiredService<ILibraryDocumentService>()));
+                sp.GetRequiredService<ILibraryDocumentService>(),
+                sp.GetRequiredService<Func<Entry, CancellationToken, Task<bool>>>()));
         }
     }
 }

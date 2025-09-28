@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
@@ -22,6 +23,7 @@ namespace LM.App.Wpf.ViewModels
     /// <summary>
     /// Coordinates Library filters, search execution, and result presentation.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("MicrosoftPublicApi", "RS0016:PublicSymbolsMustBeDocumented", Justification = "Public API recorded in PublicAPI.Unshipped.txt.")]
     public sealed partial class LibraryViewModel : ViewModelBase
     {
         private readonly IEntryStore _store;
@@ -37,7 +39,8 @@ namespace LM.App.Wpf.ViewModels
                                 IUserPreferencesStore preferencesStore,
                                 IClipboardService clipboard,
                                 IFileExplorerService fileExplorer,
-                                ILibraryDocumentService documentService)
+                                ILibraryDocumentService documentService,
+                                Func<Entry, CancellationToken, Task<bool>> dataExtractionLauncher)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
@@ -49,6 +52,7 @@ namespace LM.App.Wpf.ViewModels
             _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
             _fileExplorer = fileExplorer ?? throw new ArgumentNullException(nameof(fileExplorer));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
+            _dataExtractionLauncher = dataExtractionLauncher ?? throw new ArgumentNullException(nameof(dataExtractionLauncher));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
 
