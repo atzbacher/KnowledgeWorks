@@ -42,7 +42,7 @@
                                FontSize="16"
                                FontWeight="SemiBold"
                                Foreground="{DynamicResource LibraryPrimaryForegroundBrush}" />
-                    <TextBlock Text="Select a page, drag a region, and run OCR to capture table-like snippets."
+                    <TextBlock Text="Select a page, drag a region, and run Tabula or OCR to capture table-like snippets."
                                Margin="0,4,0,0"
                                TextWrapping="Wrap"
                                Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
@@ -111,9 +111,14 @@
                 <StackPanel Grid.Row="3"
                             Orientation="Horizontal"
                             Margin="12,0,12,12">
+                    <Button Content="Extract selection"
+                            Width="140"
+                            Height="32"
+                            Command="{Binding ExtractRegionTablesCommand}" />
                     <Button Content="Run region OCR"
                             Width="140"
                             Height="32"
+                            Margin="8,0,0,0"
                             Command="{Binding RunRegionOcrCommand}" />
                     <Button Content="Clear selection"
                             Width="140"

@@ -10,8 +10,10 @@ using CommunityToolkit.Mvvm.Input;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
 using Tesseract;
+using Tabula;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.Core;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Library;
@@ -21,6 +23,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
     private readonly RoiSelectionViewModel _roiSelection = new();
     private System.Windows.Point? _selectionStart;
     private System.Windows.Media.Imaging.BitmapSource? _currentPageBitmap;
+    private double _currentPageWidthPoints;
+    private double _currentPageHeightPoints;
     private int _ocrRegionCounter = 1;
 
     [ObservableProperty]
@@ -45,7 +49,11 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 
     partial void InitializePreviewState()
     {
-        _roiSelection.PropertyChanged += (_, _) => RunRegionOcrCommand.NotifyCanExecuteChanged();
+        _roiSelection.PropertyChanged += (_, _) =>
+        {
+            RunRegionOcrCommand.NotifyCanExecuteChanged();
+            ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+        };
         PreviewStatusMessage = "Select a page to render.";
     }
 
@@ -54,12 +62,15 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _ocrRegionCounter = 1;
         _selectionStart = null;
         _currentPageBitmap = null;
+        _currentPageWidthPoints = 0d;
+        _currentPageHeightPoints = 0d;
         PreviewBitmap = null;
         SelectedPreviewPage = null;
         PreviewStatusMessage = "Select a page to render.";
         _roiSelection.Clear();
         PreviewPages.Clear();
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     partial void ApplyPreviewPages(IReadOnlyList<int> pages)
@@ -87,6 +98,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         OnPropertyChanged(nameof(PreviewHeight));
         OnPropertyChanged(nameof(HasPreview));
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnSelectedPreviewPageChanged(int? value)
@@ -102,11 +114,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel
     partial void OnIsBusyChanged(bool value)
     {
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsPreviewBusyChanged(bool value)
     {
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     public async Task LoadPreviewAsync(int pageNumber)
@@ -126,6 +140,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             await Task.Yield();
             using var document = PdfDocument.Open(_pdfPath, new ParsingOptions { ClipPaths = true, UseLenientParsing = true });
             var page = document.GetPage(pageNumber);
+            _currentPageWidthPoints = page.Width;
+            _currentPageHeightPoints = page.Height;
             _currentPageBitmap = RenderPageBitmap(_pdfPath, pageNumber, page);
             PreviewBitmap = _currentPageBitmap;
             PreviewStatusMessage = $"Preview ready for page {pageNumber}. Drag to select a region.";
@@ -133,6 +149,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         catch (Exception ex)
         {
             PreviewBitmap = null;
+            _currentPageWidthPoints = 0d;
+            _currentPageHeightPoints = 0d;
             PreviewStatusMessage = $"Failed to render page {pageNumber}.";
             System.Windows.MessageBox.Show(
                 $"Failed to render page {pageNumber}:{Environment.NewLine}{ex.Message}",
@@ -144,6 +162,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         {
             IsPreviewBusy = false;
             RunRegionOcrCommand.NotifyCanExecuteChanged();
+            ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -158,6 +177,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _selectionStart = clamped;
         _roiSelection.Begin(clamped);
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     public void UpdateRegionSelection(System.Windows.Point point)
@@ -188,6 +208,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _roiSelection.Complete(rect);
         _selectionStart = null;
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     public void CancelRegionSelection()
@@ -195,12 +216,122 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         _selectionStart = null;
         _roiSelection.Clear();
         RunRegionOcrCommand.NotifyCanExecuteChanged();
+        ExtractRegionTablesCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
     private void ClearRegionSelection()
     {
         CancelRegionSelection();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExtractRegionTables))]
+    private async Task ExtractRegionTablesAsync()
+    {
+        if (_pdfPath is null || !RoiSelection.HasSelection || _currentPageBitmap is null || !SelectedPreviewPage.HasValue)
+        {
+            return;
+        }
+
+        var selection = RoiSelection.GetSelectionRect();
+        var pdfRectangle = BuildPdfRectangle(selection);
+        if (pdfRectangle is null)
+        {
+            System.Windows.MessageBox.Show(
+                "Selected region could not be mapped to the PDF coordinates.",
+                "Region extraction",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Information);
+            return;
+        }
+
+        var pageNumber = SelectedPreviewPage.Value;
+
+        try
+        {
+            IsBusy = true;
+            StatusMessage = "Extracting tables from selection...";
+            PreviewStatusMessage = $"Extracting selection on page {pageNumber}...";
+
+            using var document = PdfDocument.Open(_pdfPath, new ParsingOptions { ClipPaths = true });
+            var page = ObjectExtractor.Extract(document, pageNumber);
+            var extraction = CreateAlgorithm(SelectedMode.Mode);
+            var tableRectangle = new TableRectangle(pdfRectangle.Value);
+            var area = page.GetArea(tableRectangle.BoundingBox);
+            var extracted = extraction.Extract(area);
+
+            var newTables = new List<DataExtractionTableViewModel>();
+            if (extracted is not null)
+            {
+                var nextIndex = Tables
+                    .Where(table => table.PageNumber == pageNumber)
+                    .Select(table => table.TableIndex)
+                    .DefaultIfEmpty(0)
+                    .Max() + 1;
+
+                foreach (var table in extracted)
+                {
+                    if (table is null)
+                    {
+                        continue;
+                    }
+
+                    var viewModel = DataExtractionTableViewModel.FromTable(
+                        pageNumber,
+                        nextIndex++,
+                        SelectedMode.Mode,
+                        TableDetectionStrategy.None,
+                        table,
+                        tableRectangle);
+                    newTables.Add(viewModel);
+                    Tables.Add(viewModel);
+                }
+            }
+
+            if (newTables.Count == 0)
+            {
+                StatusMessage = "No tables detected in the selected region.";
+                PreviewStatusMessage = "No tables detected in the selected region.";
+            }
+            else
+            {
+                SelectedTable = newTables[0];
+                CopyTableCommand.NotifyCanExecuteChanged();
+                StatusMessage = $"Extracted {newTables.Count} table(s) from selection on page {pageNumber}.";
+                PreviewStatusMessage = "Region extraction complete.";
+            }
+
+            OnPropertyChanged(nameof(HasResults));
+
+            await WriteRegionExtractionChangeLogAsync(
+                pageNumber,
+                selection,
+                pdfRectangle.Value,
+                newTables.Count,
+                newTables.Sum(table => table.RowCount)).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "Region extraction failed.";
+            PreviewStatusMessage = "Region extraction failed.";
+            System.Windows.MessageBox.Show(
+                $"Failed to extract tables from the selected region:{Environment.NewLine}{ex.Message}",
+                "Region extraction",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+            ExtractRegionTablesCommand.NotifyCanExecuteChanged();
+            CopyTableCommand.NotifyCanExecuteChanged();
+            RunRegionOcrCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private bool CanExtractRegionTables()
+    {
+        return !IsBusy && !IsPreviewBusy && RoiSelection.HasSelection && PreviewBitmap is not null && SelectedPreviewPage.HasValue;
     }
 
     [RelayCommand(CanExecute = nameof(CanRunRegionOcr))]
@@ -348,6 +479,51 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         return new System.Windows.Int32Rect(x, y, width, height);
     }
 
+    private PdfRectangle? BuildPdfRectangle(System.Windows.Rect selection)
+    {
+        if (_currentPageBitmap is null || _currentPageWidthPoints <= 0d || _currentPageHeightPoints <= 0d)
+        {
+            return null;
+        }
+
+        var pixelWidth = _currentPageBitmap.PixelWidth;
+        var pixelHeight = _currentPageBitmap.PixelHeight;
+        if (pixelWidth <= 0 || pixelHeight <= 0)
+        {
+            return null;
+        }
+
+        var scaleX = _currentPageWidthPoints / pixelWidth;
+        var scaleY = _currentPageHeightPoints / pixelHeight;
+
+        var leftPixels = Math.Max(0d, Math.Min(selection.X, pixelWidth));
+        var rightPixels = Math.Max(0d, Math.Min(selection.X + selection.Width, pixelWidth));
+        var topPixels = Math.Max(0d, Math.Min(selection.Y, pixelHeight));
+        var bottomPixels = Math.Max(0d, Math.Min(selection.Y + selection.Height, pixelHeight));
+
+        var left = leftPixels * scaleX;
+        var right = rightPixels * scaleX;
+        var top = (_currentPageBitmap.PixelHeight - topPixels) * scaleY;
+        var bottom = (_currentPageBitmap.PixelHeight - bottomPixels) * scaleY;
+
+        left = Math.Max(0d, Math.Min(left, _currentPageWidthPoints));
+        right = Math.Max(0d, Math.Min(right, _currentPageWidthPoints));
+        top = Math.Max(0d, Math.Min(top, _currentPageHeightPoints));
+        bottom = Math.Max(0d, Math.Min(bottom, _currentPageHeightPoints));
+
+        if (right - left <= double.Epsilon || top - bottom <= double.Epsilon)
+        {
+            return null;
+        }
+
+        if (bottom > top)
+        {
+            (bottom, top) = (top, bottom);
+        }
+
+        return new PdfRectangle(left, bottom, right, top);
+    }
+
     private async Task<OcrRegionTableResult?> RecognizeRegionAsync(System.Windows.Int32Rect crop)
     {
         if (_currentPageBitmap is null)
@@ -462,6 +638,63 @@ internal sealed partial class DataExtractionPlaygroundViewModel
                     TimestampUtc = DateTime.UtcNow,
                     PerformedBy = GetCurrentUser(),
                     Action = "DataExtractionRegionOcr",
+                    Details = new HookM.ChangeLogAttachmentDetails
+                    {
+                        Title = DocumentTitle,
+                        LibraryPath = NormalizeLibraryPath(_pdfRelativePath ?? _pdfPath),
+                        Purpose = AttachmentKind.Metadata,
+                        AttachmentId = _pdfAttachmentId ?? string.Empty,
+                        Tags = tags
+                    }
+                }
+            }
+        };
+
+        try
+        {
+            await _hookOrchestrator.ProcessAsync(
+                _entryId,
+                new HookContext { ChangeLog = hook },
+                System.Threading.CancellationToken.None).ConfigureAwait(false);
+        }
+        catch
+        {
+            // Ignore hook failures.
+        }
+    }
+
+    private async Task WriteRegionExtractionChangeLogAsync(int pageNumber,
+                                                           System.Windows.Rect selection,
+                                                           PdfRectangle rectangle,
+                                                           int tableCount,
+                                                           int totalRows)
+    {
+        if (_entryId is null)
+        {
+            return;
+        }
+
+        var tags = new List<string>
+        {
+            $"mode:{SelectedMode.Mode}",
+            $"detector:{SelectedDetector.Strategy}",
+            $"page:{pageNumber}",
+            $"tables:{tableCount}",
+            $"rows:{totalRows}",
+            $"roiPx:{selection.X.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Y.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Width.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Height.ToString("F0", CultureInfo.InvariantCulture)}",
+            $"roiPts:{rectangle.Left.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Bottom.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Right.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Top.ToString("F1", CultureInfo.InvariantCulture)}"
+        };
+
+        var hook = new HookM.EntryChangeLogHook
+        {
+            Events = new List<HookM.EntryChangeLogEvent>
+            {
+                new()
+                {
+                    EventId = Guid.NewGuid().ToString("N"),
+                    TimestampUtc = DateTime.UtcNow,
+                    PerformedBy = GetCurrentUser(),
+                    Action = "DataExtractionRegionTabula",
                     Details = new HookM.ChangeLogAttachmentDetails
                     {
                         Title = DocumentTitle,
