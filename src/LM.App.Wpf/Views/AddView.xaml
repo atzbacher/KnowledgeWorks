@@ -13,6 +13,7 @@
       <Button Content="Review staged…" Command="{Binding ReviewStagedCommand}"/>
       <Button Content="Commit selected" Command="{Binding CommitSelectedCommand}"/>
       <Button Content="Clear" Command="{Binding ClearCommand}"/>
+      <Button Content="TabulaSharp playground" Command="{Binding OpenTabulaSharpPlaygroundCommand}"/>
     </StackPanel>
 
     <!-- Watched folders management -->
