@@ -20,7 +20,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 {
     private readonly RoiSelectionViewModel _roiSelection = new();
     private System.Windows.Point? _selectionStart;
-    private System.Windows.Media.Imaging.RenderTargetBitmap? _currentPageBitmap;
+    private System.Windows.Media.Imaging.BitmapSource? _currentPageBitmap;
     private int _ocrRegionCounter = 1;
 
     [ObservableProperty]
@@ -126,7 +126,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             await Task.Yield();
             using var document = PdfDocument.Open(_pdfPath, new ParsingOptions { ClipPaths = true, UseLenientParsing = true });
             var page = document.GetPage(pageNumber);
-            _currentPageBitmap = RenderPageBitmap(page);
+            _currentPageBitmap = RenderPageBitmap(_pdfPath, pageNumber, page);
             PreviewBitmap = _currentPageBitmap;
             PreviewStatusMessage = $"Preview ready for page {pageNumber}. Drag to select a region.";
         }
@@ -398,73 +398,37 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         return new OcrRegionTableResult(table.Rows, table.ColumnCount, confidence);
     }
 
-    private static System.Windows.Media.Imaging.RenderTargetBitmap RenderPageBitmap(UglyToad.PdfPig.Content.Page page)
+    private static System.Windows.Media.Imaging.BitmapSource RenderPageBitmap(string pdfPath, int pageNumber, UglyToad.PdfPig.Content.Page page)
     {
         const double targetDpi = 144d;
         var scale = targetDpi / 72d;
         var pixelWidth = Math.Max(1, (int)Math.Ceiling(page.Width * scale));
         var pixelHeight = Math.Max(1, (int)Math.Ceiling(page.Height * scale));
 
-        var visual = new System.Windows.Media.DrawingVisual();
-        using (var context = visual.RenderOpen())
-        {
-            context.DrawRectangle(System.Windows.Media.Brushes.White, null, new System.Windows.Rect(0, 0, pixelWidth, pixelHeight));
-            var typeface = new System.Windows.Media.Typeface("Segoe UI");
+        using var reader = Docnet.Core.DocLib.Instance.GetDocReader(pdfPath, new Docnet.Core.Models.PageDimensions(pixelWidth, pixelHeight));
+        var pageIndex = Math.Max(0, pageNumber - 1);
+        using var pageReader = reader.GetPageReader(pageIndex);
+        var raw = pageReader.GetImage();
+        var width = pageReader.GetPageWidth();
+        var height = pageReader.GetPageHeight();
 
-            foreach (var letter in page.Letters)
-            {
-                if (string.IsNullOrWhiteSpace(letter.Value))
-                {
-                    continue;
-                }
-
-                var fontSize = Math.Max(letter.PointSize * scale, 6);
-                var formatted = new System.Windows.Media.FormattedText(
-                    letter.Value,
-                    CultureInfo.InvariantCulture,
-                    System.Windows.FlowDirection.LeftToRight,
-                    typeface,
-                    fontSize,
-                    System.Windows.Media.Brushes.Black,
-                    1.0);
-
-                var x = letter.GlyphRectangle.Left * scale;
-                var y = (page.Height - letter.GlyphRectangle.Top) * scale;
-                context.DrawText(formatted, new System.Windows.Point(x, y));
-            }
-        }
-
-        var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(
-            pixelWidth,
-            pixelHeight,
+        var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(
+            width,
+            height,
             targetDpi,
             targetDpi,
-            System.Windows.Media.PixelFormats.Pbgra32);
+            System.Windows.Media.PixelFormats.Bgra32,
+            null,
+            raw,
+            width * 4);
 
-        bitmap.Render(visual);
         bitmap.Freeze();
         return bitmap;
     }
 
     private string? ResolveTessDataDirectory()
     {
-        var candidates = new List<string?>
-        {
-            Environment.GetEnvironmentVariable("TESSDATA_PREFIX"),
-            _workspace.WorkspacePath is null ? null : Path.Combine(_workspace.WorkspacePath, ".knowledgeworks", "tessdata"),
-            _workspace.WorkspacePath is null ? null : Path.Combine(_workspace.WorkspacePath, "tessdata"),
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tessdata")
-        };
-
-        foreach (var candidate in candidates)
-        {
-            if (!string.IsNullOrWhiteSpace(candidate) && Directory.Exists(candidate))
-            {
-                return candidate;
-            }
-        }
-
-        return null;
+        return TessDataLocator.Resolve(_workspace.WorkspacePath);
     }
 
     private async Task WriteRegionOcrChangeLogAsync(int pageNumber,

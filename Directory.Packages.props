@@ -12,6 +12,7 @@
     <PackageVersion Include="Tabula" Version="0.1.5" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
     <PackageVersion Include="Tesseract" Version="5.2.0" />
+    <PackageVersion Include="Docnet.Core" Version="2.6.0" />
 
     <!-- === Microsoft.Extensions family (pin if used anywhere) === -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
