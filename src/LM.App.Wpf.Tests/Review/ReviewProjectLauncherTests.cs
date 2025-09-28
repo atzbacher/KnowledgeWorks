@@ -90,6 +90,15 @@ namespace LM.App.Wpf.Tests.Review
             Assert.Equal(ReviewTemplateKind.Picos, project.Metadata.Template);
             Assert.Equal(string.Empty, project.Metadata.Notes);
 
+            var savedStages = workflowStore.GetStages(project.Id);
+            Assert.Equal(project.StageDefinitions.Count, savedStages.Count);
+            Assert.All(savedStages, stage => Assert.Equal(project.Id, stage.ProjectId));
+
+            var savedAssignments = workflowStore.GetAssignments();
+            var expectedAssignmentCount = project.StageDefinitions.Sum(definition => definition.ReviewerRequirement.TotalRequired);
+            Assert.Equal(expectedAssignmentCount, savedAssignments.Count);
+            Assert.All(savedAssignments, assignment => Assert.Contains(savedStages, stage => stage.Id == assignment.StageId));
+
             var changeLogPath = Path.Combine(
                 workspace.GetWorkspaceRoot(),
                 "entries",
@@ -340,39 +349,100 @@ namespace LM.App.Wpf.Tests.Review
 
         private sealed class RecordingWorkflowStore : IReviewWorkflowStore
         {
+            private readonly Dictionary<string, ReviewProject> _projects = new(StringComparer.Ordinal);
+            private readonly Dictionary<string, ReviewStage> _stages = new(StringComparer.Ordinal);
+            private readonly Dictionary<string, List<string>> _stageIdsByProject = new(StringComparer.Ordinal);
+            private readonly Dictionary<string, ScreeningAssignment> _assignments = new(StringComparer.Ordinal);
+            private readonly Dictionary<string, List<string>> _assignmentIdsByStage = new(StringComparer.Ordinal);
+
             public ReviewProject? SavedProject { get; private set; }
 
             public Task<ReviewProject?> GetProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewProject?>(SavedProject);
+                => Task.FromResult(_projects.TryGetValue(projectId, out var project) ? project : null);
 
             public Task<IReadOnlyList<ReviewProject>> GetProjectsAsync(CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewProject>>(SavedProject is null
-                    ? Array.Empty<ReviewProject>()
-                    : new[] { SavedProject });
+                => Task.FromResult<IReadOnlyList<ReviewProject>>(_projects.Values.ToList());
 
             public Task<ReviewStage?> GetStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<ReviewStage?>(null);
+                => Task.FromResult(_stages.TryGetValue(stageId, out var stage) ? stage : null);
 
             public Task<IReadOnlyList<ReviewStage>> GetStagesByProjectAsync(string projectId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+            {
+                if (!_stageIdsByProject.TryGetValue(projectId, out var ids) || ids.Count == 0)
+                {
+                    return Task.FromResult<IReadOnlyList<ReviewStage>>(Array.Empty<ReviewStage>());
+                }
+
+                var stages = ids.Select(id => _stages[id]).ToList();
+                return Task.FromResult<IReadOnlyList<ReviewStage>>(stages);
+            }
 
             public Task<ScreeningAssignment?> GetAssignmentAsync(string assignmentId, CancellationToken cancellationToken)
-                => Task.FromResult<ScreeningAssignment?>(null);
+                => Task.FromResult(_assignments.TryGetValue(assignmentId, out var assignment) ? assignment : null);
 
             public Task<IReadOnlyList<ScreeningAssignment>> GetAssignmentsByStageAsync(string stageId, CancellationToken cancellationToken)
-                => Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+            {
+                if (!_assignmentIdsByStage.TryGetValue(stageId, out var ids) || ids.Count == 0)
+                {
+                    return Task.FromResult<IReadOnlyList<ScreeningAssignment>>(Array.Empty<ScreeningAssignment>());
+                }
+
+                var assignments = ids.Select(id => _assignments[id]).ToList();
+                return Task.FromResult<IReadOnlyList<ScreeningAssignment>>(assignments);
+            }
 
             public Task SaveProjectAsync(ReviewProject project, CancellationToken cancellationToken)
             {
                 SavedProject = project;
+                _projects[project.Id] = project;
+                _stageIdsByProject.TryAdd(project.Id, new List<string>());
                 return Task.CompletedTask;
             }
 
             public Task SaveStageAsync(ReviewStage stage, CancellationToken cancellationToken)
-                => Task.CompletedTask;
+            {
+                _stages[stage.Id] = stage;
+                if (!_stageIdsByProject.TryGetValue(stage.ProjectId, out var ids))
+                {
+                    ids = new List<string>();
+                    _stageIdsByProject[stage.ProjectId] = ids;
+                }
+
+                if (!ids.Contains(stage.Id, StringComparer.Ordinal))
+                {
+                    ids.Add(stage.Id);
+                }
+
+                _assignmentIdsByStage.TryAdd(stage.Id, new List<string>());
+                return Task.CompletedTask;
+            }
 
             public Task SaveAssignmentAsync(string projectId, ScreeningAssignment assignment, CancellationToken cancellationToken)
-                => Task.CompletedTask;
+            {
+                _assignments[assignment.Id] = assignment;
+                if (!_assignmentIdsByStage.TryGetValue(assignment.StageId, out var ids))
+                {
+                    ids = new List<string>();
+                    _assignmentIdsByStage[assignment.StageId] = ids;
+                }
+
+                if (!ids.Contains(assignment.Id, StringComparer.Ordinal))
+                {
+                    ids.Add(assignment.Id);
+                }
+
+                return Task.CompletedTask;
+            }
+
+            public List<ReviewStage> GetStages(string projectId)
+            {
+                return GetStagesByProjectAsync(projectId, CancellationToken.None).GetAwaiter().GetResult().ToList();
+            }
+
+            public List<ScreeningAssignment> GetAssignments()
+            {
+                return _assignments.Values.ToList();
+            }
         }
 
         private sealed class FakeReviewHookContextFactory : IReviewHookContextFactory
