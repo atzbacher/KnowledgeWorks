@@ -367,9 +367,14 @@ internal sealed class DataExtractionTableViewModel
 
         return trimmed switch
         {
-            "+" or "-" or "±" or "+/-" or "-/+" => true,
-            _ => trimmed.All(static ch => ch is '+' or '-' or '±' or '/' or ' ')
+            "+" or "-" or "±" or "∓" or "+/-" or "-/+" => true,
+            _ => trimmed.All(static ch => IsSignCharacter(ch))
         };
+    }
+
+    private static bool IsSignCharacter(char ch)
+    {
+        return ch is '+' or '-' or '−' or '±' or '∓' or '/' or '／' or ' ' or '<' or '>' or '=' or '≤' or '≥';
     }
 
     private static int FindMergeTarget(List<List<string>> rows, int signColumn, int totalColumns, HashSet<int> columnsToRemove)
