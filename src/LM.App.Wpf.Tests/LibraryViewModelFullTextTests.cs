@@ -494,7 +494,8 @@ namespace LM.App.Wpf.Tests
                                                        ILibraryDocumentService? documentService = null,
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
-                                                       IUserPreferencesStore? preferencesStore = null)
+                                                       IUserPreferencesStore? preferencesStore = null,
+                                                       Func<Entry, CancellationToken, Task<bool>>? dataExtractionLauncher = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -509,7 +510,8 @@ namespace LM.App.Wpf.Tests
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
-            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
+            dataExtractionLauncher ??= (_, _) => Task.FromResult(true);
+            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService, dataExtractionLauncher);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor

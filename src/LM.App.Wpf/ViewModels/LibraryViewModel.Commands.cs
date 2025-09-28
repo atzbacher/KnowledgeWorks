@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly IClipboardService _clipboard;
         private readonly IFileExplorerService _fileExplorer;
         private readonly ILibraryDocumentService _documentService;
+        private readonly Func<Entry, CancellationToken, Task<bool>> _dataExtractionLauncher;
         private readonly LibraryColumnVisibility _columnVisibility = new();
         private readonly List<LibraryColumnOption> _columnOptions = new();
         private readonly TaskCompletionSource<bool> _preferencesReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -71,6 +73,7 @@ namespace LM.App.Wpf.ViewModels
             CopyMetadataCommand.NotifyCanExecuteChanged();
             CopyWorkspacePathCommand.NotifyCanExecuteChanged();
             EditEntryCommand.NotifyCanExecuteChanged();
+            OpenDataExtractionCommand.NotifyCanExecuteChanged();
         }
 
         private void OnColumnOptionChanged(object? sender, PropertyChangedEventArgs e)
@@ -333,6 +336,61 @@ namespace LM.App.Wpf.ViewModels
                 return;
 
             await Results.EditEntryAsync(target).ConfigureAwait(false);
+        }
+
+        private bool CanOpenDataExtraction(LibrarySearchResult? result)
+        {
+            var target = GetSelection(result, updateSelection: false);
+            var entry = target?.Entry;
+            return entry is not null && EntryHasPdf(entry);
+        }
+
+        [RelayCommand(CanExecute = nameof(CanOpenDataExtraction))]
+        private async Task OpenDataExtractionAsync(LibrarySearchResult? result)
+        {
+            var target = GetSelection(result, updateSelection: true);
+            var entry = target?.Entry;
+            if (entry is null)
+                return;
+
+            try
+            {
+                await _dataExtractionLauncher(entry, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open data extraction playground:\n{ex.Message}",
+                    "Data extraction",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private static bool EntryHasPdf(Entry entry)
+        {
+            if (!string.IsNullOrWhiteSpace(entry.MainFilePath) &&
+                string.Equals(Path.GetExtension(entry.MainFilePath), ".pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (entry.Attachments is null)
+                return false;
+
+            foreach (var attachment in entry.Attachments)
+            {
+                if (attachment is null)
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(attachment.RelativePath))
+                    continue;
+
+                if (string.Equals(Path.GetExtension(attachment.RelativePath), ".pdf", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
         }
     }
 }
