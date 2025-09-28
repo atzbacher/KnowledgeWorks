@@ -61,6 +61,10 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         HeaderRowOptions = new ObservableCollection<TableRowOption>();
         RemoveEmptyColumns = true;
         MergeSignColumns = true;
+
+        IdeaGroups = new ObservableCollection<OcrIdeaGroupViewModel>();
+        PopulateIdeaBoard();
+        OnPropertyChanged(nameof(HasIdeaGroups));
     }
 
     public IReadOnlyList<ExtractionModeOption> ModeOptions { get; }
@@ -112,6 +116,10 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     public ObservableCollection<DataExtractionTableViewModel> Tables { get; }
 
     public ObservableCollection<TableRowOption> HeaderRowOptions { get; }
+
+    public ObservableCollection<OcrIdeaGroupViewModel> IdeaGroups { get; }
+
+    public bool HasIdeaGroups => IdeaGroups.Count > 0;
 
     public bool HasResults => Tables.Count > 0;
 
