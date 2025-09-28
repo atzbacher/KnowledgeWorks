@@ -22,7 +22,7 @@
             <ColumnDefinition Width="4*" MinWidth="480" />
         </Grid.ColumnDefinitions>
 
-        <!-- PDF preview -->
+        <!-- PDF preview and ROI selection -->
         <Border Grid.Column="0"
                 Margin="16"
                 Padding="0"
@@ -30,20 +30,97 @@
                 BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
                 BorderThickness="1">
             <Grid>
-                <TextBlock Text="PDF preview"
-                           FontSize="16"
-                           FontWeight="SemiBold"
-                           Margin="12"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top" />
-                <Border Margin="12,40,12,12"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="12">
+                    <TextBlock Text="PDF preview &amp; ROI"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource LibraryPrimaryForegroundBrush}" />
+                    <TextBlock Text="Select a page, drag a region, and run OCR to capture table-like snippets."
+                               Margin="0,4,0,0"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Margin="12,0,12,8"
+                        Padding="8"
+                        Background="{DynamicResource LibraryPanelSubtleBrush}"
+                        BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                        BorderThickness="1">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Preview page"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding PreviewPages}"
+                                      SelectedItem="{Binding SelectedPreviewPage}"
+                                      Width="80"
+                                      Margin="8,0,0,0" />
+                            <ProgressBar Width="120"
+                                         Height="6"
+                                         Margin="12,0,0,0"
+                                         Visibility="{Binding IsPreviewBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                         IsIndeterminate="True" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding PreviewStatusMessage}"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="2"
+                        Margin="12,0,12,8"
                         Background="White"
                         BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
                         BorderThickness="1">
-                    <Grid>
-                        <WebBrowser x:Name="PdfBrowser" />
-                    </Grid>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <Image Source="{Binding PreviewBitmap}"
+                                   Stretch="None" />
+                            <Canvas x:Name="RoiCanvas"
+                                    Width="{Binding PreviewWidth}"
+                                    Height="{Binding PreviewHeight}"
+                                    Background="Transparent"
+                                    MouseLeftButtonDown="OnRoiCanvasMouseLeftButtonDown"
+                                    MouseMove="OnRoiCanvasMouseMove"
+                                    MouseLeftButtonUp="OnRoiCanvasMouseLeftButtonUp"
+                                    MouseLeave="OnRoiCanvasMouseLeave"
+                                    MouseRightButtonDown="OnRoiCanvasMouseRightButtonDown">
+                                <Rectangle Stroke="#FF1E88E5"
+                                           StrokeThickness="2"
+                                           Fill="#401E88E5"
+                                           Visibility="{Binding RoiSelection.HasVisibleSelection, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                           Width="{Binding RoiSelection.Width}"
+                                           Height="{Binding RoiSelection.Height}"
+                                           Canvas.Left="{Binding RoiSelection.X}"
+                                           Canvas.Top="{Binding RoiSelection.Y}" />
+                            </Canvas>
+                        </Grid>
+                    </ScrollViewer>
                 </Border>
+
+                <StackPanel Grid.Row="3"
+                            Orientation="Horizontal"
+                            Margin="12,0,12,12">
+                    <Button Content="Run region OCR"
+                            Width="140"
+                            Height="32"
+                            Command="{Binding RunRegionOcrCommand}" />
+                    <Button Content="Clear selection"
+                            Width="140"
+                            Height="32"
+                            Margin="8,0,0,0"
+                            Command="{Binding ClearRegionSelectionCommand}" />
+                </StackPanel>
             </Grid>
         </Border>
 

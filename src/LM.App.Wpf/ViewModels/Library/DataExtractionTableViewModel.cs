@@ -13,6 +13,8 @@ internal sealed class DataExtractionTableViewModel
 {
     private readonly IReadOnlyList<IReadOnlyList<string>> _cells;
     private readonly int _columnCount;
+    private readonly string _title;
+    private readonly string _regionSummary;
 
     private DataExtractionTableViewModel(int pageNumber,
                                          int tableIndex,
@@ -21,7 +23,9 @@ internal sealed class DataExtractionTableViewModel
                                          TableRectangle? region,
                                          IReadOnlyList<IReadOnlyList<string>> cells,
                                          int columnCount,
-                                         string preview)
+                                         string preview,
+                                         string title,
+                                         string regionSummary)
     {
         PageNumber = pageNumber;
         TableIndex = tableIndex;
@@ -31,6 +35,8 @@ internal sealed class DataExtractionTableViewModel
         _cells = cells;
         _columnCount = columnCount;
         Preview = preview;
+        _title = title;
+        _regionSummary = regionSummary;
     }
 
     public int PageNumber { get; }
@@ -49,9 +55,9 @@ internal sealed class DataExtractionTableViewModel
 
     public string Preview { get; }
 
-    public string RegionSummary => Region is null ? "Full page" : FormatRegion(Region.BoundingBox);
+    public string RegionSummary => _regionSummary;
 
-    public string Title => $"Page {PageNumber} · Table {TableIndex}";
+    public string Title => _title;
 
     public static DataExtractionTableViewModel FromTable(int pageNumber,
                                                          int tableIndex,
@@ -67,6 +73,8 @@ internal sealed class DataExtractionTableViewModel
         var cells = normalized.Rows;
         var columnCount = normalized.ColumnCount;
         var preview = BuildPreview(cells);
+        var title = $"Page {pageNumber} · Table {tableIndex}";
+        var regionSummary = region is null ? "Full page" : FormatRegion(region.BoundingBox);
 
         return new DataExtractionTableViewModel(
             pageNumber,
@@ -76,7 +84,35 @@ internal sealed class DataExtractionTableViewModel
             region,
             cells,
             columnCount,
-            preview);
+            preview,
+            title,
+            regionSummary);
+    }
+
+    public static DataExtractionTableViewModel FromOcrRegion(int pageNumber,
+                                                             int regionIndex,
+                                                             IReadOnlyList<IReadOnlyList<string>> cells)
+    {
+        if (cells is null)
+        {
+            throw new ArgumentNullException(nameof(cells));
+        }
+
+        var normalized = NormalizeManualCells(cells);
+        var title = $"Page {pageNumber} · OCR region {regionIndex}";
+        var regionSummary = $"ROI {regionIndex}";
+
+        return new DataExtractionTableViewModel(
+            pageNumber,
+            regionIndex,
+            DataExtractionMode.Stream,
+            TableDetectionStrategy.None,
+            null,
+            normalized.Rows,
+            normalized.ColumnCount,
+            BuildPreview(normalized.Rows),
+            title,
+            regionSummary);
     }
 
     public string ToTsv()
@@ -186,6 +222,47 @@ internal sealed class DataExtractionTableViewModel
         }
 
         return (projectedRows, keepIndexes.Count);
+    }
+
+    private static (IReadOnlyList<IReadOnlyList<string>> Rows, int ColumnCount) NormalizeManualCells(IReadOnlyList<IReadOnlyList<string>> rows)
+    {
+        if (rows.Count == 0)
+        {
+            return (Array.Empty<IReadOnlyList<string>>(), 0);
+        }
+
+        var maxColumns = rows.Max(static r => r?.Count ?? 0);
+        if (maxColumns == 0)
+        {
+            maxColumns = 1;
+        }
+
+        var normalizedRows = new List<IReadOnlyList<string>>(rows.Count);
+        foreach (var row in rows)
+        {
+            if (row is null)
+            {
+                normalizedRows.Add(Enumerable.Repeat(string.Empty, maxColumns).ToArray());
+                continue;
+            }
+
+            if (row.Count == maxColumns)
+            {
+                normalizedRows.Add(row.ToArray());
+                continue;
+            }
+
+            var values = new List<string>(maxColumns);
+            values.AddRange(row);
+            while (values.Count < maxColumns)
+            {
+                values.Add(string.Empty);
+            }
+
+            normalizedRows.Add(values);
+        }
+
+        return (normalizedRows, maxColumns);
     }
 
     public string ToTsv(TableAdjustmentOptions options)
