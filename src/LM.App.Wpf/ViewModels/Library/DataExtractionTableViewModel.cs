@@ -67,8 +67,9 @@ internal sealed class DataExtractionTableViewModel
         if (table is null)
             throw new ArgumentNullException(nameof(table));
 
-        var columnCount = Math.Max(table.ColumnCount, GetMaxRowWidth(table.Rows));
-        var cells = NormalizeCells(table.Rows, columnCount);
+        var normalized = NormalizeCells(table.Rows, table.ColumnCount);
+        var cells = normalized.Rows;
+        var columnCount = normalized.ColumnCount;
         var dataTable = BuildDataTable(cells, columnCount);
         var preview = BuildPreview(cells);
 
@@ -96,47 +97,118 @@ internal sealed class DataExtractionTableViewModel
         return string.Join(Environment.NewLine, rows);
     }
 
-    private static IReadOnlyList<IReadOnlyList<string>> NormalizeCells(IReadOnlyList<IReadOnlyList<Cell>> source, int columnCount)
+    private static (IReadOnlyList<IReadOnlyList<string>> Rows, int ColumnCount) NormalizeCells(IReadOnlyList<IReadOnlyList<Cell>> source,
+                                                                                               int reportedColumnCount)
     {
-        var rows = new List<IReadOnlyList<string>>();
-        if (source is null)
-            return rows;
-
-        foreach (var row in source)
+        var normalizedRows = new List<IReadOnlyList<NormalizedCell>>();
+        if (source is not null)
         {
-            if (row is null)
+            foreach (var row in source)
             {
-                rows.Add(CreateEmptyRow(columnCount));
-                continue;
-            }
-
-            var values = new List<string>(Math.Max(columnCount, row.Count));
-            foreach (var cell in row)
-            {
-                if (cell is null)
+                if (row is null)
                 {
-                    values.Add(string.Empty);
+                    normalizedRows.Add(Array.Empty<NormalizedCell>());
                     continue;
                 }
 
-                var text = cell.GetText(true) ?? string.Empty;
-                values.Add(text.Trim());
-            }
+                var values = new List<NormalizedCell>(row.Count);
+                foreach (var cell in row)
+                {
+                    if (cell is null)
+                    {
+                        values.Add(NormalizedCell.Empty);
+                        continue;
+                    }
 
-            while (values.Count < columnCount)
-            {
-                values.Add(string.Empty);
-            }
+                    var text = cell.GetText(true) ?? string.Empty;
+                    values.Add(new NormalizedCell(text.Trim(), cell.IsPlaceholder));
+                }
 
-            rows.Add(values);
+                normalizedRows.Add(values);
+            }
         }
 
-        return rows;
+        return ProjectColumns(normalizedRows, reportedColumnCount);
+    }
+
+    private static (IReadOnlyList<IReadOnlyList<string>> Rows, int ColumnCount) ProjectColumns(IReadOnlyList<IReadOnlyList<NormalizedCell>> rows,
+                                                                                              int reportedColumnCount)
+    {
+        var maxRowWidth = rows.Count == 0 ? 0 : rows.Max(static r => r.Count);
+        var initialColumnCount = Math.Max(reportedColumnCount, maxRowWidth);
+
+        if (initialColumnCount == 0)
+        {
+            return (Array.Empty<IReadOnlyList<string>>(), 0);
+        }
+
+        var keepIndexes = new List<int>(initialColumnCount);
+        for (var column = 0; column < initialColumnCount; column++)
+        {
+            var hasRealCell = false;
+            var hasContent = false;
+
+            foreach (var row in rows)
+            {
+                if (column >= row.Count)
+                {
+                    continue;
+                }
+
+                var cell = row[column];
+                if (!cell.IsPlaceholder)
+                {
+                    hasRealCell = true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(cell.Text))
+                {
+                    hasContent = true;
+                    break;
+                }
+            }
+
+            if (hasContent || hasRealCell)
+            {
+                keepIndexes.Add(column);
+            }
+        }
+
+        if (keepIndexes.Count == 0)
+        {
+            keepIndexes.Add(0);
+        }
+
+        var projectedRows = new List<IReadOnlyList<string>>(rows.Count);
+        foreach (var row in rows)
+        {
+            var values = new List<string>(keepIndexes.Count);
+            foreach (var column in keepIndexes)
+            {
+                if (column < row.Count)
+                {
+                    values.Add(row[column].Text);
+                }
+                else
+                {
+                    values.Add(string.Empty);
+                }
+            }
+
+            projectedRows.Add(values);
+        }
+
+        return (projectedRows, keepIndexes.Count);
     }
 
     private static DataTable BuildDataTable(IReadOnlyList<IReadOnlyList<string>> rows, int columnCount)
     {
         var table = new DataTable();
+
+        if (columnCount <= 0)
+        {
+            return table;
+        }
 
         for (var column = 0; column < columnCount; column++)
         {
@@ -157,47 +229,20 @@ internal sealed class DataExtractionTableViewModel
         return table;
     }
 
-    private static int GetMaxRowWidth(IReadOnlyList<IReadOnlyList<Cell>> source)
-    {
-        if (source is null || source.Count == 0)
-            return 0;
-
-        var max = 0;
-        foreach (var row in source)
-        {
-            if (row is null)
-            {
-                continue;
-            }
-
-            max = Math.Max(max, row.Count);
-        }
-
-        return max;
-    }
-
-    private static IReadOnlyList<string> CreateEmptyRow(int columnCount)
-    {
-        if (columnCount <= 0)
-            return Array.Empty<string>();
-
-        var values = new string[columnCount];
-        for (var i = 0; i < columnCount; i++)
-        {
-            values[i] = string.Empty;
-        }
-
-        return values;
-    }
-
     private static string BuildPreview(IReadOnlyList<IReadOnlyList<string>> rows)
     {
         if (rows.Count == 0)
             return "(empty table)";
 
-        var firstRow = rows[0];
-        var columns = firstRow.Select(cell => string.IsNullOrWhiteSpace(cell) ? "(blank)" : cell.Trim());
+        var firstRowWithContent = rows.FirstOrDefault(static row => row.Any(static cell => !string.IsNullOrWhiteSpace(cell)))
+                                    ?? rows[0];
+        var columns = firstRowWithContent.Select(static cell => string.IsNullOrWhiteSpace(cell) ? "(blank)" : cell.Trim());
         return string.Join(" | ", columns);
+    }
+
+    private sealed record NormalizedCell(string Text, bool IsPlaceholder)
+    {
+        public static NormalizedCell Empty { get; } = new(string.Empty, true);
     }
 
     private static string FormatRegion(PdfRectangle rectangle)
