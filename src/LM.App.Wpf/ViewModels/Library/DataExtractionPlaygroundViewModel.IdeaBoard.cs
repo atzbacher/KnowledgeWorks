@@ -109,18 +109,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
                         "Call Tesseract with `PageSegMode.SingleTable` to preserve tab stops.",
                         "Split the TSV output into rows and feed a new `DataExtractionTableViewModel`."
                     },
-                    """
-using Tesseract;
-
-using var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
-using var pix = Pix.LoadFromFile(pageImagePath);
-using var region = pix.ClipRectangle(new System.Drawing.Rectangle(left, top, width, height));
-using var page = engine.Process(region, PageSegMode.SingleTable);
-
-var tsv = page.GetTsvText();
-var rows = tsv.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-// Map TSV columns 11+ into cells and hydrate a DataTable.
-                    """,
+                    TesseractRegionSnippet,
                     "Copy Tesseract region sample",
                     new[] { "Offline", "Tables", "Interactive" },
                     new[]
@@ -138,20 +127,7 @@ var rows = tsv.Split('\n', StringSplitOptions.RemoveEmptyEntries);
                         "Replace low-confidence cells with OCR text and emit confidence scores to the grid.",
                         "Highlight suspicious cells in the preview with a semi-transparent overlay."
                     },
-                    """
-var engine = OcrEnginePool.Rent();
-foreach (var cell in detectedCells)
-{
-    using var pix = Pix.LoadFromMemory(cell.ImageBytes);
-    using var page = engine.Process(pix, PageSegMode.SingleBlock);
-    if (page.TryGetMeanConfidence(out var confidence) && confidence < 85)
-    {
-        cell.MarkAsLowConfidence();
-    }
-
-    cell.Text = page.GetText();
-}
-                    """,
+                    HybridConfidenceSnippet,
                     "Copy confidence blending sample",
                     new[] { "Quality", "Confidence", "Automation" },
                     Array.Empty<IdeaResourceViewModel>()),
@@ -188,17 +164,7 @@ foreach (var cell in detectedCells)
                         "Convert table spans to `DataExtractionTableViewModel` while preserving row/column spans.",
                         "Fallback to Tabula when the service is offline or rate-limited."
                     },
-                    """
-using Azure;
-using Azure.AI.FormRecognizer.DocumentAnalysis;
-
-var client = new DocumentAnalysisClient(new Uri(endpoint), new AzureKeyCredential(key));
-AnalyzeDocumentOperation op = await client.AnalyzeDocumentFromUriAsync(WaitUntil.Completed, "prebuilt-layout", pdfUri);
-foreach (var table in op.Value.Tables)
-{
-    // Map table.Cells into your view model, using table.Cells[i].RowSpan etc.
-}
-                    """,
+                    AzureLayoutSnippet,
                     "Copy Azure layout sample",
                     new[] { "Azure", "Managed", "JSON" },
                     new[]
@@ -231,22 +197,7 @@ foreach (var table in op.Value.Tables)
                         "Validate numeric totals locally before applying changes.",
                         "Log adjustments through the changelog hook for traceability."
                     },
-                    """
-var prompt = $$"""
-You are cleaning an OCR table. Return strict JSON with fields rows, warnings.
-
-{tsv}
-"""$$;
-
-var response = await openAiClient.GetChatCompletionsAsync(deploymentId, new ChatCompletionsOptions
-{
-    Messages =
-    {
-        new ChatRequestSystemMessage("Normalize table headers and units"),
-        new ChatRequestUserMessage(prompt)
-    }
-});
-                    """,
+                    BringYourOwnLlmSnippet,
                     "Copy LLM normalization sample",
                     new[] { "LLM", "Validation", "Normalization" },
                     Array.Empty<IdeaResourceViewModel>())

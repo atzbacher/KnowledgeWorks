@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Windows.Input;
 using LM.App.Wpf.ViewModels.Library;
 
 namespace LM.App.Wpf.Views.Library
@@ -17,7 +16,7 @@ namespace LM.App.Wpf.Views.Library
             DataContext = _viewModel;
         }
 
-        private void OnRoiCanvasMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnRoiCanvasMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var position = e.GetPosition(RoiCanvas);
             _viewModel.BeginRegionSelection(position);
@@ -30,7 +29,7 @@ namespace LM.App.Wpf.Views.Library
             }
         }
 
-        private void OnRoiCanvasMouseMove(object sender, MouseEventArgs e)
+        private void OnRoiCanvasMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (!_isDragging)
             {
@@ -41,7 +40,7 @@ namespace LM.App.Wpf.Views.Library
             _viewModel.UpdateRegionSelection(position);
         }
 
-        private void OnRoiCanvasMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void OnRoiCanvasMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (!_isDragging)
             {
@@ -55,7 +54,7 @@ namespace LM.App.Wpf.Views.Library
             e.Handled = true;
         }
 
-        private void OnRoiCanvasMouseLeave(object sender, MouseEventArgs e)
+        private void OnRoiCanvasMouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (!_isDragging)
             {
@@ -68,7 +67,7 @@ namespace LM.App.Wpf.Views.Library
             _isDragging = false;
         }
 
-        private void OnRoiCanvasMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnRoiCanvasMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             _viewModel.CancelRegionSelection();
             RoiCanvas.ReleaseMouseCapture();

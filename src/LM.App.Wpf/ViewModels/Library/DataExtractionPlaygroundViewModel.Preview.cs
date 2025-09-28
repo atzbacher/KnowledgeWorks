@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
@@ -377,9 +378,9 @@ internal sealed partial class DataExtractionPlaygroundViewModel
 
         using var engine = new TesseractEngine(tessData, "eng", EngineMode.Default);
         using var pix = Pix.LoadFromMemory(image);
-        using var page = engine.Process(pix, PageSegMode.Table);
+        using var page = engine.Process(pix, PageSegMode.SingleBlock);
 
-        var tsv = page.GetTsvText();
+        var tsv = page.GetTsvText(0);
         var table = TesseractTableBuilder.Build(tsv);
         if (table.ColumnCount == 0)
         {
@@ -393,11 +394,11 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             return null;
         }
 
-        var confidence = page.TryGetMeanConfidence(out var conf) ? conf : 0;
+        var confidence = page.GetMeanConfidence() * 100d;
         return new OcrRegionTableResult(table.Rows, table.ColumnCount, confidence);
     }
 
-    private static System.Windows.Media.Imaging.RenderTargetBitmap RenderPageBitmap(Page page)
+    private static System.Windows.Media.Imaging.RenderTargetBitmap RenderPageBitmap(UglyToad.PdfPig.Content.Page page)
     {
         const double targetDpi = 144d;
         var scale = targetDpi / 72d;
