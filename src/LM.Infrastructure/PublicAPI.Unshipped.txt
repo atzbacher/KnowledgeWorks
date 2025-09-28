@@ -34,6 +34,10 @@ LM.Infrastructure.FileSystem.WorkspaceService.GetLocalDbPath() -> string!
 LM.Infrastructure.FileSystem.WorkspaceService.GetWorkspaceRoot() -> string!
 LM.Infrastructure.FileSystem.WorkspaceService.WorkspacePath.get -> string?
 LM.Infrastructure.FileSystem.WorkspaceService.WorkspaceService() -> void
+LM.Infrastructure.FileSystem.WorkspacePreferenceStore
+LM.Infrastructure.FileSystem.WorkspacePreferenceStore.SetLastWorkspacePath(string! workspacePath) -> void
+LM.Infrastructure.FileSystem.WorkspacePreferenceStore.TryGetLastWorkspacePath() -> string?
+LM.Infrastructure.FileSystem.WorkspacePreferenceStore.WorkspacePreferenceStore(string? settingsFilePath = null) -> void
 LM.Infrastructure.Hooks.ArticleHookFactory
 LM.Infrastructure.Hooks.HookContext
 LM.Infrastructure.Hooks.HookContext.Article.get -> LM.HubSpoke.Models.ArticleHook?

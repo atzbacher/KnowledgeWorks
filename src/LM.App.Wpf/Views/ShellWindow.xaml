@@ -5,7 +5,15 @@
         xmlns:review="clr-namespace:LM.App.Wpf.Views.Review"
         Title="KnowledgeWorks" Height="700" Width="1100"
         WindowStartupLocation="CenterScreen">
-  <Grid>
+  <DockPanel>
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_Workspace">
+        <MenuItem Header="_New Workspace..."
+                  Click="OnNewWorkspaceClick" />
+        <MenuItem Header="_Load Workspace..."
+                  Click="OnLoadWorkspaceClick" />
+      </MenuItem>
+    </Menu>
     <TabControl>
       <TabItem Header="Library">
         <views:LibraryView x:Name="LibraryViewControl" />
@@ -20,5 +28,5 @@
         <review:ReviewView x:Name="ReviewViewControl" />
       </TabItem>
     </TabControl>
-  </Grid>
+  </DockPanel>
 </Window>

@@ -273,6 +273,9 @@ LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.W
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.set -> void
 LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.WorkspaceChooserViewModel(LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.CanAcceptFileDrop(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleFileDropAsync(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> System.Threading.Tasks.Task!
@@ -799,6 +802,8 @@ LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
 LM.App.Wpf.Views.SearchView.SearchView() -> void
 LM.App.Wpf.Views.ShellWindow
 LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.ShellWindow.LoadWorkspaceRequested -> System.EventHandler?
+LM.App.Wpf.Views.ShellWindow.NewWorkspaceRequested -> System.EventHandler?
 LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
@@ -808,6 +813,7 @@ LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
 LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
 LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser(LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel! viewModel) -> void
+LM.App.Wpf.Views.WorkspaceChooser.Configure(System.Action<LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel!>! configure) -> void
 override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void
 override LM.App.Wpf.App.OnStartup(System.Windows.StartupEventArgs! e) -> void
 override LM.App.Wpf.Views.LibraryPresetPickerDialog.OnClosed(System.EventArgs! e) -> void

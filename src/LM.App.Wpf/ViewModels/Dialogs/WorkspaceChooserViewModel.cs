@@ -17,6 +17,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         [ObservableProperty]
         private bool enableDebugDump;
 
+        [ObservableProperty]
+        private string title = "Choose workspace";
+
         public WorkspaceChooserViewModel(IDialogService dialogService)
         {
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
@@ -24,7 +27,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
 
         public string? SelectedWorkspacePath { get; private set; }
 
-        public string Title => "Choose workspace";
+        public bool RequireExistingDirectory { get; set; } = true;
 
         [RelayCommand]
         private void Browse()
@@ -42,12 +45,36 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         private void Confirm()
         {
             var path = WorkspacePath?.Trim();
-            if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+            if (string.IsNullOrWhiteSpace(path))
             {
-                System.Windows.MessageBox.Show("Please choose an existing folder.",
+                System.Windows.MessageBox.Show("Please choose a folder.",
                                                "Workspace",
                                                System.Windows.MessageBoxButton.OK,
                                                System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                if (!RequireExistingDirectory && !Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
+                else if (RequireExistingDirectory && !Directory.Exists(path))
+                {
+                    System.Windows.MessageBox.Show("Please choose an existing folder.",
+                                                   "Workspace",
+                                                   System.Windows.MessageBoxButton.OK,
+                                                   System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Unable to use the selected folder:{Environment.NewLine}{ex.Message}",
+                                               "Workspace",
+                                               System.Windows.MessageBoxButton.OK,
+                                               System.Windows.MessageBoxImage.Error);
                 return;
             }
 

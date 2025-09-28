@@ -18,6 +18,11 @@ namespace LM.App.Wpf.Views
 
         public string? SelectedWorkspacePath => _viewModel.SelectedWorkspacePath;
 
+        public void Configure(Action<WorkspaceChooserViewModel> configure)
+        {
+            configure?.Invoke(_viewModel);
+        }
+
         protected override void OnClosed(EventArgs e)
         {
             _viewModel.CloseRequested -= OnCloseRequested;
