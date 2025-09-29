@@ -67,6 +67,36 @@ namespace LM.Infrastructure.Hooks
             await WriteJsonAsync(absPath, hook, ct).ConfigureAwait(false);
         }
 
+        public async Task SavePdfAnnotationsAsync(string entryId, HookM.PdfAnnotationsHook hook, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(entryId))
+                throw new ArgumentException("Entry id must be non-empty.", nameof(entryId));
+            if (hook is null)
+                throw new ArgumentNullException(nameof(hook));
+
+            var relDir = Path.Combine("entries", entryId, "hooks");
+            var absDir = _workspace.GetAbsolutePath(relDir);
+            Directory.CreateDirectory(absDir);
+
+            var absPath = Path.Combine(absDir, "pdf_annotations.json");
+
+            await WriteJsonAsync(absPath, hook, ct).ConfigureAwait(false);
+
+            var changeEvent = new HookM.EntryChangeLogEvent
+            {
+                Action = "pdf-annotations-updated",
+                PerformedBy = Environment.UserName,
+                TimestampUtc = DateTime.UtcNow
+            };
+
+            var changeLog = new HookM.EntryChangeLogHook
+            {
+                Events = new List<HookM.EntryChangeLogEvent> { changeEvent }
+            };
+
+            await AppendChangeLogAsync(entryId, changeLog, ct).ConfigureAwait(false);
+        }
+
         public async Task AppendChangeLogAsync(string entryId, HookM.EntryChangeLogHook hook, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(entryId))

@@ -24,6 +24,8 @@ LM.Core.Abstractions.IFileStorageRepository
 LM.Core.Abstractions.IFileStorageRepository.SaveNewAsync(string! sourcePath, string! relativeTargetDir, string? preferredFileName = null, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IHasher
 LM.Core.Abstractions.IHasher.ComputeSha256Async(string! filePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.Core.Abstractions.IPdfAnnotationPersistenceService
+LM.Core.Abstractions.IPdfAnnotationPersistenceService.PersistAsync(string! entryId, string! pdfHash, string! overlayJson, System.Collections.Generic.IReadOnlyDictionary<string!, byte[]!>! previewImages, string? overlaySidecarRelativePath, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Core.Abstractions.IMetadataDebugSlideExporter
 LM.Core.Abstractions.IMetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IMetadataExtractor
