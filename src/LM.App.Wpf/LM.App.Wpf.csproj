@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Docnet.Core" />
-    <PackageReference Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" />
+    <PackageReference Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" GeneratePathProperty="true" />
     <PackageReference Include="PdfiumViewer.WPF" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
@@ -46,17 +46,37 @@
 
   <Target Name="EnsurePdfiumViewerRuntime" AfterTargets="CopyFilesToOutputDirectory">
     <PropertyGroup>
-      <_PdfiumX64Source>$(OutDir)x64\pdfium.dll</_PdfiumX64Source>
-      <_PdfiumDestination>$(OutDir)pdfium.dll</_PdfiumDestination>
+      <_PdfiumNativeRoot>$(PkgHiraokaHyperTools_PdfiumViewer_Native_Windows)</_PdfiumNativeRoot>
     </PropertyGroup>
 
-    <!-- Prefer the PdfiumViewer-provided binary when present to avoid Docnet's legacy build. -->
+    <ItemGroup Condition="'$(_PdfiumNativeRoot)' == ''">
+      <_PdfiumNativePackage Include="@(PackageReference)" Condition="'%(Identity)' == 'HiraokaHyperTools.PdfiumViewer.Native.Windows'">
+        <Version>%(Version)</Version>
+      </_PdfiumNativePackage>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_PdfiumPackageVersion>@(_PdfiumNativePackage->'%(Version)')</_PdfiumPackageVersion>
+      <_PdfiumNativeRoot Condition="'$(_PdfiumNativeRoot)' == '' and '$(_PdfiumPackageVersion)' != ''">$(NuGetPackageRoot)hiraokahypertools.pdfiumviewer.native.windows/$(_PdfiumPackageVersion)</_PdfiumNativeRoot>
+      <_PdfiumNativeX64>$(_PdfiumNativeRoot)\Build\x64\pdfium.dll</_PdfiumNativeX64>
+      <_PdfiumOutRoot>$(OutDir)pdfium.dll</_PdfiumOutRoot>
+      <_PdfiumOutX64>$(OutDir)x64\pdfium.dll</_PdfiumOutX64>
+    </PropertyGroup>
+
+    <!-- Always overwrite the runtime copy with the PdfiumViewer-native build so AddRef/Release exports stay available. -->
     <Copy
-      SourceFiles="$(_PdfiumX64Source)"
-      DestinationFiles="$(_PdfiumDestination)"
+      SourceFiles="$(_PdfiumNativeX64)"
+      DestinationFiles="$(_PdfiumOutX64)"
       OverwriteReadOnlyFiles="true"
       SkipUnchangedFiles="false"
-      Condition="Exists('$(_PdfiumX64Source)')" />
+      Condition="Exists('$(_PdfiumNativeX64)')" />
+
+    <Copy
+      SourceFiles="$(_PdfiumNativeX64)"
+      DestinationFiles="$(_PdfiumOutRoot)"
+      OverwriteReadOnlyFiles="true"
+      SkipUnchangedFiles="false"
+      Condition="Exists('$(_PdfiumNativeX64)')" />
   </Target>
 
   <ItemGroup>
