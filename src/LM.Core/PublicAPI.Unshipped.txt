@@ -384,6 +384,89 @@ LM.Core.Abstractions.Configuration.ISearchHistoryStore.SaveAsync(LM.Core.Models.
 LM.Core.Abstractions.Configuration.IUserPreferencesStore
 LM.Core.Abstractions.Configuration.IUserPreferencesStore.LoadAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.UserPreferences!>!
 LM.Core.Abstractions.Configuration.IUserPreferencesStore.SaveAsync(LM.Core.Models.UserPreferences! preferences, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Models.Pdf.IPdfAnnotation
+LM.Core.Models.Pdf.IPdfAnnotation.Color.get -> LM.Core.Models.Pdf.PdfAnnotationColor?
+LM.Core.Models.Pdf.IPdfAnnotation.CreatedAt.get -> System.DateTimeOffset
+LM.Core.Models.Pdf.IPdfAnnotation.Id.get -> System.Guid
+LM.Core.Models.Pdf.IPdfAnnotation.ModifiedAt.get -> System.DateTimeOffset
+LM.Core.Models.Pdf.IPdfAnnotation.Notes.get -> string?
+LM.Core.Models.Pdf.IPdfAnnotation.PageIndex.get -> int
+LM.Core.Models.Pdf.IPdfAnnotation.Preview.get -> LM.Core.Models.Pdf.PdfAnnotationPreviewImage?
+LM.Core.Models.Pdf.IPdfAnnotation.Rectangles.get -> System.Collections.Immutable.ImmutableArray<LM.Core.Models.Pdf.PdfAnnotationRect>
+LM.Core.Models.Pdf.IPdfAnnotation.SelectedText.get -> string?
+LM.Core.Models.Pdf.IPdfAnnotation.Tags.get -> System.Collections.Immutable.ImmutableArray<string>
+LM.Core.Models.Pdf.IPdfAnnotationFactory
+LM.Core.Models.Pdf.IPdfAnnotationFactory.Create(System.Guid id, System.DateTimeOffset createdAt, int pageIndex, System.Collections.Generic.IEnumerable<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles, string? selectedText = null, LM.Core.Models.Pdf.PdfAnnotationColor? color = null, string? notes = null, System.Collections.Generic.IEnumerable<string>? tags = null, LM.Core.Models.Pdf.PdfAnnotationPreviewImage? preview = null, System.DateTimeOffset? modifiedAt = null) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.IPdfAnnotationFactory.UpdateRectangles(LM.Core.Models.Pdf.PdfAnnotation! annotation, System.Collections.Generic.IEnumerable<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.IPdfAnnotationFactory.UpdateTags(LM.Core.Models.Pdf.PdfAnnotation! annotation, System.Collections.Generic.IEnumerable<string>? tags) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.IPdfAnnotationOverlay
+LM.Core.Models.Pdf.IPdfAnnotationOverlay.AnnotationId.get -> System.Guid
+LM.Core.Models.Pdf.IPdfAnnotationOverlay.Color.get -> LM.Core.Models.Pdf.PdfAnnotationColor?
+LM.Core.Models.Pdf.IPdfAnnotationOverlay.Label.get -> string?
+LM.Core.Models.Pdf.IPdfAnnotationOverlay.PageIndex.get -> int
+LM.Core.Models.Pdf.IPdfAnnotationOverlay.Rect.get -> LM.Core.Models.Pdf.PdfAnnotationRect
+LM.Core.Models.Pdf.IPdfAnnotationRect
+LM.Core.Models.Pdf.IPdfAnnotationRect.Height.get -> double
+LM.Core.Models.Pdf.IPdfAnnotationRect.Width.get -> double
+LM.Core.Models.Pdf.IPdfAnnotationRect.X.get -> double
+LM.Core.Models.Pdf.IPdfAnnotationRect.Y.get -> double
+LM.Core.Models.Pdf.PdfAnnotation
+LM.Core.Models.Pdf.PdfAnnotation.Color.get -> LM.Core.Models.Pdf.PdfAnnotationColor?
+LM.Core.Models.Pdf.PdfAnnotation.CreatedAt.get -> System.DateTimeOffset
+LM.Core.Models.Pdf.PdfAnnotation.Id.get -> System.Guid
+LM.Core.Models.Pdf.PdfAnnotation.ModifiedAt.get -> System.DateTimeOffset
+LM.Core.Models.Pdf.PdfAnnotation.ModifiedAt.init -> void
+LM.Core.Models.Pdf.PdfAnnotation.Notes.get -> string?
+LM.Core.Models.Pdf.PdfAnnotation.PageIndex.get -> int
+LM.Core.Models.Pdf.PdfAnnotation.PdfAnnotation(System.Guid id, System.DateTimeOffset createdAt, System.DateTimeOffset modifiedAt, int pageIndex, System.Collections.Immutable.ImmutableArray<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles, string? selectedText, LM.Core.Models.Pdf.PdfAnnotationColor? color, string? notes, System.Collections.Immutable.ImmutableArray<string> tags, LM.Core.Models.Pdf.PdfAnnotationPreviewImage? preview) -> void
+LM.Core.Models.Pdf.PdfAnnotation.Preview.get -> LM.Core.Models.Pdf.PdfAnnotationPreviewImage?
+LM.Core.Models.Pdf.PdfAnnotation.Rectangles.get -> System.Collections.Immutable.ImmutableArray<LM.Core.Models.Pdf.PdfAnnotationRect>
+LM.Core.Models.Pdf.PdfAnnotation.Rectangles.init -> void
+LM.Core.Models.Pdf.PdfAnnotation.SelectedText.get -> string?
+LM.Core.Models.Pdf.PdfAnnotation.Tags.get -> System.Collections.Immutable.ImmutableArray<string>
+LM.Core.Models.Pdf.PdfAnnotation.Tags.init -> void
+LM.Core.Models.Pdf.PdfAnnotation.WithRectangles(System.Collections.Generic.IEnumerable<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.PdfAnnotation.WithTags(System.Collections.Generic.IEnumerable<string>? tags) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.PdfAnnotationColor
+LM.Core.Models.Pdf.PdfAnnotationColor.Alpha.get -> byte
+LM.Core.Models.Pdf.PdfAnnotationColor.Blue.get -> byte
+LM.Core.Models.Pdf.PdfAnnotationColor.FromArgb(uint argb, string? name = null) -> LM.Core.Models.Pdf.PdfAnnotationColor!
+LM.Core.Models.Pdf.PdfAnnotationColor.Green.get -> byte
+LM.Core.Models.Pdf.PdfAnnotationColor.Name.get -> string?
+LM.Core.Models.Pdf.PdfAnnotationColor.PdfAnnotationColor(byte alpha, byte red, byte green, byte blue, string? name = null) -> void
+LM.Core.Models.Pdf.PdfAnnotationColor.Red.get -> byte
+LM.Core.Models.Pdf.PdfAnnotationColor.ToArgb() -> uint
+LM.Core.Models.Pdf.PdfAnnotationFactory
+LM.Core.Models.Pdf.PdfAnnotationFactory.Create(System.Guid id, System.DateTimeOffset createdAt, int pageIndex, System.Collections.Generic.IEnumerable<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles, string? selectedText = null, LM.Core.Models.Pdf.PdfAnnotationColor? color = null, string? notes = null, System.Collections.Generic.IEnumerable<string>? tags = null, LM.Core.Models.Pdf.PdfAnnotationPreviewImage? preview = null, System.DateTimeOffset? modifiedAt = null) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.PdfAnnotationFactory.PdfAnnotationFactory() -> void
+LM.Core.Models.Pdf.PdfAnnotationFactory.UpdateRectangles(LM.Core.Models.Pdf.PdfAnnotation! annotation, System.Collections.Generic.IEnumerable<LM.Core.Models.Pdf.PdfAnnotationRect> rectangles) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.PdfAnnotationFactory.UpdateTags(LM.Core.Models.Pdf.PdfAnnotation! annotation, System.Collections.Generic.IEnumerable<string>? tags) -> LM.Core.Models.Pdf.PdfAnnotation!
+LM.Core.Models.Pdf.PdfAnnotationOverlay
+LM.Core.Models.Pdf.PdfAnnotationOverlay.AnnotationId.get -> System.Guid
+LM.Core.Models.Pdf.PdfAnnotationOverlay.Color.get -> LM.Core.Models.Pdf.PdfAnnotationColor?
+LM.Core.Models.Pdf.PdfAnnotationOverlay.FromAnnotation(LM.Core.Models.Pdf.IPdfAnnotation! annotation, System.Func<LM.Core.Models.Pdf.PdfAnnotationRect, string?>? labelSelector = null) -> System.Collections.Immutable.ImmutableArray<LM.Core.Models.Pdf.PdfAnnotationOverlay>
+LM.Core.Models.Pdf.PdfAnnotationOverlay.Label.get -> string?
+LM.Core.Models.Pdf.PdfAnnotationOverlay.PageIndex.get -> int
+LM.Core.Models.Pdf.PdfAnnotationOverlay.PdfAnnotationOverlay(System.Guid annotationId, int pageIndex, LM.Core.Models.Pdf.PdfAnnotationRect rect, LM.Core.Models.Pdf.PdfAnnotationColor? color, string? label = null) -> void
+LM.Core.Models.Pdf.PdfAnnotationOverlay.Rect.get -> LM.Core.Models.Pdf.PdfAnnotationRect
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Hash.get -> string?
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Height.get -> int
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.LengthBytes.get -> long
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.MimeType.get -> string!
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.PdfAnnotationPreviewImage(string! mimeType, int width, int height, long lengthBytes, string? hash = null) -> void
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Width.get -> int
+LM.Core.Models.Pdf.PdfAnnotationRect
+LM.Core.Models.Pdf.PdfAnnotationRect.FromAbsolute(double x, double y, double width, double height, double pageWidth, double pageHeight) -> LM.Core.Models.Pdf.PdfAnnotationRect!
+LM.Core.Models.Pdf.PdfAnnotationRect.Height.get -> double
+LM.Core.Models.Pdf.PdfAnnotationRect.PdfAnnotationRect(double x, double y, double width, double height) -> void
+LM.Core.Models.Pdf.PdfAnnotationRect.Translate(double deltaX, double deltaY) -> LM.Core.Models.Pdf.PdfAnnotationRect!
+LM.Core.Models.Pdf.PdfAnnotationRect.Width.get -> double
+LM.Core.Models.Pdf.PdfAnnotationRect.WithNormalizedCoordinates(double x, double y, double width, double height) -> LM.Core.Models.Pdf.PdfAnnotationRect!
+LM.Core.Models.Pdf.PdfAnnotationRect.X.get -> double
+LM.Core.Models.Pdf.PdfAnnotationRect.Y.get -> double
+LM.Core.Models.Pdf.PdfAnnotationRectNormalizer
+LM.Core.Models.Pdf.PdfAnnotationRectNormalizer.Normalize(double x, double y, double width, double height, double pageWidth, double pageHeight) -> LM.Core.Models.Pdf.PdfAnnotationRect!
 LM.Core.Models.Search.SearchHistoryDocument
 LM.Core.Models.Search.SearchHistoryDocument.Entries.get -> System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.SearchHistoryEntry!>!
 LM.Core.Models.Search.SearchHistoryDocument.Entries.init -> void
