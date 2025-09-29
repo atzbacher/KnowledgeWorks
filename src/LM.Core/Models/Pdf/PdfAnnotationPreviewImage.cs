@@ -4,7 +4,7 @@ namespace LM.Core.Models.Pdf;
 
 public sealed record PdfAnnotationPreviewImage
 {
-    public PdfAnnotationPreviewImage(string mimeType, int width, int height, long lengthBytes, string? hash = null)
+    public PdfAnnotationPreviewImage(string mimeType, int width, int height, long lengthBytes, string relativePath, string? hash = null)
     {
         if (string.IsNullOrWhiteSpace(mimeType))
         {
@@ -26,10 +26,16 @@ public sealed record PdfAnnotationPreviewImage
             throw new ArgumentOutOfRangeException(nameof(lengthBytes), "Length must be greater than zero.");
         }
 
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            throw new ArgumentException("Relative path cannot be null or whitespace.", nameof(relativePath));
+        }
+
         MimeType = mimeType.Trim();
         Width = width;
         Height = height;
         LengthBytes = lengthBytes;
+        RelativePath = relativePath.Trim();
         Hash = string.IsNullOrWhiteSpace(hash) ? null : hash.Trim();
     }
 
@@ -40,6 +46,8 @@ public sealed record PdfAnnotationPreviewImage
     public int Height { get; }
 
     public long LengthBytes { get; }
+
+    public string RelativePath { get; }
 
     public string? Hash { get; }
 }

@@ -14,6 +14,7 @@ namespace LM.App.Wpf.Composition.Modules
             var services = builder.Services;
 
             services.AddSingleton<IPdfAnnotationPersistenceService, PdfAnnotationPersistenceService>();
+            services.AddSingleton<IPdfAnnotationPreviewStorage, PdfAnnotationPreviewStorage>();
             services.AddSingleton<PdfViewerViewModel>();
             services.AddTransient<PdfViewer>(sp =>
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using LM.App.Wpf.Common;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Infrastructure.Hooks;
+using LM.Core.Abstractions;
 
 namespace LM.App.Wpf.ViewModels.Pdf
 {
@@ -20,6 +22,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     {
         private readonly HookOrchestrator _hookOrchestrator;
         private readonly IUserContext _userContext;
+        private readonly IPdfAnnotationPreviewStorage _previewStorage;
 
         private string? _entryId;
         private string? _pdfPath;
@@ -28,10 +31,14 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private PdfAnnotationViewModel? _selectedAnnotation;
         private bool _isBusy;
 
-        public PdfViewerViewModel(HookOrchestrator hookOrchestrator, IUserContext userContext)
+        public PdfViewerViewModel(
+            HookOrchestrator hookOrchestrator,
+            IUserContext userContext,
+            IPdfAnnotationPreviewStorage previewStorage)
         {
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
+            _previewStorage = previewStorage ?? throw new ArgumentNullException(nameof(previewStorage));
 
             Annotations = new ObservableCollection<PdfAnnotationViewModel>();
 
@@ -204,5 +211,37 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         private bool CanRecordAnnotationChange()
             => !IsBusy && !string.IsNullOrWhiteSpace(EntryId) && SelectedAnnotation is not null;
+
+        public async Task HandleHighlightPreviewAsync(string annotationId, byte[] pngBytes, int width, int height)
+        {
+            if (string.IsNullOrWhiteSpace(annotationId) || pngBytes is null || pngBytes.Length == 0)
+            {
+                return;
+            }
+
+            var hash = PdfHash;
+            if (string.IsNullOrWhiteSpace(hash))
+            {
+                return;
+            }
+
+            _ = width;
+            _ = height;
+
+            try
+            {
+                var relativePath = await _previewStorage.SaveAsync(hash, annotationId, pngBytes, CancellationToken.None).ConfigureAwait(true);
+
+                var annotation = Annotations.FirstOrDefault(a => string.Equals(a.Id, annotationId, StringComparison.OrdinalIgnoreCase));
+                if (annotation is not null)
+                {
+                    annotation.PreviewImagePath = relativePath;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to persist annotation preview: {0}", ex);
+            }
+        }
     }
 }
