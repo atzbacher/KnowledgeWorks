@@ -64,13 +64,42 @@ namespace LM.Infrastructure.Pdf
 
         private static string? SanitizeAnnotationId(string annotationId)
         {
-            var fileName = Path.GetFileName(annotationId.Trim());
+            var trimmed = annotationId.Trim();
+            if (trimmed.Length == 0)
+            {
+                return null;
+            }
+
+            var normalizedSeparators = trimmed
+                .Replace('\\', Path.DirectorySeparatorChar)
+                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+            var fileName = Path.GetFileName(normalizedSeparators);
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 return null;
             }
 
-            return fileName;
+            var invalidChars = Path.GetInvalidFileNameChars();
+            Span<char> buffer = stackalloc char[fileName.Length];
+            var length = 0;
+
+            foreach (var ch in fileName)
+            {
+                if (Array.IndexOf(invalidChars, ch) >= 0 || char.IsWhiteSpace(ch))
+                {
+                    continue;
+                }
+
+                buffer[length++] = ch;
+            }
+
+            if (length == 0)
+            {
+                return null;
+            }
+
+            return new string(buffer[..length]);
         }
 
         private static string NormalizeRelativePath(string path)
