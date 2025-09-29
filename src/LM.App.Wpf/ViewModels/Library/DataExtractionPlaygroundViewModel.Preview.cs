@@ -155,13 +155,14 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         try
         {
             await Task.Yield();
-            using var document = PdfDocument.Open(_pdfPath, new ParsingOptions { ClipPaths = true, UseLenientParsing = true });
-            var page = document.GetPage(pageNumber);
-            _currentPageWidthPoints = page.Width;
-            _currentPageHeightPoints = page.Height;
-            _currentPageBitmap = RenderPageBitmap(_pdfPath, pageNumber, page);
+            var preview = LoadPagePreview(_pdfPath, pageNumber);
+            _currentPageWidthPoints = preview.WidthPoints;
+            _currentPageHeightPoints = preview.HeightPoints;
+            _currentPageBitmap = preview.Bitmap;
             PreviewBitmap = _currentPageBitmap;
-            PreviewStatusMessage = $"Preview ready for page {pageNumber}. Drag to select a region.";
+            PreviewStatusMessage = preview.HasLimitedMetadata
+                ? $"Preview ready for page {pageNumber}. Drag to select a region. Structured metadata could not be loaded; ROI accuracy may be reduced."
+                : $"Preview ready for page {pageNumber}. Drag to select a region.";
         }
         catch (Exception ex)
         {
@@ -184,6 +185,39 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
+
+    private PagePreviewResult LoadPagePreview(string pdfPath, int pageNumber)
+    {
+        const double targetDpi = 144d;
+        try
+        {
+            using var document = PdfDocument.Open(pdfPath, new ParsingOptions { ClipPaths = true, UseLenientParsing = true });
+            var page = document.GetPage(pageNumber);
+            using var viewerDocument = PdfiumViewer.Core.PdfDocument.Load(pdfPath);
+            var pageIndex = Math.Max(0, pageNumber - 1);
+            var bitmap = RenderPageBitmap(viewerDocument, pageIndex, page.Width, page.Height, targetDpi);
+            return new PagePreviewResult(bitmap, page.Width, page.Height, false);
+        }
+        catch (Exception ex)
+        {
+            using var viewerDocument = PdfiumViewer.Core.PdfDocument.Load(pdfPath);
+            var pageIndex = Math.Max(0, pageNumber - 1);
+            if (pageIndex < 0 || pageIndex >= viewerDocument.PageCount)
+            {
+                throw new InvalidOperationException($"Page {pageNumber} is out of range for the PDF document.", ex);
+            }
+
+            var size = viewerDocument.PageSizes[pageIndex];
+            var bitmap = RenderPageBitmap(viewerDocument, pageIndex, size.Width, size.Height, targetDpi);
+            return new PagePreviewResult(bitmap, size.Width, size.Height, true);
+        }
+    }
+
+    private sealed record PagePreviewResult(
+        System.Windows.Media.Imaging.BitmapSource Bitmap,
+        double WidthPoints,
+        double HeightPoints,
+        bool HasLimitedMetadata);
 
     public void BeginRegionSelection(System.Windows.Point point)
     {
@@ -769,15 +803,17 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         return working;
     }
 
-    private static System.Windows.Media.Imaging.BitmapSource RenderPageBitmap(string pdfPath, int pageNumber, UglyToad.PdfPig.Content.Page page)
+    private static System.Windows.Media.Imaging.BitmapSource RenderPageBitmap(
+        PdfiumViewer.Core.PdfDocument document,
+        int pageIndex,
+        double widthPoints,
+        double heightPoints,
+        double targetDpi)
     {
-        const double targetDpi = 144d;
         var scale = targetDpi / 72d;
-        var pixelWidth = Math.Max(1, (int)Math.Ceiling(page.Width * scale));
-        var pixelHeight = Math.Max(1, (int)Math.Ceiling(page.Height * scale));
-        var pageIndex = Math.Max(0, pageNumber - 1);
+        var pixelWidth = Math.Max(1, (int)Math.Ceiling(widthPoints * scale));
+        var pixelHeight = Math.Max(1, (int)Math.Ceiling(heightPoints * scale));
 
-        using var document = PdfiumViewer.Core.PdfDocument.Load(pdfPath);
         using var rendered = document.Render(
             pageIndex,
             pixelWidth,
