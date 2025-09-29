@@ -320,6 +320,8 @@ LM.HubSpoke.Models.EntryHooks.DataExtraction.get -> string?
 LM.HubSpoke.Models.EntryHooks.DataExtraction.init -> void
 LM.HubSpoke.Models.EntryHooks.Document.get -> string?
 LM.HubSpoke.Models.EntryHooks.Document.init -> void
+LM.HubSpoke.Models.EntryHooks.PdfAnnotations.get -> string?
+LM.HubSpoke.Models.EntryHooks.PdfAnnotations.init -> void
 LM.HubSpoke.Models.EntryHooks.EntryHooks() -> void
 LM.HubSpoke.Models.EntryHooks.History.get -> string?
 LM.HubSpoke.Models.EntryHooks.History.init -> void

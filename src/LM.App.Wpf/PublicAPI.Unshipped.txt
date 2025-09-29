@@ -48,10 +48,18 @@ LM.App.Wpf.Services.Review.Design.StageBlueprint.SecondaryReviewers.get -> int
 LM.App.Wpf.Services.Review.Design.StageBlueprint.StageId.get -> string!
 LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core.Models.ReviewStageType
 LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
+LM.App.Wpf.Services.Pdf.IPdfViewerLauncher
+LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbsolutePath, string! pdfHash) -> void
 LM.App.Wpf.Views.Converters.EnumEqualsConverter
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.EnumEqualsConverter() -> void
+LM.App.Wpf.Views.Pdf.PdfAnnotationList
+LM.App.Wpf.Views.Pdf.PdfAnnotationList.PdfAnnotationList() -> void
+LM.App.Wpf.Views.Pdf.PdfAnnotationList.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewerWindow
+LM.App.Wpf.Views.PdfViewerWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewerWindow.PdfViewerWindow() -> void
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogCloseRequestedEventArgs(bool? dialogResult) -> void
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogResult.get -> bool?

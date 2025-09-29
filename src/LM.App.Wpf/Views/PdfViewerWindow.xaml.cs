@@ -10,7 +10,7 @@ namespace LM.App.Wpf.Views
             InitializeComponent();
         }
 
-        public void Attach(PdfViewerViewModel viewModel)
+        internal void Attach(PdfViewerViewModel viewModel)
         {
             if (viewModel is null)
             {

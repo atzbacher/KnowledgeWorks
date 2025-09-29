@@ -6,7 +6,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     /// <summary>
     /// Represents an annotation displayed in the PDF viewer sidebar.
     /// </summary>
-    internal sealed class PdfAnnotation : Common.ViewModelBase
+    internal sealed class PdfAnnotation : Common.ViewModelBase, IDisposable
     {
         private string _title;
         private string? _textSnippet;
@@ -15,6 +15,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private System.Windows.Media.Imaging.BitmapImage? _previewImage;
         private string? _colorName;
         private int _pageNumber;
+        private bool _disposed;
 
         public PdfAnnotation(string id, string title)
         {
@@ -159,18 +160,21 @@ namespace LM.App.Wpf.ViewModels.Pdf
         /// </summary>
         public ICommand? ClearColorCommand { get; set; }
 
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            base.Dispose(disposing);
-
-            if (disposing)
+            if (_disposed)
             {
-                CopyCommand = null;
-                DeleteCommand = null;
-                ChangeColorCommand = null;
-                ClearColorCommand = null;
+                return;
             }
+
+            _disposed = true;
+
+            CopyCommand = null;
+            DeleteCommand = null;
+            ChangeColorCommand = null;
+            ClearColorCommand = null;
+
+            GC.SuppressFinalize(this);
         }
     }
 }

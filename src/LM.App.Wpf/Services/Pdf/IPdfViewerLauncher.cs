@@ -1,6 +1,6 @@
 namespace LM.App.Wpf.Services.Pdf
 {
-    internal interface IPdfViewerLauncher
+    public interface IPdfViewerLauncher
     {
         void Show(string entryId, string pdfAbsolutePath, string pdfHash);
     }
