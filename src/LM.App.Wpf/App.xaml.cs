@@ -172,6 +172,7 @@ namespace LM.App.Wpf
                                         .AddModule(new AddModule())
                                         .AddModule(new LibraryModule())
                                         .AddModule(new ReviewModule())
+                                        .AddModule(new PdfModule())
                                         .AddModule(new SearchModule())
                                         .Build();
 
