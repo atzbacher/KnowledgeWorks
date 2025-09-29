@@ -136,7 +136,9 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
             _context = new MuPDFContext(256 * 1024 * 1024);
             _document = new MuPDFDocument(_context, source.AbsolutePath)
             {
-                ClipToPageBounds = true
+                // Rotated pages can be clipped by MuPDF if the page bounds are enforced.
+                // Disable clipping so the entire rendered surface is preserved.
+                ClipToPageBounds = false
             };
         }
         catch (Exception ex)
