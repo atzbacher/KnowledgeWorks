@@ -363,7 +363,8 @@
       </StackPanel>
 
       <Border Grid.Row="1" Style="{StaticResource LibrarySectionCardStyle}">
-        <DataGrid ItemsSource="{Binding Items}"
+        <DataGrid x:Name="LibraryResultsGrid"
+                  ItemsSource="{Binding Items}"
                   SelectedItem="{Binding Selected}"
                   IsReadOnly="True"
                   AllowDrop="True"
@@ -427,11 +428,11 @@
         <i:Interaction.Triggers>
           <i:EventTrigger EventName="SelectionChanged">
             <i:InvokeCommandAction Command="{Binding HandleSelectionChangedCommand}"
-                                   CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                                   CommandParameter="{Binding SelectedItems, ElementName=LibraryResultsGrid}" />
           </i:EventTrigger>
           <i:EventTrigger EventName="MouseDoubleClick">
-            <i:InvokeCommandAction Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                   CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+            <i:InvokeCommandAction Command="{Binding DataContext.OpenEntryCommand, ElementName=LibraryViewControl}"
+                                   CommandParameter="{Binding SelectedItem, ElementName=LibraryResultsGrid}" />
           </i:EventTrigger>
         </i:Interaction.Triggers>
         <DataGrid.Columns>
