@@ -397,6 +397,9 @@
                   <MenuItem Header="Open"
                             Command="{Binding PlacementTarget.Tag.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                             CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="Open in PDF viewer"
+                            Command="{Binding PlacementTarget.Tag.OpenPdfAnnotationsCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                   <MenuItem Header="Open containing folder"
                             Command="{Binding PlacementTarget.Tag.OpenContainingFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                             CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
@@ -459,6 +462,17 @@
                 ToolTip="Open selected entry"
                 AutomationProperties.Name="Open selected entry"
                 Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <Button Style="{StaticResource LibraryPrimaryButtonStyle}"
+                Width="36"
+                Height="36"
+                Margin="8,0,0,0"
+                Padding="0"
+                FontFamily="Segoe MDL2 Assets"
+                FontSize="16"
+                Content="&#xE8A5;"
+                ToolTip="Open selected PDF in viewer"
+                AutomationProperties.Name="Open selected PDF in viewer"
+                Command="{Binding DataContext.OpenPdfAnnotationsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
       </StackPanel>
     </Grid>
 

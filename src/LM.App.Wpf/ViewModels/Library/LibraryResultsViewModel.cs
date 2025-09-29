@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Views.Behaviors;
+using LM.App.Wpf.Services.Pdf;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
@@ -37,6 +38,8 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IAttachmentMetadataPrompt _attachmentPrompt;
         private readonly IWorkSpaceService _workspace;
         private readonly HookOrchestrator _hookOrchestrator;
+        private readonly IHasher _hasher;
+        private readonly IPdfViewerLauncher _pdfViewerLauncher;
         private CancellationTokenSource? _abstractLoadCts;
 
         [ObservableProperty]
@@ -74,7 +77,9 @@ namespace LM.App.Wpf.ViewModels.Library
                                        ILibraryDocumentService documentService,
                                        IAttachmentMetadataPrompt attachmentPrompt,
                                        IWorkSpaceService workspace,
-                                       HookOrchestrator hookOrchestrator)
+                                       HookOrchestrator hookOrchestrator,
+                                       IHasher hasher,
+                                       IPdfViewerLauncher pdfViewerLauncher)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
@@ -83,6 +88,8 @@ namespace LM.App.Wpf.ViewModels.Library
             _attachmentPrompt = attachmentPrompt ?? throw new ArgumentNullException(nameof(attachmentPrompt));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
+            _hasher = hasher ?? throw new ArgumentNullException(nameof(hasher));
+            _pdfViewerLauncher = pdfViewerLauncher ?? throw new ArgumentNullException(nameof(pdfViewerLauncher));
 
             Items = new ObservableCollection<LibrarySearchResult>();
             LinkItems = new ObservableCollection<LibraryLinkItem>();
@@ -513,14 +520,107 @@ namespace LM.App.Wpf.ViewModels.Library
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanOpenPdfAnnotations))]
+        private async Task OpenPdfAnnotationsAsync(LibrarySearchResult? target)
+        {
+            var candidate = EnsureSelection(target);
+            var entry = candidate?.Entry;
+
+            if (entry is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(entry.Id))
+            {
+                System.Windows.MessageBox.Show(
+                    "Entry is missing an identifier and cannot be opened in the PDF viewer.",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!TryResolvePdfRelativePath(entry, out var relativePath))
+            {
+                System.Windows.MessageBox.Show(
+                    "The selected entry does not have a PDF document to open.",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            var absolutePath = _workspace.GetAbsolutePath(relativePath);
+            if (string.IsNullOrWhiteSpace(absolutePath) || !File.Exists(absolutePath))
+            {
+                System.Windows.MessageBox.Show(
+                    $"PDF file not found:\n{relativePath}",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            var pdfHash = NormalizeHash(entry.MainFileHashSha256);
+
+            if (string.IsNullOrWhiteSpace(pdfHash))
+            {
+                try
+                {
+                    pdfHash = await _hasher.ComputeSha256Async(absolutePath, CancellationToken.None).ConfigureAwait(false);
+                    pdfHash = NormalizeHash(pdfHash);
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show(
+                        $"Failed to compute PDF hash:\n{ex.Message}",
+                        "PDF Viewer",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error);
+                    return;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(pdfHash))
+            {
+                System.Windows.MessageBox.Show(
+                    "Unable to determine the PDF hash for annotation storage.",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                _pdfViewerLauncher.Show(entry.Id!, absolutePath, pdfHash);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open the PDF viewer:\n{ex.Message}",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
         [RelayCommand(CanExecute = nameof(CanModifySelected))]
         private Task EditAsync() => EditEntryAsync(Selected);
 
         private bool CanModifySelected() => Selected?.Entry is not null;
 
+        private bool CanOpenPdfAnnotations()
+        {
+            var entry = Selected?.Entry;
+            return entry is not null && TryResolvePdfRelativePath(entry, out _);
+        }
+
         partial void OnSelectedChanged(LibrarySearchResult? value)
         {
             OpenCommand.NotifyCanExecuteChanged();
+            OpenPdfAnnotationsCommand.NotifyCanExecuteChanged();
             EditCommand.NotifyCanExecuteChanged();
             UpdateLinkItems();
             SyncSelectionList(value);
@@ -714,6 +814,53 @@ namespace LM.App.Wpf.ViewModels.Library
         {
             var ext = Path.GetExtension(path);
             return !string.IsNullOrWhiteSpace(ext) && s_supportedAttachmentExtensions.Contains(ext);
+        }
+
+        private static bool TryResolvePdfRelativePath(Entry entry, out string relativePath)
+        {
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (IsPdfPath(entry.MainFilePath))
+            {
+                relativePath = entry.MainFilePath;
+                return true;
+            }
+
+            if (entry.Attachments is not null)
+            {
+                foreach (var attachment in entry.Attachments)
+                {
+                    if (attachment is null)
+                        continue;
+
+                    if (IsPdfPath(attachment.RelativePath))
+                    {
+                        relativePath = attachment.RelativePath;
+                        return true;
+                    }
+                }
+            }
+
+            relativePath = string.Empty;
+            return false;
+        }
+
+        private static bool IsPdfPath(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            var extension = Path.GetExtension(path);
+            return !string.IsNullOrWhiteSpace(extension) && extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string? NormalizeHash(string? hash)
+        {
+            if (string.IsNullOrWhiteSpace(hash))
+                return null;
+
+            var trimmed = hash.Trim();
+            return trimmed.Length == 64 ? trimmed.ToLowerInvariant() : null;
         }
 
         private static string DisplayNameForPath(string path)

@@ -49,7 +49,9 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<ILibraryDocumentService>(),
                 sp.GetRequiredService<IAttachmentMetadataPrompt>(),
                 sp.GetRequiredService<IWorkSpaceService>(),
-                sp.GetRequiredService<HookOrchestrator>()));
+                sp.GetRequiredService<HookOrchestrator>(),
+                sp.GetRequiredService<IHasher>(),
+                sp.GetRequiredService<Services.Pdf.IPdfViewerLauncher>()));
 
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),
