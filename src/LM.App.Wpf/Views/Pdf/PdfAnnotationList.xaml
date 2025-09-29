@@ -33,7 +33,7 @@
               SelectionChanged="OnSelectionChanged"
               ScrollViewer.VerticalScrollBarVisibility="Auto">
       <ListView.GroupStyle>
-        <GroupStyle ContainerStyle="{StaticResource PdfAnnotationGroupStyle}" />
+        <StaticResource ResourceKey="PdfAnnotationGroupStyle" />
       </ListView.GroupStyle>
     </ListView>
   </Grid>
