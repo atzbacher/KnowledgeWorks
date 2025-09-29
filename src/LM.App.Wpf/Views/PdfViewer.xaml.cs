@@ -166,6 +166,13 @@ namespace LM.App.Wpf.Views
             {
                 // Older runtimes may not support removal; ignore.
             }
+            catch (COMException ex) when ((uint)ex.ErrorCode == 0x80070049)
+            {
+                // WebView2 returns ERROR_BAD_NET_NAME (0x80070049) when the
+                // script object is no longer available. This happens if the
+                // viewer closes before the host object is disposed. Ignore it
+                // and continue registering a new bridge instance.
+            }
 
             _hostObject ??= new PdfViewerHostObject(this);
 
