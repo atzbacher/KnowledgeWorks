@@ -1,6 +1,6 @@
 namespace LM.Core.Models.Pdf;
 
-public static class PdfAnnotationRectNormalizer
+internal static class PdfAnnotationRectNormalizer
 {
     public static PdfAnnotationRect Normalize(double x, double y, double width, double height, double pageWidth, double pageHeight)
     {

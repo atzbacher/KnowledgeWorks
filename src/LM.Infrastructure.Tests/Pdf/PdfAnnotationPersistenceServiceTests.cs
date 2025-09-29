@@ -87,7 +87,7 @@ namespace LM.Infrastructure.Tests.Pdf
             var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
-            Assert.Equal(sidecar.Replace('\', '/'), hook!.OverlayPath);
+            Assert.Equal(sidecar.Replace("\\", "/"), hook!.OverlayPath);
         }
 
         [Fact]

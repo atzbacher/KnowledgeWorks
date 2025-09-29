@@ -2,7 +2,7 @@ using System;
 
 namespace LM.Core.Models.Pdf;
 
-public interface IPdfAnnotationOverlay
+internal interface IPdfAnnotationOverlay
 {
     Guid AnnotationId { get; }
 

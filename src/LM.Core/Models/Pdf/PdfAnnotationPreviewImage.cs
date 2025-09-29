@@ -2,7 +2,7 @@ using System;
 
 namespace LM.Core.Models.Pdf;
 
-public sealed record PdfAnnotationPreviewImage
+internal sealed record PdfAnnotationPreviewImage
 {
     public PdfAnnotationPreviewImage(string mimeType, int width, int height, long lengthBytes, string relativePath, string? hash = null)
     {

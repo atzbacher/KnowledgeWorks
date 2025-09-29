@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 
 namespace LM.Core.Models.Pdf;
 
-public interface IPdfAnnotation
+internal interface IPdfAnnotation
 {
     Guid Id { get; }
 

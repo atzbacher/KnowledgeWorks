@@ -1,6 +1,6 @@
 namespace LM.Core.Models.Pdf;
 
-public interface IPdfAnnotationRect
+internal interface IPdfAnnotationRect
 {
     double X { get; }
 
