@@ -39,7 +39,7 @@ namespace LM.App.Wpf.Services.Pdf
             EnsureWindow();
 
             _viewModel.InitializeContext(entryId.Trim(), pdfAbsolutePath.Trim(), normalizedHash);
-            _ = _viewModel.LoadPdfCommand.ExecuteAsync(null);
+            _viewModel.LoadPdfCommand.Execute(null);
 
             if (_window is null)
             {

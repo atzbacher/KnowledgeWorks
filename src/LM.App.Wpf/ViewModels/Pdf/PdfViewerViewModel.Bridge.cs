@@ -181,12 +181,12 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
                 if (string.IsNullOrWhiteSpace(title))
                 {
-                    var pageNumber = root.TryGetProperty("pageNumber", out var pageElement) && pageElement.TryGetInt32(out var parsedPage)
+                    var pageNumberForTitle = root.TryGetProperty("pageNumber", out var pageElement) && pageElement.TryGetInt32(out var parsedPage)
                         ? parsedPage
                         : 0;
 
-                    title = pageNumber > 0
-                        ? string.Format(CultureInfo.InvariantCulture, "Highlight on page {0}", pageNumber)
+                    title = pageNumberForTitle > 0
+                        ? string.Format(CultureInfo.InvariantCulture, "Highlight on page {0}", pageNumberForTitle)
                         : "Highlight";
                 }
 

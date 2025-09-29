@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.App.Wpf.Services.Pdf;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Library;
 using LM.Core.Abstractions;
@@ -491,6 +492,8 @@ namespace LM.App.Wpf.Tests
                                                        IFileStorageRepository? storage = null,
                                                        IAttachmentMetadataPrompt? attachmentPrompt = null,
                                                        HookOrchestrator? orchestrator = null,
+                                                       IHasher? hasher = null,
+                                                       IPdfViewerLauncher? pdfViewerLauncher = null,
                                                        ILibraryDocumentService? documentService = null,
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
@@ -503,9 +506,11 @@ namespace LM.App.Wpf.Tests
             storage ??= new RecordingFileStorageRepository();
             attachmentPrompt ??= new NoopAttachmentPrompt();
             orchestrator ??= new HookOrchestrator(ws);
+            hasher ??= new StubHasher();
+            pdfViewerLauncher ??= new RecordingPdfViewerLauncher();
             var filters = new LibraryFiltersViewModel(presetStore, prompt, store, ws);
             documentService ??= new NoopDocumentService();
-            var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator);
+            var results = new LibraryResultsViewModel(store, storage, editor, documentService, attachmentPrompt, ws, orchestrator, hasher, pdfViewerLauncher);
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
@@ -560,6 +565,22 @@ namespace LM.App.Wpf.Tests
         {
             public void OpenEntry(Entry entry) { }
             public void OpenAttachment(Attachment attachment) { }
+        }
+
+        private sealed class StubHasher : IHasher
+        {
+            public Task<string> ComputeSha256Async(string filePath, CancellationToken ct = default)
+                => Task.FromResult("stub-hash");
+        }
+
+        private sealed class RecordingPdfViewerLauncher : IPdfViewerLauncher
+        {
+            public List<(string EntryId, string PdfPath, string Hash)> Invocations { get; } = new();
+
+            public void Show(string entryId, string pdfAbsolutePath, string pdfHash)
+            {
+                Invocations.Add((entryId, pdfAbsolutePath, pdfHash));
+            }
         }
 
         private sealed class RecordingEntryEditor : ILibraryEntryEditor
