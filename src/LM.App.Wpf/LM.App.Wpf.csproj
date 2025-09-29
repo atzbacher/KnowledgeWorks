@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" GeneratePathProperty="true" />
+    <PackageReference Include="bblanchon.PDFium.Win32" GeneratePathProperty="true" />
     <PackageReference Include="PdfiumViewer.WPF" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
@@ -45,19 +45,19 @@
 
   <Target Name="EnsurePdfiumViewerRuntime" AfterTargets="CopyFilesToOutputDirectory">
     <PropertyGroup>
-      <_PdfiumNativeRoot>$(PkgHiraokaHyperTools_PdfiumViewer_Native_Windows)</_PdfiumNativeRoot>
+      <_PdfiumNativeRoot>$(PkgBblanchon_PDFium_Win32)</_PdfiumNativeRoot>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(_PdfiumNativeRoot)' == ''">
-      <_PdfiumNativePackage Include="@(PackageReference)" Condition="'%(Identity)' == 'HiraokaHyperTools.PdfiumViewer.Native.Windows'">
+      <_PdfiumNativePackage Include="@(PackageReference)" Condition="'%(Identity)' == 'bblanchon.PDFium.Win32'">
         <Version>%(Version)</Version>
       </_PdfiumNativePackage>
     </ItemGroup>
 
     <PropertyGroup>
       <_PdfiumPackageVersion>@(_PdfiumNativePackage->'%(Version)')</_PdfiumPackageVersion>
-      <_PdfiumNativeRoot Condition="'$(_PdfiumNativeRoot)' == '' and '$(_PdfiumPackageVersion)' != ''">$(NuGetPackageRoot)hiraokahypertools.pdfiumviewer.native.windows/$(_PdfiumPackageVersion)</_PdfiumNativeRoot>
-      <_PdfiumNativeX64>$(_PdfiumNativeRoot)\Build\x64\pdfium.dll</_PdfiumNativeX64>
+      <_PdfiumNativeRoot Condition="'$(_PdfiumNativeRoot)' == '' and '$(_PdfiumPackageVersion)' != ''">$(NuGetPackageRoot)bblanchon.pdfium.win32/$(_PdfiumPackageVersion)</_PdfiumNativeRoot>
+      <_PdfiumNativeX64>$(_PdfiumNativeRoot)\runtimes\win-x64\native\pdfium.dll</_PdfiumNativeX64>
       <_PdfiumOutRoot>$(OutDir)pdfium.dll</_PdfiumOutRoot>
       <_PdfiumOutX64>$(OutDir)x64\pdfium.dll</_PdfiumOutX64>
     </PropertyGroup>

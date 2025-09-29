@@ -13,7 +13,7 @@
     <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
     <PackageVersion Include="Tesseract" Version="5.2.0" />
     <PackageVersion Include="PdfiumViewer.WPF" Version="1.0.6" />
-    <PackageVersion Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" Version="0.1.5637" />
+    <PackageVersion Include="bblanchon.PDFium.Win32" Version="142.0.7442" />
 
     <!-- === Microsoft.Extensions family (pin if used anywhere) === -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
