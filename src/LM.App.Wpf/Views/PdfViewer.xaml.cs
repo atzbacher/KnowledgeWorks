@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.ViewModels.Pdf;
 using Microsoft.Web.WebView2.Core;
@@ -16,6 +17,7 @@ namespace LM.App.Wpf.Views
         private PdfViewerViewModel? _viewModel;
         private System.Uri? _pendingDocumentSource;
         private bool _isBridgeInitialized;
+        private PdfWebViewBridge? _bridge;
 
         public PdfViewer()
         {
@@ -31,6 +33,7 @@ namespace LM.App.Wpf.Views
             if (_viewModel is not null)
             {
                 _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+                _viewModel.WebViewBridge = null;
             }
 
             _viewModel = e.NewValue as PdfViewerViewModel;
@@ -39,6 +42,7 @@ namespace LM.App.Wpf.Views
             {
                 _viewModel.PropertyChanged += OnViewModelPropertyChanged;
                 _pendingDocumentSource = _viewModel.DocumentSource;
+                AttachBridge();
             }
 
             if (IsLoaded)
@@ -55,6 +59,7 @@ namespace LM.App.Wpf.Views
             if (_viewModel is not null)
             {
                 _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+                _viewModel.WebViewBridge = null;
             }
 
             if (PdfWebView.CoreWebView2 is not null && _isBridgeInitialized)
@@ -68,6 +73,8 @@ namespace LM.App.Wpf.Views
         {
             var documentSource = _viewModel?.DocumentSource ?? _pendingDocumentSource;
             _pendingDocumentSource = null;
+
+            AttachBridge();
 
             _ = PdfWebView.Dispatcher.InvokeAsync(async () =>
             {
@@ -222,6 +229,73 @@ namespace LM.App.Wpf.Views
             catch (Exception ex)
             {
                 Trace.TraceError("Unhandled error while processing WebView message: {0}", ex);
+            }
+        }
+
+        private void AttachBridge()
+        {
+            if (_viewModel is null)
+            {
+                return;
+            }
+
+            _bridge ??= new PdfWebViewBridge(PdfWebView);
+            _viewModel.WebViewBridge = _bridge;
+        }
+
+        private sealed class PdfWebViewBridge : IPdfWebViewBridge
+        {
+            private readonly Microsoft.Web.WebView2.Wpf.WebView2 _webView;
+
+            public PdfWebViewBridge(Microsoft.Web.WebView2.Wpf.WebView2 webView)
+            {
+                _webView = webView ?? throw new ArgumentNullException(nameof(webView));
+            }
+
+            public async Task ScrollToAnnotationAsync(string annotationId, CancellationToken cancellationToken)
+            {
+                if (string.IsNullOrWhiteSpace(annotationId))
+                {
+                    return;
+                }
+
+                await EnsureCoreAsync().ConfigureAwait(false);
+
+                await _webView.Dispatcher.InvokeAsync(() =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_webView.CoreWebView2 is null)
+                    {
+                        return;
+                    }
+
+                    var payload = JsonSerializer.Serialize(new
+                    {
+                        type = "scroll-to-annotation",
+                        annotationId
+                    });
+
+                    _webView.CoreWebView2.PostWebMessageAsJson(payload);
+                }).Task.ConfigureAwait(false);
+            }
+
+            private async Task EnsureCoreAsync()
+            {
+                if (_webView.CoreWebView2 is not null)
+                {
+                    return;
+                }
+
+                if (!_webView.Dispatcher.CheckAccess())
+                {
+                    await _webView.Dispatcher.InvokeAsync(async () =>
+                    {
+                        await EnsureCoreAsync().ConfigureAwait(true);
+                    }).Task.ConfigureAwait(false);
+                    return;
+                }
+
+                await _webView.EnsureCoreWebView2Async().ConfigureAwait(true);
             }
         }
     }

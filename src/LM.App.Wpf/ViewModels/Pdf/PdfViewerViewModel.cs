@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -23,24 +25,40 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private readonly HookOrchestrator _hookOrchestrator;
         private readonly IUserContext _userContext;
         private readonly IPdfAnnotationPreviewStorage _previewStorage;
+        private readonly IWorkSpaceService _workspace;
+        private readonly IClipboardService _clipboard;
 
         private string? _entryId;
         private string? _pdfPath;
         private string? _pdfHash;
         private System.Uri? _documentSource;
-        private PdfAnnotationViewModel? _selectedAnnotation;
+        private PdfAnnotation? _selectedAnnotation;
         private bool _isBusy;
+        private readonly RelayCommand _copyAnnotationCommand;
+        private readonly RelayCommand _deleteAnnotationCommand;
+        private readonly RelayCommand _changeAnnotationColorCommand;
+
+        private IPdfWebViewBridge? _webViewBridge;
 
         public PdfViewerViewModel(
             HookOrchestrator hookOrchestrator,
             IUserContext userContext,
-            IPdfAnnotationPreviewStorage previewStorage)
+            IPdfAnnotationPreviewStorage previewStorage,
+            IWorkSpaceService workspace,
+            IClipboardService clipboard)
         {
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _previewStorage = previewStorage ?? throw new ArgumentNullException(nameof(previewStorage));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
 
-            Annotations = new ObservableCollection<PdfAnnotationViewModel>();
+            Annotations = new ObservableCollection<PdfAnnotation>();
+            Annotations.CollectionChanged += OnAnnotationsCollectionChanged;
+
+            _copyAnnotationCommand = new RelayCommand(OnCopyAnnotation, CanInteractWithAnnotation);
+            _deleteAnnotationCommand = new RelayCommand(OnDeleteAnnotation, CanInteractWithAnnotation);
+            _changeAnnotationColorCommand = new RelayCommand(OnChangeAnnotationColor, CanChangeAnnotationColor);
 
             LoadPdfCommand = new AsyncRelayCommand(LoadPdfAsync, () => !IsBusy);
             RecordAnnotationChangeCommand = new AsyncRelayCommand(RecordAnnotationChangeAsync, CanRecordAnnotationChange);
@@ -49,7 +67,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         /// <summary>
         /// Gets the collection of annotations displayed in the sidebar.
         /// </summary>
-        public ObservableCollection<PdfAnnotationViewModel> Annotations { get; }
+        public ObservableCollection<PdfAnnotation> Annotations { get; }
 
         /// <summary>
         /// Gets or sets the workspace entry identifier backing the viewer session.
@@ -101,7 +119,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         /// <summary>
         /// Gets or sets the annotation currently selected in the UI.
         /// </summary>
-        public PdfAnnotationViewModel? SelectedAnnotation
+        public PdfAnnotation? SelectedAnnotation
         {
             get => _selectedAnnotation;
             set
@@ -109,6 +127,9 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 if (SetProperty(ref _selectedAnnotation, value))
                 {
                     RecordAnnotationChangeCommand?.RaiseCanExecuteChanged();
+                    _copyAnnotationCommand.RaiseCanExecuteChanged();
+                    _deleteAnnotationCommand.RaiseCanExecuteChanged();
+                    _changeAnnotationColorCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -125,6 +146,9 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 {
                     LoadPdfCommand.RaiseCanExecuteChanged();
                     RecordAnnotationChangeCommand.RaiseCanExecuteChanged();
+                    _copyAnnotationCommand.RaiseCanExecuteChanged();
+                    _deleteAnnotationCommand.RaiseCanExecuteChanged();
+                    _changeAnnotationColorCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -138,6 +162,59 @@ namespace LM.App.Wpf.ViewModels.Pdf
         /// Command invoked to persist annotation changes to the changelog hook.
         /// </summary>
         public IAsyncRelayCommand RecordAnnotationChangeCommand { get; }
+
+        /// <summary>
+        /// Gets the command used to copy annotation content to the clipboard.
+        /// </summary>
+        public System.Windows.Input.ICommand CopyAnnotationCommand => _copyAnnotationCommand;
+
+        /// <summary>
+        /// Gets the command used to delete an annotation.
+        /// </summary>
+        public System.Windows.Input.ICommand DeleteAnnotationCommand => _deleteAnnotationCommand;
+
+        /// <summary>
+        /// Gets the command used to change the annotation color.
+        /// </summary>
+        public System.Windows.Input.ICommand ChangeAnnotationColorCommand => _changeAnnotationColorCommand;
+
+        /// <summary>
+        /// Gets or sets the bridge used to communicate with the WebView instance.
+        /// </summary>
+        public IPdfWebViewBridge? WebViewBridge
+        {
+            private get => _webViewBridge;
+            set => _webViewBridge = value;
+        }
+
+        public async Task HandleAnnotationSelectionAsync(PdfAnnotation? annotation, CancellationToken cancellationToken)
+        {
+            SelectedAnnotation = annotation;
+
+            if (annotation is null || string.IsNullOrWhiteSpace(annotation.Id))
+            {
+                return;
+            }
+
+            var bridge = _webViewBridge;
+            if (bridge is null)
+            {
+                return;
+            }
+
+            try
+            {
+                await bridge.ScrollToAnnotationAsync(annotation.Id, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Intentionally ignored.
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to request annotation scroll for '{0}': {1}", annotation.Id, ex);
+            }
+        }
 
         private async Task LoadPdfAsync()
         {
@@ -191,22 +268,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 return;
             }
 
-            var tags = new List<string>
-            {
-                "annotationId:" + SelectedAnnotation.Id
-            };
-
-            if (!string.IsNullOrWhiteSpace(SelectedAnnotation.Title))
-            {
-                tags.Add("annotationTitle:" + SelectedAnnotation.Title);
-            }
-
-            await ReviewChangeLogWriter.WriteAsync(_hookOrchestrator,
-                                                   EntryId,
-                                                   _userContext.UserName,
-                                                   "annotation-change",
-                                                   tags,
-                                                   CancellationToken.None).ConfigureAwait(false);
+            await WriteAnnotationChangeAsync(SelectedAnnotation, "manual-log", CancellationToken.None).ConfigureAwait(false);
         }
 
         private bool CanRecordAnnotationChange()
@@ -236,11 +298,201 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 if (annotation is not null)
                 {
                     annotation.PreviewImagePath = relativePath;
+                    annotation.PreviewImage = TryLoadPreviewBitmap(relativePath);
                 }
             }
             catch (Exception ex)
             {
                 Trace.TraceError("Failed to persist annotation preview: {0}", ex);
+            }
+        }
+
+        private bool CanInteractWithAnnotation(object? parameter)
+        {
+            return !IsBusy && parameter is PdfAnnotation annotation && !string.IsNullOrWhiteSpace(annotation.Id);
+        }
+
+        private bool CanChangeAnnotationColor(object? parameter)
+        {
+            if (IsBusy)
+            {
+                return false;
+            }
+
+            if (parameter is not PdfAnnotationColorCommandParameter request)
+            {
+                return false;
+            }
+
+            return request.Annotation is not null && !string.IsNullOrWhiteSpace(request.Annotation.Id);
+        }
+
+        private void OnAnnotationsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems is not null)
+            {
+                foreach (var item in e.OldItems)
+                {
+                    if (item is PdfAnnotation oldAnnotation)
+                    {
+                        oldAnnotation.PropertyChanged -= OnAnnotationPropertyChanged;
+                    }
+                }
+            }
+
+            if (e.NewItems is not null)
+            {
+                foreach (var item in e.NewItems)
+                {
+                    if (item is PdfAnnotation newAnnotation)
+                    {
+                        newAnnotation.PropertyChanged += OnAnnotationPropertyChanged;
+                    }
+                }
+            }
+        }
+
+        private void OnAnnotationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not PdfAnnotation annotation)
+            {
+                return;
+            }
+
+            if (string.Equals(e.PropertyName, nameof(PdfAnnotation.Note), StringComparison.Ordinal))
+            {
+                _ = WriteAnnotationChangeAsync(annotation, "note-updated", CancellationToken.None);
+            }
+        }
+
+        private void OnCopyAnnotation(object? parameter)
+        {
+            if (parameter is not PdfAnnotation annotation)
+            {
+                return;
+            }
+
+            var text = annotation.TextSnippet;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                text = annotation.Title;
+            }
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            try
+            {
+                _clipboard.SetText(text);
+                _ = WriteAnnotationChangeAsync(annotation, "copied", CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to copy annotation '{0}': {1}", annotation.Id, ex);
+            }
+        }
+
+        private void OnDeleteAnnotation(object? parameter)
+        {
+            if (parameter is not PdfAnnotation annotation)
+            {
+                return;
+            }
+
+            if (!Annotations.Remove(annotation))
+            {
+                return;
+            }
+
+            if (ReferenceEquals(SelectedAnnotation, annotation))
+            {
+                SelectedAnnotation = null;
+            }
+
+            _ = WriteAnnotationChangeAsync(annotation, "deleted", CancellationToken.None);
+        }
+
+        private void OnChangeAnnotationColor(object? parameter)
+        {
+            if (parameter is not PdfAnnotationColorCommandParameter request || request.Annotation is null)
+            {
+                return;
+            }
+
+            request.Annotation.ColorName = string.IsNullOrWhiteSpace(request.ColorName) ? null : request.ColorName.Trim();
+            _ = WriteAnnotationChangeAsync(request.Annotation, "color-updated", CancellationToken.None);
+        }
+
+        private async Task WriteAnnotationChangeAsync(PdfAnnotation annotation, string? actionTag, CancellationToken cancellationToken)
+        {
+            if (annotation is null || string.IsNullOrWhiteSpace(annotation.Id) || string.IsNullOrWhiteSpace(EntryId))
+            {
+                return;
+            }
+
+            try
+            {
+                var tags = new List<string>
+                {
+                    "annotationId:" + annotation.Id
+                };
+
+                if (!string.IsNullOrWhiteSpace(annotation.Title))
+                {
+                    tags.Add("annotationTitle:" + annotation.Title);
+                }
+
+                if (!string.IsNullOrWhiteSpace(actionTag))
+                {
+                    tags.Add("action:" + actionTag);
+                }
+
+                await ReviewChangeLogWriter.WriteAsync(_hookOrchestrator,
+                                                       EntryId!,
+                                                       _userContext.UserName,
+                                                       "annotation-change",
+                                                       tags,
+                                                       cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // Intentionally ignored.
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to write annotation change for '{0}': {1}", annotation.Id, ex);
+            }
+        }
+
+        private System.Windows.Media.Imaging.BitmapImage? TryLoadPreviewBitmap(string? relativePath)
+        {
+            if (string.IsNullOrWhiteSpace(relativePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var absolutePath = _workspace.GetAbsolutePath(relativePath);
+                if (!File.Exists(absolutePath))
+                {
+                    return null;
+                }
+
+                var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(absolutePath, UriKind.Absolute);
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to load annotation preview '{0}': {1}", relativePath, ex);
+                return null;
             }
         }
     }
