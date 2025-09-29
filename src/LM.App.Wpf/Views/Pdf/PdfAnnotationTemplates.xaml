@@ -39,17 +39,18 @@
         </Border>
 
         <StackPanel Grid.Column="2"
-                    Orientation="Vertical"
-                    Spacing="4">
+                    Orientation="Vertical">
           <TextBlock Text="{Binding Title}"
                      FontWeight="SemiBold"
                      TextTrimming="CharacterEllipsis" />
           <TextBlock Text="{Binding TextSnippet}"
+                     Margin="0,4,0,0"
                      FontStyle="Italic"
                      Foreground="#FF555555"
                      TextWrapping="Wrap"
                      MaxHeight="60" />
           <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
+                   Margin="0,4,0,0"
                    AcceptsReturn="True"
                    TextWrapping="Wrap"
                    MinHeight="48"

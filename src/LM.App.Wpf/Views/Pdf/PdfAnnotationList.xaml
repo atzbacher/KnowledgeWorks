@@ -30,11 +30,11 @@
     <ListView ItemsSource="{Binding Source={StaticResource AnnotationsView}}"
               SelectedItem="{Binding SelectedAnnotation, Mode=TwoWay}"
               ItemTemplate="{StaticResource PdfAnnotationItemTemplate}"
-              SelectionChanged="OnSelectionChanged">
+              SelectionChanged="OnSelectionChanged"
+              ScrollViewer.VerticalScrollBarVisibility="Auto">
       <ListView.GroupStyle>
         <GroupStyle ContainerStyle="{StaticResource PdfAnnotationGroupStyle}" />
       </ListView.GroupStyle>
-      <ListView.ScrollViewer.VerticalScrollBarVisibility>Auto</ListView.ScrollViewer.VerticalScrollBarVisibility>
     </ListView>
   </Grid>
 </UserControl>
