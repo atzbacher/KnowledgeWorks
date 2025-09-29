@@ -81,6 +81,8 @@ namespace LM.App.Wpf.ViewModels.Library
 
         public string KeywordTooltip { get; } = BuildKeywordTooltip();
 
+        public IRelayCommand ClearCommand { get; }
+
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore,
                                        ILibraryPresetPrompt presetPrompt,
                                        IEntryStore store,
@@ -90,6 +92,8 @@ namespace LM.App.Wpf.ViewModels.Library
             _presetPrompt = presetPrompt ?? throw new ArgumentNullException(nameof(presetPrompt));
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+
+            ClearCommand = new RelayCommand(Clear);
         }
 
         private static string BuildKeywordTooltip()

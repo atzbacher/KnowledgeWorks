@@ -53,6 +53,8 @@ namespace LM.App.Wpf.ViewModels
 
         public IReadOnlyList<LibraryColumnOption> ColumnOptions => _columnOptions;
 
+        public IAsyncRelayCommand<LibrarySearchResult?> OpenPdfAnnotationsCommand => Results.OpenPdfAnnotationsCommand;
+
         private void InitializeColumns()
         {
             foreach (var (key, display) in s_columnDefinitions)
