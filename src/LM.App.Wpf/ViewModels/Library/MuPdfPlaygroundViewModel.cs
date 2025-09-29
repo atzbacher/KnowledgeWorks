@@ -360,7 +360,7 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
 
     partial void OnSelectedPageNumberChanged(int value)
     {
-        if (_isInitializing)
+        if (_isInitializing || _isDisposed)
         {
             return;
         }
@@ -370,7 +370,7 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
 
     partial void OnSelectedZoomChanged(int value)
     {
-        if (_isInitializing)
+        if (_isInitializing || _isDisposed)
         {
             return;
         }
@@ -380,7 +380,7 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
 
     partial void OnIncludePdfAnnotationsChanged(bool value)
     {
-        if (_isInitializing)
+        if (_isInitializing || _isDisposed)
         {
             return;
         }
@@ -390,14 +390,26 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
 
     private async Task RenderCurrentPageAsync()
     {
-        if (_document is null)
+        if (_isDisposed || _document is null)
         {
             return;
         }
 
-        await _renderGate.WaitAsync().ConfigureAwait(false);
         try
         {
+            await _renderGate.WaitAsync().ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+        try
+        {
+            if (_isDisposed || _document is null)
+            {
+                return;
+            }
+
             var pageIndex = Math.Clamp(SelectedPageNumber - 1, 0, _document.Pages.Count - 1);
             var zoomFactor = SelectedZoom / 100d;
             var includeAnnotations = IncludePdfAnnotations;
@@ -421,7 +433,14 @@ internal sealed partial class MuPdfPlaygroundViewModel : ViewModelBase, IDisposa
         }
         finally
         {
-            _renderGate.Release();
+            try
+            {
+                _renderGate.Release();
+            }
+            catch (ObjectDisposedException)
+            {
+                // Disposal raced with an in-flight render; nothing to release.
+            }
         }
     }
 
