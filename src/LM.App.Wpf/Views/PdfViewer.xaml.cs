@@ -2,17 +2,20 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using LM.App.Wpf.ViewModels.Pdf;
+using Microsoft.Web.WebView2.Core;
 
 namespace LM.App.Wpf.Views
 {
     public partial class PdfViewer : System.Windows.Controls.UserControl
     {
-        private static readonly string ViewerRelativePath = Path.Combine("wwwroot", "pdfjs", "viewer.html");
+        private static readonly string ViewerRelativePath = Path.Combine("wwwroot", "pdfjs", "web", "viewer.html");
 
         private PdfViewerViewModel? _viewModel;
         private System.Uri? _pendingDocumentSource;
+        private bool _isBridgeInitialized;
 
         public PdfViewer()
         {
@@ -52,6 +55,12 @@ namespace LM.App.Wpf.Views
             if (_viewModel is not null)
             {
                 _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+            }
+
+            if (PdfWebView.CoreWebView2 is not null && _isBridgeInitialized)
+            {
+                PdfWebView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
+                _isBridgeInitialized = false;
             }
         }
 
@@ -115,6 +124,8 @@ namespace LM.App.Wpf.Views
                 return;
             }
 
+            InitializeBridge(PdfWebView.CoreWebView2);
+
             var viewerUri = new Uri(viewerPath, UriKind.Absolute);
             var target = viewerUri.AbsoluteUri;
 
@@ -125,6 +136,93 @@ namespace LM.App.Wpf.Views
             }
 
             PdfWebView.CoreWebView2.Navigate(target);
+        }
+
+        private void InitializeBridge(CoreWebView2 coreWebView)
+        {
+            if (_isBridgeInitialized)
+            {
+                return;
+            }
+
+            coreWebView.WebMessageReceived += OnWebMessageReceived;
+            _isBridgeInitialized = true;
+        }
+
+        private async void OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            if (_viewModel is null)
+            {
+                return;
+            }
+
+            try
+            {
+                var json = e.WebMessageAsJson;
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    json = e.TryGetWebMessageAsString();
+                }
+
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return;
+                }
+
+                using var document = JsonDocument.Parse(json);
+                var root = document.RootElement;
+
+                if (!root.TryGetProperty("type", out var typeElement) || typeElement.GetString() != "highlight-created")
+                {
+                    return;
+                }
+
+                if (!root.TryGetProperty("annotationId", out var annotationElement))
+                {
+                    return;
+                }
+
+                var annotationId = annotationElement.GetString();
+                if (string.IsNullOrWhiteSpace(annotationId))
+                {
+                    return;
+                }
+
+                if (!root.TryGetProperty("preview", out var previewElement))
+                {
+                    return;
+                }
+
+                if (!previewElement.TryGetProperty("base64", out var dataElement))
+                {
+                    return;
+                }
+
+                var base64 = dataElement.GetString();
+                if (string.IsNullOrWhiteSpace(base64))
+                {
+                    return;
+                }
+
+                var width = previewElement.TryGetProperty("width", out var widthElement) ? widthElement.GetInt32() : 0;
+                var height = previewElement.TryGetProperty("height", out var heightElement) ? heightElement.GetInt32() : 0;
+
+                var pngBytes = Convert.FromBase64String(base64);
+
+                await _viewModel.HandleHighlightPreviewAsync(annotationId, pngBytes, width, height).ConfigureAwait(true);
+            }
+            catch (FormatException ex)
+            {
+                Trace.TraceError("Failed to decode highlight preview payload: {0}", ex);
+            }
+            catch (JsonException ex)
+            {
+                Trace.TraceError("Failed to parse WebView message: {0}", ex);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Unhandled error while processing WebView message: {0}", ex);
+            }
         }
     }
 }

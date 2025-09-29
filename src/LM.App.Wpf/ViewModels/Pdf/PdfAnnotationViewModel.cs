@@ -10,6 +10,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     {
         private string _title;
         private string? _content;
+        private string? _previewImagePath;
 
         public PdfAnnotationViewModel(string id, string title)
         {
@@ -65,6 +66,19 @@ namespace LM.App.Wpf.ViewModels.Pdf
             {
                 var sanitized = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
                 SetProperty(ref _content, sanitized);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the workspace-relative path to the preview image for this annotation.
+        /// </summary>
+        public string? PreviewImagePath
+        {
+            get => _previewImagePath;
+            set
+            {
+                var sanitized = string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+                SetProperty(ref _previewImagePath, sanitized);
             }
         }
     }

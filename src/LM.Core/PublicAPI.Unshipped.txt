@@ -26,6 +26,8 @@ LM.Core.Abstractions.IHasher
 LM.Core.Abstractions.IHasher.ComputeSha256Async(string! filePath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IPdfAnnotationPersistenceService
 LM.Core.Abstractions.IPdfAnnotationPersistenceService.PersistAsync(string! entryId, string! pdfHash, string! overlayJson, System.Collections.Generic.IReadOnlyDictionary<string!, byte[]!>! previewImages, string? overlaySidecarRelativePath, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.IPdfAnnotationPreviewStorage
+LM.Core.Abstractions.IPdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>
 LM.Core.Abstractions.IMetadataDebugSlideExporter
 LM.Core.Abstractions.IMetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IMetadataExtractor
@@ -455,8 +457,9 @@ LM.Core.Models.Pdf.PdfAnnotationPreviewImage
 LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Hash.get -> string?
 LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Height.get -> int
 LM.Core.Models.Pdf.PdfAnnotationPreviewImage.LengthBytes.get -> long
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.RelativePath.get -> string!
 LM.Core.Models.Pdf.PdfAnnotationPreviewImage.MimeType.get -> string!
-LM.Core.Models.Pdf.PdfAnnotationPreviewImage.PdfAnnotationPreviewImage(string! mimeType, int width, int height, long lengthBytes, string? hash = null) -> void
+LM.Core.Models.Pdf.PdfAnnotationPreviewImage.PdfAnnotationPreviewImage(string! mimeType, int width, int height, long lengthBytes, string! relativePath, string? hash = null) -> void
 LM.Core.Models.Pdf.PdfAnnotationPreviewImage.Width.get -> int
 LM.Core.Models.Pdf.PdfAnnotationRect
 LM.Core.Models.Pdf.PdfAnnotationRect.FromAbsolute(double x, double y, double width, double height, double pageWidth, double pageHeight) -> LM.Core.Models.Pdf.PdfAnnotationRect!
