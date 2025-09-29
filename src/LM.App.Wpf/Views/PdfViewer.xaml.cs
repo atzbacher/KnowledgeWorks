@@ -173,6 +173,12 @@ namespace LM.App.Wpf.Views
                 // viewer closes before the host object is disposed. Ignore it
                 // and continue registering a new bridge instance.
             }
+            catch (COMException ex) when ((uint)ex.ErrorCode == 0x80070490)
+            {
+                // WebView2 returns ERROR_NOT_FOUND (0x80070490) if the
+                // host object has already been removed. Treat it the same
+                // as a missing registration and continue.
+            }
 
             _hostObject ??= new PdfViewerHostObject(this);
 
