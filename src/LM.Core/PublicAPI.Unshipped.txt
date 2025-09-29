@@ -198,6 +198,59 @@ LM.Core.Models.FileMetadata.Source.get -> string?
 LM.Core.Models.FileMetadata.Source.set -> void
 LM.Core.Models.FileMetadata.Tags.get -> System.Collections.Generic.List<string!>!
 LM.Core.Models.FileMetadata.Tags.set -> void
+LM.Core.Abstractions.ILibraryAnnotationRepository
+LM.Core.Abstractions.ILibraryAnnotationRepository.DeleteAsync(string! entryId, string! attachmentId, System.Guid annotationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.ILibraryAnnotationRepository.GetAnnotationAsync(string! entryId, string! attachmentId, System.Guid annotationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.LibraryAnnotation?>!
+LM.Core.Abstractions.ILibraryAnnotationRepository.GetAnnotationsAsync(string! entryId, string! attachmentId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.LibraryAnnotation!>!>!
+LM.Core.Abstractions.ILibraryAnnotationRepository.ReplaceAsync(string! entryId, string! attachmentId, System.Collections.Generic.IEnumerable<LM.Core.Models.LibraryAnnotation!>! annotations, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Abstractions.ILibraryAnnotationRepository.UpsertAsync(LM.Core.Models.LibraryAnnotation! annotation, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Core.Models.LibraryAnnotation
+LM.Core.Models.LibraryAnnotation.LibraryAnnotation(System.Guid annotationId, string! entryId, string! attachmentId, int pageNumber, LM.Core.Models.LibraryAnnotationGeometry geometry, LM.Core.Models.LibraryAnnotationType annotationType, string? colorKey, System.Collections.Generic.IEnumerable<string!>? tags, string? title, string? note, string? meaning, string! createdBy, System.DateTime createdAtUtc, string? lastModifiedBy, System.DateTime? lastModifiedUtc) -> void
+LM.Core.Models.LibraryAnnotation.AnnotationId.get -> System.Guid
+LM.Core.Models.LibraryAnnotation.AnnotationId.init -> void
+LM.Core.Models.LibraryAnnotation.EntryId.get -> string!
+LM.Core.Models.LibraryAnnotation.EntryId.init -> void
+LM.Core.Models.LibraryAnnotation.AttachmentId.get -> string!
+LM.Core.Models.LibraryAnnotation.AttachmentId.init -> void
+LM.Core.Models.LibraryAnnotation.PageNumber.get -> int
+LM.Core.Models.LibraryAnnotation.PageNumber.init -> void
+LM.Core.Models.LibraryAnnotation.Geometry.get -> LM.Core.Models.LibraryAnnotationGeometry
+LM.Core.Models.LibraryAnnotation.Geometry.init -> void
+LM.Core.Models.LibraryAnnotation.AnnotationType.get -> LM.Core.Models.LibraryAnnotationType
+LM.Core.Models.LibraryAnnotation.AnnotationType.init -> void
+LM.Core.Models.LibraryAnnotation.ColorKey.get -> string?
+LM.Core.Models.LibraryAnnotation.ColorKey.init -> void
+LM.Core.Models.LibraryAnnotation.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.Core.Models.LibraryAnnotation.Tags.init -> void
+LM.Core.Models.LibraryAnnotation.Title.get -> string?
+LM.Core.Models.LibraryAnnotation.Title.init -> void
+LM.Core.Models.LibraryAnnotation.Note.get -> string?
+LM.Core.Models.LibraryAnnotation.Note.init -> void
+LM.Core.Models.LibraryAnnotation.Meaning.get -> string?
+LM.Core.Models.LibraryAnnotation.Meaning.init -> void
+LM.Core.Models.LibraryAnnotation.CreatedBy.get -> string!
+LM.Core.Models.LibraryAnnotation.CreatedBy.init -> void
+LM.Core.Models.LibraryAnnotation.CreatedAtUtc.get -> System.DateTime
+LM.Core.Models.LibraryAnnotation.CreatedAtUtc.init -> void
+LM.Core.Models.LibraryAnnotation.LastModifiedBy.get -> string?
+LM.Core.Models.LibraryAnnotation.LastModifiedBy.init -> void
+LM.Core.Models.LibraryAnnotation.LastModifiedUtc.get -> System.DateTime?
+LM.Core.Models.LibraryAnnotation.LastModifiedUtc.init -> void
+LM.Core.Models.LibraryAnnotationGeometry
+LM.Core.Models.LibraryAnnotationGeometry.LibraryAnnotationGeometry(float X, float Y, float Width, float Height) -> void
+LM.Core.Models.LibraryAnnotationGeometry.X.get -> float
+LM.Core.Models.LibraryAnnotationGeometry.X.init -> void
+LM.Core.Models.LibraryAnnotationGeometry.Y.get -> float
+LM.Core.Models.LibraryAnnotationGeometry.Y.init -> void
+LM.Core.Models.LibraryAnnotationGeometry.Width.get -> float
+LM.Core.Models.LibraryAnnotationGeometry.Width.init -> void
+LM.Core.Models.LibraryAnnotationGeometry.Height.get -> float
+LM.Core.Models.LibraryAnnotationGeometry.Height.init -> void
+LM.Core.Models.LibraryAnnotationType
+LM.Core.Models.LibraryAnnotationType.Highlight = 0 -> LM.Core.Models.LibraryAnnotationType
+LM.Core.Models.LibraryAnnotationType.Note = 1 -> LM.Core.Models.LibraryAnnotationType
+LM.Core.Models.LibraryAnnotationType.Rectangle = 2 -> LM.Core.Models.LibraryAnnotationType
+LM.Core.Models.LibraryAnnotationType.Underline = 3 -> LM.Core.Models.LibraryAnnotationType
 LM.Core.Models.FileMetadata.Title.get -> string?
 LM.Core.Models.FileMetadata.Title.set -> void
 LM.Core.Models.FileMetadata.Year.get -> int?

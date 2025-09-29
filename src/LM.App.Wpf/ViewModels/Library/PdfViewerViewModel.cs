@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections;
 using System.Drawing.Imaging;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
+using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using PdfiumViewer;
@@ -39,6 +41,7 @@ public sealed partial class PdfViewerViewModel : ViewModelBase
     private const double DefaultSidePaneWidth = 320;
 
     private readonly IUserPreferencesStore _preferencesStore;
+    private readonly ILibraryAnnotationRepository _annotationRepository;
     private readonly ObservableCollection<PdfPageThumbnailViewModel> _thumbnails = new();
     private readonly ObservableCollection<PdfAnnotationListItemViewModel> _annotations = new();
     private readonly ObservableCollection<PdfOutlineNodeViewModel> _outlineNodes = new();
@@ -66,13 +69,16 @@ public sealed partial class PdfViewerViewModel : ViewModelBase
 
     public event EventHandler? SearchRequested;
 
-    public PdfViewerViewModel(IUserPreferencesStore preferencesStore)
+    public PdfViewerViewModel(IUserPreferencesStore preferencesStore,
+                              ILibraryAnnotationRepository annotationRepository)
     {
         _preferencesStore = preferencesStore ?? throw new ArgumentNullException(nameof(preferencesStore));
+        _annotationRepository = annotationRepository ?? throw new ArgumentNullException(nameof(annotationRepository));
 
         Thumbnails = new ReadOnlyObservableCollection<PdfPageThumbnailViewModel>(_thumbnails);
         AnnotationItems = new ReadOnlyObservableCollection<PdfAnnotationListItemViewModel>(_annotations);
         OutlineItems = new ReadOnlyObservableCollection<PdfOutlineNodeViewModel>(_outlineNodes);
+        PdfAnnotations = new ObservableCollection<PdfAnnotationViewModel>();
 
         _ = LoadPreferencesAsync();
     }
@@ -116,6 +122,8 @@ public sealed partial class PdfViewerViewModel : ViewModelBase
     public ReadOnlyObservableCollection<PdfPageThumbnailViewModel> Thumbnails { get; }
 
     public ReadOnlyObservableCollection<PdfAnnotationListItemViewModel> AnnotationItems { get; }
+
+    internal ObservableCollection<PdfAnnotationViewModel> PdfAnnotations { get; }
 
     public ReadOnlyObservableCollection<PdfOutlineNodeViewModel> OutlineItems { get; }
 
@@ -286,9 +294,92 @@ public sealed partial class PdfViewerViewModel : ViewModelBase
         OnPropertyChanged(nameof(WindowTitle));
 
         await LoadDocumentArtifactsAsync(absolutePath).ConfigureAwait(true);
+        await LoadPersistedAnnotationsAsync(entry.Id, attachmentId ?? string.Empty).ConfigureAwait(true);
         SelectedPaneTab = PdfViewerPaneTab.Thumbnails;
         _ = Thumbnails.FirstOrDefault();
         return true;
+    }
+
+    private async Task LoadPersistedAnnotationsAsync(string entryId, string attachmentId)
+    {
+        try
+        {
+            var annotations = await _annotationRepository
+                .GetAnnotationsAsync(entryId, attachmentId)
+                .ConfigureAwait(true);
+
+            var viewModels = PdfAnnotationViewModelFactory.CreateMany(annotations);
+            ApplyAnnotations(viewModels);
+        }
+        catch
+        {
+            PdfAnnotations.Clear();
+            _annotations.Clear();
+        }
+    }
+
+    private void ApplyAnnotations(IReadOnlyList<PdfAnnotationViewModel> annotations)
+    {
+        PdfAnnotations.Clear();
+        _annotations.Clear();
+
+        if (annotations.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var annotation in annotations)
+        {
+            PdfAnnotations.Add(annotation);
+            _annotations.Add(CreateListItem(annotation));
+        }
+    }
+
+    private PdfAnnotationListItemViewModel CreateListItem(PdfAnnotationViewModel annotation)
+    {
+        var accentBrush = annotation.ColorBrush ?? System.Windows.Media.Brushes.Goldenrod;
+        var tags = annotation.TagCollection.Count == 0
+            ? null
+            : string.Join(", ", annotation.TagCollection);
+
+        var navigateCommand = new RelayCommand(() => NavigateToAnnotation(annotation));
+        var deleteCommand = new RelayCommand(static () => { }, static () => false);
+
+        return new PdfAnnotationListItemViewModel(
+            annotation.AnnotationId,
+            ResolveAnnotationTitle(annotation),
+            tags,
+            accentBrush,
+            annotation.PageNumber,
+            navigateCommand,
+            deleteCommand);
+    }
+
+    private static string ResolveAnnotationTitle(PdfAnnotationViewModel annotation)
+    {
+        if (!string.IsNullOrWhiteSpace(annotation.Title))
+        {
+            return annotation.Title!;
+        }
+
+        return annotation.Kind switch
+        {
+            PdfAnnotationKind.Note => $"Note — Page {annotation.PageNumber}",
+            PdfAnnotationKind.Rectangle => $"Rectangle — Page {annotation.PageNumber}",
+            PdfAnnotationKind.Underline => $"Underline — Page {annotation.PageNumber}",
+            _ => $"Highlight — Page {annotation.PageNumber}"
+        };
+    }
+
+    private void NavigateToAnnotation(PdfAnnotationViewModel annotation)
+    {
+        if (annotation is null)
+        {
+            return;
+        }
+
+        _surface?.TryNavigateToPage(annotation.PageNumber);
+        SelectedPaneTab = PdfViewerPaneTab.Annotations;
     }
 
     private async Task LoadPreferencesAsync()

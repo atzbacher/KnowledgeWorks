@@ -25,6 +25,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     private readonly HookOrchestrator _hookOrchestrator;
     private readonly IWorkSpaceService _workspace;
     private readonly IClipboardService _clipboard;
+    private readonly ILibraryAnnotationRepository _annotationRepository;
 
     private string? _entryId;
     private string? _pdfPath;
@@ -35,11 +36,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
 
     public DataExtractionPlaygroundViewModel(HookOrchestrator hookOrchestrator,
                                              IWorkSpaceService workspace,
-                                             IClipboardService clipboard)
+                                             IClipboardService clipboard,
+                                             ILibraryAnnotationRepository annotationRepository)
     {
         _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
         _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
         _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
+        _annotationRepository = annotationRepository ?? throw new ArgumentNullException(nameof(annotationRepository));
 
         ModeOptions = new[]
         {
@@ -183,6 +186,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         PdfFileName = pdfSource.DisplayName;
         PdfSource = new Uri(pdfSource.AbsolutePath);
 
+        await LoadPersistedAnnotationsAsync(entry.Id, _pdfAttachmentId ?? string.Empty, cancellationToken).ConfigureAwait(true);
+
         var pageIndexes = ReadPageIndexes(pdfSource.AbsolutePath);
         if (pageIndexes.Count > 0)
         {
@@ -203,6 +208,37 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         CopyTableCommand.NotifyCanExecuteChanged();
 
         return true;
+    }
+
+    private async Task LoadPersistedAnnotationsAsync(string entryId,
+                                                     string attachmentId,
+                                                     CancellationToken cancellationToken)
+    {
+        try
+        {
+            var annotations = await _annotationRepository
+                .GetAnnotationsAsync(entryId, attachmentId, cancellationToken)
+                .ConfigureAwait(true);
+
+            PdfAnnotations.Clear();
+            if (annotations.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var viewModel in PdfAnnotationViewModelFactory.CreateMany(annotations))
+            {
+                PdfAnnotations.Add(viewModel);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch
+        {
+            PdfAnnotations.Clear();
+        }
     }
 
     [RelayCommand(CanExecute = nameof(CanExtractTables))]

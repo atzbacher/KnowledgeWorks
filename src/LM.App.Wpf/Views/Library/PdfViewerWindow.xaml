@@ -254,7 +254,8 @@
             <Border Grid.Column="2"
                     Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
                 <controls:PdfInteractiveViewer x:Name="ViewerControl"
-                                               SourcePath="{Binding DocumentPath}" />
+                                               SourcePath="{Binding DocumentPath}"
+                                               Annotations="{Binding PdfAnnotations}" />
             </Border>
         </Grid>
     </Grid>

@@ -522,7 +522,7 @@ LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Thumbnails = 0 -> LM.App.Wpf.View
 LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Annotations = 1 -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
 LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Outline = 2 -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel
-LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.PdfViewerViewModel(LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore) -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.PdfViewerViewModel(LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.Core.Abstractions.ILibraryAnnotationRepository! annotationRepository) -> void
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Entry.get -> LM.Core.Models.Entry?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Attachment.get -> LM.Core.Models.Attachment?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.DocumentPath.get -> string?

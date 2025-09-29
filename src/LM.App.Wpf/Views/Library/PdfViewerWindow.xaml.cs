@@ -23,11 +23,13 @@ namespace LM.App.Wpf.Views.Library
             {
                 oldViewModel.SearchRequested -= OnSearchRequested;
                 oldViewModel.DetachSurface();
+                ViewerControl.Annotations = null;
             }
 
             if (e.NewValue is PdfViewerViewModel viewModel)
             {
                 EnsureSurfaceAdapter();
+                ViewerControl.Annotations = viewModel.PdfAnnotations;
                 viewModel.AttachSurface(_surfaceAdapter!);
                 viewModel.SearchRequested += OnSearchRequested;
             }

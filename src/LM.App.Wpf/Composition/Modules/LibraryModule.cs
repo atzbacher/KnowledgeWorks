@@ -12,6 +12,7 @@ using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Infrastructure.Hooks;
+using LM.Infrastructure.Repositories;
 using LM.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,7 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<IFileExplorerService, FileExplorerService>();
             services.AddSingleton<LibraryFilterPresetStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
+            services.AddSingleton<ILibraryAnnotationRepository, JsonLibraryAnnotationRepository>();
             services.AddTransient<LibraryPresetSaveDialogViewModel>();
             services.AddTransient<LibraryPresetSaveDialog>();
             services.AddTransient<LibraryPresetPickerDialogViewModel>();

@@ -50,6 +50,13 @@ LM.Infrastructure.Hooks.HookContext.HookContext() -> void
 LM.Infrastructure.Hooks.HookOrchestrator
 LM.Infrastructure.Hooks.HookOrchestrator.HookOrchestrator(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Hooks.HookOrchestrator.ProcessAsync(string! entryId, LM.Infrastructure.Hooks.HookContext! ctx, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.JsonLibraryAnnotationRepository(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.DeleteAsync(string! entryId, string! attachmentId, System.Guid annotationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.GetAnnotationAsync(string! entryId, string! attachmentId, System.Guid annotationId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.Core.Models.LibraryAnnotation?>!
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.GetAnnotationsAsync(string! entryId, string! attachmentId, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.Core.Models.LibraryAnnotation!>!>!
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.ReplaceAsync(string! entryId, string! attachmentId, System.Collections.Generic.IEnumerable<LM.Core.Models.LibraryAnnotation!>! annotations, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Repositories.JsonLibraryAnnotationRepository.UpsertAsync(LM.Core.Models.LibraryAnnotation! annotation, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Hooks.HookPersister
 LM.Infrastructure.Hooks.HookPersister.HookPersister(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Hooks.HookPersister.SaveArticleIfAnyAsync(string! entryId, LM.HubSpoke.Models.ArticleHook? hook, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
