@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Docnet.Core" />
     <PackageReference Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" GeneratePathProperty="true" />
     <PackageReference Include="PdfiumViewer.WPF" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
