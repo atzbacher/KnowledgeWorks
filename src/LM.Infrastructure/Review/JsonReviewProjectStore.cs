@@ -317,6 +317,7 @@ internal sealed partial class JsonReviewProjectStore
         ArgumentNullException.ThrowIfNull(assignment);
         ScreeningAssignmentDto dto;
         string path;
+        string legacyLockPath;
 
         await _mutex.WaitAsync(ct).ConfigureAwait(false);
         try
@@ -329,12 +330,14 @@ internal sealed partial class JsonReviewProjectStore
 
             dto = ScreeningAssignmentMapper.ToDto(projectId, assignment);
             path = GetAssignmentPath(projectId, assignment.Id);
+            legacyLockPath = string.Concat(path, ".lock");
         }
         finally
         {
             _mutex.Release();
         }
 
+        DeleteFileIfExists(legacyLockPath);
         await WriteJsonAsync(path, dto, ct).ConfigureAwait(false);
 
         await _mutex.WaitAsync(ct).ConfigureAwait(false);

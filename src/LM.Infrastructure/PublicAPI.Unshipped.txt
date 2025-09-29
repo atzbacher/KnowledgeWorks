@@ -70,7 +70,7 @@ LM.Infrastructure.Pdf.PdfAnnotationPersistenceService.PdfAnnotationPersistenceSe
 LM.Infrastructure.Pdf.PdfAnnotationPersistenceService.PersistAsync(string! entryId, string! pdfHash, string! overlayJson, System.Collections.Generic.IReadOnlyDictionary<string!, byte[]!>! previewImages, string? overlaySidecarRelativePath, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.PdfAnnotationPreviewStorage(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>
+LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Search.PubMedSearchProvider
 LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
 LM.Infrastructure.Search.PubMedSearchProvider.Database.get -> LM.Core.Models.SearchDatabase
