@@ -36,7 +36,9 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<LibraryPresetPickerDialog>();
             services.AddTransient<EntryEditorViewModel>();
             services.AddSingleton<ILibraryEntryEditor, LibraryEntryEditor>();
-            services.AddSingleton<ILibraryDocumentService>(sp => new LibraryDocumentService(sp.GetRequiredService<IWorkSpaceService>()));
+            services.AddTransient<PdfViewerViewModel>();
+            services.AddSingleton<IPdfViewerLauncher, PdfViewerLauncher>();
+            services.AddSingleton<ILibraryDocumentService, LibraryDocumentService>();
             services.AddTransient<DataExtractionPlaygroundViewModel>();
             services.AddSingleton<LibraryDataExtractionLauncher>();
             services.AddSingleton<Func<Entry, CancellationToken, Task<bool>>>(sp =>

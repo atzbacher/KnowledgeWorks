@@ -560,8 +560,8 @@ namespace LM.App.Wpf.Tests
 
         private sealed class NoopDocumentService : ILibraryDocumentService
         {
-            public void OpenEntry(Entry entry) { }
-            public void OpenAttachment(Attachment attachment) { }
+            public Task OpenEntryAsync(Entry entry) => Task.CompletedTask;
+            public Task OpenAttachmentAsync(Entry entry, Attachment attachment) => Task.CompletedTask;
         }
 
         private sealed class RecordingEntryEditor : ILibraryEntryEditor

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 
@@ -8,15 +9,20 @@ namespace LM.App.Wpf.Library
     public sealed class LibraryDocumentService : ILibraryDocumentService
     {
         private readonly IWorkSpaceService _workspace;
+        private readonly IPdfViewerLauncher _pdfViewerLauncher;
 
-        public LibraryDocumentService(IWorkSpaceService workspace)
+        public LibraryDocumentService(IWorkSpaceService workspace, IPdfViewerLauncher pdfViewerLauncher)
         {
-            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            ArgumentNullException.ThrowIfNull(workspace);
+            ArgumentNullException.ThrowIfNull(pdfViewerLauncher);
+
+            _workspace = workspace;
+            _pdfViewerLauncher = pdfViewerLauncher;
         }
 
-        public void OpenEntry(Entry entry)
+        public async Task OpenEntryAsync(Entry entry)
         {
-            if (entry is null) throw new ArgumentNullException(nameof(entry));
+            ArgumentNullException.ThrowIfNull(entry);
 
             var relativePath = entry.MainFilePath;
             if (string.IsNullOrWhiteSpace(relativePath))
@@ -26,19 +32,18 @@ namespace LM.App.Wpf.Library
             if (string.IsNullOrWhiteSpace(absolutePath))
                 throw new InvalidOperationException("Unable to resolve document path in workspace.");
 
-            var info = new ProcessStartInfo
+            if (await _pdfViewerLauncher.LaunchAsync(entry).ConfigureAwait(true))
             {
-                FileName = absolutePath,
-                UseShellExecute = true
-            };
+                return;
+            }
 
-            Process.Start(info);
+            LaunchWithShell(absolutePath);
         }
 
-        public void OpenAttachment(Attachment attachment)
+        public async Task OpenAttachmentAsync(Entry entry, Attachment attachment)
         {
-            if (attachment is null)
-                throw new ArgumentNullException(nameof(attachment));
+            ArgumentNullException.ThrowIfNull(entry);
+            ArgumentNullException.ThrowIfNull(attachment);
 
             var relativePath = attachment.RelativePath;
             if (string.IsNullOrWhiteSpace(relativePath))
@@ -48,6 +53,16 @@ namespace LM.App.Wpf.Library
             if (string.IsNullOrWhiteSpace(absolutePath))
                 throw new InvalidOperationException("Unable to resolve attachment path in workspace.");
 
+            if (await _pdfViewerLauncher.LaunchAsync(entry, attachment.Id).ConfigureAwait(true))
+            {
+                return;
+            }
+
+            LaunchWithShell(absolutePath);
+        }
+
+        private static void LaunchWithShell(string absolutePath)
+        {
             var info = new ProcessStartInfo
             {
                 FileName = absolutePath,
