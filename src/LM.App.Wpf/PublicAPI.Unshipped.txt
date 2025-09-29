@@ -467,12 +467,21 @@ LM.App.Wpf.ViewModels.IAddPipeline
 LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.ViewModels.IAddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
 LM.App.Wpf.Library.ILibraryDocumentService
-LM.App.Wpf.Library.ILibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
-LM.App.Wpf.Library.ILibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
+LM.App.Wpf.Library.ILibraryDocumentService.OpenEntryAsync(LM.Core.Models.Entry! entry) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.ILibraryDocumentService.OpenAttachmentAsync(LM.Core.Models.Entry! entry, LM.Core.Models.Attachment! attachment) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.IPdfViewerLauncher
+LM.App.Wpf.Library.IPdfViewerLauncher.LaunchAsync(LM.Core.Models.Entry! entry, string? attachmentId = null) -> System.Threading.Tasks.Task<bool>!
 LM.App.Wpf.Library.LibraryDocumentService
-LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.App.Wpf.Library.LibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
-LM.App.Wpf.Library.LibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
+LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.Library.IPdfViewerLauncher! pdfViewerLauncher) -> void
+LM.App.Wpf.Library.LibraryDocumentService.OpenEntryAsync(LM.Core.Models.Entry! entry) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryDocumentService.OpenAttachmentAsync(LM.Core.Models.Entry! entry, LM.Core.Models.Attachment! attachment) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.PdfViewerViewModel() -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Entry.get -> LM.Core.Models.Entry?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Attachment.get -> LM.Core.Models.Attachment?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.DocumentPath.get -> string?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.WindowTitle.get -> string!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.InitializeAsync(LM.Core.Models.Entry! entry, string! absolutePath, string? attachmentId) -> System.Threading.Tasks.Task<bool>!
 LM.App.Wpf.Library.IAttachmentMetadataPrompt
 LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
 LM.App.Wpf.Library.AttachmentMetadataPromptContext

@@ -429,6 +429,10 @@
             <i:InvokeCommandAction Command="{Binding HandleSelectionChangedCommand}"
                                    CommandParameter="{Binding SelectedItems, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
           </i:EventTrigger>
+          <i:EventTrigger EventName="MouseDoubleClick">
+            <i:InvokeCommandAction Command="{Binding DataContext.OpenEntryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                   CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+          </i:EventTrigger>
         </i:Interaction.Triggers>
         <DataGrid.Columns>
           <StaticResource ResourceKey="LibraryResultsColumn.AttachmentIndicator" />
