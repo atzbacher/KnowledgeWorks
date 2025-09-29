@@ -41,6 +41,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<ILibraryDocumentService, LibraryDocumentService>();
             services.AddTransient<DataExtractionPlaygroundViewModel>();
             services.AddSingleton<LibraryDataExtractionLauncher>();
+            services.AddTransient<MuPdfPlaygroundViewModel>();
+            services.AddSingleton<IMuPdfPlaygroundLauncher, LibraryMuPdfPlaygroundLauncher>();
             services.AddSingleton<Func<Entry, CancellationToken, Task<bool>>>(sp =>
             {
                 var launcher = sp.GetRequiredService<LibraryDataExtractionLauncher>();
@@ -74,7 +76,8 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IClipboardService>(),
                 sp.GetRequiredService<IFileExplorerService>(),
                 sp.GetRequiredService<ILibraryDocumentService>(),
-                sp.GetRequiredService<Func<Entry, CancellationToken, Task<bool>>>()));
+                sp.GetRequiredService<Func<Entry, CancellationToken, Task<bool>>>(),
+                sp.GetRequiredService<IMuPdfPlaygroundLauncher>()));
         }
     }
 }

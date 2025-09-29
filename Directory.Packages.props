@@ -3,9 +3,9 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- === Text extraction & metadata === -->
+    <PackageVersion Include="MuPDFCore" Version="2.0.1" />
     <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageVersion Include="UglyToad.PdfPig.Core" Version="1.7.0" />
     <PackageVersion Include="UglyToad.PdfPig.Fonts" Version="1.7.0" />
@@ -14,7 +14,6 @@
     <PackageVersion Include="Tesseract" Version="5.2.0" />
     <PackageVersion Include="PdfiumViewer.WPF" Version="1.0.6" />
     <PackageVersion Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" Version="0.1.5637" />
-
     <!-- === Microsoft.Extensions family (pin if used anywhere) === -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
@@ -22,7 +21,6 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.0" />
-
     <!-- === Testing & tooling === -->
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.7" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="3.3.4" />
@@ -30,10 +28,8 @@
     <PackageVersion Include="xunit" Version="2.8.1" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-
     <!-- === WPF infrastructure === -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageVersion Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
   </ItemGroup>
 </Project>
-

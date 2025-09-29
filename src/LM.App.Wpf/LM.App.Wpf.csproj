@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" GeneratePathProperty="true" />
+    <PackageReference Include="MuPDFCore" />
     <PackageReference Include="PdfiumViewer.WPF" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
@@ -63,19 +64,9 @@
     </PropertyGroup>
 
     <!-- Always overwrite the runtime copy with the PdfiumViewer-native build so AddRef/Release exports stay available. -->
-    <Copy
-      SourceFiles="$(_PdfiumNativeX64)"
-      DestinationFiles="$(_PdfiumOutX64)"
-      OverwriteReadOnlyFiles="true"
-      SkipUnchangedFiles="false"
-      Condition="Exists('$(_PdfiumNativeX64)')" />
+    <Copy SourceFiles="$(_PdfiumNativeX64)" DestinationFiles="$(_PdfiumOutX64)" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="false" Condition="Exists('$(_PdfiumNativeX64)')" />
 
-    <Copy
-      SourceFiles="$(_PdfiumNativeX64)"
-      DestinationFiles="$(_PdfiumOutRoot)"
-      OverwriteReadOnlyFiles="true"
-      SkipUnchangedFiles="false"
-      Condition="Exists('$(_PdfiumNativeX64)')" />
+    <Copy SourceFiles="$(_PdfiumNativeX64)" DestinationFiles="$(_PdfiumOutRoot)" OverwriteReadOnlyFiles="true" SkipUnchangedFiles="false" Condition="Exists('$(_PdfiumNativeX64)')" />
   </Target>
 
   <ItemGroup>

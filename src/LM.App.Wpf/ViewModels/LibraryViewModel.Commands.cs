@@ -45,6 +45,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly IFileExplorerService _fileExplorer;
         private readonly ILibraryDocumentService _documentService;
         private readonly Func<Entry, CancellationToken, Task<bool>> _dataExtractionLauncher;
+        private readonly IMuPdfPlaygroundLauncher _muPdfPlaygroundLauncher;
         private readonly LibraryColumnVisibility _columnVisibility = new();
         private readonly List<LibraryColumnOption> _columnOptions = new();
         private readonly TaskCompletionSource<bool> _preferencesReady = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -74,6 +75,7 @@ namespace LM.App.Wpf.ViewModels
             CopyWorkspacePathCommand.NotifyCanExecuteChanged();
             EditEntryCommand.NotifyCanExecuteChanged();
             OpenDataExtractionCommand.NotifyCanExecuteChanged();
+            OpenMuPdfPlaygroundCommand.NotifyCanExecuteChanged();
         }
 
         private void OnColumnOptionChanged(object? sender, PropertyChangedEventArgs e)
@@ -362,6 +364,35 @@ namespace LM.App.Wpf.ViewModels
                 System.Windows.MessageBox.Show(
                     $"Failed to open data extraction playground:\n{ex.Message}",
                     "Data extraction",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private bool CanOpenMuPdfPlayground(LibrarySearchResult? result)
+        {
+            var target = GetSelection(result, updateSelection: false);
+            var entry = target?.Entry;
+            return entry is not null && EntryHasPdf(entry);
+        }
+
+        [RelayCommand(CanExecute = nameof(CanOpenMuPdfPlayground))]
+        private async Task OpenMuPdfPlaygroundAsync(LibrarySearchResult? result)
+        {
+            var target = GetSelection(result, updateSelection: true);
+            var entry = target?.Entry;
+            if (entry is null)
+                return;
+
+            try
+            {
+                await _muPdfPlaygroundLauncher.LaunchAsync(entry, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    $"Failed to open MuPDF playground:\n{ex.Message}",
+                    "MuPDF playground",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
             }

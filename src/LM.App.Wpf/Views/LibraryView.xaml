@@ -413,6 +413,9 @@
                   <MenuItem Header="Data extraction playground"
                             Command="{Binding PlacementTarget.Tag.OpenDataExtractionCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                             CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                  <MenuItem Header="MuPDF playground"
+                            Command="{Binding PlacementTarget.Tag.OpenMuPdfPlaygroundCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                 </ContextMenu>
               </Setter.Value>
             </Setter>

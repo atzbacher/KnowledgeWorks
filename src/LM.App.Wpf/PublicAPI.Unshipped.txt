@@ -483,7 +483,9 @@ LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.DocumentPath.get -> string?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.WindowTitle.get -> string!
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.InitializeAsync(LM.Core.Models.Entry! entry, string! absolutePath, string? attachmentId) -> System.Threading.Tasks.Task<bool>!
 LM.App.Wpf.Library.IAttachmentMetadataPrompt
+LM.App.Wpf.Library.IMuPdfPlaygroundLauncher
 LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
+LM.App.Wpf.Library.IMuPdfPlaygroundLauncher.LaunchAsync(LM.Core.Models.Entry! entry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<bool>!
 LM.App.Wpf.Library.AttachmentMetadataPromptContext
 LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.get -> string!
 LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.init -> void
@@ -597,7 +599,7 @@ LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.get -> string!
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService, System.Func<LM.Core.Models.Entry!, System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Boolean>!>! dataExtractionLauncher) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService, System.Func<LM.Core.Models.Entry!, System.Threading.CancellationToken, System.Threading.Tasks.Task<System.Boolean>!>! dataExtractionLauncher, LM.App.Wpf.Library.IMuPdfPlaygroundLauncher! muPdfPlaygroundLauncher) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
@@ -607,6 +609,7 @@ LM.App.Wpf.ViewModels.LibraryViewModel.EditEntryCommand.get -> System.Windows.In
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenContainingFolderCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenEntryCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenDataExtractionCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.LibraryViewModel.OpenMuPdfPlaygroundCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.SearchItemViewModel
 LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
 LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void
