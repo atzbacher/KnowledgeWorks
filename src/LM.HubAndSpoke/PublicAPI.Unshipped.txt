@@ -297,6 +297,18 @@ LM.HubSpoke.Models.EntryChangeLogHook.Events.get -> System.Collections.Generic.L
 LM.HubSpoke.Models.EntryChangeLogHook.Events.set -> void
 LM.HubSpoke.Models.EntryChangeLogHook.SchemaVersion.get -> string!
 LM.HubSpoke.Models.EntryChangeLogHook.SchemaVersion.init -> void
+LM.HubSpoke.Models.PdfAnnotationPreview
+LM.HubSpoke.Models.PdfAnnotationPreview.AnnotationId.get -> string!
+LM.HubSpoke.Models.PdfAnnotationPreview.AnnotationId.init -> void
+LM.HubSpoke.Models.PdfAnnotationPreview.ImagePath.get -> string!
+LM.HubSpoke.Models.PdfAnnotationPreview.ImagePath.init -> void
+LM.HubSpoke.Models.PdfAnnotationsHook
+LM.HubSpoke.Models.PdfAnnotationsHook.OverlayPath.get -> string!
+LM.HubSpoke.Models.PdfAnnotationsHook.OverlayPath.init -> void
+LM.HubSpoke.Models.PdfAnnotationsHook.Previews.get -> System.Collections.Generic.List<LM.HubSpoke.Models.PdfAnnotationPreview!>!
+LM.HubSpoke.Models.PdfAnnotationsHook.Previews.init -> void
+LM.HubSpoke.Models.PdfAnnotationsHook.SchemaVersion.get -> string!
+LM.HubSpoke.Models.PdfAnnotationsHook.SchemaVersion.init -> void
 LM.HubSpoke.Models.EntryHooks
 LM.HubSpoke.Models.EntryHooks.Article.get -> string?
 LM.HubSpoke.Models.EntryHooks.Article.init -> void

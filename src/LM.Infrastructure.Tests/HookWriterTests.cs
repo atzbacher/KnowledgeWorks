@@ -67,6 +67,48 @@ namespace LM.Infrastructure.Tests.Hooks
         }
 
         [Fact]
+        public async Task SavePdfAnnotationsAsync_WritesHookAndChangeLog()
+        {
+            using var temp = new TempDir();
+
+            var ws = new WorkspaceService();
+            await ws.EnsureWorkspaceAsync(temp.Path);
+
+            var writer = new HookWriter(ws);
+            var entryId = "pdf-entry";
+
+            var hook = new HookM.PdfAnnotationsHook
+            {
+                OverlayPath = "library/ab/abcdef/abcdef.json",
+                Previews = new List<HookM.PdfAnnotationPreview>
+                {
+                    new() { AnnotationId = "ann-1", ImagePath = "extraction/abcdef/ann-1.png" }
+                }
+            };
+
+            await writer.SavePdfAnnotationsAsync(entryId, hook, CancellationToken.None);
+
+            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
+            Assert.True(File.Exists(hookPath), $"Expected pdf annotations hook at: {hookPath}");
+
+            var hookJson = await File.ReadAllTextAsync(hookPath);
+            using var hookDoc = JsonDocument.Parse(hookJson);
+            Assert.Equal(hook.OverlayPath, hookDoc.RootElement.GetProperty("overlayPath").GetString());
+
+            var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
+            Assert.True(File.Exists(changeLogPath), $"Expected changelog at: {changeLogPath}");
+
+            var changeLogJson = await File.ReadAllTextAsync(changeLogPath);
+            var changeLog = JsonSerializer.Deserialize<HookM.EntryChangeLogHook>(changeLogJson);
+
+            Assert.NotNull(changeLog);
+            Assert.NotNull(changeLog!.Events);
+            var evt = Assert.Single(changeLog.Events!);
+            Assert.Equal("pdf-annotations-updated", evt.Action);
+            Assert.Equal(Environment.UserName, evt.PerformedBy);
+        }
+
+        [Fact]
         public async Task AppendChangeLogAsync_RetriesWhenFileIsLocked()
         {
             using var temp = new TempDir();
