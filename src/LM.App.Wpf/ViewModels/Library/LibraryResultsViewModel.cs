@@ -568,7 +568,7 @@ namespace LM.App.Wpf.ViewModels.Library
             {
                 try
                 {
-                    pdfHash = await _hasher.ComputeSha256Async(absolutePath, CancellationToken.None).ConfigureAwait(false);
+                    pdfHash = await _hasher.ComputeSha256Async(absolutePath, CancellationToken.None);
                     pdfHash = NormalizeHash(pdfHash);
                 }
                 catch (Exception ex)
