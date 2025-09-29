@@ -63,19 +63,19 @@ namespace LM.App.Wpf.Library
                 return false;
             }
 
-            using var scope = _services.CreateScope();
+            var scope = _services.CreateScope();
             var viewModel = scope.ServiceProvider.GetRequiredService<PdfViewerViewModel>();
             var initialized = await viewModel.InitializeAsync(entry, absolutePath, attachmentId).ConfigureAwait(true);
             if (!initialized)
             {
+                scope.Dispose();
                 return false;
             }
 
-            var window = new PdfViewerWindow
-            {
-                Owner = System.Windows.Application.Current?.MainWindow,
-                DataContext = viewModel
-            };
+            var window = scope.ServiceProvider.GetRequiredService<PdfViewerWindow>();
+            window.Owner = System.Windows.Application.Current?.MainWindow;
+            window.DataContext = viewModel;
+            window.Closed += (_, _) => scope.Dispose();
 
             window.Show();
             return true;

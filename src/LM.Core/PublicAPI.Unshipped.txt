@@ -427,6 +427,8 @@ LM.Core.Models.SearchPreferences.LastUpdatedUtc.init -> void
 LM.Core.Models.LibraryPreferences
 LM.Core.Models.LibraryPreferences.VisibleColumns.get -> string![]!
 LM.Core.Models.LibraryPreferences.VisibleColumns.init -> void
+LM.Core.Models.LibraryPreferences.ShowPdfNavigationPane.get -> bool
+LM.Core.Models.LibraryPreferences.ShowPdfNavigationPane.init -> void
 LM.Core.Models.LibraryPreferences.LastUpdatedUtc.get -> System.DateTimeOffset
 LM.Core.Models.LibraryPreferences.LastUpdatedUtc.init -> void
 LM.Core.Models.WatchedFolderSettings
