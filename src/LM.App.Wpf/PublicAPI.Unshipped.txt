@@ -545,6 +545,7 @@ LM.App.Wpf.Library.AttachmentMetadataSelection.Title.get -> string!
 LM.App.Wpf.Library.AttachmentMetadataSelection.Title.init -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LibraryFiltersViewModel(LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt, LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ClearCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyPresetAsync(LM.App.Wpf.Common.LibraryPresetSummary! summary, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyState(LM.App.Wpf.Library.LibraryFilterState! state) -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.CaptureState() -> LM.App.Wpf.Library.LibraryFilterState!
@@ -637,6 +638,7 @@ LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.OpenPdfAnnotationsCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LibrarySearchResult?>!
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
