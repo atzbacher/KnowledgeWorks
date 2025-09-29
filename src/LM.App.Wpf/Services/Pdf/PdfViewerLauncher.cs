@@ -34,6 +34,16 @@ namespace LM.App.Wpf.Services.Pdf
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));
             }
 
+            if (!WebView2RuntimeBootstrapper.TryEnsureRuntime(out var bootstrapError))
+            {
+                System.Windows.MessageBox.Show(
+                    bootstrapError ?? "The WebView2 runtime required for the PDF viewer is missing.",
+                    "PDF Viewer",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
             var normalizedHash = pdfHash.Trim().ToLowerInvariant();
 
             EnsureWindow();
