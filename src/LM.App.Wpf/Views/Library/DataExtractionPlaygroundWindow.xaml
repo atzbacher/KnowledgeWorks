@@ -93,31 +93,89 @@
                 </Border>
 
                 <StackPanel Grid.Row="3"
-                            Orientation="Horizontal"
                             Margin="12,0,12,12">
-                    <Button Content="Extract selection"
-                            Width="140"
-                            Height="32"
-                            Command="{Binding ExtractRegionTablesCommand}" />
-                    <Button Content="Run region OCR"
-                            Width="140"
-                            Height="32"
-                            Margin="8,0,0,0"
-                            Command="{Binding RunRegionOcrCommand}" />
-                    <Button Content="Clear selection"
-                            Width="140"
-                            Height="32"
-                            Margin="8,0,0,0"
-                            Command="{Binding ClearRegionSelectionCommand}" />
-                    <Button Content="Highlight selection"
-                            Width="160"
-                            Height="32"
-                            Margin="12,0,0,0"
-                            Command="{Binding AddHighlightCommand}" />
-                    <StackPanel Orientation="Horizontal"
-                                Margin="12,0,0,0"
-                                VerticalAlignment="Center">
-                        <TextBox Width="200"
+                    <WrapPanel>
+                        <Button Content="Extract selection"
+                                Width="140"
+                                Height="32"
+                                Command="{Binding ExtractRegionTablesCommand}" />
+                        <Button Content="Run region OCR"
+                                Width="140"
+                                Height="32"
+                                Margin="8,0,0,0"
+                                Command="{Binding RunRegionOcrCommand}" />
+                        <Button Content="Clear selection"
+                                Width="140"
+                                Height="32"
+                                Margin="8,0,0,0"
+                                Command="{Binding ClearRegionSelectionCommand}" />
+                    </WrapPanel>
+                    <WrapPanel Margin="0,8,0,0"
+                               VerticalAlignment="Center">
+                        <StackPanel Width="180"
+                                    Margin="0,0,12,0">
+                            <TextBlock Text="Highlight color"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                            <ComboBox ItemsSource="{Binding HighlightColorOptions}"
+                                      SelectedItem="{Binding SelectedHighlightColor}"
+                                      Width="180"
+                                      Margin="0,4,0,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewModels:AnnotationColorOption}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="16"
+                                                    Height="16"
+                                                    CornerRadius="3"
+                                                    Background="{Binding Brush}"
+                                                    BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                    BorderThickness="1" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       Margin="6,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <Button Content="Highlight selection"
+                                Width="160"
+                                Height="32"
+                                Margin="0,16,0,0"
+                                Command="{Binding AddHighlightCommand}" />
+                        <StackPanel Width="180"
+                                    Margin="12,0,12,0">
+                            <TextBlock Text="Underline color"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                            <ComboBox ItemsSource="{Binding UnderlineColorOptions}"
+                                      SelectedItem="{Binding SelectedUnderlineColor}"
+                                      Width="180"
+                                      Margin="0,4,0,0">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewModels:AnnotationColorOption}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="16"
+                                                    Height="16"
+                                                    CornerRadius="3"
+                                                    Background="{Binding Brush}"
+                                                    BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                    BorderThickness="1" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       Margin="6,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                        <Button Content="Underline selection"
+                                Width="160"
+                                Height="32"
+                                Margin="0,16,0,0"
+                                Command="{Binding AddUnderlineCommand}" />
+                    </WrapPanel>
+                    <WrapPanel Margin="0,8,0,0"
+                               VerticalAlignment="Center">
+                        <TextBox Width="220"
                                  Margin="0,0,8,0"
                                  ToolTip="Annotation note"
                                  Text="{Binding AnnotationNote, UpdateSourceTrigger=PropertyChanged}" />
@@ -125,7 +183,7 @@
                                 Width="140"
                                 Height="32"
                                 Command="{Binding AddAnnotationCommand}" />
-                    </StackPanel>
+                    </WrapPanel>
                 </StackPanel>
             </Grid>
         </Border>
@@ -136,6 +194,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="2*" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -336,6 +395,199 @@
                     Padding="12"
                     Background="{DynamicResource LibraryPanelBackgroundBrush}"
                     BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Text="Selection captures"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource LibraryPrimaryForegroundBrush}" />
+
+                    <TextBlock Grid.Row="1"
+                               Text="Saved underlines and highlight thumbnails appear here after you annotate the preview."
+                               Margin="0,4,0,0"
+                               TextWrapping="Wrap"
+                               Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+
+                    <Grid Grid.Row="2" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Underlined text"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                            <ItemsControl ItemsSource="{Binding UnderlineCaptures}" Margin="0,8,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewModels:AnnotationCaptureViewModel}">
+                                        <Border Padding="8"
+                                                Margin="0,0,0,8"
+                                                Background="{DynamicResource LibraryPanelSubtleBrush}"
+                                                BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                BorderThickness="1">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="6" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0"
+                                                        Background="{Binding ColorBrush}"
+                                                        CornerRadius="2" />
+                                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                    <TextBlock Text="{Binding Text}"
+                                                               Margin="0,4,0,0"
+                                                               TextWrapping="Wrap">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasText}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="No text detected."
+                                                               Margin="0,4,0,0"
+                                                               Foreground="{DynamicResource LibrarySecondaryForegroundBrush}"
+                                                               FontSize="12">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasText}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding TimestampDisplay}"
+                                                               Margin="0,4,0,0"
+                                                               Foreground="{DynamicResource LibrarySecondaryForegroundBrush}"
+                                                               FontSize="12" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="No underlined selections captured yet."
+                                       Margin="0,8,0,0"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasUnderlineCaptures}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Text="Highlight thumbnails"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}" />
+                            <ItemsControl ItemsSource="{Binding HighlightCaptures}" Margin="0,8,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type viewModels:AnnotationCaptureViewModel}">
+                                        <Border Padding="8"
+                                                Margin="0,0,0,8"
+                                                Background="{DynamicResource LibraryPanelSubtleBrush}"
+                                                BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                BorderThickness="1">
+                                            <StackPanel>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Width="16"
+                                                            Height="16"
+                                                            CornerRadius="3"
+                                                            Background="{Binding ColorBrush}"
+                                                            BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                            BorderThickness="1" />
+                                                    <StackPanel Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding TimestampDisplay}"
+                                                                   Foreground="{DynamicResource LibrarySecondaryForegroundBrush}"
+                                                                   FontSize="12" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                                <Border Margin="0,8,0,0"
+                                                        BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
+                                                        BorderThickness="1"
+                                                        Background="White">
+                                                    <Image Source="{Binding Thumbnail}"
+                                                           Stretch="Uniform"
+                                                           MaxHeight="160">
+                                                        <Image.Style>
+                                                            <Style TargetType="Image">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasThumbnail}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Image.Style>
+                                                    </Image>
+                                                </Border>
+                                                <TextBlock Text="No preview available."
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource LibrarySecondaryForegroundBrush}"
+                                                           FontSize="12">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasThumbnail}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="No highlights captured yet."
+                                       Margin="0,8,0,0"
+                                       Foreground="{DynamicResource LibrarySecondaryForegroundBrush}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasHighlightCaptures}" Value="False">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="4"
+                    Margin="0,12,0,0"
+                    Padding="12"
+                    Background="{DynamicResource LibraryPanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource LibraryPanelBorderBrush}"
                     BorderThickness="1"
                     Visibility="{Binding HasIdeaGroups, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
@@ -467,7 +719,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="4"
+            <Border Grid.Row="5"
                     Margin="0,12,0,0"
                     Padding="12"
                     Background="{DynamicResource LibraryPanelSubtleBrush}"

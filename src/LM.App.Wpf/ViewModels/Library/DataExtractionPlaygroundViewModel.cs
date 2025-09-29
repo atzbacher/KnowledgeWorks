@@ -65,6 +65,16 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
         MergeSignColumns = true;
 
         PreviewPages = new ObservableCollection<int>();
+
+        HighlightColorOptions = AnnotationColorOption.CreateDefaultPalette();
+        UnderlineColorOptions = HighlightColorOptions;
+        SelectedHighlightColor = HighlightColorOptions.Count > 0
+            ? HighlightColorOptions[0]
+            : null;
+        SelectedUnderlineColor = UnderlineColorOptions.Count > 1
+            ? UnderlineColorOptions[1]
+            : SelectedHighlightColor;
+
         InitializePreviewState();
 
         IdeaGroups = new ObservableCollection<OcrIdeaGroupViewModel>();
@@ -135,6 +145,18 @@ internal sealed partial class DataExtractionPlaygroundViewModel : ViewModelBase
     public ObservableCollection<int> PreviewPages { get; }
 
     public ObservableCollection<PdfAnnotationViewModel> PdfAnnotations { get; }
+
+    public IReadOnlyList<AnnotationColorOption> HighlightColorOptions { get; private set; }
+        = Array.Empty<AnnotationColorOption>();
+
+    public IReadOnlyList<AnnotationColorOption> UnderlineColorOptions { get; private set; }
+        = Array.Empty<AnnotationColorOption>();
+
+    [ObservableProperty]
+    private AnnotationColorOption? selectedHighlightColor;
+
+    [ObservableProperty]
+    private AnnotationColorOption? selectedUnderlineColor;
 
     public bool HasIdeaGroups => IdeaGroups.Count > 0;
 

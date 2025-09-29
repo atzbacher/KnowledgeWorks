@@ -301,7 +301,7 @@ internal sealed partial class PdfInteractiveViewer : System.Windows.Controls.Use
                     Renderer.Markers.Add(new HighlightPdfMarker(
                         annotation.PageNumber - 1,
                         annotation.PdfBounds,
-                        System.Windows.Media.Color.FromArgb(168, 255, 241, 118)));
+                        annotation.Color));
                     break;
                 case PdfAnnotationKind.Note:
                     Renderer.Markers.Add(new NotePdfMarker(
@@ -310,6 +310,12 @@ internal sealed partial class PdfInteractiveViewer : System.Windows.Controls.Use
                         annotation.Note ?? string.Empty,
                         System.Windows.Media.Color.FromArgb(192, 255, 249, 196),
                         System.Windows.Media.Color.FromRgb(102, 124, 64)));
+                    break;
+                case PdfAnnotationKind.Underline:
+                    Renderer.Markers.Add(new UnderlinePdfMarker(
+                        annotation.PageNumber - 1,
+                        annotation.PdfBounds,
+                        annotation.Color));
                     break;
             }
         }

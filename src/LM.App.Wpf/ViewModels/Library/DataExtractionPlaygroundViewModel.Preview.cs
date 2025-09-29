@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,9 @@ namespace LM.App.Wpf.ViewModels.Library;
 internal sealed partial class DataExtractionPlaygroundViewModel
 {
     private const double OcrTargetDpi = 300d;
+    private static readonly System.Windows.Media.Color DefaultHighlightColor = System.Windows.Media.Color.FromArgb(200, 255, 230, 109);
+    private static readonly System.Windows.Media.Color DefaultUnderlineColor = System.Windows.Media.Color.FromArgb(200, 125, 205, 255);
+    private static readonly System.Windows.Media.Color DefaultNoteColor = System.Windows.Media.Color.FromArgb(192, 255, 249, 196);
     private readonly RoiSelectionViewModel _roiSelection = new();
     private System.Windows.Point? _selectionStart;
     private System.Windows.Media.Imaging.BitmapSource? _currentPageBitmap;
@@ -53,6 +57,16 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         ? ConvertPixelsToDip(bitmap.PixelHeight, bitmap.DpiY)
         : 0d;
 
+    public ObservableCollection<AnnotationCaptureViewModel> HighlightCaptures { get; } = new();
+
+    public ObservableCollection<AnnotationCaptureViewModel> UnderlineCaptures { get; } = new();
+
+    public bool HasHighlightCaptures => HighlightCaptures.Count > 0;
+
+    public bool HasUnderlineCaptures => UnderlineCaptures.Count > 0;
+
+    public bool HasSelectionCaptures => HasHighlightCaptures || HasUnderlineCaptures;
+
     partial void InitializePreviewState()
     {
         _roiSelection.PropertyChanged += (_, _) =>
@@ -60,8 +74,12 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             ExtractRegionTablesCommand.NotifyCanExecuteChanged();
             AddHighlightCommand.NotifyCanExecuteChanged();
+            AddUnderlineCommand.NotifyCanExecuteChanged();
             AddAnnotationCommand.NotifyCanExecuteChanged();
         };
+        HighlightCaptures.CollectionChanged += (_, _) => UpdateCaptureIndicators();
+        UnderlineCaptures.CollectionChanged += (_, _) => UpdateCaptureIndicators();
+        UpdateCaptureIndicators();
         PreviewStatusMessage = "Select a page to render.";
     }
 
@@ -81,7 +99,11 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
+        HighlightCaptures.Clear();
+        UnderlineCaptures.Clear();
+        UpdateCaptureIndicators();
     }
 
     partial void ApplyPreviewPages(IReadOnlyList<int> pages)
@@ -111,6 +133,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -129,6 +152,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -137,6 +161,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -182,6 +207,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             ExtractRegionTablesCommand.NotifyCanExecuteChanged();
             AddHighlightCommand.NotifyCanExecuteChanged();
+            AddUnderlineCommand.NotifyCanExecuteChanged();
             AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
@@ -232,6 +258,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -245,6 +272,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         var rect = NormalizeRect(_selectionStart.Value, ClampPoint(point));
         _roiSelection.Update(rect);
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -267,6 +295,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -277,6 +306,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         RunRegionOcrCommand.NotifyCanExecuteChanged();
         ExtractRegionTablesCommand.NotifyCanExecuteChanged();
         AddHighlightCommand.NotifyCanExecuteChanged();
+        AddUnderlineCommand.NotifyCanExecuteChanged();
         AddAnnotationCommand.NotifyCanExecuteChanged();
     }
 
@@ -388,6 +418,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             CopyTableCommand.NotifyCanExecuteChanged();
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             AddHighlightCommand.NotifyCanExecuteChanged();
+            AddUnderlineCommand.NotifyCanExecuteChanged();
             AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
@@ -497,6 +528,7 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             IsBusy = false;
             RunRegionOcrCommand.NotifyCanExecuteChanged();
             AddHighlightCommand.NotifyCanExecuteChanged();
+            AddUnderlineCommand.NotifyCanExecuteChanged();
             AddAnnotationCommand.NotifyCanExecuteChanged();
         }
     }
@@ -514,19 +546,75 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             return;
         }
 
+        var color = SelectedHighlightColor?.Color ?? DefaultHighlightColor;
         var annotation = new PdfAnnotationViewModel(
             PdfAnnotationKind.Highlight,
             SelectedPreviewPage!.Value,
             bounds,
             null,
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            color);
         PdfAnnotations.Add(annotation);
+
+        var thumbnail = CreateThumbnail(selection);
+        HighlightCaptures.Add(new AnnotationCaptureViewModel(
+            annotation.AnnotationId,
+            annotation.Kind,
+            annotation.PageNumber,
+            annotation.Color,
+            annotation.CreatedAt,
+            thumbnail,
+            null));
+
+        StatusMessage = $"Highlight saved on page {annotation.PageNumber}.";
+        PreviewStatusMessage = "Highlight saved.";
 
         await WriteAnnotationChangeLogAsync(
             annotation,
             selection,
             pdfRectangle,
             null).ConfigureAwait(true);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCreateAnnotation))]
+    private async Task AddUnderlineAsync()
+    {
+        if (!TryCreateAnnotationBounds(out var selection, out var pdfRectangle, out var bounds))
+        {
+            return;
+        }
+
+        var color = SelectedUnderlineColor?.Color ?? DefaultUnderlineColor;
+        var annotation = new PdfAnnotationViewModel(
+            PdfAnnotationKind.Underline,
+            SelectedPreviewPage!.Value,
+            bounds,
+            null,
+            DateTime.UtcNow,
+            color);
+        PdfAnnotations.Add(annotation);
+
+        var extractedText = ExtractUnderlineText(pdfRectangle, annotation.PageNumber);
+        UnderlineCaptures.Add(new AnnotationCaptureViewModel(
+            annotation.AnnotationId,
+            annotation.Kind,
+            annotation.PageNumber,
+            annotation.Color,
+            annotation.CreatedAt,
+            null,
+            extractedText));
+
+        StatusMessage = string.IsNullOrWhiteSpace(extractedText)
+            ? $"Underline saved on page {annotation.PageNumber} (no text detected)."
+            : $"Underline saved on page {annotation.PageNumber}.";
+        PreviewStatusMessage = "Underline saved.";
+
+        await WriteAnnotationChangeLogAsync(
+            annotation,
+            selection,
+            pdfRectangle,
+            null,
+            extractedText).ConfigureAwait(true);
     }
 
     [RelayCommand(CanExecute = nameof(CanCreateAnnotation))]
@@ -543,9 +631,13 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             SelectedPreviewPage!.Value,
             bounds,
             note,
-            DateTime.UtcNow);
+            DateTime.UtcNow,
+            DefaultNoteColor);
         PdfAnnotations.Add(annotation);
         AnnotationNote = string.Empty;
+
+        StatusMessage = $"Annotation saved on page {annotation.PageNumber}.";
+        PreviewStatusMessage = "Annotation saved.";
 
         await WriteAnnotationChangeLogAsync(
             annotation,
@@ -639,6 +731,47 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         return new System.Windows.Int32Rect(x, y, width, height);
     }
 
+    private System.Windows.Media.Imaging.BitmapSource? CreateThumbnail(System.Windows.Rect selection)
+    {
+        if (_currentPageBitmap is null)
+        {
+            return null;
+        }
+
+        var crop = CreateCrop(selection);
+        if (crop is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var cropped = new System.Windows.Media.Imaging.CroppedBitmap(_currentPageBitmap, crop.Value);
+            cropped.Freeze();
+
+            const int maxDimension = 160;
+            if (cropped.PixelWidth <= maxDimension && cropped.PixelHeight <= maxDimension)
+            {
+                return cropped;
+            }
+
+            var scale = Math.Min((double)maxDimension / cropped.PixelWidth, (double)maxDimension / cropped.PixelHeight);
+            if (scale >= 1d)
+            {
+                return cropped;
+            }
+
+            var transform = new System.Windows.Media.ScaleTransform(scale, scale);
+            var scaled = new System.Windows.Media.Imaging.TransformedBitmap(cropped, transform);
+            scaled.Freeze();
+            return scaled;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private PdfRectangle? BuildPdfRectangle(System.Windows.Rect selection)
     {
         if (_currentPageBitmap is null || _currentPageWidthPoints <= 0d || _currentPageHeightPoints <= 0d)
@@ -685,6 +818,95 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         }
 
         return new PdfRectangle(left, bottom, right, top);
+    }
+
+    private string? ExtractUnderlineText(PdfRectangle rectangle, int pageNumber)
+    {
+        if (_pdfPath is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var document = PdfDocument.Open(_pdfPath, new ParsingOptions { ClipPaths = true, UseLenientParsing = true });
+            var page = document.GetPage(pageNumber);
+            var words = page.GetWords();
+            var matches = words
+                .Where(word => word is not null && Intersects(rectangle, word.BoundingBox))
+                .ToList();
+
+            if (matches.Count == 0)
+            {
+                return null;
+            }
+
+            var ordered = matches
+                .OrderByDescending(word => word.BoundingBox.Top)
+                .ThenBy(word => word.BoundingBox.Left)
+                .ToList();
+
+            var baselineThreshold = Math.Max(2d, rectangle.Height * 0.25d);
+            var lines = new List<string>();
+            var currentLine = new List<string>();
+            double? baseline = null;
+
+            foreach (var word in ordered)
+            {
+                if (baseline is null || Math.Abs(word.BoundingBox.Bottom - baseline.Value) <= baselineThreshold)
+                {
+                    if (!string.IsNullOrWhiteSpace(word.Text))
+                    {
+                        currentLine.Add(word.Text.Trim());
+                    }
+
+                    baseline = baseline is null
+                        ? word.BoundingBox.Bottom
+                        : (baseline.Value + word.BoundingBox.Bottom) / 2d;
+                    continue;
+                }
+
+                if (currentLine.Count > 0)
+                {
+                    lines.Add(string.Join(' ', currentLine));
+                    currentLine.Clear();
+                }
+
+                if (!string.IsNullOrWhiteSpace(word.Text))
+                {
+                    currentLine.Add(word.Text.Trim());
+                }
+
+                baseline = word.BoundingBox.Bottom;
+            }
+
+            if (currentLine.Count > 0)
+            {
+                lines.Add(string.Join(' ', currentLine));
+            }
+
+            var combined = string.Join(Environment.NewLine, lines)
+                .ReplaceLineEndings(Environment.NewLine)
+                .Trim();
+
+            return string.IsNullOrWhiteSpace(combined) ? null : combined;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool Intersects(PdfRectangle a, PdfRectangle b)
+    {
+        return a.Left < b.Right && a.Right > b.Left && a.Bottom < b.Top && a.Top > b.Bottom;
+    }
+
+    private void UpdateCaptureIndicators()
+    {
+        OnPropertyChanged(nameof(HasHighlightCaptures));
+        OnPropertyChanged(nameof(HasUnderlineCaptures));
+        OnPropertyChanged(nameof(HasSelectionCaptures));
     }
 
     private static double ConvertPixelsToDip(int pixels, double dpi)
@@ -911,7 +1133,8 @@ internal sealed partial class DataExtractionPlaygroundViewModel
     private async Task WriteAnnotationChangeLogAsync(PdfAnnotationViewModel annotation,
                                                      System.Windows.Rect selection,
                                                      PdfRectangle rectangle,
-                                                     string? note)
+                                                     string? note,
+                                                     string? extractedText = null)
     {
         if (_entryId is null)
         {
@@ -923,12 +1146,18 @@ internal sealed partial class DataExtractionPlaygroundViewModel
             $"annotation:{annotation.Kind}",
             $"page:{annotation.PageNumber}",
             $"roiPx:{selection.X.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Y.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Width.ToString("F0", CultureInfo.InvariantCulture)}-{selection.Height.ToString("F0", CultureInfo.InvariantCulture)}",
-            $"roiPts:{rectangle.Left.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Bottom.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Right.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Top.ToString("F1", CultureInfo.InvariantCulture)}"
+            $"roiPts:{rectangle.Left.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Bottom.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Right.ToString("F1", CultureInfo.InvariantCulture)}-{rectangle.Top.ToString("F1", CultureInfo.InvariantCulture)}",
+            $"color:#{annotation.Color.R:X2}{annotation.Color.G:X2}{annotation.Color.B:X2}"
         };
 
         if (!string.IsNullOrWhiteSpace(note))
         {
             tags.Add($"note:{TruncateForTag(note, 64)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(extractedText))
+        {
+            tags.Add($"text:{TruncateForTag(extractedText, 64)}");
         }
 
         var hook = new HookM.EntryChangeLogHook

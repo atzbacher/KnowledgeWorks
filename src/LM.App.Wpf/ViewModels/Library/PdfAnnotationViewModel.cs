@@ -9,21 +9,24 @@ internal enum PdfAnnotationKind
 {
     Highlight,
     Note,
+    Underline,
 }
 
-internal sealed partial class PdfAnnotationViewModel : ObservableObject
+internal sealed class PdfAnnotationViewModel : ObservableObject
 {
     public PdfAnnotationViewModel(PdfAnnotationKind kind,
                                   int pageNumber,
                                   RectangleF pdfBounds,
                                   string? note,
-                                  DateTime createdAt)
+                                  DateTime createdAt,
+                                  System.Windows.Media.Color color)
     {
         Kind = kind;
         PageNumber = pageNumber;
         PdfBounds = pdfBounds;
         Note = note;
         CreatedAt = createdAt;
+        Color = color;
         AnnotationId = Guid.NewGuid();
     }
 
@@ -38,4 +41,6 @@ internal sealed partial class PdfAnnotationViewModel : ObservableObject
     public string? Note { get; }
 
     public DateTime CreatedAt { get; }
+
+    public System.Windows.Media.Color Color { get; }
 }
