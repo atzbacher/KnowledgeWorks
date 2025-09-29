@@ -102,6 +102,9 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("document")]
         public string? Document { get; init; }           // "hooks/document.json"  <-- NEW generic document hook
 
+        [JsonPropertyName("pdf_annotations")]
+        public string? PdfAnnotations { get; init; }     // "entries/<hash>/hooks/pdf_annotations.json"
+
         [JsonPropertyName("data_extraction")]
         public string? DataExtraction { get; init; }     // "extraction/ab/cd/<sha256>.json"
 

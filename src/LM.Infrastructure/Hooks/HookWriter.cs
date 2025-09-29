@@ -67,14 +67,18 @@ namespace LM.Infrastructure.Hooks
             await WriteJsonAsync(absPath, hook, ct).ConfigureAwait(false);
         }
 
-        public async Task SavePdfAnnotationsAsync(string entryId, HookM.PdfAnnotationsHook hook, CancellationToken ct)
+        public async Task SavePdfAnnotationsAsync(string entryId, string pdfHash, HookM.PdfAnnotationsHook hook, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(entryId))
                 throw new ArgumentException("Entry id must be non-empty.", nameof(entryId));
+            if (string.IsNullOrWhiteSpace(pdfHash))
+                throw new ArgumentException("PDF hash must be non-empty.", nameof(pdfHash));
             if (hook is null)
                 throw new ArgumentNullException(nameof(hook));
 
-            var relDir = Path.Combine("entries", entryId, "hooks");
+            var normalizedHash = pdfHash.Trim().ToLowerInvariant();
+
+            var relDir = Path.Combine("entries", normalizedHash, "hooks");
             var absDir = _workspace.GetAbsolutePath(relDir);
             Directory.CreateDirectory(absDir);
 
@@ -95,6 +99,7 @@ namespace LM.Infrastructure.Hooks
             };
 
             await AppendChangeLogAsync(entryId, changeLog, ct).ConfigureAwait(false);
+            await AppendChangeLogAsync(normalizedHash, changeLog, ct).ConfigureAwait(false);
         }
 
         public async Task AppendChangeLogAsync(string entryId, HookM.EntryChangeLogHook hook, CancellationToken ct)

@@ -128,6 +128,8 @@ namespace LM.HubSpoke.Entries
                 previousHooks = existingHub?.Hooks;
             }
 
+            var pdfHookPath = ResolvePdfAnnotationsHook(entry, previousHooks);
+
             var hub = new EntryHub
             {
                 EntryId = entryId,
@@ -145,6 +147,7 @@ namespace LM.HubSpoke.Entries
                 {
                     Article = isPublication ? "hooks/article.json" : null,
                     Document = !isPublication && !isLitSearch ? "hooks/document.json" : null,
+                    PdfAnnotations = pdfHookPath,
                     LitSearch = isLitSearch ? "hooks/litsearch.json" : null,
                     Notes = hasNotes ? "hooks/notes.json" : null,
                     DataExtraction = previousHooks?.DataExtraction
@@ -235,6 +238,49 @@ namespace LM.HubSpoke.Entries
             };
 
             await File.WriteAllTextAsync(notesPath, JsonSerializer.Serialize(notesHook, JsonStd.Options), ct);
+        }
+
+        private static string? ResolvePdfAnnotationsHook(Entry entry, EntryHooks? previousHooks)
+        {
+            if (entry is null)
+            {
+                return previousHooks?.PdfAnnotations;
+            }
+
+            if (!IsPdfMainFile(entry.MainFilePath))
+            {
+                return previousHooks?.PdfAnnotations;
+            }
+
+            var normalizedHash = NormalizeHash(entry.MainFileHashSha256);
+            if (normalizedHash is null)
+            {
+                return previousHooks?.PdfAnnotations;
+            }
+
+            return $"entries/{normalizedHash}/hooks/pdf_annotations.json";
+        }
+
+        private static bool IsPdfMainFile(string? path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            var extension = Path.GetExtension(path);
+            return !string.IsNullOrWhiteSpace(extension) && extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string? NormalizeHash(string? hash)
+        {
+            if (string.IsNullOrWhiteSpace(hash))
+            {
+                return null;
+            }
+
+            var trimmed = hash.Trim();
+            return trimmed.Length == 64 ? trimmed.ToLowerInvariant() : null;
         }
 
         private static EntryNotesSummary? BuildNotesSummary(Entry entry, object? hook)

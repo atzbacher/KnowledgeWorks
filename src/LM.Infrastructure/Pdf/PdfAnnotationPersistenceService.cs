@@ -39,7 +39,8 @@ namespace LM.Infrastructure.Pdf
                 throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
             if (string.IsNullOrWhiteSpace(pdfHash))
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));
-            if (pdfHash.Length < 2)
+            var normalizedHash = pdfHash.Trim().ToLowerInvariant();
+            if (normalizedHash.Length < 2)
                 throw new ArgumentException("PDF hash must contain at least two characters.", nameof(pdfHash));
             if (overlayJson is null)
                 throw new ArgumentNullException(nameof(overlayJson));
@@ -48,14 +49,14 @@ namespace LM.Infrastructure.Pdf
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var overlayRelativePath = ResolveOverlayRelativePath(pdfHash, overlaySidecarRelativePath);
+            var overlayRelativePath = ResolveOverlayRelativePath(normalizedHash, overlaySidecarRelativePath);
             var overlayAbsolutePath = _workspace.GetAbsolutePath(overlayRelativePath);
             EnsureDirectoryForFile(overlayAbsolutePath);
 
             var overlayBytes = Encoding.UTF8.GetBytes(overlayJson);
             await File.WriteAllBytesAsync(overlayAbsolutePath, overlayBytes, cancellationToken).ConfigureAwait(false);
 
-            var previewRootRelative = Path.Combine("extraction", pdfHash);
+            var previewRootRelative = Path.Combine("extraction", normalizedHash);
             var previewRootAbsolute = _workspace.GetAbsolutePath(previewRootRelative);
             Directory.CreateDirectory(previewRootAbsolute);
 
@@ -89,7 +90,7 @@ namespace LM.Infrastructure.Pdf
                 Previews = previews
             };
 
-            await _hookWriter.SavePdfAnnotationsAsync(entryId, hook, cancellationToken).ConfigureAwait(false);
+            await _hookWriter.SavePdfAnnotationsAsync(entryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
         }
 
         private static string ResolveOverlayRelativePath(string pdfHash, string? sidecar)

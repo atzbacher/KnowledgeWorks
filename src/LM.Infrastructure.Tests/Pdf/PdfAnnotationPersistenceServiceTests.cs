@@ -25,6 +25,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             const string entryId = "entry-123";
             const string hash = "ABCDEF123456";
+            var normalized = hash.ToLowerInvariant();
             const string overlayJson = "{\"hello\":\"world\"}";
 
             var previews = new Dictionary<string, byte[]>
@@ -35,26 +36,26 @@ namespace LM.Infrastructure.Tests.Pdf
 
             await service.PersistAsync(entryId, hash, overlayJson, previews, null, CancellationToken.None);
 
-            var overlayPath = Path.Combine(temp.Path, "library", hash[..2], hash, hash + ".json");
+            var overlayPath = Path.Combine(temp.Path, "library", normalized[..2], normalized, normalized + ".json");
             Assert.True(File.Exists(overlayPath), $"Expected overlay at: {overlayPath}");
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(overlayPath));
 
             foreach (var previewId in previews.Keys)
             {
-                var previewPath = Path.Combine(temp.Path, "extraction", hash, previewId + ".png");
+                var previewPath = Path.Combine(temp.Path, "extraction", normalized, previewId + ".png");
                 Assert.True(File.Exists(previewPath), $"Expected preview at: {previewPath}");
                 Assert.Equal(previews[previewId], await File.ReadAllBytesAsync(previewPath));
             }
 
-            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
             Assert.True(File.Exists(hookPath));
 
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
-            Assert.Equal($"library/{hash[..2]}/{hash}/{hash}.json", hook!.OverlayPath);
+            Assert.Equal($"library/{normalized[..2]}/{normalized}/{normalized}.json", hook!.OverlayPath);
             Assert.Equal(2, hook.Previews.Count);
-            Assert.Contains(hook.Previews, p => p.AnnotationId == "ann1" && p.ImagePath == $"extraction/{hash}/ann1.png");
-            Assert.Contains(hook.Previews, p => p.AnnotationId == "ann2" && p.ImagePath == $"extraction/{hash}/ann2.png");
+            Assert.Contains(hook.Previews, p => p.AnnotationId == "ann1" && p.ImagePath == $"extraction/{normalized}/ann1.png");
+            Assert.Contains(hook.Previews, p => p.AnnotationId == "ann2" && p.ImagePath == $"extraction/{normalized}/ann2.png");
 
             var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
             var changeLog = JsonSerializer.Deserialize<EntryChangeLogHook>(await File.ReadAllTextAsync(changeLogPath));
@@ -62,6 +63,9 @@ namespace LM.Infrastructure.Tests.Pdf
             var changeEvent = Assert.Single(changeLog!.Events);
             Assert.Equal("pdf-annotations-updated", changeEvent.Action);
             Assert.Equal(Environment.UserName, changeEvent.PerformedBy);
+
+            var hashChangeLogPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "changelog.json");
+            Assert.True(File.Exists(hashChangeLogPath));
         }
 
         [Fact]
@@ -76,6 +80,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             const string entryId = "entry-456";
             const string hash = "A1B2C3D4";
+            var normalized = hash.ToLowerInvariant();
             const string overlayJson = "{}";
             const string sidecar = "annotations/custom_overlay.json";
 
@@ -84,7 +89,7 @@ namespace LM.Infrastructure.Tests.Pdf
             var overlayPath = Path.Combine(temp.Path, sidecar);
             Assert.True(File.Exists(overlayPath));
 
-            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
             Assert.Equal(sidecar.Replace("\\", "/"), hook!.OverlayPath);

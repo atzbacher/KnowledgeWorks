@@ -31,6 +31,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private string? _entryId;
         private string? _pdfPath;
         private string? _pdfHash;
+        private string? _precomputedHash;
         private System.Uri? _documentSource;
         private PdfAnnotation? _selectedAnnotation;
         private bool _isBusy;
@@ -62,6 +63,22 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
             LoadPdfCommand = new AsyncRelayCommand(LoadPdfCoreAsync, () => !IsBusy);
             RecordAnnotationChangeCommand = new AsyncRelayCommand(RecordAnnotationChangeAsync, CanRecordAnnotationChange);
+        }
+
+        internal void InitializeContext(string entryId, string pdfPath, string? pdfHash)
+        {
+            EntryId = entryId;
+            PdfPath = pdfPath;
+
+            if (string.IsNullOrWhiteSpace(pdfHash))
+            {
+                _precomputedHash = null;
+                return;
+            }
+
+            var normalized = pdfHash.Trim().ToLowerInvariant();
+            _precomputedHash = normalized;
+            PdfHash = normalized;
         }
 
         /// <summary>
@@ -238,15 +255,24 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     return;
                 }
 
-                await using var stream = new FileStream(absolutePath,
-                                                        FileMode.Open,
-                                                        FileAccess.Read,
-                                                        FileShare.Read,
-                                                        bufferSize: 81920,
-                                                        useAsync: true);
-                using var sha = SHA256.Create();
-                var hashBytes = await sha.ComputeHashAsync(stream, CancellationToken.None).ConfigureAwait(false);
-                PdfHash = Convert.ToHexString(hashBytes);
+                if (!string.IsNullOrWhiteSpace(_precomputedHash))
+                {
+                    PdfHash = _precomputedHash;
+                }
+                else
+                {
+                    await using var stream = new FileStream(absolutePath,
+                                                            FileMode.Open,
+                                                            FileAccess.Read,
+                                                            FileShare.Read,
+                                                            bufferSize: 81920,
+                                                            useAsync: true);
+                    using var sha = SHA256.Create();
+                    var hashBytes = await sha.ComputeHashAsync(stream, CancellationToken.None).ConfigureAwait(false);
+                    PdfHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                }
+
+                _precomputedHash = null;
                 DocumentSource = new Uri(absolutePath, UriKind.Absolute);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
