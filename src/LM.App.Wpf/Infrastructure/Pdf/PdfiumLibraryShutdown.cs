@@ -8,10 +8,21 @@ namespace LM.App.Wpf.Infrastructure.Pdf;
 internal static class PdfiumLibraryShutdown
 {
     private static readonly Lazy<Action> ReleaseLibrary = new(CreateReleaseAction);
+    private static readonly object ReleaseGate = new();
+    private static bool _isReleased;
 
     public static void Release()
     {
-        ReleaseLibrary.Value();
+        lock (ReleaseGate)
+        {
+            if (_isReleased)
+            {
+                return;
+            }
+
+            ReleaseLibrary.Value();
+            _isReleased = true;
+        }
     }
 
     private static Action CreateReleaseAction()
@@ -41,6 +52,7 @@ internal static class PdfiumLibraryShutdown
             try
             {
                 disposeMethod.Invoke(instance, Array.Empty<object>());
+                GC.SuppressFinalize(instance);
             }
             catch
             {
