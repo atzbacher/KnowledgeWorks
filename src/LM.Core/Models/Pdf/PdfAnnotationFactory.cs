@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LM.Core.Models.Pdf;
 
-public sealed class PdfAnnotationFactory : IPdfAnnotationFactory
+internal sealed class PdfAnnotationFactory : IPdfAnnotationFactory
 {
     public PdfAnnotation Create(
         Guid id,

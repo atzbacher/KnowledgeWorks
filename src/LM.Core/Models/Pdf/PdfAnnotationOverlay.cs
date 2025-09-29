@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LM.Core.Models.Pdf;
 
-public sealed record PdfAnnotationOverlay : IPdfAnnotationOverlay
+internal sealed record PdfAnnotationOverlay : IPdfAnnotationOverlay
 {
     public PdfAnnotationOverlay(Guid annotationId, int pageIndex, PdfAnnotationRect rect, PdfAnnotationColor? color, string? label = null)
     {

@@ -1,6 +1,6 @@
 namespace LM.Core.Models.Pdf;
 
-public sealed record PdfAnnotationColor
+internal sealed record PdfAnnotationColor
 {
     public PdfAnnotationColor(byte alpha, byte red, byte green, byte blue, string? name = null)
     {

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace LM.Core.Models.Pdf;
 
-public sealed record PdfAnnotation : IPdfAnnotation
+internal sealed record PdfAnnotation : IPdfAnnotation
 {
     public PdfAnnotation(
         Guid id,

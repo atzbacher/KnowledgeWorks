@@ -1,6 +1,6 @@
 namespace LM.Core.Models.Pdf;
 
-public sealed record PdfAnnotationRect : IPdfAnnotationRect
+internal sealed record PdfAnnotationRect : IPdfAnnotationRect
 {
     public PdfAnnotationRect(double x, double y, double width, double height)
     {
