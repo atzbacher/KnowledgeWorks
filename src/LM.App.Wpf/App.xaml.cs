@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using LM.App.Wpf.Application;
 using LM.App.Wpf.Composition.Modules;
 using LM.App.Wpf.Common.Dialogs;
+using LM.App.Wpf.Infrastructure.Pdf;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Review;
@@ -92,6 +93,7 @@ namespace LM.App.Wpf
             }
             _addViewModel?.Dispose();
             _host?.Dispose();
+            PdfiumLibraryShutdown.Release();
             base.OnExit(e);
         }
 
