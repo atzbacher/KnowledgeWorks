@@ -172,6 +172,7 @@ namespace LM.App.Wpf.Views
                     "WebView2 failed to remove existing host object (HRESULT: 0x{0:X8}). {1}",
                     ex.HResult,
                     ex);
+
             }
 
             _hostObject ??= new PdfViewerHostObject(this);
