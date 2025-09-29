@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -774,27 +775,41 @@ internal sealed partial class DataExtractionPlaygroundViewModel
         var scale = targetDpi / 72d;
         var pixelWidth = Math.Max(1, (int)Math.Ceiling(page.Width * scale));
         var pixelHeight = Math.Max(1, (int)Math.Ceiling(page.Height * scale));
-
-        using var reader = Docnet.Core.DocLib.Instance.GetDocReader(pdfPath, new Docnet.Core.Models.PageDimensions(pixelWidth, pixelHeight));
         var pageIndex = Math.Max(0, pageNumber - 1);
-        using var pageReader = reader.GetPageReader(pageIndex);
-        var raw = pageReader.GetImage();
-        var width = pageReader.GetPageWidth();
-        var height = pageReader.GetPageHeight();
 
-        var bitmap = System.Windows.Media.Imaging.BitmapSource.Create(
-            width,
-            height,
-            targetDpi,
-            targetDpi,
-            System.Windows.Media.PixelFormats.Bgra32,
-            null,
-            raw,
-            width * 4);
+        using var document = PdfiumViewer.Core.PdfDocument.Load(pdfPath);
+        using var rendered = document.Render(
+            pageIndex,
+            pixelWidth,
+            pixelHeight,
+            (float)targetDpi,
+            (float)targetDpi,
+            PdfiumViewer.Enums.PdfRenderFlags.Annotations | PdfiumViewer.Enums.PdfRenderFlags.LcdText);
 
-        bitmap.Freeze();
-        return bitmap;
+        if (rendered is not System.Drawing.Bitmap bitmap)
+        {
+            throw new InvalidOperationException("PDF rendering returned an unexpected image type.");
+        }
+
+        var handle = bitmap.GetHbitmap();
+        try
+        {
+            var source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                handle,
+                IntPtr.Zero,
+                System.Windows.Int32Rect.Empty,
+                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+            source.Freeze();
+            return source;
+        }
+        finally
+        {
+            DeleteObject(handle);
+        }
     }
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteObject(IntPtr handle);
 
     private string? ResolveTessDataDirectory()
     {
