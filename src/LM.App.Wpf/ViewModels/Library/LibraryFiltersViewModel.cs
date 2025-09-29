@@ -93,7 +93,7 @@ namespace LM.App.Wpf.ViewModels.Library
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
 
-            ClearCommand = new RelayCommand(Clear);
+           ClearCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Clear);
         }
 
         private static string BuildKeywordTooltip()
