@@ -1685,3 +1685,9 @@ dialog :link {
     display: none;
   }
 }
+
+/* KnowledgeWorks custom styling */
+.kw-annotation-focus {
+  outline: 2px solid rgba(47, 111, 237, 0.9) !important;
+  transition: outline 0.25s ease-in-out;
+}

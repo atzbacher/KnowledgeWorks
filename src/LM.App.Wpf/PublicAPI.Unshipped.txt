@@ -159,27 +159,50 @@ LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! ta
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
 LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Content.get -> string?
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Content.set -> void
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Id.get -> string!
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.PdfAnnotationViewModel(string! id, string! title) -> void
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Title.get -> string!
-LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ChangeColorCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ChangeColorCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ClearColorCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ClearColorCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorName.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorName.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.CopyCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.CopyCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.DeleteCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.DeleteCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Id.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.get -> int
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PdfAnnotation(string! id, string! title) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImage.get -> System.Windows.Media.Imaging.BitmapImage?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImage.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImagePath.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImagePath.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.TextSnippet.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.TextSnippet.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Title.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Title.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel
-LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.Annotations.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel!>!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.Annotations.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Pdf.PdfAnnotation!>!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.ChangeAnnotationColorCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.CopyAnnotationCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.DocumentSource.get -> System.Uri?
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.get -> string?
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.HandleAnnotationSelectionAsync(LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.IsBusy.get -> bool
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.LoadPdfCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfHash.get -> string?
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.get -> string?
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.set -> void
-LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfViewerViewModel(LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.App.Wpf.Services.IUserContext! userContext) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfViewerViewModel(LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.App.Wpf.Services.IUserContext! userContext, LM.Core.Abstractions.IPdfAnnotationPreviewStorage! previewStorage, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.Common.IClipboardService! clipboard) -> void
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.RecordAnnotationChangeCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
-LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?
 LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.WebViewBridge.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.DeleteAnnotationCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.Library.LibraryFilterPreset
 LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
 LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!

@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:webview2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf"
              mc:Ignorable="d">
   <DockPanel>
     <ToolBar DockPanel.Dock="Top">
@@ -47,10 +48,7 @@
                   Padding="8,4"
                   Command="{Binding RecordAnnotationChangeCommand}" />
 
-          <ListBox ItemsSource="{Binding Annotations}"
-                   SelectedItem="{Binding SelectedAnnotation, Mode=TwoWay}"
-                   DisplayMemberPath="Title"
-                   ScrollViewer.VerticalScrollBarVisibility="Auto" />
+          <pdf:PdfAnnotationList />
         </DockPanel>
       </Border>
 
