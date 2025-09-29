@@ -14,8 +14,7 @@
     <PackageVersion Include="Tesseract" Version="5.2.0" />
     <PackageVersion Include="Docnet.Core" Version="2.6.0" />
     <PackageVersion Include="PdfiumViewer.WPF" Version="1.0.6" />
-    <PackageVersion Include="PdfiumViewer.Native.x86.v8-xfa" Version="2018.4.8.256" />
-    <PackageVersion Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2018.4.8.256" />
+    <PackageVersion Include="HiraokaHyperTools.PdfiumViewer.Native.Windows" Version="0.1.5637" />
 
     <!-- === Microsoft.Extensions family (pin if used anywhere) === -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />

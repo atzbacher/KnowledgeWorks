@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using PdfiumViewer.Core;
 
 namespace LM.App.Wpf.Infrastructure.Pdf;
@@ -27,6 +28,11 @@ internal static class PdfiumLibraryShutdown
 
     private static Action CreateReleaseAction()
     {
+        if (!SupportsNativeRelease())
+        {
+            return static () => { };
+        }
+
         var libraryType = typeof(PdfDocument).Assembly.GetType("PdfiumViewer.Core.PdfLibrary");
         if (libraryType is null)
         {
@@ -63,5 +69,34 @@ internal static class PdfiumLibraryShutdown
                 instanceField.SetValue(null, null);
             }
         };
+    }
+
+    private static bool SupportsNativeRelease()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return false;
+        }
+
+        if (!NativeLibrary.TryLoad("pdfium.dll", out var handle))
+        {
+            return false;
+        }
+
+        try
+        {
+            return NativeLibrary.TryGetExport(handle, "FPDF_Release", out _);
+        }
+        finally
+        {
+            try
+            {
+                NativeLibrary.Free(handle);
+            }
+            catch
+            {
+                // Ignore unload failures – the original loader still owns the module lifetime.
+            }
+        }
     }
 }
