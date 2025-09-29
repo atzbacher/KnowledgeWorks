@@ -159,6 +159,27 @@ LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! ta
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
 LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Content.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Content.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Id.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.PdfAnnotationViewModel(string! id, string! title) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.Annotations.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel!>!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.DocumentSource.get -> System.Uri?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.LoadPdfCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfHash.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfViewerViewModel(LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.App.Wpf.Services.IUserContext! userContext) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.RecordAnnotationChangeCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotationViewModel?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.set -> void
 LM.App.Wpf.Library.LibraryFilterPreset
 LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
 LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!
@@ -755,6 +776,9 @@ LM.App.Wpf.Views.LibraryPresetSaveDialog.ViewModel.get -> LM.App.Wpf.ViewModels.
 LM.App.Wpf.Views.LibraryView
 LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
 LM.App.Wpf.Views.LibraryView.LibraryView() -> void
+LM.App.Wpf.Views.PdfViewer
+LM.App.Wpf.Views.PdfViewer.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewer.PdfViewer() -> void
 LM.App.Wpf.Views.Library.TagTokenSelector
 LM.App.Wpf.Views.Library.TagTokenSelector.InitializeComponent() -> void
 LM.App.Wpf.Views.Library.TagTokenSelector.FilteredSuggestions.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
