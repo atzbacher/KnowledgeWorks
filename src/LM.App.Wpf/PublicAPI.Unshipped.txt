@@ -182,6 +182,11 @@ LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.DeleteCommand.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Id.get -> string!
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.get -> string?
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.Annotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.Annotation.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.ColorName.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.ColorName.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.get -> int
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PdfAnnotation(string! id, string! title) -> void
