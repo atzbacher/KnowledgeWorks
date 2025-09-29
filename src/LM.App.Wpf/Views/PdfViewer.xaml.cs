@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace LM.App.Wpf.Views
         private System.Uri? _pendingDocumentSource;
         private bool _isBridgeInitialized;
         private PdfWebViewBridge? _bridge;
+        private PdfViewerHostObject? _hostObject;
 
         public PdfViewer()
         {
@@ -152,6 +154,30 @@ namespace LM.App.Wpf.Views
                 return;
             }
 
+            try
+            {
+                coreWebView.RemoveHostObjectFromScript("knowledgeworksBridge");
+            }
+            catch (ArgumentException)
+            {
+                // Host object was not previously registered; ignore.
+            }
+            catch (NotImplementedException)
+            {
+                // Older runtimes may not support removal; ignore.
+            }
+
+            _hostObject ??= new PdfViewerHostObject(this);
+
+            try
+            {
+                coreWebView.AddHostObjectToScript("knowledgeworksBridge", _hostObject);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Trace.TraceError("Failed to register WebView host object: {0}", ex);
+            }
+
             coreWebView.WebMessageReceived += OnWebMessageReceived;
             _isBridgeInitialized = true;
         }
@@ -179,44 +205,29 @@ namespace LM.App.Wpf.Views
                 using var document = JsonDocument.Parse(json);
                 var root = document.RootElement;
 
-                if (!root.TryGetProperty("type", out var typeElement) || typeElement.GetString() != "highlight-created")
+                if (!root.TryGetProperty("type", out var typeElement))
                 {
                     return;
                 }
 
-                if (!root.TryGetProperty("annotationId", out var annotationElement))
+                var messageType = typeElement.GetString();
+                switch (messageType)
                 {
-                    return;
+                    case "ready":
+                        _viewModel.HandleViewerReady();
+                        break;
+                    case "selection-changed":
+                        HandleSelectionChanged(root);
+                        break;
+                    case "highlight-created":
+                        await HandleHighlightCreatedAsync(root).ConfigureAwait(true);
+                        break;
+                    case "nav-changed":
+                        HandleNavigationChanged(root);
+                        break;
+                    default:
+                        break;
                 }
-
-                var annotationId = annotationElement.GetString();
-                if (string.IsNullOrWhiteSpace(annotationId))
-                {
-                    return;
-                }
-
-                if (!root.TryGetProperty("preview", out var previewElement))
-                {
-                    return;
-                }
-
-                if (!previewElement.TryGetProperty("base64", out var dataElement))
-                {
-                    return;
-                }
-
-                var base64 = dataElement.GetString();
-                if (string.IsNullOrWhiteSpace(base64))
-                {
-                    return;
-                }
-
-                var width = previewElement.TryGetProperty("width", out var widthElement) ? widthElement.GetInt32() : 0;
-                var height = previewElement.TryGetProperty("height", out var heightElement) ? heightElement.GetInt32() : 0;
-
-                var pngBytes = Convert.FromBase64String(base64);
-
-                await _viewModel.HandleHighlightPreviewAsync(annotationId, pngBytes, width, height).ConfigureAwait(true);
             }
             catch (FormatException ex)
             {
@@ -232,6 +243,110 @@ namespace LM.App.Wpf.Views
             }
         }
 
+        private void HandleSelectionChanged(JsonElement root)
+        {
+            if (_viewModel is null)
+            {
+                return;
+            }
+
+            if (!root.TryGetProperty("selection", out var selectionElement) || selectionElement.ValueKind == JsonValueKind.Null)
+            {
+                _viewModel.UpdateSelection(null, null);
+                return;
+            }
+
+            var text = selectionElement.TryGetProperty("text", out var textElement)
+                ? textElement.GetString()
+                : null;
+
+            int? pageNumber = null;
+            if (selectionElement.TryGetProperty("pageNumber", out var pageElement) && pageElement.ValueKind == JsonValueKind.Number)
+            {
+                if (pageElement.TryGetInt32(out var parsedPage) && parsedPage > 0)
+                {
+                    pageNumber = parsedPage;
+                }
+            }
+
+            _viewModel.UpdateSelection(text, pageNumber);
+        }
+
+        private async Task HandleHighlightCreatedAsync(JsonElement root)
+        {
+            if (_viewModel is null)
+            {
+                return;
+            }
+
+            if (!root.TryGetProperty("annotationId", out var annotationElement))
+            {
+                return;
+            }
+
+            var annotationId = annotationElement.GetString();
+            if (string.IsNullOrWhiteSpace(annotationId))
+            {
+                return;
+            }
+
+            int? pageNumber = null;
+            if (root.TryGetProperty("pageIndex", out var pageIndexElement) && pageIndexElement.ValueKind == JsonValueKind.Number)
+            {
+                if (pageIndexElement.TryGetInt32(out var pageIndex) && pageIndex >= 0)
+                {
+                    pageNumber = pageIndex + 1;
+                }
+            }
+
+            _viewModel.HandleHighlightCreated(annotationId, pageNumber);
+
+            if (!root.TryGetProperty("preview", out var previewElement))
+            {
+                return;
+            }
+
+            if (!previewElement.TryGetProperty("base64", out var dataElement))
+            {
+                return;
+            }
+
+            var base64 = dataElement.GetString();
+            if (string.IsNullOrWhiteSpace(base64))
+            {
+                return;
+            }
+
+            var width = previewElement.TryGetProperty("width", out var widthElement) && widthElement.ValueKind == JsonValueKind.Number
+                ? widthElement.GetInt32()
+                : 0;
+            var height = previewElement.TryGetProperty("height", out var heightElement) && heightElement.ValueKind == JsonValueKind.Number
+                ? heightElement.GetInt32()
+                : 0;
+
+            var pngBytes = Convert.FromBase64String(base64);
+
+            await _viewModel.HandleHighlightPreviewAsync(annotationId, pngBytes, width, height).ConfigureAwait(true);
+        }
+
+        private void HandleNavigationChanged(JsonElement root)
+        {
+            if (_viewModel is null)
+            {
+                return;
+            }
+
+            if (!root.TryGetProperty("pageNumber", out var pageElement) || pageElement.ValueKind != JsonValueKind.Number)
+            {
+                return;
+            }
+
+            if (pageElement.TryGetInt32(out var pageNumber) && pageNumber > 0)
+            {
+                _viewModel.HandleNavigationChanged(pageNumber);
+            }
+        }
+
         private void AttachBridge()
         {
             if (_viewModel is null)
@@ -241,6 +356,72 @@ namespace LM.App.Wpf.Views
 
             _bridge ??= new PdfWebViewBridge(PdfWebView);
             _viewModel.WebViewBridge = _bridge;
+        }
+
+        [ComVisible(true)]
+        [ClassInterface(ClassInterfaceType.None)]
+        private sealed class PdfViewerHostObject
+        {
+            private readonly PdfViewer _owner;
+
+            public PdfViewerHostObject(PdfViewer owner)
+            {
+                _owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            }
+
+            public Task<string?> LoadPdfAsync()
+            {
+                return InvokeAsync(viewModel => viewModel.LoadPdfAsync());
+            }
+
+            public Task<string?> CreateHighlightAsync(string payloadJson)
+            {
+                return InvokeAsync(viewModel => viewModel.CreateHighlightAsync(payloadJson ?? string.Empty));
+            }
+
+            public Task<string?> GetCurrentSelectionAsync()
+            {
+                return InvokeAsync(viewModel => viewModel.GetCurrentSelectionAsync());
+            }
+
+            public Task SetOverlayAsync(string payloadJson)
+            {
+                return InvokeAsync(async viewModel =>
+                {
+                    await viewModel.SetOverlayAsync(payloadJson ?? string.Empty).ConfigureAwait(true);
+                    return (string?)null;
+                });
+            }
+
+            private Task<TResult?> InvokeAsync<TResult>(Func<PdfViewerViewModel, Task<TResult?>> callback)
+            {
+                var dispatcher = _owner.PdfWebView.Dispatcher;
+                if (dispatcher.CheckAccess())
+                {
+                    return ExecuteAsync(callback);
+                }
+
+                return dispatcher.InvokeAsync(() => ExecuteAsync(callback)).Task.Unwrap();
+            }
+
+            private async Task<TResult?> ExecuteAsync<TResult>(Func<PdfViewerViewModel, Task<TResult?>> callback)
+            {
+                var viewModel = _owner._viewModel;
+                if (viewModel is null)
+                {
+                    return default;
+                }
+
+                try
+                {
+                    return await callback(viewModel).ConfigureAwait(true);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("Host bridge invocation failed: {0}", ex);
+                    return default;
+                }
+            }
         }
 
         private sealed class PdfWebViewBridge : IPdfWebViewBridge

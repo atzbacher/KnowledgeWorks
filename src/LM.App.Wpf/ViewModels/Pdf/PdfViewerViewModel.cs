@@ -20,7 +20,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     /// <summary>
     /// Coordinates PDF rendering and annotation metadata for the viewer surface.
     /// </summary>
-    internal sealed class PdfViewerViewModel : ViewModelBase
+    internal sealed partial class PdfViewerViewModel : ViewModelBase
     {
         private readonly HookOrchestrator _hookOrchestrator;
         private readonly IUserContext _userContext;
@@ -60,7 +60,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             _deleteAnnotationCommand = new RelayCommand(OnDeleteAnnotation, CanInteractWithAnnotation);
             _changeAnnotationColorCommand = new RelayCommand(OnChangeAnnotationColor, CanChangeAnnotationColor);
 
-            LoadPdfCommand = new AsyncRelayCommand(LoadPdfAsync, () => !IsBusy);
+            LoadPdfCommand = new AsyncRelayCommand(LoadPdfCoreAsync, () => !IsBusy);
             RecordAnnotationChangeCommand = new AsyncRelayCommand(RecordAnnotationChangeAsync, CanRecordAnnotationChange);
         }
 
@@ -216,7 +216,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             }
         }
 
-        private async Task LoadPdfAsync()
+        private async Task LoadPdfCoreAsync()
         {
             var path = PdfPath;
             if (string.IsNullOrWhiteSpace(path))
