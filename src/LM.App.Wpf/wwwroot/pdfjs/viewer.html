@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>KnowledgeWorks PDF Viewer</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #1e1e1e;
+        color: #f5f5f5;
+      }
+
+      header {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background-color: #2d2d2d;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      main {
+        height: calc(100vh - 58px);
+        overflow: auto;
+        padding: 16px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        background-color: #1e1e1e;
+      }
+
+      #viewer {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+        width: min(100%, 900px);
+      }
+
+      canvas {
+        width: 100%;
+        height: auto;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+        background-color: #fff;
+      }
+
+      .message {
+        margin: auto;
+        font-size: 14px;
+        opacity: 0.8;
+        text-align: center;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.min.js" integrity="sha512-0ypnUfzk0CqJPZEo3pzKJfStyid7mlYBfVZ3VAb9YSEuxsJJcwWabgZiE4OMlZP6eiC04nt8dYrCf6bMnOK0Pg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <header>
+      <h1>KnowledgeWorks PDF Viewer</h1>
+      <span id="status" class="message">Waiting for document&hellip;</span>
+    </header>
+    <main>
+      <div id="viewer"></div>
+    </main>
+    <script>
+      (function () {
+        const status = document.getElementById("status");
+        const viewer = document.getElementById("viewer");
+        const params = new URLSearchParams(window.location.search);
+        const fileUrl = params.get("file");
+
+        if (!fileUrl) {
+          status.textContent = "No document provided.";
+          return;
+        }
+
+        status.textContent = "Loading document&hellip;";
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.2.67/pdf.worker.min.js";
+
+        function renderPage(page) {
+          return page.getViewport({ scale: 1.35 });
+        }
+
+        function drawPage(page) {
+          const viewport = renderPage(page);
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d", { alpha: false });
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          viewer.appendChild(canvas);
+
+          return page.render({ canvasContext: context, viewport }).promise;
+        }
+
+        pdfjsLib
+          .getDocument({ url: fileUrl, withCredentials: false })
+          .promise.then(async (doc) => {
+            status.textContent = `Rendering ${doc.numPages} page${doc.numPages > 1 ? "s" : ""}…`;
+            for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
+              const page = await doc.getPage(pageNumber);
+              await drawPage(page);
+            }
+            status.textContent = `Loaded ${doc.numPages} page${doc.numPages > 1 ? "s" : ""}.`;
+          })
+          .catch((error) => {
+            console.error("Failed to render PDF", error);
+            status.textContent = "Unable to display the PDF document.";
+          });
+      })();
+    </script>
+  </body>
+</html>

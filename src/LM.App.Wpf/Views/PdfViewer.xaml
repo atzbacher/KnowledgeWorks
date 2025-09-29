@@ -63,7 +63,7 @@
       <Border Grid.Column="2"
               Background="#FFFFFFFF"
               Padding="0">
-        <webview2:WebView2 Source="{Binding DocumentSource}" />
+        <webview2:WebView2 x:Name="PdfWebView" />
       </Border>
     </Grid>
   </DockPanel>
