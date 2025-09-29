@@ -103,7 +103,8 @@
                     <ToggleButton.IsChecked>
                         <Binding Path="ActiveAnnotationTool"
                                  Converter="{StaticResource EnumEqualsConverter}"
-                                 ConverterParameter="Highlight" />
+                                 ConverterParameter="Highlight"
+                                 Mode="OneWay" />
                     </ToggleButton.IsChecked>
                 </ToggleButton>
                 <ToggleButton Content="Underline"
@@ -112,7 +113,8 @@
                     <ToggleButton.IsChecked>
                         <Binding Path="ActiveAnnotationTool"
                                  Converter="{StaticResource EnumEqualsConverter}"
-                                 ConverterParameter="Underline" />
+                                 ConverterParameter="Underline"
+                                 Mode="OneWay" />
                     </ToggleButton.IsChecked>
                 </ToggleButton>
                 <ToggleButton Content="Rectangle"
@@ -121,7 +123,8 @@
                     <ToggleButton.IsChecked>
                         <Binding Path="ActiveAnnotationTool"
                                  Converter="{StaticResource EnumEqualsConverter}"
-                                 ConverterParameter="Rectangle" />
+                                 ConverterParameter="Rectangle"
+                                 Mode="OneWay" />
                     </ToggleButton.IsChecked>
                 </ToggleButton>
                 <ToggleButton Content="Note"
@@ -130,7 +133,8 @@
                     <ToggleButton.IsChecked>
                         <Binding Path="ActiveAnnotationTool"
                                  Converter="{StaticResource EnumEqualsConverter}"
-                                 ConverterParameter="Note" />
+                                 ConverterParameter="Note"
+                                 Mode="OneWay" />
                     </ToggleButton.IsChecked>
                 </ToggleButton>
             </ToolBar>
