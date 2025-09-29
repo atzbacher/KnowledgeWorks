@@ -178,7 +178,7 @@ namespace LM.App.Wpf.ViewModels
         private bool CanOpenEntry(LibrarySearchResult? result) => GetSelection(result, updateSelection: false) is not null;
 
         [RelayCommand(CanExecute = nameof(CanOpenEntry))]
-        private void OpenEntry(LibrarySearchResult? result)
+        private async Task OpenEntryAsync(LibrarySearchResult? result)
         {
             var target = GetSelection(result, updateSelection: true);
             if (target is null)
@@ -186,7 +186,7 @@ namespace LM.App.Wpf.ViewModels
 
             try
             {
-                _documentService.OpenEntry(target.Entry);
+                await _documentService.OpenEntryAsync(target.Entry).ConfigureAwait(true);
             }
             catch (Exception ex)
             {

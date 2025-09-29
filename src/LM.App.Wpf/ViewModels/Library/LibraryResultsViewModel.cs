@@ -402,10 +402,21 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         [RelayCommand]
-        private void OpenAttachment(Attachment? attachment)
+        private async Task OpenAttachmentAsync(Attachment? attachment)
         {
             if (attachment is null)
                 return;
+
+            var entry = Selected?.Entry;
+            if (entry is null)
+            {
+                System.Windows.MessageBox.Show(
+                    "No entry is selected.",
+                    "Open Attachment",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Information);
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(attachment.RelativePath))
             {
@@ -430,7 +441,7 @@ namespace LM.App.Wpf.ViewModels.Library
 
             try
             {
-                _documentService.OpenAttachment(attachment);
+                await _documentService.OpenAttachmentAsync(entry, attachment).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -494,14 +505,14 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         [RelayCommand(CanExecute = nameof(CanModifySelected))]
-        private void Open()
+        private async Task OpenAsync()
         {
             var entry = Selected?.Entry;
             if (entry is null) return;
 
             try
             {
-                _documentService.OpenEntry(entry);
+                await _documentService.OpenEntryAsync(entry).ConfigureAwait(true);
             }
             catch (Exception ex)
             {

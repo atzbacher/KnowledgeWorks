@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using LM.Core.Models;
 
 namespace LM.App.Wpf.Library
@@ -7,7 +8,7 @@ namespace LM.App.Wpf.Library
     /// </summary>
     public interface ILibraryDocumentService
     {
-        void OpenEntry(Entry entry);
-        void OpenAttachment(Attachment attachment);
+        Task OpenEntryAsync(Entry entry);
+        Task OpenAttachmentAsync(Entry entry, Attachment attachment);
     }
 }
