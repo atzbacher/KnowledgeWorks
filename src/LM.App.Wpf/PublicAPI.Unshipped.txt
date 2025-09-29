@@ -475,13 +475,101 @@ LM.App.Wpf.Library.LibraryDocumentService
 LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.Library.IPdfViewerLauncher! pdfViewerLauncher) -> void
 LM.App.Wpf.Library.LibraryDocumentService.OpenEntryAsync(LM.Core.Models.Entry! entry) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryDocumentService.OpenAttachmentAsync(LM.Core.Models.Entry! entry, LM.Core.Models.Attachment! attachment) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.PageChanged -> System.EventHandler<int>?
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.PageCount.get -> int
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.ZoomIn() -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.ZoomOut() -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.SetZoom(double zoom) -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.SetZoomMode(PdfiumViewer.Enums.PdfViewerZoomMode mode) -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.RotateClockwise() -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.RotateCounterClockwise() -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.TryNavigateToPage(int pageNumber) -> bool
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.Search(string! text, bool matchCase, bool wholeWord) -> System.Collections.IList?
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.ScrollIntoView(object! match) -> void
+LM.App.Wpf.ViewModels.Library.IPdfViewerSurface.FocusViewer() -> void
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.PdfAnnotationListItemViewModel(System.Guid annotationId, string! title, string? tags, System.Windows.Media.Brush! accentBrush, int pageNumber, CommunityToolkit.Mvvm.Input.IRelayCommand! navigateCommand, CommunityToolkit.Mvvm.Input.IRelayCommand! deleteCommand) -> void
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.AnnotationId.get -> System.Guid
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.Tags.get -> string?
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.AccentBrush.get -> System.Windows.Media.Brush!
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.PageNumber.get -> int
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.NavigateCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel.DeleteCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool.None = 0 -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool.Highlight = 1 -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool.Underline = 2 -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool.Rectangle = 3 -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfAnnotationTool.Note = 4 -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.PdfOutlineNodeViewModel(string! title, int? pageNumber, string? targetUri, CommunityToolkit.Mvvm.Input.IRelayCommand! navigateCommand, System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel!>! children) -> void
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.PageNumber.get -> int?
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.TargetUri.get -> string?
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.Children.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel!>!
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.NavigateCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel.HasDestination.get -> bool
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel.PdfPageThumbnailViewModel(int pageNumber, System.Windows.Media.ImageSource! thumbnail) -> void
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel.PageNumber.get -> int
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel.Thumbnail.get -> System.Windows.Media.ImageSource!
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel.IsCurrent.get -> bool
+LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel.IsCurrent.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
+LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Thumbnails = 0 -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
+LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Annotations = 1 -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
+LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab.Outline = 2 -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel
-LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.PdfViewerViewModel() -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.PdfViewerViewModel(LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore) -> void
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Entry.get -> LM.Core.Models.Entry?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Attachment.get -> LM.Core.Models.Attachment?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.DocumentPath.get -> string?
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.WindowTitle.get -> string!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.Thumbnails.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel!>!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.AnnotationItems.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel!>!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.OutlineItems.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel!>!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.IsSidePaneVisible.get -> bool
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SidePaneWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedPaneTab.get -> LM.App.Wpf.ViewModels.Library.PdfViewerPaneTab
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedPaneTab.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActiveAnnotationTool.get -> LM.App.Wpf.ViewModels.Library.PdfAnnotationTool
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedThumbnail.get -> LM.App.Wpf.ViewModels.Library.PdfPageThumbnailViewModel?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedThumbnail.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedAnnotation.get -> LM.App.Wpf.ViewModels.Library.PdfAnnotationListItemViewModel?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedAnnotation.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedOutline.get -> LM.App.Wpf.ViewModels.Library.PdfOutlineNodeViewModel?
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SelectedOutline.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.CurrentPageNumber.get -> int
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SearchText.get -> string!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SearchText.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.MatchCase.get -> bool
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.MatchCase.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.MatchWholeWord.get -> bool
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.MatchWholeWord.set -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ToggleSidePaneCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ShowPageListCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ZoomInCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ZoomOutCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.FitWidthCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.FitHeightCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActualSizeCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.RotateClockwiseCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.RotateCounterClockwiseCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.FindNextCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.FindPreviousCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.FocusViewerCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActivateHighlightCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActivateUnderlineCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActivateRectangleCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ActivateNoteCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.ClearSearchCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.BeginSearchCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.AttachSurface(LM.App.Wpf.ViewModels.Library.IPdfViewerSurface! surface) -> void
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.DetachSurface() -> void
 LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.InitializeAsync(LM.Core.Models.Entry! entry, string! absolutePath, string? attachmentId) -> System.Threading.Tasks.Task<bool>!
+LM.App.Wpf.ViewModels.Library.PdfViewerViewModel.SearchRequested -> System.EventHandler?
 LM.App.Wpf.Library.IAttachmentMetadataPrompt
 LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
 LM.App.Wpf.Library.AttachmentMetadataPromptContext

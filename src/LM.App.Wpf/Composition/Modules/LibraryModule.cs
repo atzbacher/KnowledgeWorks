@@ -37,6 +37,7 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddTransient<EntryEditorViewModel>();
             services.AddSingleton<ILibraryEntryEditor, LibraryEntryEditor>();
             services.AddTransient<PdfViewerViewModel>();
+            services.AddTransient<PdfViewerWindow>();
             services.AddSingleton<IPdfViewerLauncher, PdfViewerLauncher>();
             services.AddSingleton<ILibraryDocumentService, LibraryDocumentService>();
             services.AddTransient<DataExtractionPlaygroundViewModel>();

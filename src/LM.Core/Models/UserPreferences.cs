@@ -20,6 +20,7 @@ namespace LM.Core.Models
     public sealed record class LibraryPreferences
     {
         public string[] VisibleColumns { get; init; } = Array.Empty<string>();
+        public bool ShowPdfNavigationPane { get; init; } = true;
         public DateTimeOffset LastUpdatedUtc { get; init; } = DateTimeOffset.UtcNow;
     }
 }

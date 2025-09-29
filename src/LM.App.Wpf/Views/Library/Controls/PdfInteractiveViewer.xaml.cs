@@ -57,6 +57,7 @@ internal sealed partial class PdfInteractiveViewer : System.Windows.Controls.Use
         Renderer.PreviewMouseLeftButtonUp += OnRendererPreviewMouseLeftButtonUp;
         Renderer.MouseLeave += OnRendererMouseLeave;
         Renderer.PreviewMouseRightButtonDown += OnRendererPreviewMouseRightButtonDown;
+        Renderer.PageChanged += OnRendererPageChanged;
     }
 
     public event EventHandler<System.Windows.Point>? RegionSelectionStarted;
@@ -66,6 +67,8 @@ internal sealed partial class PdfInteractiveViewer : System.Windows.Controls.Use
     public event EventHandler<System.Windows.Point>? RegionSelectionCompleted;
 
     public event EventHandler? RegionSelectionCanceled;
+
+    public event EventHandler<int>? PageChanged;
 
     public string? SourcePath
     {
@@ -144,13 +147,120 @@ internal sealed partial class PdfInteractiveViewer : System.Windows.Controls.Use
 
     private void OnLoaded(object sender, System.Windows.RoutedEventArgs e)
     {
+        Renderer.PageChanged -= OnRendererPageChanged;
+        Renderer.PageChanged += OnRendererPageChanged;
         AttachAdorner();
         RefreshMarkers();
     }
 
     private void OnUnloaded(object? sender, System.Windows.RoutedEventArgs e)
     {
+        Renderer.PageChanged -= OnRendererPageChanged;
         Renderer.UnLoad();
+    }
+
+    public void ZoomIn()
+    {
+        Renderer.ZoomIn();
+    }
+
+    public void ZoomOut()
+    {
+        Renderer.ZoomOut();
+    }
+
+    public void SetZoom(double zoom)
+    {
+        Renderer.SetZoom(zoom);
+    }
+
+    public void SetZoomMode(PdfiumViewer.Enums.PdfViewerZoomMode mode)
+    {
+        Renderer.SetZoomMode(mode);
+    }
+
+    public void RotateClockwise()
+    {
+        Renderer.ClockwiseRotate();
+    }
+
+    public void RotateCounterClockwise()
+    {
+        Renderer.Counterclockwise();
+    }
+
+    public bool TryNavigateToPage(int pageNumber)
+    {
+        if (pageNumber <= 0 || Renderer.Document is null)
+        {
+            return false;
+        }
+
+        var zeroBased = pageNumber - 1;
+        if (zeroBased >= Renderer.Document.PageCount)
+        {
+            return false;
+        }
+
+        Renderer.GotoPage(zeroBased);
+        return true;
+    }
+
+    public System.Collections.IList? Search(string text, bool matchCase, bool wholeWord)
+    {
+        if (string.IsNullOrWhiteSpace(text) || Renderer.Document is null)
+        {
+            return null;
+        }
+
+        var result = Renderer.Search(text, matchCase, wholeWord, 0, Renderer.Document.PageCount - 1);
+        if (result is null)
+        {
+            return null;
+        }
+
+        return result.Items as System.Collections.IList;
+    }
+
+    public void FocusViewer()
+    {
+        Renderer.Focus();
+    }
+
+    public int GetPageCount()
+    {
+        return Renderer.Document?.PageCount ?? 0;
+    }
+
+    public void ScrollIntoView(object match)
+    {
+        if (match is null)
+        {
+            return;
+        }
+
+        dynamic dynMatch = match;
+        Renderer.GotoPage((int)dynMatch.Page);
+
+        var bounds = Renderer.GetTextBounds(dynMatch.TextSpan) as System.Collections.IList;
+        if (bounds is null || bounds.Count == 0)
+        {
+            return;
+        }
+
+        var rectangle = bounds[0];
+        if (rectangle is null)
+        {
+            return;
+        }
+
+        Renderer.ScrollIntoView((dynamic)rectangle);
+    }
+
+    private void OnRendererPageChanged(object? sender, int pageIndex)
+    {
+        SetCurrentValue(PageNumberProperty, pageIndex + 1);
+        PageChanged?.Invoke(this, pageIndex + 1);
     }
 
     private void AttachAdorner()
