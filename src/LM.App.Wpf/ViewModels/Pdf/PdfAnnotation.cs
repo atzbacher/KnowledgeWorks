@@ -6,7 +6,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     /// <summary>
     /// Represents an annotation displayed in the PDF viewer sidebar.
     /// </summary>
-    internal sealed class PdfAnnotation : Common.ViewModelBase, IDisposable
+    public sealed class PdfAnnotation : Common.ViewModelBase, IDisposable
     {
         private string _title;
         private string? _textSnippet;
