@@ -40,7 +40,8 @@ namespace LM.App.Wpf.ViewModels
                                 IClipboardService clipboard,
                                 IFileExplorerService fileExplorer,
                                 ILibraryDocumentService documentService,
-                                Func<Entry, CancellationToken, Task<bool>> dataExtractionLauncher)
+                                Func<Entry, CancellationToken, Task<bool>> dataExtractionLauncher,
+                                IMuPdfPlaygroundLauncher muPdfPlaygroundLauncher)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
@@ -53,6 +54,7 @@ namespace LM.App.Wpf.ViewModels
             _fileExplorer = fileExplorer ?? throw new ArgumentNullException(nameof(fileExplorer));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
             _dataExtractionLauncher = dataExtractionLauncher ?? throw new ArgumentNullException(nameof(dataExtractionLauncher));
+            _muPdfPlaygroundLauncher = muPdfPlaygroundLauncher ?? throw new ArgumentNullException(nameof(muPdfPlaygroundLauncher));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
 

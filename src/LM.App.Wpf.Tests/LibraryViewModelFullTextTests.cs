@@ -495,7 +495,9 @@ namespace LM.App.Wpf.Tests
                                                        IClipboardService? clipboard = null,
                                                        IFileExplorerService? fileExplorer = null,
                                                        IUserPreferencesStore? preferencesStore = null,
-                                                       Func<Entry, CancellationToken, Task<bool>>? dataExtractionLauncher = null)
+                                                       Func<Entry, CancellationToken, Task<bool>>? dataExtractionLauncher = null,
+                                                       IMuPdfPlaygroundLauncher? muPdfPlaygroundLauncher = null
+)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -511,7 +513,8 @@ namespace LM.App.Wpf.Tests
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
             dataExtractionLauncher ??= (_, _) => Task.FromResult(true);
-            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService, dataExtractionLauncher);
+            muPdfPlaygroundLauncher ??= new NoopMuPdfPlaygroundLauncher();
+            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService, dataExtractionLauncher, muPdfPlaygroundLauncher);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
@@ -536,6 +539,14 @@ namespace LM.App.Wpf.Tests
             public void RevealInExplorer(string path)
             {
                 LastPath = path;
+            }
+        }
+
+        private sealed class NoopMuPdfPlaygroundLauncher : IMuPdfPlaygroundLauncher
+        {
+            public Task<bool> LaunchAsync(Entry entry, CancellationToken cancellationToken)
+            {
+                return Task.FromResult(false);
             }
         }
 

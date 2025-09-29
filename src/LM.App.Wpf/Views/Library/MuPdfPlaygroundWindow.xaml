@@ -1,0 +1,141 @@
+<Window x:Class="LM.App.Wpf.Views.Library.MuPdfPlaygroundWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
+        xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
+        mc:Ignorable="d"
+        x:ClassModifier="internal"
+        Title="{Binding DocumentTitle, FallbackValue=MuPDF Playground}"
+        Height="780"
+        Width="1200"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <TextBlock Text="MuPDF Playground"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+                <TextBlock Text="—" Margin="8,0,0,0" FontSize="20"/>
+                <TextBlock Text="{Binding DocumentTitle}" FontSize="16" VerticalAlignment="Center" Margin="8,0,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                <TextBlock Text="Page" VerticalAlignment="Center"/>
+                <ComboBox Width="80" Margin="4,0,0,0"
+                          ItemsSource="{Binding PageNumbers}"
+                          SelectedItem="{Binding SelectedPageNumber, Mode=TwoWay}"/>
+                <TextBlock Text="Zoom" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                <ComboBox Width="80" Margin="4,0,0,0"
+                          ItemsSource="{Binding ZoomOptions}"
+                          SelectedItem="{Binding SelectedZoom, Mode=TwoWay}"/>
+                <CheckBox Content="Include annotations"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          IsChecked="{Binding IncludePdfAnnotations, Mode=TwoWay}"/>
+                <ToggleButton Content="Area highlighter"
+                              Margin="8,0,0,0"
+                              Padding="8,2"
+                              IsChecked="{Binding IsSelectionModeEnabled, Mode=TwoWay}"/>
+                <Button Content="Export page"
+                        Command="{Binding ExportCurrentPageCommand}"
+                        Margin="8,0,0,0"/>
+                <Button Content="Copy all text"
+                        Command="{Binding CopyPageTextCommand}"
+                        Margin="4,0,0,0"/>
+            </StackPanel>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" BorderBrush="#FFD0D7E5" BorderThickness="1" CornerRadius="6" Margin="0,0,12,0">
+                <controls:MuPdfPageSurface ImageSource="{Binding CurrentPageImage}"
+                                           Annotations="{Binding Annotations}"
+                                           IsSelectionEnabled="{Binding IsSelectionModeEnabled}"
+                                           SelectionCommand="{Binding AddAnnotationFromSelectionCommand}"/>
+            </Border>
+
+            <Border Grid.Column="1" BorderBrush="#FFD0D7E5" BorderThickness="1" CornerRadius="6" Padding="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="Annotations"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="Drag on the page to add highlights. Select an item below to add notes or remove it."
+                                   TextWrapping="Wrap"
+                                   Foreground="Gray"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <ListBox Grid.Row="1"
+                             ItemsSource="{Binding Annotations}"
+                             SelectedItem="{Binding SelectedAnnotation, Mode=TwoWay}"
+                             DisplayMemberPath="DisplayTitle"
+                             MinHeight="200"/>
+
+                    <StackPanel Grid.Row="2" Margin="0,12,0,0">
+                        <TextBlock Text="Note" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding SelectedAnnotation.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True"
+                                 Height="80"
+                                 VerticalScrollBarVisibility="Auto"
+                                 IsEnabled="{Binding HasSelectedAnnotation}"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Save note"
+                                    Command="{Binding SaveAnnotationNoteCommand}"
+                                    CommandParameter="{Binding SelectedAnnotation}"
+                                    Margin="0,0,6,0"
+                                    IsEnabled="{Binding HasSelectedAnnotation}"/>
+                            <Button Content="Copy summary"
+                                    Command="{Binding CopyAnnotationSummaryCommand}"
+                                    CommandParameter="{Binding SelectedAnnotation}"
+                                    Margin="0,0,6,0"
+                                    IsEnabled="{Binding HasSelectedAnnotation}"/>
+                            <Button Content="Remove"
+                                    Command="{Binding RemoveAnnotationCommand}"
+                                    CommandParameter="{Binding SelectedAnnotation}"
+                                    IsEnabled="{Binding HasSelectedAnnotation}"/>
+                        </StackPanel>
+                        <TextBlock Text="Selection rectangle scales with zoom for consistent capture."
+                                   FontStyle="Italic"
+                                   Foreground="Gray"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StatusBar Grid.Row="2" Margin="0,12,0,0">
+            <StatusBarItem Content="{Binding StatusMessage}"/>
+            <StatusBarItem>
+                <TextBlock Text="Page size:"
+                           FontWeight="SemiBold"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock Text="{Binding CurrentPagePixelWidth, StringFormat={}{0:F0}px}"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock Text="×"/>
+            </StatusBarItem>
+            <StatusBarItem>
+                <TextBlock Text="{Binding CurrentPagePixelHeight, StringFormat={}{0:F0}px}"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
