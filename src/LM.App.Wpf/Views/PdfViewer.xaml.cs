@@ -21,6 +21,8 @@ namespace LM.App.Wpf.Views
         private static readonly string ViewerAppOrigin = string.Concat("https://", ViewerVirtualHostName);
         private static readonly string ViewerRelativePath = Path.Combine("wwwroot", "pdfjs", "web", "viewer.html");
 
+        private const int ElementNotFoundHResult = unchecked((int)0x80070490);
+
         private PdfViewerViewModel? _viewModel;
         private System.Uri? _pendingDocumentSource;
         private bool _isBridgeInitialized;
@@ -30,6 +32,7 @@ namespace LM.App.Wpf.Views
         private string? _currentDocumentFilePath;
         private string? _currentDocumentToken;
         private bool _isDocumentRequestHandlerAttached;
+        private bool _isHostObjectRegistered;
 
         public PdfViewer()
         {
@@ -220,25 +223,34 @@ namespace LM.App.Wpf.Views
                 return;
             }
 
-            try
+            if (_isHostObjectRegistered)
             {
-                coreWebView.RemoveHostObjectFromScript("knowledgeworksBridge");
-            }
-            catch (ArgumentException)
-            {
-                // Host object was not previously registered; ignore.
-            }
-            catch (NotImplementedException)
-            {
-                // Older runtimes may not support removal; ignore.
-            }
-            catch (COMException ex)
-            {
-                Trace.TraceWarning(
-                    "WebView2 failed to remove existing host object (HRESULT: 0x{0:X8}). {1}",
-                    ex.HResult,
-                    ex);
-
+                try
+                {
+                    coreWebView.RemoveHostObjectFromScript("knowledgeworksBridge");
+                    _isHostObjectRegistered = false;
+                }
+                catch (ArgumentException)
+                {
+                    // Host object was not previously registered; ignore.
+                    _isHostObjectRegistered = false;
+                }
+                catch (NotImplementedException)
+                {
+                    // Older runtimes may not support removal; ignore.
+                }
+                catch (COMException ex) when (ex.HResult == ElementNotFoundHResult)
+                {
+                    // Element was already removed; treat as success.
+                    _isHostObjectRegistered = false;
+                }
+                catch (COMException ex)
+                {
+                    Trace.TraceWarning(
+                        "WebView2 failed to remove existing host object (HRESULT: 0x{0:X8}). {1}",
+                        ex.HResult,
+                        ex);
+                }
             }
 
             _hostObject ??= new PdfViewerHostObject(this);
@@ -283,6 +295,7 @@ namespace LM.App.Wpf.Views
                 }
 
                 RegisterHostObject(coreWebView, _hostObject);
+                _isHostObjectRegistered = true;
             }
             catch (InvalidOperationException ex)
             {
