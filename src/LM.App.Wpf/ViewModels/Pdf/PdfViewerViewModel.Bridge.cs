@@ -15,6 +15,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private int _currentPageNumber;
         private string? _overlayJson;
         private string? _overlaySidecarPath;
+        private System.Uri? _virtualDocumentSource;
 
         public bool IsViewerReady
         {
@@ -54,7 +55,8 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         public Task<string?> LoadPdfAsync()
         {
-            return Task.FromResult(DocumentSource?.AbsoluteUri);
+            var source = _virtualDocumentSource ?? DocumentSource;
+            return Task.FromResult(source?.AbsoluteUri);
         }
 
         public Task<string?> CreateHighlightAsync(string payloadJson)
@@ -114,6 +116,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
         internal void HandleViewerReady()
         {
             IsViewerReady = true;
+        }
+
+        internal void UpdateVirtualDocumentSource(System.Uri? virtualSource)
+        {
+            _virtualDocumentSource = virtualSource;
         }
 
         internal void UpdateSelection(string? text, int? pageNumber)

@@ -13,6 +13,8 @@ namespace LM.App.Wpf.Views
 {
     public partial class PdfViewer : System.Windows.Controls.UserControl
     {
+        private const string ViewerVirtualHostName = "viewer-appassets.knowledgeworks";
+        private const string DocumentVirtualHostName = "viewer-documents.knowledgeworks";
         private static readonly string ViewerRelativePath = Path.Combine("wwwroot", "pdfjs", "web", "viewer.html");
 
         private PdfViewerViewModel? _viewModel;
@@ -20,6 +22,8 @@ namespace LM.App.Wpf.Views
         private bool _isBridgeInitialized;
         private PdfWebViewBridge? _bridge;
         private PdfViewerHostObject? _hostObject;
+        private string? _mappedWebRootPath;
+        private string? _mappedDocumentRootPath;
 
         public PdfViewer()
         {
@@ -110,11 +114,18 @@ namespace LM.App.Wpf.Views
             }
 
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var webRootPath = Path.Combine(baseDirectory, "wwwroot");
             var viewerPath = Path.Combine(baseDirectory, ViewerRelativePath);
 
             if (!File.Exists(viewerPath))
             {
                 Trace.TraceWarning("Pdf.js viewer asset was not found at '{0}'.", viewerPath);
+                return;
+            }
+
+            if (!Directory.Exists(webRootPath))
+            {
+                Trace.TraceWarning("Pdf.js web root directory was not found at '{0}'.", webRootPath);
                 return;
             }
 
@@ -133,18 +144,34 @@ namespace LM.App.Wpf.Views
                 return;
             }
 
-            InitializeBridge(PdfWebView.CoreWebView2);
+            var coreWebView = PdfWebView.CoreWebView2;
 
-            var viewerUri = new Uri(viewerPath, UriKind.Absolute);
+            EnsureVirtualHostMapping(coreWebView, webRootPath);
+
+            var viewerUri = new Uri(string.Concat("https://", ViewerVirtualHostName, "/pdfjs/web/viewer.html"), UriKind.Absolute);
             var target = viewerUri.AbsoluteUri;
 
-            if (documentSource is not null)
+            bool documentMappingApplied = false;
+            var virtualDocumentSource = documentSource is null
+                ? null
+                : TryCreateVirtualDocumentUri(coreWebView, documentSource, out documentMappingApplied);
+
+            if (!documentMappingApplied)
             {
-                var encodedPdf = Uri.EscapeDataString(documentSource.AbsoluteUri);
-                target = string.Concat(viewerUri.AbsoluteUri, "?file=", encodedPdf);
+                ResetDocumentMapping(coreWebView);
             }
 
-            PdfWebView.CoreWebView2.Navigate(target);
+            _viewModel?.UpdateVirtualDocumentSource(virtualDocumentSource);
+
+            if (virtualDocumentSource is not null)
+            {
+                var encodedPdf = Uri.EscapeDataString(virtualDocumentSource.AbsoluteUri);
+                target = string.Concat(target, "?file=", encodedPdf);
+            }
+
+            InitializeBridge(coreWebView);
+
+            coreWebView.Navigate(target);
         }
 
         private void InitializeBridge(CoreWebView2 coreWebView)
@@ -396,6 +423,135 @@ namespace LM.App.Wpf.Views
 
             _bridge ??= new PdfWebViewBridge(PdfWebView);
             _viewModel.WebViewBridge = _bridge;
+        }
+
+        private void EnsureVirtualHostMapping(CoreWebView2 coreWebView, string webRootPath)
+        {
+            if (coreWebView is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(webRootPath) || !Directory.Exists(webRootPath))
+            {
+                return;
+            }
+
+            var fullPath = Path.GetFullPath(webRootPath);
+
+            if (string.Equals(_mappedWebRootPath, fullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                coreWebView.SetVirtualHostNameToFolderMapping(
+                    ViewerVirtualHostName,
+                    fullPath,
+                    CoreWebView2HostResourceAccessKind.Allow);
+                _mappedWebRootPath = fullPath;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to map WebView virtual host '{0}' to '{1}': {2}", ViewerVirtualHostName, fullPath, ex);
+            }
+        }
+
+        private System.Uri? TryCreateVirtualDocumentUri(CoreWebView2 coreWebView, System.Uri documentSource, out bool mappingApplied)
+        {
+            mappingApplied = false;
+
+            if (coreWebView is null)
+            {
+                return null;
+            }
+
+            if (!documentSource.IsAbsoluteUri)
+            {
+                return documentSource;
+            }
+
+            if (!string.Equals(documentSource.Scheme, System.Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+            {
+                return documentSource;
+            }
+
+            var pdfPath = documentSource.LocalPath;
+            if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
+            {
+                return null;
+            }
+
+            var directory = Path.GetDirectoryName(pdfPath);
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            {
+                return null;
+            }
+
+            EnsureDocumentMapping(coreWebView, directory);
+            mappingApplied = true;
+
+            var fileName = Path.GetFileName(pdfPath);
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return null;
+            }
+
+            var target = string.Concat("https://", DocumentVirtualHostName, "/", Uri.EscapeDataString(fileName));
+            return new System.Uri(target, UriKind.Absolute);
+        }
+
+        private void EnsureDocumentMapping(CoreWebView2 coreWebView, string directory)
+        {
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            {
+                return;
+            }
+
+            var fullPath = Path.GetFullPath(directory);
+
+            if (string.Equals(_mappedDocumentRootPath, fullPath, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            try
+            {
+                coreWebView.SetVirtualHostNameToFolderMapping(
+                    DocumentVirtualHostName,
+                    fullPath,
+                    CoreWebView2HostResourceAccessKind.Allow);
+                _mappedDocumentRootPath = fullPath;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to map PDF directory '{0}' to virtual host '{1}': {2}", fullPath, DocumentVirtualHostName, ex);
+            }
+        }
+
+        private void ResetDocumentMapping(CoreWebView2 coreWebView)
+        {
+            if (coreWebView is null)
+            {
+                return;
+            }
+
+            if (_mappedDocumentRootPath is null)
+            {
+                return;
+            }
+
+            try
+            {
+                coreWebView.ClearVirtualHostNameToFolderMapping(DocumentVirtualHostName);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning("Failed to clear virtual host mapping for '{0}': {1}", DocumentVirtualHostName, ex);
+            }
+
+            _mappedDocumentRootPath = null;
         }
 
         private sealed class PdfWebViewBridge : IPdfWebViewBridge
