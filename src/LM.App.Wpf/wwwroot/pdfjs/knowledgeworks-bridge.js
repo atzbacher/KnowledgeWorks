@@ -273,6 +273,18 @@ async function loadPdfFromHost() {
   }
 }
 
+function requestPdfLoad(targetHint) {
+  if (typeof targetHint === "string") {
+    const normalizedHint = targetHint.trim();
+    lastRequestedPdfUrl = normalizedHint ? normalizedHint : null;
+  } else {
+    lastRequestedPdfUrl = null;
+  }
+
+  pdfLoadCompleted = false;
+  void loadPdfFromHost();
+}
+
 function watchAnnotationStorage(app) {
   const storage = app?.pdfDocument?.annotationStorage;
   if (!storage) {
@@ -316,7 +328,7 @@ async function initializeBridge() {
     patchAnnotationLayerForHighlights();
     watchAnnotationStorage(app);
     app.eventBus?.on("documentloaded", () => watchAnnotationStorage(app));
-    void loadPdfFromHost();
+    requestPdfLoad();
   } catch (error) {
     console.error("knowledgeworks-bridge: initialization failed", error);
     bridgeInitializationCompleted = false;
@@ -396,7 +408,7 @@ function requestOverlaySnapshot() {
 }
 
 window.PdfBridge = {
-  loadPdf: loadPdfFromHost,
+  loadPdf: requestPdfLoad,
   applyOverlay,
   scrollToAnnotation: scrollToAnnotationDom,
   createHighlight: createHighlightFromHost,
