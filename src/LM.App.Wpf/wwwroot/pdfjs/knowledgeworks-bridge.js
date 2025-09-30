@@ -8,6 +8,7 @@ let overlaySyncHandle = null;
 const processedHighlights = new Set();
 const RETRY_DELAY_MS = 50;
 let pdfLoadCompleted = false;
+let lastRequestedPdfUrl = null;
 let bridgeInitializationCompleted = false;
 
 function getChromeWebView() {
@@ -213,10 +214,6 @@ function patchAnnotationLayerForHighlights() {
 }
 
 async function loadPdfFromHost() {
-  if (pdfLoadCompleted) {
-    return;
-  }
-
   const host = getHostObject();
   if (!host) {
     window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
@@ -238,7 +235,18 @@ async function loadPdfFromHost() {
     const target = await host.LoadPdfAsync();
     const normalizedTarget = typeof target === "string" ? target.trim() : "";
     if (!normalizedTarget) {
+      lastRequestedPdfUrl = null;
+      pdfLoadCompleted = false;
       window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
+      return;
+    }
+
+    if (lastRequestedPdfUrl !== normalizedTarget) {
+      lastRequestedPdfUrl = normalizedTarget;
+      pdfLoadCompleted = false;
+    }
+
+    if (pdfLoadCompleted && app.url === normalizedTarget) {
       return;
     }
 
@@ -247,8 +255,10 @@ async function loadPdfFromHost() {
         await app.open({ url: normalizedTarget, originalUrl: normalizedTarget });
       }
 
-      pdfLoadCompleted = true;
-      return;
+      if (app.url === normalizedTarget) {
+        pdfLoadCompleted = true;
+        return;
+      }
     }
 
     if (app.url === normalizedTarget) {
@@ -261,6 +271,18 @@ async function loadPdfFromHost() {
     console.error("knowledgeworks-bridge: failed to load PDF from host", error);
     window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
   }
+}
+
+function requestPdfLoad(targetHint) {
+  if (typeof targetHint === "string") {
+    const normalizedHint = targetHint.trim();
+    lastRequestedPdfUrl = normalizedHint ? normalizedHint : null;
+  } else {
+    lastRequestedPdfUrl = null;
+  }
+
+  pdfLoadCompleted = false;
+  void loadPdfFromHost();
 }
 
 function watchAnnotationStorage(app) {
@@ -306,7 +328,7 @@ async function initializeBridge() {
     patchAnnotationLayerForHighlights();
     watchAnnotationStorage(app);
     app.eventBus?.on("documentloaded", () => watchAnnotationStorage(app));
-    void loadPdfFromHost();
+    requestPdfLoad();
   } catch (error) {
     console.error("knowledgeworks-bridge: initialization failed", error);
     bridgeInitializationCompleted = false;
@@ -386,7 +408,7 @@ function requestOverlaySnapshot() {
 }
 
 window.PdfBridge = {
-  loadPdf: loadPdfFromHost,
+  loadPdf: requestPdfLoad,
   applyOverlay,
   scrollToAnnotation: scrollToAnnotationDom,
   createHighlight: createHighlightFromHost,

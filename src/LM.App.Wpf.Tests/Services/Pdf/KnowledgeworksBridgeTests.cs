@@ -31,6 +31,50 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             Assert.False(harness.RunNextTimer());
         }
 
+        [Fact]
+        public void LoadPdfFromHostRequestsHostWhenUrlChanges()
+        {
+            using var harness = KnowledgeworksBridgeHarness.Create();
+
+            harness.SetPdfViewerApplication();
+            harness.SetHostObject("app://first.pdf");
+
+            harness.InvokePdfBridgeLoad();
+            harness.DrainTimers();
+
+            Assert.Equal(1, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://first.pdf", harness.OpenedUrl);
+
+            harness.SetHostObject("app://second.pdf");
+
+            harness.InvokePdfBridgeLoad();
+            harness.DrainTimers();
+
+            Assert.Equal(2, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://second.pdf", harness.OpenedUrl);
+        }
+
+        [Fact]
+        public void LoadPdfFromHostRequestsHostWhenSameUrlReloaded()
+        {
+            using var harness = KnowledgeworksBridgeHarness.Create();
+
+            harness.SetPdfViewerApplication();
+            harness.SetHostObject("app://shared.pdf");
+
+            harness.InvokePdfBridgeLoad();
+            harness.DrainTimers();
+
+            Assert.Equal(1, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://shared.pdf", harness.OpenedUrl);
+
+            harness.InvokePdfBridgeLoad();
+            harness.DrainTimers();
+
+            Assert.Equal(2, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://shared.pdf", harness.OpenedUrl);
+        }
+
         private sealed class KnowledgeworksBridgeHarness : IDisposable
         {
             private readonly Engine _engine;
@@ -116,6 +160,19 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             {
                 var initialize = _engine.GetValue("initializeBridge");
                 _engine.Invoke(initialize);
+            }
+
+            public void InvokePdfBridgeLoad(string? target = null)
+            {
+                var loadPdf = _engine.GetValue("window.PdfBridge.loadPdf");
+                if (target is null)
+                {
+                    _engine.Invoke(loadPdf);
+                }
+                else
+                {
+                    _engine.Invoke(loadPdf, target);
+                }
             }
 
             public bool HasPendingTimers => GetQueueLength() > 0;
