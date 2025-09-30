@@ -584,6 +584,7 @@ namespace LM.App.Wpf.Views
                     var notFoundHeaders = BuildResponseHeaders("text/plain; charset=utf-8", notFoundPayload.Length, allowRange: false);
                     var payloadStream = new MemoryStream(notFoundPayload, writable: false);
                     e.Response = environment.CreateWebResourceResponse(payloadStream, 404, "Not Found", notFoundHeaders);
+
                     return;
                 }
 
