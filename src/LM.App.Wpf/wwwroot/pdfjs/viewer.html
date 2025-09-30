@@ -248,6 +248,22 @@
               statusEl.classList.add("error");
             });
         }
+        const bridgeScript = document.createElement("script");
+        const path = window.location.pathname.includes("/web/")
+          ? "../knowledgeworks-bridge.js"
+          : "knowledgeworks-bridge.js";
+        bridgeScript.src = path;
+        bridgeScript.async = false;
+        bridgeScript.onerror = () => {
+          console.error(
+            "Failed to load knowledgeworks bridge script from",
+            bridgeScript.src,
+          );
+          statusEl.textContent = "KnowledgeWorks bridge unavailable.";
+          statusEl.classList.add("error");
+        };
+        document.body.appendChild(bridgeScript);
+
       })();
     </script>
     <script src="./knowledgeworks-bridge.js"></script>
