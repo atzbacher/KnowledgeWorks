@@ -66,6 +66,10 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var hashChangeLogPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "changelog.json");
             Assert.True(File.Exists(hashChangeLogPath));
+
+            var debugOverlayPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.overlay.json");
+            Assert.True(File.Exists(debugOverlayPath));
+            Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
         }
 
         [Fact]
@@ -93,6 +97,54 @@ namespace LM.Infrastructure.Tests.Pdf
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
             Assert.Equal(sidecar.Replace("\\", "/"), hook!.OverlayPath);
+
+            var debugOverlayPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.overlay.json");
+            Assert.True(File.Exists(debugOverlayPath));
+            Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
+        }
+
+        [Fact]
+        public async Task PersistAsync_PreservesExistingPreviewsWhenNoNewImages()
+        {
+            using var temp = new TempDir();
+
+            var workspace = new WorkspaceService();
+            await workspace.EnsureWorkspaceAsync(temp.Path);
+
+            var service = new PdfAnnotationPersistenceService(workspace);
+
+            const string entryId = "entry-901";
+            const string hash = "FACEBEEF";
+            var normalized = hash.ToLowerInvariant();
+
+            await service.PersistAsync(
+                entryId,
+                hash,
+                "{\"existing\":true}",
+                new Dictionary<string, byte[]>
+                {
+                    ["existing"] = new byte[] { 1, 1, 1 }
+                },
+                null,
+                CancellationToken.None);
+
+            await service.PersistAsync(
+                entryId,
+                hash,
+                "{\"updated\":true}",
+                new Dictionary<string, byte[]>(),
+                null,
+                CancellationToken.None);
+
+            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
+            var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
+            Assert.NotNull(hook);
+            var preview = Assert.Single(hook!.Previews);
+            Assert.Equal("existing", preview.AnnotationId);
+            Assert.Equal($"extraction/{normalized}/existing.png", preview.ImagePath);
+
+            var previewPath = Path.Combine(temp.Path, "extraction", normalized, "existing.png");
+            Assert.True(File.Exists(previewPath));
         }
 
         [Fact]

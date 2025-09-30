@@ -901,6 +901,29 @@ namespace LM.App.Wpf.Views
                 }).Task.ConfigureAwait(false);
             }
 
+            public async Task ApplyOverlayAsync(string overlayJson, CancellationToken cancellationToken)
+            {
+                if (string.IsNullOrWhiteSpace(overlayJson))
+                {
+                    return;
+                }
+
+                await EnsureCoreAsync().ConfigureAwait(false);
+
+                await _webView.Dispatcher.InvokeAsync(() =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_webView.CoreWebView2 is null)
+                    {
+                        return;
+                    }
+
+                    var encoded = JsonSerializer.Serialize(overlayJson);
+                    var script = string.Concat("window?.PdfBridge?.applyOverlay?.(", encoded, ");");
+                    _ = _webView.CoreWebView2.ExecuteScriptAsync(script);
+                }).Task.ConfigureAwait(false);
+            }
+
             private async Task EnsureCoreAsync()
             {
                 if (_webView.CoreWebView2 is not null)

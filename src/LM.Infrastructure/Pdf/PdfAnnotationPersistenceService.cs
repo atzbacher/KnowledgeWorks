@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
@@ -17,6 +18,7 @@ namespace LM.Infrastructure.Pdf
     {
         private const string OverlayExtension = ".json";
         private const string PreviewExtension = ".png";
+        private const string DebugOverlayFileName = "pdf_annotations.overlay.json";
 
         private readonly IWorkSpaceService _workspace;
         private readonly HookWriter _hookWriter;
@@ -60,7 +62,7 @@ namespace LM.Infrastructure.Pdf
             var previewRootAbsolute = _workspace.GetAbsolutePath(previewRootRelative);
             Directory.CreateDirectory(previewRootAbsolute);
 
-            var previews = new List<PdfAnnotationPreview>(safePreviewImages.Count);
+            var previewMap = await LoadExistingPreviewsAsync(normalizedHash, cancellationToken).ConfigureAwait(false);
 
             foreach (var kvp in safePreviewImages)
             {
@@ -77,10 +79,16 @@ namespace LM.Infrastructure.Pdf
 
                 await File.WriteAllBytesAsync(previewAbsolutePath, kvp.Value, cancellationToken).ConfigureAwait(false);
 
+                previewMap[annotationId] = previewRelativePath;
+            }
+
+            var previews = new List<PdfAnnotationPreview>(previewMap.Count);
+            foreach (var kvp in previewMap)
+            {
                 previews.Add(new PdfAnnotationPreview
                 {
-                    AnnotationId = annotationId,
-                    ImagePath = previewRelativePath
+                    AnnotationId = kvp.Key,
+                    ImagePath = kvp.Value
                 });
             }
 
@@ -91,6 +99,96 @@ namespace LM.Infrastructure.Pdf
             };
 
             await _hookWriter.SavePdfAnnotationsAsync(entryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
+
+            await WriteDebugOverlayCopyAsync(normalizedHash, overlayJson, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string normalizedHash, CancellationToken cancellationToken)
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            var hookRelative = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+            var hookAbsolute = _workspace.GetAbsolutePath(hookRelative);
+
+            if (string.IsNullOrWhiteSpace(hookAbsolute) || !File.Exists(hookAbsolute))
+            {
+                return result;
+            }
+
+            try
+            {
+                await using var stream = new FileStream(
+                    hookAbsolute,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read,
+                    bufferSize: 4096,
+                    useAsync: true);
+
+                var hook = await JsonSerializer.DeserializeAsync<PdfAnnotationsHook>(stream, JsonStd.Options, cancellationToken).ConfigureAwait(false);
+                if (hook?.Previews is null || hook.Previews.Count == 0)
+                {
+                    return result;
+                }
+
+                foreach (var preview in hook.Previews)
+                {
+                    if (preview is null)
+                    {
+                        continue;
+                    }
+
+                    var id = NormalizeAnnotationId(preview.AnnotationId);
+                    if (id is null || string.IsNullOrWhiteSpace(preview.ImagePath))
+                    {
+                        continue;
+                    }
+
+                    var normalizedPath = NormalizeRelativePath(preview.ImagePath);
+                    var absolutePath = _workspace.GetAbsolutePath(normalizedPath);
+                    if (string.IsNullOrWhiteSpace(absolutePath) || !File.Exists(absolutePath))
+                    {
+                        continue;
+                    }
+
+                    result[id] = normalizedPath;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // Ignore malformed hooks and fall back to regenerated previews.
+            }
+
+            return result;
+        }
+
+        private async Task WriteDebugOverlayCopyAsync(string normalizedHash, string overlayJson, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(overlayJson))
+            {
+                return;
+            }
+
+            try
+            {
+                var debugRelative = Path.Combine("entries", normalizedHash, "hooks", DebugOverlayFileName);
+                var debugAbsolute = _workspace.GetAbsolutePath(debugRelative);
+                EnsureDirectoryForFile(debugAbsolute);
+
+                await File.WriteAllTextAsync(debugAbsolute, overlayJson, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch
+            {
+                // Debug copy is best-effort. Ignore failures.
+            }
         }
 
         private static string ResolveOverlayRelativePath(string pdfHash, string? sidecar)

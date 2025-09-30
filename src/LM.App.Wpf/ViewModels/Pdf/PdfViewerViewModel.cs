@@ -25,6 +25,8 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private readonly HookOrchestrator _hookOrchestrator;
         private readonly IUserContext _userContext;
         private readonly IPdfAnnotationPreviewStorage _previewStorage;
+        private readonly IPdfAnnotationPersistenceService _annotationPersistence;
+        private readonly IPdfAnnotationOverlayReader _overlayReader;
         private readonly IWorkSpaceService _workspace;
         private readonly IClipboardService _clipboard;
 
@@ -40,17 +42,28 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private readonly RelayCommand _changeAnnotationColorCommand;
 
         private IPdfWebViewBridge? _webViewBridge;
+        private readonly Dictionary<string, byte[]> _pendingPreviewBytes = new(StringComparer.OrdinalIgnoreCase);
+        private readonly object _previewBytesGate = new();
+        private readonly object _overlayPersistenceGate = new();
+        private CancellationTokenSource? _overlayPersistenceCts;
+        private Task? _overlayPersistenceTask;
+
+        private static readonly TimeSpan OverlayPersistenceDelay = TimeSpan.FromMilliseconds(500);
 
         public PdfViewerViewModel(
             HookOrchestrator hookOrchestrator,
             IUserContext userContext,
             IPdfAnnotationPreviewStorage previewStorage,
+            IPdfAnnotationPersistenceService annotationPersistence,
+            IPdfAnnotationOverlayReader overlayReader,
             IWorkSpaceService workspace,
             IClipboardService clipboard)
         {
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
             _userContext = userContext ?? throw new ArgumentNullException(nameof(userContext));
             _previewStorage = previewStorage ?? throw new ArgumentNullException(nameof(previewStorage));
+            _annotationPersistence = annotationPersistence ?? throw new ArgumentNullException(nameof(annotationPersistence));
+            _overlayReader = overlayReader ?? throw new ArgumentNullException(nameof(overlayReader));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
             _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
 
@@ -213,6 +226,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             {
                 _webViewBridge = value;
                 TryRequestDocumentLoad();
+                TryApplyOverlayToViewer();
             }
         }
 
@@ -299,6 +313,12 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 }
 
                 DocumentSource = absoluteUri;
+
+                var currentHash = PdfHash;
+                if (!string.IsNullOrWhiteSpace(currentHash))
+                {
+                    await LoadOverlaySnapshotAsync(currentHash!, CancellationToken.None).ConfigureAwait(false);
+                }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -325,6 +345,103 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private bool CanRecordAnnotationChange()
             => !IsBusy && !string.IsNullOrWhiteSpace(EntryId) && SelectedAnnotation is not null;
 
+        private async Task LoadOverlaySnapshotAsync(string pdfHash, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var overlayJson = await _overlayReader.GetOverlayJsonAsync(pdfHash, cancellationToken).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(overlayJson))
+                {
+                    QueueOverlayForViewer(overlayJson);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to load overlay for '{0}': {1}", pdfHash, ex);
+            }
+        }
+
+        private void OnOverlaySnapshotReceived(string? overlayJson, string? sidecarPath, string? hashOverride)
+        {
+            if (string.IsNullOrWhiteSpace(overlayJson))
+            {
+                return;
+            }
+
+            var entryId = EntryId;
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                return;
+            }
+
+            var normalizedHash = !string.IsNullOrWhiteSpace(hashOverride)
+                ? hashOverride.Trim().ToLowerInvariant()
+                : PdfHash;
+
+            if (string.IsNullOrWhiteSpace(normalizedHash))
+            {
+                return;
+            }
+
+            normalizedHash = normalizedHash.Trim().ToLowerInvariant();
+
+            if (string.IsNullOrWhiteSpace(PdfHash))
+            {
+                PdfHash = normalizedHash;
+            }
+
+            ScheduleOverlayPersistence(entryId!, normalizedHash, overlayJson, sidecarPath);
+        }
+
+        private void ScheduleOverlayPersistence(string entryId, string pdfHash, string overlayJson, string? sidecarPath)
+        {
+            lock (_overlayPersistenceGate)
+            {
+                _overlayPersistenceCts?.Cancel();
+                _overlayPersistenceCts?.Dispose();
+
+                var cts = new CancellationTokenSource();
+                _overlayPersistenceCts = cts;
+                _overlayPersistenceTask = PersistOverlayAsync(entryId, pdfHash, overlayJson, sidecarPath, cts.Token);
+            }
+        }
+
+        private Task PersistOverlayAsync(string entryId, string pdfHash, string overlayJson, string? sidecarPath, CancellationToken cancellationToken)
+        {
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    await Task.Delay(OverlayPersistenceDelay, cancellationToken).ConfigureAwait(false);
+
+                    Dictionary<string, byte[]> previewSnapshot;
+                    lock (_previewBytesGate)
+                    {
+                        previewSnapshot = new Dictionary<string, byte[]>(_pendingPreviewBytes.Count, StringComparer.OrdinalIgnoreCase);
+                        foreach (var kvp in _pendingPreviewBytes)
+                        {
+                            previewSnapshot[kvp.Key] = kvp.Value;
+                        }
+
+                        _pendingPreviewBytes.Clear();
+                    }
+
+                    await _annotationPersistence.PersistAsync(entryId, pdfHash, overlayJson, previewSnapshot, sidecarPath, cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("Failed to persist PDF annotations for '{0}': {1}", entryId, ex);
+                }
+            }, cancellationToken);
+        }
+
         public async Task HandleHighlightPreviewAsync(string annotationId, byte[] pngBytes, int width, int height)
         {
             if (string.IsNullOrWhiteSpace(annotationId) || pngBytes is null || pngBytes.Length == 0)
@@ -343,6 +460,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
             try
             {
+                lock (_previewBytesGate)
+                {
+                    _pendingPreviewBytes[annotationId] = pngBytes.ToArray();
+                }
+
                 var relativePath = await _previewStorage.SaveAsync(hash, annotationId, pngBytes, CancellationToken.None).ConfigureAwait(true);
 
                 var annotation = Annotations.FirstOrDefault(a => string.Equals(a.Id, annotationId, StringComparison.OrdinalIgnoreCase));

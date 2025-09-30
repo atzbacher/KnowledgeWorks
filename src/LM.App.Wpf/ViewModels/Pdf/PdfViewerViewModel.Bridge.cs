@@ -19,6 +19,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private System.Uri? _virtualDocumentSource;
         private TaskCompletionSource<System.Uri?>? _virtualDocumentSourceReady;
         private bool _pendingDocumentLoadRequest;
+        private string? _pendingOverlayPayload;
 
         public bool IsViewerReady
         {
@@ -130,6 +131,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     : null;
 
                 UpdateOverlaySnapshot(overlayJson, sidecarPath);
+                var hash = root.TryGetProperty("hash", out var hashElement)
+                    ? hashElement.GetString()
+                    : null;
+
+                OnOverlaySnapshotReceived(overlayJson, sidecarPath, hash);
             }
             catch (JsonException ex)
             {
@@ -149,6 +155,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             }
 
             TryRequestDocumentLoad();
+            TryApplyOverlayToViewer();
         }
 
         internal void UpdateVirtualDocumentSource(System.Uri? virtualSource)
@@ -156,6 +163,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             _virtualDocumentSource = virtualSource;
             _virtualDocumentSourceReady?.TrySetResult(virtualSource);
             TryRequestDocumentLoad();
+            TryApplyOverlayToViewer();
         }
 
         partial void OnDocumentSourceChanged(System.Uri? value)
@@ -189,6 +197,42 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         private static TaskCompletionSource<System.Uri?> CreateVirtualDocumentCompletion()
             => new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        internal void QueueOverlayForViewer(string overlayJson)
+        {
+            if (string.IsNullOrWhiteSpace(overlayJson))
+            {
+                return;
+            }
+
+            OverlayJson = overlayJson;
+            _pendingOverlayPayload = overlayJson;
+            TryApplyOverlayToViewer();
+        }
+
+        private void TryApplyOverlayToViewer()
+        {
+            if (string.IsNullOrWhiteSpace(_pendingOverlayPayload))
+            {
+                return;
+            }
+
+            if (!IsViewerReady)
+            {
+                return;
+            }
+
+            var bridge = _webViewBridge;
+            if (bridge is null)
+            {
+                return;
+            }
+
+            var payload = _pendingOverlayPayload;
+            _pendingOverlayPayload = null;
+
+            _ = bridge.ApplyOverlayAsync(payload!, CancellationToken.None);
+        }
 
         internal void UpdateSelection(string? text, int? pageNumber)
         {
