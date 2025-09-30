@@ -40,6 +40,7 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             harness.SetHostObject("app://first.pdf");
 
             harness.InvokePdfBridgeLoad();
+
             harness.DrainTimers();
 
             Assert.Equal(1, harness.LoadPdfInvocationCount);
@@ -48,6 +49,7 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             harness.SetHostObject("app://second.pdf");
 
             harness.InvokePdfBridgeLoad();
+
             harness.DrainTimers();
 
             Assert.Equal(2, harness.LoadPdfInvocationCount);
@@ -173,6 +175,7 @@ namespace LM.App.Wpf.Tests.Services.Pdf
                 {
                     _engine.Invoke(loadPdf, target);
                 }
+
             }
 
             public bool HasPendingTimers => GetQueueLength() > 0;

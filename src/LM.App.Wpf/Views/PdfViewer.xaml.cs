@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text;
@@ -17,6 +18,7 @@ namespace LM.App.Wpf.Views
     {
         private const string ViewerVirtualHostName = "viewer-appassets.knowledgeworks";
         private const string DocumentVirtualHostName = "viewer-documents.knowledgeworks";
+        private static readonly string ViewerAppOrigin = string.Concat("https://", ViewerVirtualHostName);
         private static readonly string ViewerRelativePath = Path.Combine("wwwroot", "pdfjs", "web", "viewer.html");
 
         private PdfViewerViewModel? _viewModel;
@@ -246,6 +248,11 @@ namespace LM.App.Wpf.Views
                 "PdfViewerHostObject COM visible: {0}",
                 Marshal.IsTypeVisibleFromCom(typeof(PdfViewerHostObject)));
 
+            if (!areHostObjectsAllowed)
+            {
+                coreWebView.Settings.AreHostObjectsAllowed = true;
+            }
+
             try
             {
 
@@ -274,7 +281,7 @@ namespace LM.App.Wpf.Views
                     Trace.TraceError("GetIDispatchForObject failed: {0}", ex);
                 }
 
-                coreWebView.AddHostObjectToScript("knowledgeworksBridge", _hostObject);
+                RegisterHostObject(coreWebView, _hostObject);
             }
             catch (InvalidOperationException ex)
             {
@@ -344,6 +351,42 @@ namespace LM.App.Wpf.Views
             {
                 Trace.TraceError("Unhandled error while processing WebView message: {0}", ex);
             }
+        }
+
+        private static void RegisterHostObject(CoreWebView2 coreWebView, PdfViewerHostObject hostObject)
+        {
+            var withOrigins = typeof(CoreWebView2).GetMethod("AddHostObjectToScriptWithOrigins");
+
+            if (withOrigins is not null)
+            {
+                try
+                {
+                    withOrigins.Invoke(coreWebView, new object[]
+                    {
+                        "knowledgeworksBridge",
+                        hostObject,
+                        new[] { ViewerAppOrigin },
+                    });
+                    return;
+                }
+                catch (TargetInvocationException ex) when (ex.InnerException is NotImplementedException or EntryPointNotFoundException or MissingMethodException)
+                {
+                }
+                catch (TargetInvocationException ex)
+                {
+                    Trace.TraceWarning(
+                        "Failed to register host object via origins API: {0}",
+                        ex.InnerException ?? ex);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning(
+                        "Failed to register host object via origins API: {0}",
+                        ex);
+                }
+            }
+
+            coreWebView.AddHostObjectToScript("knowledgeworksBridge", hostObject);
         }
 
         private void HandleSelectionChanged(JsonElement root)
