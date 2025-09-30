@@ -24,45 +24,16 @@ See https://github.com/adobe-type-tools/cmap-resources
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<!--#if GENERIC || CHROME-->
     <meta name="google" content="notranslate">
-<!--#endif-->
     <title>PDF.js viewer</title>
 
-<!--#if MOZCENTRAL-->
-<!--#include viewer-snippet-firefox-extension.html-->
-<!--#elif CHROME-->
-<!--#include viewer-snippet-chrome-extension.html-->
-<!--#else-->
-    <link rel="resource" type="application/l10n" href="locale/locale.json">
-    <script type="importmap">
-      {
-        "imports": {
-          "display-cmap_reader_factory": "../src/display/cmap_reader_factory.js",
-          "display-standard_fontdata_factory": "../src/display/standard_fontdata_factory.js",
-          "display-wasm_factory": "../src/display/wasm_factory.js",
-          "display-fetch_stream": "../src/display/fetch_stream.js",
-          "display-network": "../src/display/network.js",
-          "display-node_stream": "../src/display/stubs.js",
-          "display-node_utils": "../src/display/stubs.js"
-        }
-      }
-    </script>
-    <script type="module" src="../build/pdf.mjs"></script>
-<!--#endif-->
+<!-- This snippet is used in production (included from viewer.html) -->
+<link rel="resource" type="application/l10n" href="locale/locale.json">
+<script src="../build/pdf.mjs" type="module"></script>
 
-<!--#if MOZCENTRAL-->
-<!--<link rel="stylesheet" href="resource://pdf.js/web/viewer.css">-->
-<!--<link rel="localization" href="toolkit/pdfviewer/viewer.ftl"/>-->
-<!--#else-->
     <link rel="stylesheet" href="viewer.css">
-<!--#endif-->
 
-<!--#if MOZCENTRAL-->
-<!--<script src="resource://pdf.js/web/viewer.mjs" type="module"></script>-->
-<!--#elif !MOZCENTRAL-->
-    <script src="viewer.js" type="module"></script>
-<!--#endif-->
+  <script src="viewer.mjs" type="module"></script>
   </head>
 
   <body tabindex="0">
@@ -217,9 +188,8 @@ See https://github.com/adobe-type-tools/cmap-resources
                     <button id="editorCommentButton" class="toolbarButton" type="button" tabindex="0" disabled="disabled" role="radio" aria-expanded="false" aria-haspopup="true" aria-controls="editorCommentParamsToolbar" data-l10n-id="pdfjs-editor-comment-button">
                       <span data-l10n-id="pdfjs-editor-comment-button-label"></span>
                     </button>
-                    <div class="editorParamsToolbar hidden menu" id="editorCommentParamsToolbar">
-                      <div id="editorCommentsSidebar" class="menuContainer comment sidebar" role="landmark" aria-labelledby="editorCommentsSidebarHeader">
-                        <div id="editorCommentsSidebarResizer" class="sidebarResizer"></div>
+                    <div class="editorParamsToolbar sidebar hidden menu" id="editorCommentParamsToolbar">
+                      <div id="editorCommentsSidebar" class="menuContainer" role="landmark" aria-labelledby="editorCommentsSidebarHeader">
                         <div id="editorCommentsSidebarHeader" role="heading" aria-level="2">
                           <span class="commentCount">
                             <span id="editorCommentsSidebarTitle" data-l10n-id="pdfjs-editor-comments-sidebar-title" data-l10n-args='{ "count": 0 }'></span>
@@ -229,9 +199,7 @@ See https://github.com/adobe-type-tools/cmap-resources
                             <span data-l10n-id="pdfjs-editor-comments-sidebar-close-button-label"></span>
                           </button>
                         </div>
-                        <div id="editorCommentsSidebarListContainer" tabindex="-1">
-                          <ul id="editorCommentsSidebarList"></ul>
-                        </div>
+                        <ul id="editorCommentsSidebarList"></ul>
                       </div>
                     </div>
                   </div>
@@ -344,11 +312,9 @@ See https://github.com/adobe-type-tools/cmap-resources
                   </button>
                   <div id="secondaryToolbar" class="hidden doorHangerRight menu">
                     <div id="secondaryToolbarButtonContainer" class="menuContainer">
-<!--#if GENERIC-->
                       <button id="secondaryOpenFile" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-open-file-button">
                         <span data-l10n-id="pdfjs-open-file-button-label"></span>
                       </button>
-<!--#endif-->
 
                       <div class="visibleMediumView">
                         <button id="secondaryPrint" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-print-button">
@@ -359,14 +325,9 @@ See https://github.com/adobe-type-tools/cmap-resources
                           <span data-l10n-id="pdfjs-save-button-label"></span>
                         </button>
 
-<!--#if !GENERIC-->
-<!--            <div class="horizontalToolbarSeparator"></div>-->
-<!--#endif-->
                       </div>
 
-<!--#if GENERIC-->
                       <div class="horizontalToolbarSeparator"></div>
-<!--#endif-->
 
                       <button id="presentationMode" class="toolbarButton labeled" type="button" tabindex="0" data-l10n-id="pdfjs-presentation-mode-button">
                         <span data-l10n-id="pdfjs-presentation-mode-button-label"></span>
@@ -761,24 +722,37 @@ See https://github.com/adobe-type-tools/cmap-resources
         </div>
       </dialog>
 
-      <dialog class="dialog commentManager" id="commentManagerDialog" aria-labelledby="commentManagerTitle">
+      <dialog class="dialog commentManager" id="commentManagerDialog">
         <div class="mainContainer">
-          <div class="title" id="commentManagerToolbar">
-            <span id="commentManagerTitle" role="sectionhead" data-l10n-id="pdfjs-editor-edit-comment-dialog-title-when-adding"></span>
+          <div id="commentManagerToolbar">
+            <button id="commentActionsButton" class="toolbarButton" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="commentActionsMenu" tabindex="0" data-l10n-id="pdfjs-editor-edit-comment-actions-button">
+              <span data-l10n-id="pdfjs-editor-edit-comment-actions-button-label"></span>
+            </button>
+            <menu class="hidden" role="menu" id="commentActionsMenu">
+              <button id="commentActionsEditButton" role="menuitem" type="button" tabindex="0">
+                <span data-l10n-id="pdfjs-editor-edit-comment-actions-edit-button-label"></span>
+              </button>
+              <button id="commentActionsDeleteButton" role="menuitem" type="button" tabindex="0">
+                <span data-l10n-id="pdfjs-editor-edit-comment-actions-delete-button-label"></span>
+              </button>
+            </menu>
+            <button id="commentCloseButton" class="toolbarButton" type="button" tabindex="0" data-l10n-id="pdfjs-editor-edit-comment-close-button">
+              <span data-l10n-id="pdfjs-editor-edit-comment-close-button-label"></span>
+            </button>
           </div>
-          <textarea id="commentManagerTextInput" data-l10n-id="pdfjs-editor-edit-comment-dialog-text-input" tabindex="0"></textarea>
+          <textarea class="hidden" id="commentManagerTextInput" data-l10n-id="pdfjs-editor-edit-comment-manager-text-input"></textarea>
+          <div class="hidden" id="commentManagerTextView"></div>
           <div class="dialogButtonsGroup">
             <button id="commentManagerCancelButton" type="button" class="secondaryButton" tabindex="0">
-              <span data-l10n-id="pdfjs-editor-edit-comment-dialog-cancel-button"></span>
+              <span data-l10n-id="pdfjs-editor-edit-comment-manager-cancel-button"></span>
             </button>
             <button id="commentManagerSaveButton" type="button" class="primaryButton" disabled tabindex="0">
-              <span data-l10n-id="pdfjs-editor-edit-comment-dialog-save-button-when-adding"></span>
+              <span data-l10n-id="pdfjs-editor-edit-comment-manager-save-button"></span>
             </button>
           </div>
         </div>
       </dialog>
 
-<!--#if !MOZCENTRAL-->
         <dialog id="printServiceDialog" style="min-width: 200px;">
           <div class="row">
             <span data-l10n-id="pdfjs-print-progress-message"></span>
@@ -791,10 +765,6 @@ See https://github.com/adobe-type-tools/cmap-resources
             <button id="printCancel" class="dialogButton" type="button"><span data-l10n-id="pdfjs-print-progress-close-button"></span></button>
           </div>
         </dialog>
-<!--#endif-->
-<!--#if CHROME-->
-<!--#include viewer-snippet-chrome-overlays.html-->
-<!--#endif-->
       </div>  <!-- dialogContainer -->
 
       <div id="editorUndoBar" class="messageBar" role="status" aria-labelledby="editorUndoBarMessage" tabindex="-1" hidden>
@@ -813,9 +783,5 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
-    <script src="viewer.js"></script>
-    <script type="module" src="knowledgeworks/highlight-previews.js"></script>
-    <script type="module" src="knowledgeworks/annotation-bridge.js"></script>
-    <script type="module" src="../knowledgeworks-bridge.js"></script>
   </body>
 </html>
