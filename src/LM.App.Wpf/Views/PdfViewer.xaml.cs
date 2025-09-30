@@ -90,20 +90,35 @@ namespace LM.App.Wpf.Views
 
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PdfViewerViewModel.DocumentSource))
+            if (!string.Equals(e.PropertyName, nameof(PdfViewerViewModel.DocumentSource), StringComparison.Ordinal))
             {
-                _pendingDocumentSource = _viewModel?.DocumentSource;
-
-                if (!IsLoaded)
-                {
-                    return;
-                }
-
-                _ = PdfWebView.Dispatcher.InvokeAsync(async () =>
-                {
-                    await UpdateViewerAsync(_viewModel?.DocumentSource).ConfigureAwait(true);
-                });
+                return;
             }
+
+            _pendingDocumentSource = _viewModel?.DocumentSource;
+
+            if (!Dispatcher.CheckAccess())
+            {
+                _ = Dispatcher.InvokeAsync(HandleDocumentSourceChanged);
+                return;
+            }
+
+            HandleDocumentSourceChanged();
+        }
+
+        private void HandleDocumentSourceChanged()
+        {
+            if (!IsLoaded)
+            {
+                return;
+            }
+
+            var documentSource = _viewModel?.DocumentSource ?? _pendingDocumentSource;
+
+            _ = PdfWebView.Dispatcher.InvokeAsync(async () =>
+            {
+                await UpdateViewerAsync(documentSource).ConfigureAwait(true);
+            });
         }
 
         private async Task UpdateViewerAsync(System.Uri? documentSource)
