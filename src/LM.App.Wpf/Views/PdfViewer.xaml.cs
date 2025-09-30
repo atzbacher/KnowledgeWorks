@@ -581,9 +581,10 @@ namespace LM.App.Wpf.Views
                 if (!File.Exists(resolvedPath))
                 {
                     var notFoundPayload = Encoding.UTF8.GetBytes("File not found.");
-                    var headers = BuildResponseHeaders("text/plain; charset=utf-8", notFoundPayload.Length, allowRange: false);
+                    var notFoundHeaders = BuildResponseHeaders("text/plain; charset=utf-8", notFoundPayload.Length, allowRange: false);
                     var payloadStream = new MemoryStream(notFoundPayload, writable: false);
-                    e.Response = environment.CreateWebResourceResponse(payloadStream, 404, "Not Found", headers);
+                    e.Response = environment.CreateWebResourceResponse(payloadStream, 404, "Not Found", notFoundHeaders);
+
                     return;
                 }
 
