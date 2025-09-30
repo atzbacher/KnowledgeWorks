@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -23,6 +24,8 @@ namespace LM.App.Wpf.Tests.Pdf
                 orchestrator,
                 new TestUserContext(),
                 new TestPreviewStorage(),
+                new TestPersistenceService(),
+                new TestOverlayReader(),
                 workspace,
                 new TestClipboardService());
 
@@ -58,6 +61,11 @@ namespace LM.App.Wpf.Tests.Pdf
             {
                 return Task.CompletedTask;
             }
+
+            public Task ApplyOverlayAsync(string overlayJson, CancellationToken cancellationToken)
+            {
+                return Task.CompletedTask;
+            }
         }
 
         private sealed class TestUserContext : IUserContext
@@ -71,6 +79,18 @@ namespace LM.App.Wpf.Tests.Pdf
             {
                 return Task.FromResult("preview.png");
             }
+        }
+
+        private sealed class TestPersistenceService : IPdfAnnotationPersistenceService
+        {
+            public Task PersistAsync(string entryId, string pdfHash, string overlayJson, IReadOnlyDictionary<string, byte[]> previewImages, string? overlaySidecarRelativePath, CancellationToken cancellationToken)
+                => Task.CompletedTask;
+        }
+
+        private sealed class TestOverlayReader : IPdfAnnotationOverlayReader
+        {
+            public Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
+                => Task.FromResult<string?>(null);
         }
 
         private sealed class TestClipboardService : IClipboardService

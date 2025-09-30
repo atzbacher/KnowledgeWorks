@@ -8,5 +8,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         Task ScrollToAnnotationAsync(string annotationId, CancellationToken cancellationToken);
 
         Task RequestDocumentLoadAsync(CancellationToken cancellationToken);
+
+        Task ApplyOverlayAsync(string overlayJson, CancellationToken cancellationToken);
     }
 }
