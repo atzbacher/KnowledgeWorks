@@ -179,6 +179,32 @@ namespace LM.App.Wpf.Views
 
             try
             {
+
+                Trace.TraceInformation(
+    "PdfViewerHostObject visible to COM? {0}",
+    Marshal.IsTypeVisibleFromCom(typeof(PdfViewer.PdfViewerHostObject)));
+
+                try
+                {
+                    var typeInfo = Marshal.GetIUnknownForObject(typeof(PdfViewer.PdfViewerHostObject));
+                    Trace.TraceInformation("GetITypeInfoForType succeeded (ptr = {0}).", typeInfo);
+                    Marshal.Release(typeInfo);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("GetITypeInfoForType failed: {0}", ex);
+                }
+
+                try
+                {
+                    _ = Marshal.GetIDispatchForObject(_hostObject!);
+                    Trace.TraceInformation("GetIDispatchForObject succeeded.");
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("GetIDispatchForObject failed: {0}", ex);
+                }
+
                 coreWebView.AddHostObjectToScript("knowledgeworksBridge", _hostObject);
             }
             catch (InvalidOperationException ex)
