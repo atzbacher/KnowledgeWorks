@@ -679,6 +679,14 @@ namespace LM.App.Wpf.Views
             {
                 deferral = e.GetDeferral();
 
+                if (string.Equals(e.Request.Method, "OPTIONS", StringComparison.OrdinalIgnoreCase))
+                {
+                    var preflightHeaders = BuildPreflightResponseHeaders();
+                    e.Response = environment.CreateWebResourceResponse(Stream.Null, 204, "No Content", preflightHeaders);
+
+                    return;
+                }
+
                 if (!File.Exists(resolvedPath))
                 {
                     var notFoundPayload = Encoding.UTF8.GetBytes("File not found.");
@@ -787,8 +795,7 @@ namespace LM.App.Wpf.Views
                 builder.Append("Accept-Ranges: bytes\r\n");
             }
 
-            builder.Append("Access-Control-Allow-Origin: *\r\n");
-            builder.Append("Access-Control-Allow-Credentials: false\r\n");
+            AppendCorsHeaders(builder);
 
             return builder.ToString();
         }
@@ -866,8 +873,7 @@ namespace LM.App.Wpf.Views
             var builder = new StringBuilder();
             builder.Append("Content-Type: application/pdf\r\n");
             builder.Append("Accept-Ranges: bytes\r\n");
-            builder.Append("Access-Control-Allow-Origin: *\r\n");
-            builder.Append("Access-Control-Allow-Credentials: false\r\n");
+            AppendCorsHeaders(builder);
             builder.Append("Content-Length: ");
             builder.Append(length.ToString(CultureInfo.InvariantCulture));
             builder.Append('\r');
@@ -883,6 +889,25 @@ namespace LM.App.Wpf.Views
 
             response = environment.CreateWebResourceResponse(stream, 206, "Partial Content", builder.ToString());
             return true;
+        }
+
+        private static string BuildPreflightResponseHeaders()
+        {
+            var builder = new StringBuilder();
+            AppendCorsHeaders(builder);
+            builder.Append("Content-Length: 0\r\n");
+
+            return builder.ToString();
+        }
+
+        private static void AppendCorsHeaders(StringBuilder builder)
+        {
+            builder.Append("Access-Control-Allow-Origin: *\r\n");
+            builder.Append("Access-Control-Allow-Credentials: false\r\n");
+            builder.Append("Access-Control-Allow-Methods: GET, OPTIONS\r\n");
+            builder.Append("Access-Control-Allow-Headers: Range, Accept, Cache-Control, Pragma, Referer, Content-Type\r\n");
+            builder.Append("Access-Control-Expose-Headers: Accept-Ranges, Content-Length, Content-Range\r\n");
+            builder.Append("Access-Control-Max-Age: 86400\r\n");
         }
 
         private bool TryResolveDocumentRequest(string? requestUri, out string? path)
