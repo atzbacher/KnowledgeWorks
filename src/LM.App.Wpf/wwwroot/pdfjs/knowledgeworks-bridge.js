@@ -8,6 +8,7 @@ let overlaySyncHandle = null;
 const processedHighlights = new Set();
 const RETRY_DELAY_MS = 50;
 let pdfLoadCompleted = false;
+let lastRequestedPdfUrl = null;
 let bridgeInitializationCompleted = false;
 
 function getChromeWebView() {
@@ -213,10 +214,6 @@ function patchAnnotationLayerForHighlights() {
 }
 
 async function loadPdfFromHost() {
-  if (pdfLoadCompleted) {
-    return;
-  }
-
   const host = getHostObject();
   if (!host) {
     window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
@@ -238,7 +235,18 @@ async function loadPdfFromHost() {
     const target = await host.LoadPdfAsync();
     const normalizedTarget = typeof target === "string" ? target.trim() : "";
     if (!normalizedTarget) {
+      lastRequestedPdfUrl = null;
+      pdfLoadCompleted = false;
       window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
+      return;
+    }
+
+    if (lastRequestedPdfUrl !== normalizedTarget) {
+      lastRequestedPdfUrl = normalizedTarget;
+      pdfLoadCompleted = false;
+    }
+
+    if (pdfLoadCompleted && app.url === normalizedTarget) {
       return;
     }
 
@@ -247,8 +255,10 @@ async function loadPdfFromHost() {
         await app.open({ url: normalizedTarget, originalUrl: normalizedTarget });
       }
 
-      pdfLoadCompleted = true;
-      return;
+      if (app.url === normalizedTarget) {
+        pdfLoadCompleted = true;
+        return;
+      }
     }
 
     if (app.url === normalizedTarget) {
