@@ -134,10 +134,12 @@ namespace LM.App.Wpf.ViewModels.Pdf
             {
                 if (SetProperty(ref _documentSource, value))
                 {
-                    UpdateVirtualDocumentSource(value);
+                    OnDocumentSourceChanged(value);
                 }
             }
         }
+
+        partial void OnDocumentSourceChanged(System.Uri? value);
 
         /// <summary>
         /// Gets or sets the annotation currently selected in the UI.

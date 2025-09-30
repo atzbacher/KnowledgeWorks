@@ -63,6 +63,17 @@ LM.App.Wpf.Views.Pdf.PdfAnnotationList.InitializeComponent() -> void
 LM.App.Wpf.Views.PdfViewerWindow
 LM.App.Wpf.Views.PdfViewerWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.PdfViewerWindow.PdfViewerWindow() -> void
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.LoadPdfAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.CreateHighlightAsync(string! payloadJson) -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.GetCurrentSelectionAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.SetOverlayAsync(string! payloadJson) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.PdfViewerHostObject(LM.App.Wpf.Views.PdfViewer! owner) -> void
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.LoadPdfAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.CreateHighlightAsync(string! payloadJson) -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.GetCurrentSelectionAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.SetOverlayAsync(string! payloadJson) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogCloseRequestedEventArgs(bool? dialogResult) -> void
 LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogResult.get -> bool?

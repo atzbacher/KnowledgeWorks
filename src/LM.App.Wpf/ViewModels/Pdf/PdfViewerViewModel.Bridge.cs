@@ -16,6 +16,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private string? _overlayJson;
         private string? _overlaySidecarPath;
         private System.Uri? _virtualDocumentSource;
+        private TaskCompletionSource<System.Uri?>? _virtualDocumentSourceReady;
 
         public bool IsViewerReady
         {
@@ -53,10 +54,33 @@ namespace LM.App.Wpf.ViewModels.Pdf
             private set => SetProperty(ref _overlaySidecarPath, string.IsNullOrWhiteSpace(value) ? null : value);
         }
 
-        public Task<string?> LoadPdfAsync()
+        public async Task<string?> LoadPdfAsync()
         {
-            var source = _virtualDocumentSource ?? DocumentSource;
-            return Task.FromResult(source?.AbsoluteUri);
+            var completion = _virtualDocumentSourceReady;
+
+            if (completion is not null)
+            {
+                var readyTask = completion.Task;
+                var completedTask = await Task.WhenAny(readyTask, Task.Delay(TimeSpan.FromSeconds(5))).ConfigureAwait(true);
+
+                if (completedTask == readyTask)
+                {
+                    var virtualSource = await readyTask.ConfigureAwait(true);
+                    if (virtualSource is not null)
+                    {
+                        return virtualSource.AbsoluteUri;
+                    }
+                }
+            }
+
+            var fallback = _virtualDocumentSource ?? DocumentSource;
+
+            if (fallback is not null && string.Equals(fallback.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return fallback?.AbsoluteUri;
         }
 
         public Task<string?> CreateHighlightAsync(string payloadJson)
@@ -121,7 +145,35 @@ namespace LM.App.Wpf.ViewModels.Pdf
         internal void UpdateVirtualDocumentSource(System.Uri? virtualSource)
         {
             _virtualDocumentSource = virtualSource;
+            _virtualDocumentSourceReady?.TrySetResult(virtualSource);
         }
+
+        partial void OnDocumentSourceChanged(System.Uri? value)
+        {
+            if (value is null)
+            {
+                _virtualDocumentSource = null;
+                var completion = CreateVirtualDocumentCompletion();
+                completion.TrySetResult(null);
+                _virtualDocumentSourceReady = completion;
+                return;
+            }
+
+            if (!value.IsAbsoluteUri || !string.Equals(value.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
+            {
+                _virtualDocumentSource = value;
+                var completion = CreateVirtualDocumentCompletion();
+                completion.TrySetResult(value);
+                _virtualDocumentSourceReady = completion;
+                return;
+            }
+
+            _virtualDocumentSource = null;
+            _virtualDocumentSourceReady = CreateVirtualDocumentCompletion();
+        }
+
+        private static TaskCompletionSource<System.Uri?> CreateVirtualDocumentCompletion()
+            => new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         internal void UpdateSelection(string? text, int? pageNumber)
         {
