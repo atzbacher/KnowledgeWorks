@@ -1,9 +1,11 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.ViewModels.Pdf;
@@ -23,7 +25,9 @@ namespace LM.App.Wpf.Views
         private PdfWebViewBridge? _bridge;
         private PdfViewerHostObject? _hostObject;
         private string? _mappedWebRootPath;
-        private string? _mappedDocumentRootPath;
+        private string? _currentDocumentFilePath;
+        private string? _currentDocumentToken;
+        private bool _isDocumentRequestHandlerAttached;
 
         public PdfViewer()
         {
@@ -73,6 +77,24 @@ namespace LM.App.Wpf.Views
                 PdfWebView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
                 _isBridgeInitialized = false;
             }
+
+            if (PdfWebView.CoreWebView2 is not null && _isDocumentRequestHandlerAttached)
+            {
+                try
+                {
+                    PdfWebView.CoreWebView2.RemoveWebResourceRequestedFilter(
+                        string.Concat("https://", DocumentVirtualHostName, "/*"),
+                        CoreWebView2WebResourceContext.All);
+                }
+                catch (NotImplementedException)
+                {
+                }
+
+                PdfWebView.CoreWebView2.WebResourceRequested -= OnDocumentWebResourceRequested;
+                _isDocumentRequestHandlerAttached = false;
+            }
+
+            ClearDocumentRequestMapping();
         }
 
         private void OnLoaded(object? sender, System.Windows.RoutedEventArgs e)
@@ -90,20 +112,35 @@ namespace LM.App.Wpf.Views
 
         private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(PdfViewerViewModel.DocumentSource))
+            if (!string.Equals(e.PropertyName, nameof(PdfViewerViewModel.DocumentSource), StringComparison.Ordinal))
             {
-                _pendingDocumentSource = _viewModel?.DocumentSource;
-
-                if (!IsLoaded)
-                {
-                    return;
-                }
-
-                _ = PdfWebView.Dispatcher.InvokeAsync(async () =>
-                {
-                    await UpdateViewerAsync(_viewModel?.DocumentSource).ConfigureAwait(true);
-                });
+                return;
             }
+
+            _pendingDocumentSource = _viewModel?.DocumentSource;
+
+            if (!Dispatcher.CheckAccess())
+            {
+                _ = Dispatcher.InvokeAsync(HandleDocumentSourceChanged);
+                return;
+            }
+
+            HandleDocumentSourceChanged();
+        }
+
+        private void HandleDocumentSourceChanged()
+        {
+            if (!IsLoaded)
+            {
+                return;
+            }
+
+            var documentSource = _viewModel?.DocumentSource ?? _pendingDocumentSource;
+
+            _ = PdfWebView.Dispatcher.InvokeAsync(async () =>
+            {
+                await UpdateViewerAsync(documentSource).ConfigureAwait(true);
+            });
         }
 
         private async Task UpdateViewerAsync(System.Uri? documentSource)
@@ -151,15 +188,14 @@ namespace LM.App.Wpf.Views
             var viewerUri = new Uri(string.Concat("https://", ViewerVirtualHostName, "/pdfjs/web/viewer.html"), UriKind.Absolute);
             var target = viewerUri.AbsoluteUri;
 
-            bool documentMappingApplied = false;
+            if (documentSource is null)
+            {
+                ClearDocumentRequestMapping();
+            }
+
             var virtualDocumentSource = documentSource is null
                 ? null
-                : TryCreateVirtualDocumentUri(coreWebView, documentSource, out documentMappingApplied);
-
-            if (!documentMappingApplied)
-            {
-                ResetDocumentMapping(coreWebView);
-            }
+                : TryCreateVirtualDocumentUri(coreWebView, documentSource);
 
             _viewModel?.UpdateVirtualDocumentSource(virtualDocumentSource);
 
@@ -458,10 +494,8 @@ namespace LM.App.Wpf.Views
             }
         }
 
-        private System.Uri? TryCreateVirtualDocumentUri(CoreWebView2 coreWebView, System.Uri documentSource, out bool mappingApplied)
+        private System.Uri? TryCreateVirtualDocumentUri(CoreWebView2 coreWebView, System.Uri documentSource)
         {
-            mappingApplied = false;
-
             if (coreWebView is null)
             {
                 return null;
@@ -469,89 +503,274 @@ namespace LM.App.Wpf.Views
 
             if (!documentSource.IsAbsoluteUri)
             {
+                ClearDocumentRequestMapping();
                 return documentSource;
             }
 
             if (!string.Equals(documentSource.Scheme, System.Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
             {
+                ClearDocumentRequestMapping();
                 return documentSource;
             }
 
             var pdfPath = documentSource.LocalPath;
             if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
             {
+                ClearDocumentRequestMapping();
                 return null;
             }
-
-            var directory = Path.GetDirectoryName(pdfPath);
-            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
-            {
-                return null;
-            }
-
-            EnsureDocumentMapping(coreWebView, directory);
-            mappingApplied = true;
 
             var fileName = Path.GetFileName(pdfPath);
             if (string.IsNullOrEmpty(fileName))
             {
+                ClearDocumentRequestMapping();
                 return null;
             }
 
-            var target = string.Concat("https://", DocumentVirtualHostName, "/", Uri.EscapeDataString(fileName));
+            EnsureDocumentRequestHandler(coreWebView);
+
+            var token = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+            _currentDocumentFilePath = pdfPath;
+            _currentDocumentToken = token;
+
+            var targetPath = string.Concat(token, "/", Uri.EscapeDataString(fileName));
+            var target = string.Concat("https://", DocumentVirtualHostName, "/", targetPath);
             return new System.Uri(target, UriKind.Absolute);
         }
 
-        private void EnsureDocumentMapping(CoreWebView2 coreWebView, string directory)
+        private void EnsureDocumentRequestHandler(CoreWebView2 coreWebView)
         {
-            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            if (_isDocumentRequestHandlerAttached)
             {
                 return;
             }
 
-            var fullPath = Path.GetFullPath(directory);
-
-            if (string.Equals(_mappedDocumentRootPath, fullPath, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
+            var documentHost = string.Concat("https://", DocumentVirtualHostName, "/*");
 
             try
             {
-                coreWebView.SetVirtualHostNameToFolderMapping(
-                    DocumentVirtualHostName,
-                    fullPath,
-                    CoreWebView2HostResourceAccessKind.Allow);
-                _mappedDocumentRootPath = fullPath;
+                coreWebView.AddWebResourceRequestedFilter(documentHost, CoreWebView2WebResourceContext.All);
+            }
+            catch (NotImplementedException)
+            {
+            }
+
+            coreWebView.WebResourceRequested += OnDocumentWebResourceRequested;
+            _isDocumentRequestHandlerAttached = true;
+        }
+
+        private void OnDocumentWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+        {
+            var environment = PdfWebView.CoreWebView2?.Environment;
+            if (environment is null)
+            {
+                return;
+            }
+
+            if (!TryResolveDocumentRequest(e.Request.Uri, out var resolvedPath))
+            {
+                return;
+            }
+
+            CoreWebView2Deferral? deferral = null;
+
+            try
+            {
+                deferral = e.GetDeferral();
+
+                if (!File.Exists(resolvedPath))
+                {
+                    var notFoundPayload = Encoding.UTF8.GetBytes("File not found.");
+                    var notFoundHeaders = BuildResponseHeaders("text/plain; charset=utf-8", notFoundPayload.Length, allowRange: false);
+                    var payloadStream = new MemoryStream(notFoundPayload, writable: false);
+                    e.Response = environment.CreateWebResourceResponse(payloadStream, 404, "Not Found", notFoundHeaders);
+                    return;
+                }
+
+                var fileInfo = new FileInfo(resolvedPath);
+                var rangeHeader = e.Request.Headers.GetHeader("Range");
+
+                if (TryCreateRangeResponse(environment, resolvedPath, fileInfo.Length, rangeHeader, out var rangeResponse))
+                {
+                    e.Response = rangeResponse;
+                    return;
+                }
+
+                var fileStream = new FileStream(resolvedPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var headers = BuildResponseHeaders("application/pdf", fileInfo.Length, allowRange: true);
+                e.Response = environment.CreateWebResourceResponse(fileStream, 200, "OK", headers);
             }
             catch (Exception ex)
             {
-                Trace.TraceError("Failed to map PDF directory '{0}' to virtual host '{1}': {2}", fullPath, DocumentVirtualHostName, ex);
+                Trace.TraceError("Failed to serve PDF '{0}': {1}", resolvedPath ?? string.Empty, ex);
+            }
+            finally
+            {
+                deferral?.Complete();
             }
         }
 
-        private void ResetDocumentMapping(CoreWebView2 coreWebView)
+        private static string BuildResponseHeaders(string contentType, long contentLength, bool allowRange)
         {
-            if (coreWebView is null)
+            var builder = new StringBuilder();
+            builder.Append("Content-Type: ");
+            builder.Append(contentType);
+            builder.Append('\r');
+            builder.Append('\n');
+
+            builder.Append("Content-Length: ");
+            builder.Append(contentLength.ToString(CultureInfo.InvariantCulture));
+            builder.Append('\r');
+            builder.Append('\n');
+
+            if (allowRange)
             {
-                return;
+                builder.Append("Accept-Ranges: bytes\r\n");
             }
 
-            if (_mappedDocumentRootPath is null)
+            builder.Append("Access-Control-Allow-Origin: *\r\n");
+            builder.Append("Access-Control-Allow-Credentials: false\r\n");
+
+            return builder.ToString();
+        }
+
+        private static bool TryCreateRangeResponse(CoreWebView2Environment environment, string path, long fileLength, string? rangeHeader, out CoreWebView2WebResourceResponse? response)
+        {
+            response = null;
+
+            if (string.IsNullOrWhiteSpace(rangeHeader))
             {
-                return;
+                return false;
             }
 
-            try
+            const string prefix = "bytes=";
+            if (!rangeHeader.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
-                coreWebView.ClearVirtualHostNameToFolderMapping(DocumentVirtualHostName);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceWarning("Failed to clear virtual host mapping for '{0}': {1}", DocumentVirtualHostName, ex);
+                return false;
             }
 
-            _mappedDocumentRootPath = null;
+            var rangeExpression = rangeHeader.Substring(prefix.Length);
+            var tokens = rangeExpression.Split('-', 2, StringSplitOptions.TrimEntries);
+            if (tokens.Length == 0)
+            {
+                return false;
+            }
+
+            long start;
+            long end = fileLength - 1;
+
+            if (!long.TryParse(tokens[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out start))
+            {
+                if (tokens.Length <= 1 || string.IsNullOrWhiteSpace(tokens[1]) || !long.TryParse(tokens[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var suffixLength))
+                {
+                    return false;
+                }
+
+                if (suffixLength <= 0)
+                {
+                    return false;
+                }
+
+                var lengthFromEnd = Math.Min(suffixLength, fileLength);
+                start = fileLength - lengthFromEnd;
+            }
+
+            if (start < 0 || start >= fileLength)
+            {
+                return false;
+            }
+
+            if (tokens.Length > 1 && !string.IsNullOrWhiteSpace(tokens[1]) && long.TryParse(tokens[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedEnd))
+            {
+                if (parsedEnd < start)
+                {
+                    return false;
+                }
+
+                end = Math.Min(parsedEnd, fileLength - 1);
+            }
+
+            var length = (end - start) + 1;
+
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            stream.Seek(start, SeekOrigin.Begin);
+
+            var builder = new StringBuilder();
+            builder.Append("Content-Type: application/pdf\r\n");
+            builder.Append("Accept-Ranges: bytes\r\n");
+            builder.Append("Access-Control-Allow-Origin: *\r\n");
+            builder.Append("Access-Control-Allow-Credentials: false\r\n");
+            builder.Append("Content-Length: ");
+            builder.Append(length.ToString(CultureInfo.InvariantCulture));
+            builder.Append('\r');
+            builder.Append('\n');
+            builder.Append("Content-Range: bytes ");
+            builder.Append(start.ToString(CultureInfo.InvariantCulture));
+            builder.Append('-');
+            builder.Append(end.ToString(CultureInfo.InvariantCulture));
+            builder.Append('/');
+            builder.Append(fileLength.ToString(CultureInfo.InvariantCulture));
+            builder.Append('\r');
+            builder.Append('\n');
+
+            response = environment.CreateWebResourceResponse(stream, 206, "Partial Content", builder.ToString());
+            return true;
+        }
+
+        private bool TryResolveDocumentRequest(string? requestUri, out string? path)
+        {
+            path = null;
+
+            if (string.IsNullOrWhiteSpace(requestUri))
+            {
+                return false;
+            }
+
+            if (_currentDocumentToken is null || _currentDocumentFilePath is null)
+            {
+                return false;
+            }
+
+            if (!System.Uri.TryCreate(requestUri, UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+
+            if (!string.Equals(uri.Host, DocumentVirtualHostName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var segments = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 0)
+            {
+                return false;
+            }
+
+            if (!string.Equals(segments[0], _currentDocumentToken, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            var requestedFileName = segments.Length > 1
+                ? Uri.UnescapeDataString(segments[^1])
+                : string.Empty;
+
+            var currentFileName = Path.GetFileName(_currentDocumentFilePath);
+
+            if (!string.Equals(requestedFileName, currentFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            path = _currentDocumentFilePath;
+            return true;
+        }
+
+        private void ClearDocumentRequestMapping()
+        {
+            _currentDocumentFilePath = null;
+            _currentDocumentToken = null;
         }
 
         private sealed class PdfWebViewBridge : IPdfWebViewBridge
