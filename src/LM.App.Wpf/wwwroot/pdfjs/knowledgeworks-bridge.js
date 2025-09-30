@@ -223,12 +223,13 @@ async function loadPdfFromHost() {
   try {
     await app.initializedPromise;
     const target = await host.LoadPdfAsync();
-    if (!target || (typeof target === "string" && !target.trim())) {
+    const normalizedTarget = typeof target === "string" ? target.trim() : "";
+    if (!normalizedTarget) {
       return;
     }
 
-    if (!app.url) {
-      await app.open({ url: target });
+    if (app.url !== normalizedTarget) {
+      await app.open({ url: normalizedTarget, originalUrl: normalizedTarget });
     }
   } catch (error) {
     console.error("knowledgeworks-bridge: failed to load PDF from host", error);
