@@ -142,6 +142,12 @@ namespace LM.App.Wpf.ViewModels.Pdf
         internal void HandleViewerReady()
         {
             IsViewerReady = true;
+
+            if (!_pendingDocumentLoadRequest && (DocumentSource is not null || _virtualDocumentSource is not null))
+            {
+                _pendingDocumentLoadRequest = true;
+            }
+
             TryRequestDocumentLoad();
         }
 
