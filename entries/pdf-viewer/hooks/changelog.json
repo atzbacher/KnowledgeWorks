@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0",
+  "events": [
+    {
+      "eventId": "45337034fb0649329192c12ae3d104d0",
+      "timestampUtc": "2025-09-30T18:23:12Z",
+      "performedBy": "root",
+      "action": "pdf-viewer-html-updated"
+    }
+  ]
+}

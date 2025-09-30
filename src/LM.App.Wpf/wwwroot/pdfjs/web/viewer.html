@@ -34,7 +34,8 @@ See https://github.com/adobe-type-tools/cmap-resources
 <!--#elif CHROME-->
 <!--#include viewer-snippet-chrome-extension.html-->
 <!--#else-->
-<!--#include viewer-snippet.html-->
+    <link rel="resource" type="application/l10n" href="locale/locale.json">
+    <script type="module" src="../build/pdf.mjs"></script>
 <!--#endif-->
 
 <!--#if MOZCENTRAL-->
@@ -93,7 +94,7 @@ See https://github.com/adobe-type-tools/cmap-resources
         }
       }
     </script>
-    <script src="viewer.js" type="module"></script>
+    <script type="module" src="viewer.js"></script>
 <!--#endif-->
   </head>
 

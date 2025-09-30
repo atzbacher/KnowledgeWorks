@@ -1,6 +1,8 @@
 *~
 local.mk
 build/
+!build/
+!build/pdf.mjs
 tags
 .DS_Store
 Makefile
