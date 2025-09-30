@@ -6,6 +6,9 @@ const MESSAGE_NAV_CHANGED = "nav-changed";
 let currentSelectionSnapshot = null;
 let overlaySyncHandle = null;
 const processedHighlights = new Set();
+const RETRY_DELAY_MS = 50;
+let pdfLoadCompleted = false;
+let bridgeInitializationCompleted = false;
 
 function getChromeWebView() {
   return window.chrome?.webview ?? null;
@@ -210,29 +213,53 @@ function patchAnnotationLayerForHighlights() {
 }
 
 async function loadPdfFromHost() {
+  if (pdfLoadCompleted) {
+    return;
+  }
+
   const host = getHostObject();
   if (!host) {
+    window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
     return;
   }
 
   const app = window.PDFViewerApplication;
   if (!app) {
+    window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
     return;
   }
 
   try {
-    await app.initializedPromise;
+    const initializedPromise = app.initializedPromise;
+    if (initializedPromise?.then) {
+      await initializedPromise;
+    }
+
     const target = await host.LoadPdfAsync();
     const normalizedTarget = typeof target === "string" ? target.trim() : "";
     if (!normalizedTarget) {
+      window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
       return;
     }
 
-    if (app.url !== normalizedTarget) {
-      await app.open({ url: normalizedTarget, originalUrl: normalizedTarget });
+    if (typeof app.open === "function") {
+      if (app.url !== normalizedTarget) {
+        await app.open({ url: normalizedTarget, originalUrl: normalizedTarget });
+      }
+
+      pdfLoadCompleted = true;
+      return;
     }
+
+    if (app.url === normalizedTarget) {
+      pdfLoadCompleted = true;
+      return;
+    }
+
+    window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
   } catch (error) {
     console.error("knowledgeworks-bridge: failed to load PDF from host", error);
+    window.setTimeout(() => void loadPdfFromHost(), RETRY_DELAY_MS);
   }
 }
 
@@ -247,13 +274,27 @@ function watchAnnotationStorage(app) {
 }
 
 async function initializeBridge() {
+  if (bridgeInitializationCompleted) {
+    return;
+  }
+
   const app = window.PDFViewerApplication;
   if (!app) {
+    window.setTimeout(() => void initializeBridge(), RETRY_DELAY_MS);
     return;
   }
 
   try {
-    await app.initializedPromise;
+    const initializedPromise = app.initializedPromise;
+    if (initializedPromise?.then) {
+      await initializedPromise;
+    }
+
+    if (bridgeInitializationCompleted) {
+      return;
+    }
+
+    bridgeInitializationCompleted = true;
 
     postMessage({ type: MESSAGE_READY });
 
@@ -268,6 +309,8 @@ async function initializeBridge() {
     void loadPdfFromHost();
   } catch (error) {
     console.error("knowledgeworks-bridge: initialization failed", error);
+    bridgeInitializationCompleted = false;
+    window.setTimeout(() => void initializeBridge(), RETRY_DELAY_MS);
   }
 }
 
