@@ -277,7 +277,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     {
                         Mode = FileMode.Open,
                         Access = FileAccess.Read,
-                        Share = FileShare.Read,
+                        Share = FileShare.ReadWrite | FileShare.Delete,
                         BufferSize = 81920,
                         Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
                     };
