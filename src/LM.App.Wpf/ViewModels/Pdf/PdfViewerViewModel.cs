@@ -291,7 +291,14 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 }
 
                 _precomputedHash = null;
-                DocumentSource = new Uri(absolutePath, UriKind.Absolute);
+
+                var absoluteUri = new Uri(absolutePath, UriKind.Absolute);
+                if (DocumentSource is { } existingSource && string.Equals(existingSource.AbsoluteUri, absoluteUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+                {
+                    DocumentSource = null;
+                }
+
+                DocumentSource = absoluteUri;
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
