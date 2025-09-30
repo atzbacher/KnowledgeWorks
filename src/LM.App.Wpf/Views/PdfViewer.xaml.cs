@@ -177,6 +177,12 @@ namespace LM.App.Wpf.Views
 
             _hostObject ??= new PdfViewerHostObject(this);
 
+            var areHostObjectsAllowed = coreWebView.Settings.AreHostObjectsAllowed;
+            Trace.TraceInformation("AreHostObjectsAllowed = {0}", areHostObjectsAllowed);
+            Trace.TraceInformation(
+                "PdfViewerHostObject COM visible: {0}",
+                Marshal.IsTypeVisibleFromCom(typeof(PdfViewerHostObject)));
+
             try
             {
 
@@ -390,72 +396,6 @@ namespace LM.App.Wpf.Views
 
             _bridge ??= new PdfWebViewBridge(PdfWebView);
             _viewModel.WebViewBridge = _bridge;
-        }
-
-        [ComVisible(true)]
-        [ClassInterface(ClassInterfaceType.None)]
-        private sealed class PdfViewerHostObject
-        {
-            private readonly PdfViewer _owner;
-
-            public PdfViewerHostObject(PdfViewer owner)
-            {
-                _owner = owner ?? throw new ArgumentNullException(nameof(owner));
-            }
-
-            public Task<string?> LoadPdfAsync()
-            {
-                return InvokeAsync(viewModel => viewModel.LoadPdfAsync());
-            }
-
-            public Task<string?> CreateHighlightAsync(string payloadJson)
-            {
-                return InvokeAsync(viewModel => viewModel.CreateHighlightAsync(payloadJson ?? string.Empty));
-            }
-
-            public Task<string?> GetCurrentSelectionAsync()
-            {
-                return InvokeAsync(viewModel => viewModel.GetCurrentSelectionAsync());
-            }
-
-            public Task SetOverlayAsync(string payloadJson)
-            {
-                return InvokeAsync(async viewModel =>
-                {
-                    await viewModel.SetOverlayAsync(payloadJson ?? string.Empty).ConfigureAwait(true);
-                    return (string?)null;
-                });
-            }
-
-            private Task<TResult?> InvokeAsync<TResult>(Func<PdfViewerViewModel, Task<TResult?>> callback)
-            {
-                var dispatcher = _owner.PdfWebView.Dispatcher;
-                if (dispatcher.CheckAccess())
-                {
-                    return ExecuteAsync(callback);
-                }
-
-                return dispatcher.InvokeAsync(() => ExecuteAsync(callback)).Task.Unwrap();
-            }
-
-            private async Task<TResult?> ExecuteAsync<TResult>(Func<PdfViewerViewModel, Task<TResult?>> callback)
-            {
-                var viewModel = _owner._viewModel;
-                if (viewModel is null)
-                {
-                    return default;
-                }
-
-                try
-                {
-                    return await callback(viewModel).ConfigureAwait(true);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError("Host bridge invocation failed: {0}", ex);
-                    return default;
-                }
-            }
         }
 
         private sealed class PdfWebViewBridge : IPdfWebViewBridge
