@@ -269,12 +269,18 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 }
                 else
                 {
-                    await using var stream = new FileStream(absolutePath,
-                                                            FileMode.Open,
-                                                            FileAccess.Read,
-                                                            FileShare.Read,
-                                                            bufferSize: 81920,
-                                                            useAsync: true);
+                    var streamOptions = new FileStreamOptions
+                    {
+                        Mode = FileMode.Open,
+                        Access = FileAccess.Read,
+                        Share = FileShare.Read,
+                        BufferSize = 81920,
+                        Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+                    };
+
+                    // Asynchronous file streams intentionally disable timeout semantics; debugger
+                    // inspection of ReadTimeout/WriteTimeout will surface InvalidOperationException.
+                    await using var stream = new FileStream(absolutePath, streamOptions);
                     using var sha = SHA256.Create();
                     var hashBytes = await sha.ComputeHashAsync(stream, CancellationToken.None).ConfigureAwait(false);
                     PdfHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
