@@ -203,7 +203,8 @@ namespace LM.App.Wpf.Views
 
             if (virtualDocumentSource is not null)
             {
-                var encodedPdf = Uri.EscapeDataString(virtualDocumentSource.AbsoluteUri);
+                var safeAbsolute = virtualDocumentSource.GetComponents(UriComponents.AbsoluteUri, UriFormat.SafeUnescaped);
+                var encodedPdf = Uri.EscapeDataString(safeAbsolute);
                 target = string.Concat(target, "?file=", encodedPdf);
             }
 
