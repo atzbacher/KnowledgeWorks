@@ -31,6 +31,29 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             Assert.False(harness.RunNextTimer());
         }
 
+        [Fact]
+        public void LoadPdfFromHostRequestsHostWhenUrlChanges()
+        {
+            using var harness = KnowledgeworksBridgeHarness.Create();
+
+            harness.SetPdfViewerApplication();
+            harness.SetHostObject("app://first.pdf");
+
+            harness.InvokeLoadPdfFromHost();
+            harness.DrainTimers();
+
+            Assert.Equal(1, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://first.pdf", harness.OpenedUrl);
+
+            harness.SetHostObject("app://second.pdf");
+
+            harness.InvokeLoadPdfFromHost();
+            harness.DrainTimers();
+
+            Assert.Equal(2, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://second.pdf", harness.OpenedUrl);
+        }
+
         private sealed class KnowledgeworksBridgeHarness : IDisposable
         {
             private readonly Engine _engine;
@@ -116,6 +139,12 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             {
                 var initialize = _engine.GetValue("initializeBridge");
                 _engine.Invoke(initialize);
+            }
+
+            public void InvokeLoadPdfFromHost()
+            {
+                var loadPdf = _engine.GetValue("loadPdfFromHost");
+                _engine.Invoke(loadPdf);
             }
 
             public bool HasPendingTimers => GetQueueLength() > 0;
