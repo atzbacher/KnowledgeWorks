@@ -130,7 +130,13 @@ namespace LM.App.Wpf.ViewModels.Pdf
         public System.Uri? DocumentSource
         {
             get => _documentSource;
-            private set => SetProperty(ref _documentSource, value);
+            private set
+            {
+                if (SetProperty(ref _documentSource, value))
+                {
+                    UpdateVirtualDocumentSource(value);
+                }
+            }
         }
 
         /// <summary>
