@@ -597,7 +597,16 @@ namespace LM.App.Wpf.Views
                     return;
                 }
 
-                var fileStream = new FileStream(resolvedPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var fileStreamOptions = new FileStreamOptions
+                {
+                    Mode = FileMode.Open,
+                    Access = FileAccess.Read,
+                    Share = FileShare.ReadWrite | FileShare.Delete,
+                    BufferSize = 81920,
+                    Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+                };
+
+                var fileStream = new FileStream(resolvedPath, fileStreamOptions);
                 var headers = BuildResponseHeaders("application/pdf", fileInfo.Length, allowRange: true);
                 e.Response = environment.CreateWebResourceResponse(fileStream, 200, "OK", headers);
             }
@@ -693,7 +702,16 @@ namespace LM.App.Wpf.Views
 
             var length = (end - start) + 1;
 
-            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var streamOptions = new FileStreamOptions
+            {
+                Mode = FileMode.Open,
+                Access = FileAccess.Read,
+                Share = FileShare.ReadWrite | FileShare.Delete,
+                BufferSize = 81920,
+                Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+            };
+
+            var stream = new FileStream(path, streamOptions);
             stream.Seek(start, SeekOrigin.Begin);
 
             var builder = new StringBuilder();
