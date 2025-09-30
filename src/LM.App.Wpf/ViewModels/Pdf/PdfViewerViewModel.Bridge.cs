@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LM.App.Wpf.ViewModels.Pdf
@@ -17,6 +18,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private string? _overlaySidecarPath;
         private System.Uri? _virtualDocumentSource;
         private TaskCompletionSource<System.Uri?>? _virtualDocumentSourceReady;
+        private bool _pendingDocumentLoadRequest;
 
         public bool IsViewerReady
         {
@@ -140,12 +142,14 @@ namespace LM.App.Wpf.ViewModels.Pdf
         internal void HandleViewerReady()
         {
             IsViewerReady = true;
+            TryRequestDocumentLoad();
         }
 
         internal void UpdateVirtualDocumentSource(System.Uri? virtualSource)
         {
             _virtualDocumentSource = virtualSource;
             _virtualDocumentSourceReady?.TrySetResult(virtualSource);
+            TryRequestDocumentLoad();
         }
 
         partial void OnDocumentSourceChanged(System.Uri? value)
@@ -156,8 +160,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 var completion = CreateVirtualDocumentCompletion();
                 completion.TrySetResult(null);
                 _virtualDocumentSourceReady = completion;
+                _pendingDocumentLoadRequest = false;
                 return;
             }
+
+            _pendingDocumentLoadRequest = true;
 
             if (!value.IsAbsoluteUri || !string.Equals(value.Scheme, Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
             {
@@ -165,11 +172,13 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 var completion = CreateVirtualDocumentCompletion();
                 completion.TrySetResult(value);
                 _virtualDocumentSourceReady = completion;
+                TryRequestDocumentLoad();
                 return;
             }
 
             _virtualDocumentSource = null;
             _virtualDocumentSourceReady = CreateVirtualDocumentCompletion();
+            TryRequestDocumentLoad();
         }
 
         private static TaskCompletionSource<System.Uri?> CreateVirtualDocumentCompletion()
@@ -189,6 +198,28 @@ namespace LM.App.Wpf.ViewModels.Pdf
             }
 
             CurrentPageNumber = pageNumber;
+        }
+
+        private void TryRequestDocumentLoad()
+        {
+            if (!_pendingDocumentLoadRequest)
+            {
+                return;
+            }
+
+            if (!IsViewerReady)
+            {
+                return;
+            }
+
+            var bridge = _webViewBridge;
+            if (bridge is null)
+            {
+                return;
+            }
+
+            _pendingDocumentLoadRequest = false;
+            _ = bridge.RequestDocumentLoadAsync(CancellationToken.None);
         }
 
         internal void HandleHighlightCreated(string annotationId, int? pageNumber)

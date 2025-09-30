@@ -209,7 +209,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
         public IPdfWebViewBridge? WebViewBridge
         {
             private get => _webViewBridge;
-            set => _webViewBridge = value;
+            set
+            {
+                _webViewBridge = value;
+                TryRequestDocumentLoad();
+            }
         }
 
         public async Task HandleAnnotationSelectionAsync(PdfAnnotation? annotation, CancellationToken cancellationToken)
