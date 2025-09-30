@@ -6,5 +6,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
     internal interface IPdfWebViewBridge
     {
         Task ScrollToAnnotationAsync(string annotationId, CancellationToken cancellationToken);
+
+        Task RequestDocumentLoadAsync(CancellationToken cancellationToken);
     }
 }

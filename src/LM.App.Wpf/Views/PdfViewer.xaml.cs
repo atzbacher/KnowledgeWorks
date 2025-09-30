@@ -810,6 +810,22 @@ namespace LM.App.Wpf.Views
                 }).Task.ConfigureAwait(false);
             }
 
+            public async Task RequestDocumentLoadAsync(CancellationToken cancellationToken)
+            {
+                await EnsureCoreAsync().ConfigureAwait(false);
+
+                await _webView.Dispatcher.InvokeAsync(() =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (_webView.CoreWebView2 is null)
+                    {
+                        return;
+                    }
+
+                    _ = _webView.CoreWebView2.ExecuteScriptAsync("window?.PdfBridge?.loadPdf?.()");
+                }).Task.ConfigureAwait(false);
+            }
+
             private async Task EnsureCoreAsync()
             {
                 if (_webView.CoreWebView2 is not null)
