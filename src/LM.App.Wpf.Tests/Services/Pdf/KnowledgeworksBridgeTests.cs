@@ -90,7 +90,8 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             {
                 _engine = new Engine(options => options.CatchClrExceptions());
 
-                _engine.Execute("var window = globalThis;");
+                _engine.SetValue("window", _engine.Global);
+                _engine.SetValue("globalThis", _engine.Global);
                 _window = _engine.GetValue("window");
 
                 _engine.SetValue("__kwRecordLoad", new Action(() => _loadPdfInvocationCount++));
@@ -166,7 +167,13 @@ namespace LM.App.Wpf.Tests.Services.Pdf
 
             public void InvokePdfBridgeLoad(string? target = null)
             {
-                var loadPdf = _engine.GetValue("window.PdfBridge.loadPdf");
+                var bridge = GetWindowProperty("PdfBridge");
+                var loadPdf = GetProperty(bridge, "loadPdf");
+                if (loadPdf.IsUndefined())
+                {
+                    throw new InvalidOperationException("PdfBridge.loadPdf is not defined");
+                }
+
                 if (target is null)
                 {
                     _engine.Invoke(loadPdf);
@@ -175,14 +182,19 @@ namespace LM.App.Wpf.Tests.Services.Pdf
                 {
                     _engine.Invoke(loadPdf, target);
                 }
-
             }
 
             public bool HasPendingTimers => GetQueueLength() > 0;
 
             public bool RunNextTimer()
             {
-                var result = _engine.GetValue("window.__kwRunNextTimer()");
+                var callback = GetWindowProperty("__kwRunNextTimer");
+                if (callback.IsUndefined())
+                {
+                    return false;
+                }
+
+                var result = _engine.Invoke(callback);
                 return ConvertToNumber(result) > 0;
             }
 
@@ -238,12 +250,34 @@ namespace LM.App.Wpf.Tests.Services.Pdf
 
             private double GetQueueLength()
             {
-                var value = _engine.GetValue("window.__kwTimers.queue.length");
-                return ConvertToNumber(value);
+                var timers = GetWindowProperty("__kwTimers");
+                var queue = GetProperty(timers, "queue");
+                var length = GetProperty(queue, "length");
+                return ConvertToNumber(length);
+            }
+
+            private JsValue GetWindowProperty(string propertyName)
+            {
+                return GetProperty(_window, propertyName);
+            }
+
+            private static JsValue GetProperty(JsValue target, string propertyName)
+            {
+                if (!target.IsObject())
+                {
+                    return JsValue.Undefined;
+                }
+
+                return target.AsObject().Get(propertyName);
             }
 
             private static double ConvertToNumber(JsValue value)
             {
+                if (value.IsNumber())
+                {
+                    return value.AsNumber();
+                }
+
                 var obj = value.ToObject();
                 return obj switch
                 {
@@ -252,6 +286,12 @@ namespace LM.App.Wpf.Tests.Services.Pdf
                     long l => l,
                     float f => f,
                     decimal m => (double)m,
+                    uint u => u,
+                    ushort us => us,
+                    short s => s,
+                    byte b => b,
+                    sbyte sb => sb,
+                    ulong ul => ul,
                     _ => 0d,
                 };
             }
