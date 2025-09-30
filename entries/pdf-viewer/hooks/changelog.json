@@ -12,6 +12,12 @@
       "timestampUtc": "2025-09-30T19:43:01Z",
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-html-updated"
+    },
+    {
+      "eventId": "b06342f74bca4997956883c2a2cdfed2",
+      "timestampUtc": "2025-09-30T20:28:28Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-html-updated"
     }
   ]
 }
