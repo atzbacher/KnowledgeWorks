@@ -33,6 +33,7 @@ namespace LM.App.Wpf.Views
         private string? _currentDocumentToken;
         private bool _isDocumentRequestHandlerAttached;
         private bool _isHostObjectRegistered;
+        private bool _isViewerAssetRequestHandlerAttached;
 
         public PdfViewer()
         {
@@ -97,6 +98,22 @@ namespace LM.App.Wpf.Views
 
                 PdfWebView.CoreWebView2.WebResourceRequested -= OnDocumentWebResourceRequested;
                 _isDocumentRequestHandlerAttached = false;
+            }
+
+            if (PdfWebView.CoreWebView2 is not null && _isViewerAssetRequestHandlerAttached)
+            {
+                try
+                {
+                    PdfWebView.CoreWebView2.RemoveWebResourceRequestedFilter(
+                        string.Concat("https://", ViewerVirtualHostName, "/*"),
+                        CoreWebView2WebResourceContext.All);
+                }
+                catch (NotImplementedException)
+                {
+                }
+
+                PdfWebView.CoreWebView2.WebResourceRequested -= OnViewerAssetWebResourceRequested;
+                _isViewerAssetRequestHandlerAttached = false;
             }
 
             ClearDocumentRequestMapping();
@@ -189,6 +206,7 @@ namespace LM.App.Wpf.Views
             var coreWebView = PdfWebView.CoreWebView2;
 
             EnsureVirtualHostMapping(coreWebView, webRootPath);
+            EnsureViewerAssetRequestHandler(coreWebView);
 
             var viewerUri = new Uri(string.Concat("https://", ViewerVirtualHostName, "/pdfjs/web/viewer.html"), UriKind.Absolute);
             var target = viewerUri.AbsoluteUri;
@@ -551,6 +569,32 @@ namespace LM.App.Wpf.Views
             }
         }
 
+        private void EnsureViewerAssetRequestHandler(CoreWebView2 coreWebView)
+        {
+            if (coreWebView is null)
+            {
+                return;
+            }
+
+            if (_isViewerAssetRequestHandlerAttached)
+            {
+                return;
+            }
+
+            var viewerHost = string.Concat("https://", ViewerVirtualHostName, "/*");
+
+            try
+            {
+                coreWebView.AddWebResourceRequestedFilter(viewerHost, CoreWebView2WebResourceContext.All);
+            }
+            catch (NotImplementedException)
+            {
+            }
+
+            coreWebView.WebResourceRequested += OnViewerAssetWebResourceRequested;
+            _isViewerAssetRequestHandlerAttached = true;
+        }
+
         private System.Uri? TryCreateVirtualDocumentUri(CoreWebView2 coreWebView, System.Uri documentSource)
         {
             if (coreWebView is null)
@@ -670,6 +714,54 @@ namespace LM.App.Wpf.Views
             catch (Exception ex)
             {
                 Trace.TraceError("Failed to serve PDF '{0}': {1}", resolvedPath ?? string.Empty, ex);
+            }
+            finally
+            {
+                deferral?.Complete();
+            }
+        }
+
+        private void OnViewerAssetWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+        {
+            if (!TryResolveViewerModulePath(e.Request.Uri, out var modulePath))
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(modulePath) || !File.Exists(modulePath))
+            {
+                return;
+            }
+
+            var environment = PdfWebView.CoreWebView2?.Environment;
+            if (environment is null)
+            {
+                return;
+            }
+
+            CoreWebView2Deferral? deferral = null;
+
+            try
+            {
+                deferral = e.GetDeferral();
+
+                var fileInfo = new FileInfo(modulePath);
+                var streamOptions = new FileStreamOptions
+                {
+                    Mode = FileMode.Open,
+                    Access = FileAccess.Read,
+                    Share = FileShare.ReadWrite | FileShare.Delete,
+                    BufferSize = 81920,
+                    Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
+                };
+
+                var stream = new FileStream(modulePath, streamOptions);
+                var headers = BuildResponseHeaders("text/javascript", fileInfo.Length, allowRange: false);
+                e.Response = environment.CreateWebResourceResponse(stream, 200, "OK", headers);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError("Failed to serve viewer module '{0}': {1}", modulePath, ex);
             }
             finally
             {
@@ -840,6 +932,87 @@ namespace LM.App.Wpf.Views
             }
 
             path = _currentDocumentFilePath;
+            return true;
+        }
+
+        private bool TryResolveViewerModulePath(string? requestUri, out string? modulePath)
+        {
+            modulePath = null;
+
+            if (string.IsNullOrWhiteSpace(requestUri) || string.IsNullOrWhiteSpace(_mappedWebRootPath))
+            {
+                return false;
+            }
+
+            if (!System.Uri.TryCreate(requestUri, UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+
+            if (!string.Equals(uri.Host, ViewerVirtualHostName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!uri.AbsolutePath.EndsWith(".mjs", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (!TryResolveViewerAssetPath(uri, out var assetPath))
+            {
+                return false;
+            }
+
+            modulePath = assetPath;
+            return true;
+        }
+
+        private bool TryResolveViewerAssetPath(System.Uri uri, out string? path)
+        {
+            path = null;
+
+            if (string.IsNullOrWhiteSpace(_mappedWebRootPath))
+            {
+                return false;
+            }
+
+            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (segments.Length == 0)
+            {
+                return false;
+            }
+
+            var candidate = _mappedWebRootPath!;
+
+            foreach (var segment in segments)
+            {
+                var decodedSegment = Uri.UnescapeDataString(segment);
+
+                if (string.IsNullOrWhiteSpace(decodedSegment))
+                {
+                    return false;
+                }
+
+                if (decodedSegment.Contains(Path.DirectorySeparatorChar, StringComparison.Ordinal) ||
+                    decodedSegment.Contains(Path.AltDirectorySeparatorChar, StringComparison.Ordinal) ||
+                    decodedSegment.Contains(':', StringComparison.Ordinal) ||
+                    string.Equals(decodedSegment, "..", StringComparison.Ordinal))
+                {
+                    return false;
+                }
+
+                candidate = Path.Combine(candidate, decodedSegment);
+            }
+
+            var fullPath = Path.GetFullPath(candidate);
+
+            if (!fullPath.StartsWith(_mappedWebRootPath!, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            path = fullPath;
             return true;
         }
 
