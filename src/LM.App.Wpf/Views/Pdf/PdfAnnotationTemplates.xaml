@@ -2,122 +2,139 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Pdf"
                     xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf">
-  <DataTemplate x:Key="PdfAnnotationItemTemplate" DataType="{x:Type vm:PdfAnnotation}">
-    <Border Margin="0,0,0,8"
+
+    <!-- ===================================================================
+       CRITICAL: ControlTemplate MUST be defined BEFORE GroupStyle!
+       StaticResource requires forward references to be resolved.
+       ================================================================ -->
+
+    <ControlTemplate x:Key="PdfAnnotationGroupTemplate" TargetType="GroupItem">
+        <Expander IsExpanded="True" Margin="0,0,0,8">
+            <Expander.Header>
+                <TextBlock Text="{Binding Name, StringFormat=Page {0}}"
+                   FontWeight="SemiBold"
+                   Margin="0,4,0,4" />
+            </Expander.Header>
+            <ItemsPresenter />
+        </Expander>
+    </ControlTemplate>
+
+    <!-- NOW the GroupStyle can reference the template above -->
+    <GroupStyle x:Key="PdfAnnotationGroupStyle">
+        <GroupStyle.ContainerStyle>
+            <Style TargetType="GroupItem">
+                <Setter Property="Template" Value="{StaticResource PdfAnnotationGroupTemplate}" />
+            </Style>
+        </GroupStyle.ContainerStyle>
+    </GroupStyle>
+
+    <!-- DataTemplate for individual annotation items -->
+    <DataTemplate x:Key="PdfAnnotationItemTemplate" DataType="{x:Type vm:PdfAnnotation}">
+        <Border Margin="0,0,0,8"
             Padding="8"
             Tag="{Binding RelativeSource={RelativeSource AncestorType=pdf:PdfAnnotationList}}">
-      <Border.Style>
-        <Style TargetType="Border">
-          <Setter Property="Background" Value="#FFFDFDFD" />
-          <Setter Property="BorderBrush" Value="#FFD0D0D0" />
-          <Setter Property="BorderThickness" Value="1" />
-          <Setter Property="CornerRadius" Value="4" />
-          <Style.Triggers>
-            <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsSelected}" Value="True">
-              <Setter Property="Background" Value="#FFE3F1FF" />
-              <Setter Property="BorderBrush" Value="#FF2F6FED" />
-            </DataTrigger>
-          </Style.Triggers>
-        </Style>
-      </Border.Style>
-      <Grid>
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="72" />
-          <ColumnDefinition Width="8" />
-          <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="#FFFDFDFD" />
+                    <Setter Property="BorderBrush" Value="#FFD0D0D0" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="CornerRadius" Value="4" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsSelected}" Value="True">
+                            <Setter Property="Background" Value="#FFE3F1FF" />
+                            <Setter Property="BorderBrush" Value="#FF2F6FED" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="72" />
+                    <ColumnDefinition Width="8" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-        <Border Width="64"
+                <Border Grid.Column="0"
+                Width="64"
                 Height="64"
                 Background="#FFEDEDED"
                 BorderBrush="#FFCCCCCC"
                 BorderThickness="1"
                 CornerRadius="4">
-          <Image Source="{Binding PreviewImage}"
+                    <Image Source="{Binding PreviewImage}"
                  Stretch="UniformToFill"
                  SnapsToDevicePixels="True" />
-        </Border>
+                </Border>
 
-        <StackPanel Grid.Column="2"
+                <StackPanel Grid.Column="2"
                     Orientation="Vertical">
-          <TextBlock Text="{Binding Title}"
+                    <TextBlock Text="{Binding Title}"
                      FontWeight="SemiBold"
                      TextTrimming="CharacterEllipsis" />
-          <TextBlock Text="{Binding TextSnippet}"
+                    <TextBlock Text="{Binding TextSnippet}"
                      Margin="0,4,0,0"
                      FontStyle="Italic"
                      Foreground="#FF555555"
                      TextWrapping="Wrap"
                      MaxHeight="60" />
-          <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
+                    <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
                    Margin="0,4,0,0"
                    AcceptsReturn="True"
                    TextWrapping="Wrap"
                    MinHeight="48"
                    VerticalScrollBarVisibility="Auto" />
-        </StackPanel>
-      </Grid>
-      <Border.ContextMenu>
-        <ContextMenu>
-          <MenuItem Header="Copy"
+                </StackPanel>
+            </Grid>
+            <Border.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Copy"
                     Command="{Binding PlacementTarget.Tag.DataContext.CopyAnnotationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                     CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-          <Separator />
-          <MenuItem Header="Highlight Color">
-            <MenuItem Header="Yellow"
+                    <Separator />
+                    <MenuItem Header="Highlight Color">
+                        <MenuItem Header="Yellow"
                       Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-              <MenuItem.CommandParameter>
-                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            <MenuItem.CommandParameter>
+                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       ColorName="Yellow" />
-              </MenuItem.CommandParameter>
-            </MenuItem>
-            <MenuItem Header="Green"
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="Green"
                       Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-              <MenuItem.CommandParameter>
-                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            <MenuItem.CommandParameter>
+                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       ColorName="Green" />
-              </MenuItem.CommandParameter>
-            </MenuItem>
-            <MenuItem Header="Blue"
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="Blue"
                       Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-              <MenuItem.CommandParameter>
-                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            <MenuItem.CommandParameter>
+                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       ColorName="Blue" />
-              </MenuItem.CommandParameter>
-            </MenuItem>
-            <MenuItem Header="Clear"
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="Pink"
                       Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-              <MenuItem.CommandParameter>
-                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                            <MenuItem.CommandParameter>
+                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                      ColorName="Pink" />
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                        <MenuItem Header="Clear"
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                            <MenuItem.CommandParameter>
+                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                                       ColorName="" />
-              </MenuItem.CommandParameter>
-            </MenuItem>
-          </MenuItem>
-          <Separator />
-          <MenuItem Header="Delete"
+                            </MenuItem.CommandParameter>
+                        </MenuItem>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="Delete"
                     Command="{Binding PlacementTarget.Tag.DataContext.DeleteAnnotationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                     CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
-        </ContextMenu>
-      </Border.ContextMenu>
-    </Border>
-  </DataTemplate>
+                </ContextMenu>
+            </Border.ContextMenu>
+        </Border>
+    </DataTemplate>
 
-  <GroupStyle x:Key="PdfAnnotationGroupStyle">
-    <GroupStyle.ContainerStyle>
-      <Style TargetType="GroupItem">
-        <Setter Property="Template" Value="{StaticResource PdfAnnotationGroupTemplate}" />
-      </Style>
-    </GroupStyle.ContainerStyle>
-  </GroupStyle>
-
-  <ControlTemplate x:Key="PdfAnnotationGroupTemplate" TargetType="GroupItem">
-    <Expander IsExpanded="True" Margin="0,0,0,8">
-      <Expander.Header>
-        <TextBlock Text="{Binding Name, StringFormat=Page {0}}"
-                   FontWeight="SemiBold"
-                   Margin="0,4,0,4" />
-      </Expander.Header>
-      <ItemsPresenter />
-    </Expander>
-  </ControlTemplate>
 </ResourceDictionary>

@@ -1,4 +1,4 @@
-const INITIALIZE_RETRY_DELAY_MS = 200;
+﻿const INITIALIZE_RETRY_DELAY_MS = 200;
 const OVERLAY_FLUSH_DELAY_MS = 400;
 const MAX_SELECTION_LENGTH = 4096;
 
@@ -283,35 +283,77 @@ async function flushOverlayAsync(storage) {
 }
 
 function patchAnnotationManager() {
-  if (typeof window === "undefined" || !window.pdfjsViewer) {
-    return;
-  }
+    console.log("patchAnnotationManager called");
 
-  var viewerNs = window.pdfjsViewer;
-  var proto = viewerNs.AnnotationEditorUIManager ? viewerNs.AnnotationEditorUIManager.prototype : null;
-  if (!proto || proto.__kwBridgePatched) {
-    return;
-  }
-
-  var originalAdd = proto.addToAnnotationStorage;
-  proto.addToAnnotationStorage = function (editor) {
-    originalAdd.call(this, editor);
-
-    if (!editor || typeof editor !== "object" || editor.name !== "highlightEditor") {
-      return;
+    if (typeof window === "undefined") {
+        console.error("window is undefined!");
+        return;
     }
 
-    queueMicrotask(function () {
-      void handleHighlightCreatedAsync(editor);
-    });
-  };
+    // CRITICAL CHECK: pdfjsViewer must exist
+    if (!window.pdfjsViewer) {
+        console.error("❌ window.pdfjsViewer is NOT available yet!");
+        console.error("   This is why highlights don't work.");
+        console.error("   Will retry in 200ms...");
 
-  Object.defineProperty(proto, "__kwBridgePatched", {
-    configurable: false,
-    enumerable: false,
-    writable: false,
-    value: true,
-  });
+        // Retry after a delay
+        setTimeout(patchAnnotationManager, 200);
+        return;
+    }
+
+    console.log("✓ window.pdfjsViewer exists");
+
+    var viewerNs = window.pdfjsViewer;
+
+    if (!viewerNs.AnnotationEditorUIManager) {
+        console.error("❌ AnnotationEditorUIManager not available yet!");
+        console.error("   Will retry in 200ms...");
+        setTimeout(patchAnnotationManager, 200);
+        return;
+    }
+
+    console.log("✓ AnnotationEditorUIManager exists");
+
+    var proto = viewerNs.AnnotationEditorUIManager.prototype;
+
+    if (proto.__kwBridgePatched) {
+        console.log("✓ Already patched");
+        return;
+    }
+
+    if (!proto.addToAnnotationStorage) {
+        console.error("❌ addToAnnotationStorage method not found!");
+        return;
+    }
+
+    console.log("✓ addToAnnotationStorage exists, applying patch...");
+
+    var originalAdd = proto.addToAnnotationStorage;
+    proto.addToAnnotationStorage = function (editor) {
+        console.log("📝 addToAnnotationStorage called!", editor?.name);
+
+        originalAdd.call(this, editor);
+
+        if (!editor || typeof editor !== "object" || editor.name !== "highlightEditor") {
+            console.log("   Not a highlight, skipping");
+            return;
+        }
+
+        console.log("   ✓ IS A HIGHLIGHT! Calling handleHighlightCreatedAsync...");
+
+        queueMicrotask(function () {
+            void handleHighlightCreatedAsync(editor);
+        });
+    };
+
+    Object.defineProperty(proto, "__kwBridgePatched", {
+        configurable: false,
+        enumerable: false,
+        writable: false,
+        value: true,
+    });
+
+    console.log("✅ PATCH APPLIED SUCCESSFULLY!");
 }
 
 async function handleHighlightCreatedAsync(editor) {
@@ -504,11 +546,18 @@ function initializeBridge() {
           console.log("knowledgeworks-bridge: editor buttons unhidden");
       }
 
+      setupAnnotationEditorListener();
 
     registerSelectionHandlers(app);
     registerNavigationHandlers(app);
     monitorAnnotationStorage(app);
-    patchAnnotationManager();
+
+      console.log("Waiting 500ms before patching annotation manager...");
+      setTimeout(function () {
+          console.log("Now attempting to patch annotation manager...");
+          patchAnnotationManager();
+      }, 500);
+
     void applyOverlayInternal();
     void loadPdfInternal();
   }).catch(function (error) {
@@ -524,4 +573,23 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 
 if (typeof window !== "undefined") {
   window.initializeBridge = initializeBridge;
+}
+
+function setupAnnotationEditorListener() {
+    var app = getViewerApplication();
+    if (!app || !app.eventBus) {
+        return;
+    }
+
+    app.eventBus.on("annotationeditoruimanager", function (evt) {
+        console.log("📢 annotationeditoruimanager event fired!");
+        console.log("   UI Manager:", evt.uiManager);
+
+        // Now we KNOW the manager exists, patch it immediately
+        setTimeout(function () {
+            patchAnnotationManager();
+        }, 100);
+    });
+
+    console.log("✓ Listening for annotationeditoruimanager event");
 }
