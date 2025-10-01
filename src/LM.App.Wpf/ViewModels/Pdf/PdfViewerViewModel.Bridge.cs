@@ -13,6 +13,9 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private bool _isViewerReady;
         private string? _currentSelectionText;
         private int? _selectionPageNumber;
+        private string? _lastSelectionText;
+        private int? _lastSelectionPageNumber;
+        private bool _isSelectionCacheFresh;
         private int _currentPageNumber;
         private string? _overlayJson;
         private string? _overlaySidecarPath;
@@ -120,6 +123,24 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 "PdfViewerViewModel.CreateHighlightAsync payload preview: {0}",
                 DescribeSnapshotValue(payloadJson));
             var annotation = EnsureAnnotationFromPayload(payloadJson);
+            if (annotation is not null)
+            {
+                if (_isSelectionCacheFresh && !string.IsNullOrWhiteSpace(_lastSelectionText))
+                {
+                    var sanitizedCachedText = _lastSelectionText!.Trim();
+                    Trace.TraceInformation(
+                        "PdfViewerViewModel.CreateHighlightAsync applying cached selection (text={0}, page={1})",
+                        DescribeSnapshotValue(sanitizedCachedText),
+                        _lastSelectionPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
+                    annotation.TextSnippet = sanitizedCachedText;
+                    if (string.IsNullOrWhiteSpace(annotation.Note))
+                    {
+                        annotation.Note = sanitizedCachedText;
+                    }
+                }
+
+                ExpireCachedSelectionSnapshot();
+            }
             Trace.TraceInformation(
                 "PdfViewerViewModel.CreateHighlightAsync resolved annotationId: {0}",
                 annotation?.Id ?? "(null)");
@@ -128,23 +149,38 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         public Task<string?> GetCurrentSelectionAsync()
         {
-            if (CurrentSelectionText is null && SelectionPageNumber is null)
+            var currentText = CurrentSelectionText;
+            var currentPageNumber = SelectionPageNumber;
+
+            if (string.IsNullOrWhiteSpace(currentText) && !currentPageNumber.HasValue)
             {
-                Trace.TraceInformation("PdfViewerViewModel.GetCurrentSelectionAsync returning null (no selection)");
-                return Task.FromResult<string?>(null);
+                if (_isSelectionCacheFresh && !string.IsNullOrWhiteSpace(_lastSelectionText))
+                {
+                    Trace.TraceInformation(
+                        "PdfViewerViewModel.GetCurrentSelectionAsync using cached snapshot (text={0}, page={1})",
+                        DescribeSnapshotValue(_lastSelectionText),
+                        _lastSelectionPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
+                    currentText = _lastSelectionText;
+                    currentPageNumber = _lastSelectionPageNumber;
+                }
+                else
+                {
+                    Trace.TraceInformation("PdfViewerViewModel.GetCurrentSelectionAsync returning null (no selection)");
+                    return Task.FromResult<string?>(null);
+                }
             }
 
             var snapshot = new
             {
-                text = CurrentSelectionText,
-                pageNumber = SelectionPageNumber,
+                text = currentText,
+                pageNumber = currentPageNumber,
             };
 
             var json = JsonSerializer.Serialize(snapshot);
             Trace.TraceInformation(
                 "PdfViewerViewModel.GetCurrentSelectionAsync returning snapshot (text={0}, pageNumber={1})",
-                DescribeSnapshotValue(CurrentSelectionText),
-                SelectionPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
+                DescribeSnapshotValue(currentText),
+                currentPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             return Task.FromResult<string?>(json);
         }
 
@@ -298,8 +334,19 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 "PdfViewerViewModel.UpdateSelection received (text={0}, pageNumber={1})",
                 DescribeSnapshotValue(text),
                 pageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
-            CurrentSelectionText = text;
-            SelectionPageNumber = pageNumber;
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                CurrentSelectionText = text;
+                SelectionPageNumber = pageNumber;
+
+                CacheSelectionSnapshot(CurrentSelectionText, SelectionPageNumber);
+            }
+            else
+            {
+                Trace.TraceInformation("PdfViewerViewModel.UpdateSelection clearing current selection while retaining cache");
+                CurrentSelectionText = null;
+                SelectionPageNumber = null;
+            }
         }
 
         internal void HandleNavigationChanged(int pageNumber)
@@ -439,6 +486,36 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 Trace.TraceError("Failed to deserialize highlight payload: {0}", ex);
                 return null;
             }
+        }
+
+        private void CacheSelectionSnapshot(string? text, int? pageNumber)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                Trace.TraceInformation("PdfViewerViewModel.CacheSelectionSnapshot skipping empty text");
+                return;
+            }
+
+            _lastSelectionText = text.Trim();
+            _lastSelectionPageNumber = pageNumber;
+            _isSelectionCacheFresh = true;
+            Trace.TraceInformation(
+                "PdfViewerViewModel.CacheSelectionSnapshot stored (text={0}, page={1})",
+                DescribeSnapshotValue(_lastSelectionText),
+                _lastSelectionPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
+        }
+
+        private void ExpireCachedSelectionSnapshot()
+        {
+            if (!_isSelectionCacheFresh)
+            {
+                return;
+            }
+
+            Trace.TraceInformation("PdfViewerViewModel.ExpireCachedSelectionSnapshot clearing cached selection");
+            _isSelectionCacheFresh = false;
+            _lastSelectionText = null;
+            _lastSelectionPageNumber = null;
         }
     }
 }
