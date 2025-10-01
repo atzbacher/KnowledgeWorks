@@ -36,6 +36,12 @@
       "timestampUtc": "2025-10-01T07:45:00Z",
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-origin-policy-updated"
+    },
+    {
+      "eventId": "3700d2620bc542d9a007d2efa13dcef7",
+      "timestampUtc": "2025-10-01T08:21:18Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-document-resolution-updated"
     }
   ]
 }
