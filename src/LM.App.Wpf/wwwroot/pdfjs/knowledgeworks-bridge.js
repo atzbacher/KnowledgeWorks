@@ -9,6 +9,24 @@ var lastOverlayHash = null;
 var readyPosted = false;
 var knownAnnotationIds = new Set();
 
+function registerAllowedDocumentOrigins() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  var allowed = window.KnowledgeWorksAllowedDocumentOrigins;
+  var origins = Array.isArray(allowed) ? allowed.slice() : [];
+  var documentOrigin = "https://viewer-documents.knowledgeworks";
+
+  if (!origins.includes(documentOrigin)) {
+    origins.push(documentOrigin);
+  }
+
+  window.KnowledgeWorksAllowedDocumentOrigins = origins;
+}
+
+registerAllowedDocumentOrigins();
+
 function getChromeWebView() {
   if (typeof window === "undefined") {
     return null;
