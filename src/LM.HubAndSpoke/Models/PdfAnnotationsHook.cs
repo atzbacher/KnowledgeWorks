@@ -29,6 +29,9 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("note")]
         public string? Note { get; init; }
+
+        [JsonPropertyName("color")]
+        public PdfAnnotationColorMetadata? Color { get; init; }
     }
 
     public sealed class PdfAnnotationPreview
@@ -38,5 +41,17 @@ namespace LM.HubSpoke.Models
 
         [JsonPropertyName("imagePath")]
         public string ImagePath { get; init; } = string.Empty;
+    }
+
+    public sealed class PdfAnnotationColorMetadata
+    {
+        [JsonPropertyName("r")]
+        public int Red { get; init; }
+
+        [JsonPropertyName("g")]
+        public int Green { get; init; }
+
+        [JsonPropertyName("b")]
+        public int Blue { get; init; }
     }
 }

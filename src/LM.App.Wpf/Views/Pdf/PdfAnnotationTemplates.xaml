@@ -2,9 +2,11 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Pdf"
                     xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:xml="http://www.w3.org/XML/1998/namespace">
+
     <pdf:AnnotationColorParameterConverter x:Key="AnnotationColorParameterConverter" />
+    <pdf:NullOrEmptyToVisibilityConverter x:Key="AnnotationTypeVisibilityConverter" />
 
     <!-- ===================================================================
        CRITICAL: ControlTemplate MUST be defined BEFORE GroupStyle!
@@ -36,7 +38,7 @@
             Tag="{Binding RelativeSource={RelativeSource AncestorType=pdf:PdfAnnotationList}}">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Background" Value="#FFFDFDFD" />
+                    <Setter Property="Background" Value="{Binding HighlightBrush}" />
                     <Setter Property="BorderBrush" Value="#FFD0D0D0" />
                     <Setter Property="BorderThickness" Value="1" />
                     <Setter Property="CornerRadius" Value="4" />
@@ -77,13 +79,27 @@
                      FontStyle="Italic"
                      Foreground="#FF555555"
                      TextWrapping="Wrap"
-                     MaxHeight="60" />
+                     MaxHeight="60"
+                     xml:space="preserve" />
                     <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
                    Margin="0,4,0,0"
                    AcceptsReturn="True"
                    TextWrapping="Wrap"
                    MinHeight="48"
                    VerticalScrollBarVisibility="Auto" />
+                    <Border Margin="0,6,0,0"
+                        Padding="6,2"
+                        HorizontalAlignment="Left"
+                        Background="#FFE8E8E8"
+                        BorderBrush="#FFBFBFBF"
+                        BorderThickness="1"
+                        CornerRadius="3"
+                        Visibility="{Binding AnnotationTypeDisplay, Converter={StaticResource AnnotationTypeVisibilityConverter}}">
+                        <TextBlock Text="{Binding AnnotationTypeDisplay}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Foreground="#FF333333" />
+                    </Border>
                 </StackPanel>
             </Grid>
             <Border.ContextMenu>
