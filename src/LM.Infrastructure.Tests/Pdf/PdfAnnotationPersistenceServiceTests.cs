@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LM.Core.Models.Pdf;
 using LM.HubSpoke.Models;
 using LM.Infrastructure.FileSystem;
 using LM.Infrastructure.Pdf;
@@ -34,9 +36,18 @@ namespace LM.Infrastructure.Tests.Pdf
                 ["ann2"] = new byte[] { 4, 5, 6 }
             };
 
-            await service.PersistAsync(entryId, hash, overlayJson, previews, null, CancellationToken.None);
+            var pdfRelativePath = Path.Combine("library", "ab", "source.pdf");
+            Directory.CreateDirectory(Path.Combine(temp.Path, "library", "ab"));
 
-            var overlayPath = Path.Combine(temp.Path, "library", normalized[..2], normalized[2..4], normalized + ".json");
+            var annotations = new List<PdfAnnotationBridgeMetadata>
+            {
+                new("ann1", "Snippet One", "Note One"),
+                new("ann2", "Snippet Two", null)
+            };
+
+            await service.PersistAsync(entryId, hash, overlayJson, previews, null, pdfRelativePath, annotations, CancellationToken.None);
+
+            var overlayPath = Path.Combine(temp.Path, "library", "ab", "source.overlay.json");
             Assert.True(File.Exists(overlayPath), $"Expected overlay at: {overlayPath}");
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(overlayPath));
 
@@ -52,10 +63,18 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
-            Assert.Equal($"library/{normalized[..2]}/{normalized[2..4]}/{normalized}.json", hook!.OverlayPath);
+            Assert.Equal("library/ab/source.overlay.json", hook!.OverlayPath);
             Assert.Equal(2, hook.Previews.Count);
             Assert.Contains(hook.Previews, p => p.AnnotationId == "ann1" && p.ImagePath == $"extraction/{normalized}/ann1.png");
             Assert.Contains(hook.Previews, p => p.AnnotationId == "ann2" && p.ImagePath == $"extraction/{normalized}/ann2.png");
+
+            Assert.Equal(2, hook.Annotations.Count);
+            var first = hook.Annotations.First(a => a.AnnotationId == "ann1");
+            Assert.Equal("Snippet One", first.Text);
+            Assert.Equal("Note One", first.Note);
+            var second = hook.Annotations.First(a => a.AnnotationId == "ann2");
+            Assert.Equal("Snippet Two", second.Text);
+            Assert.Null(second.Note);
 
             var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
             var changeLog = JsonSerializer.Deserialize<EntryChangeLogHook>(await File.ReadAllTextAsync(changeLogPath));
@@ -64,10 +83,7 @@ namespace LM.Infrastructure.Tests.Pdf
             Assert.Equal("pdf-annotations-updated", changeEvent.Action);
             Assert.Equal(Environment.UserName, changeEvent.PerformedBy);
 
-            var hashDir = Path.Combine(temp.Path, "entries", normalized);
-            Assert.False(Directory.Exists(hashDir));
-
-            var debugOverlayPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.overlay.json");
+            var debugOverlayPath = Path.Combine(temp.Path, "debug", normalized + ".debug.json");
             Assert.True(File.Exists(debugOverlayPath));
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
         }
@@ -88,7 +104,12 @@ namespace LM.Infrastructure.Tests.Pdf
             const string overlayJson = "{}";
             const string sidecar = "annotations/custom_overlay.json";
 
-            await service.PersistAsync(entryId, hash, overlayJson, new Dictionary<string, byte[]>(), sidecar, CancellationToken.None);
+            var annotations = new List<PdfAnnotationBridgeMetadata>
+            {
+                new("ann", "Snippet", "Note")
+            };
+
+            await service.PersistAsync(entryId, hash, overlayJson, new Dictionary<string, byte[]>(), sidecar, Path.Combine("library", "ab", "source.pdf"), annotations, CancellationToken.None);
 
             var overlayPath = Path.Combine(temp.Path, sidecar);
             Assert.True(File.Exists(overlayPath));
@@ -97,8 +118,11 @@ namespace LM.Infrastructure.Tests.Pdf
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
             Assert.Equal(sidecar.Replace("\\", "/"), hook!.OverlayPath);
+            var annotation = Assert.Single(hook.Annotations);
+            Assert.Equal("Snippet", annotation.Text);
+            Assert.Equal("Note", annotation.Note);
 
-            var debugOverlayPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.overlay.json");
+            var debugOverlayPath = Path.Combine(temp.Path, "debug", normalized + ".debug.json");
             Assert.True(File.Exists(debugOverlayPath));
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
         }
@@ -116,6 +140,12 @@ namespace LM.Infrastructure.Tests.Pdf
             const string entryId = "entry-901";
             const string hash = "FACEBEEF";
             var normalized = hash.ToLowerInvariant();
+            var pdfRelativePath = Path.Combine("library", "aa", "document.pdf");
+
+            var firstAnnotations = new List<PdfAnnotationBridgeMetadata>
+            {
+                new("existing", "Initial", "First note")
+            };
 
             await service.PersistAsync(
                 entryId,
@@ -126,7 +156,14 @@ namespace LM.Infrastructure.Tests.Pdf
                     ["existing"] = new byte[] { 1, 1, 1 }
                 },
                 null,
+                pdfRelativePath,
+                firstAnnotations,
                 CancellationToken.None);
+
+            var updatedAnnotations = new List<PdfAnnotationBridgeMetadata>
+            {
+                new("existing", "Updated", "Second note")
+            };
 
             await service.PersistAsync(
                 entryId,
@@ -134,6 +171,8 @@ namespace LM.Infrastructure.Tests.Pdf
                 "{\"updated\":true}",
                 new Dictionary<string, byte[]>(),
                 null,
+                pdfRelativePath,
+                updatedAnnotations,
                 CancellationToken.None);
 
             var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
@@ -142,6 +181,10 @@ namespace LM.Infrastructure.Tests.Pdf
             var preview = Assert.Single(hook!.Previews);
             Assert.Equal("existing", preview.AnnotationId);
             Assert.Equal($"extraction/{normalized}/existing.png", preview.ImagePath);
+
+            var annotation = Assert.Single(hook.Annotations);
+            Assert.Equal("Updated", annotation.Text);
+            Assert.Equal("Second note", annotation.Note);
 
             var previewPath = Path.Combine(temp.Path, "extraction", normalized, "existing.png");
             Assert.True(File.Exists(previewPath));
@@ -166,6 +209,8 @@ namespace LM.Infrastructure.Tests.Pdf
                     "{}",
                     new Dictionary<string, byte[]>(),
                     absoluteSidecar,
+                    null,
+                    Array.Empty<PdfAnnotationBridgeMetadata>(),
                     CancellationToken.None));
         }
 

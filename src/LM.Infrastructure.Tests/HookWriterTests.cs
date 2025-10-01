@@ -81,6 +81,10 @@ namespace LM.Infrastructure.Tests.Hooks
             var hook = new HookM.PdfAnnotationsHook
             {
                 OverlayPath = "library/ab/abcdef/abcdef.json",
+                Annotations = new List<HookM.PdfAnnotationMetadata>
+                {
+                    new() { AnnotationId = "ann-1", Text = "Snippet", Note = "Note" }
+                },
                 Previews = new List<HookM.PdfAnnotationPreview>
                 {
                     new() { AnnotationId = "ann-1", ImagePath = "extraction/abcdef/ann-1.png" }
@@ -95,6 +99,12 @@ namespace LM.Infrastructure.Tests.Hooks
             var hookJson = await File.ReadAllTextAsync(hookPath);
             using var hookDoc = JsonDocument.Parse(hookJson);
             Assert.Equal(hook.OverlayPath, hookDoc.RootElement.GetProperty("overlayPath").GetString());
+            var annotationsElement = hookDoc.RootElement.GetProperty("annotations");
+            Assert.Equal(1, annotationsElement.GetArrayLength());
+            var annotationElement = annotationsElement[0];
+            Assert.Equal("ann-1", annotationElement.GetProperty("annotationId").GetString());
+            Assert.Equal("Snippet", annotationElement.GetProperty("text").GetString());
+            Assert.Equal("Note", annotationElement.GetProperty("note").GetString());
 
             var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
             Assert.True(File.Exists(changeLogPath), $"Expected changelog at: {changeLogPath}");
