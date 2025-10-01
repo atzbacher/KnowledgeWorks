@@ -450,16 +450,23 @@ function notifyReadyOnce() {
 function initializeBridge() {
   ensurePdfBridge();
 
-  var app = getViewerApplication();
   var host = getHostObject();
+  if (!host) {
+    scheduleRetry();
+    return;
+  }
 
-  if (!app || !host) {
+  notifyReadyOnce();
+
+  var app = getViewerApplication();
+  if (!app) {
+
     scheduleRetry();
     return;
   }
 
   app.initializedPromise.then(function () {
-    notifyReadyOnce();
+
     registerSelectionHandlers(app);
     registerNavigationHandlers(app);
     monitorAnnotationStorage(app);
