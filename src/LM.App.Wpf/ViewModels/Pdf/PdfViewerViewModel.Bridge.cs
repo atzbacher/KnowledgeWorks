@@ -111,7 +111,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             return fallback?.AbsoluteUri;
         }
 
-        public Task<string?> CreateHighlightAsync(string payloadJson)
+        public Task<string?> CreateHighlightAsync(string? payloadJson)
         {
             Trace.TraceInformation(
                 "PdfViewerViewModel.CreateHighlightAsync invoked (payload length={0})",
@@ -148,7 +148,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             return Task.FromResult<string?>(json);
         }
 
-        public Task SetOverlayAsync(string payloadJson)
+        public Task SetOverlayAsync(string? payloadJson)
         {
             // ADD THIS AT THE TOP:
             Trace.TraceInformation("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -363,7 +363,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             OverlaySidecarPath = sidecarPath;
         }
 
-        private PdfAnnotation? EnsureAnnotationFromPayload(string payloadJson)
+        private PdfAnnotation? EnsureAnnotationFromPayload(string? payloadJson)
         {
             if (string.IsNullOrWhiteSpace(payloadJson))
             {

@@ -19,13 +19,13 @@ namespace LM.App.Wpf.Views
             Task<string?> LoadPdfAsync();
 
             [DispId(2)]
-            Task<string?> CreateHighlightAsync(string payloadJson);
+            Task<string?> CreateHighlightAsync(string? payloadJson);
 
             [DispId(3)]
             Task<string?> GetCurrentSelectionAsync();
 
             [DispId(4)]
-            Task SetOverlayAsync(string payloadJson);
+            Task SetOverlayAsync(string? payloadJson);
         }
 
         [ComVisible(true)]
@@ -55,7 +55,7 @@ namespace LM.App.Wpf.Views
                 });
             }
 
-            public Task<string?> CreateHighlightAsync(string payloadJson)
+            public Task<string?> CreateHighlightAsync(string? payloadJson)
             {
                 Trace.TraceInformation(
                     "PdfViewerHostObject.CreateHighlightAsync invoked (payload length={0})",
@@ -87,7 +87,7 @@ namespace LM.App.Wpf.Views
                 });
             }
 
-            public Task SetOverlayAsync(string payloadJson)
+            public Task SetOverlayAsync(string? payloadJson)
             {
                 Trace.TraceInformation(
                     "PdfViewerHostObject.SetOverlayAsync invoked (payload length={0})",
