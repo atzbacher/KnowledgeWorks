@@ -68,9 +68,11 @@
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0"
                          Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource LibrarySearchFieldStyle}"
                          Height="26"
-                         VerticalContentAlignment="Center"/>
+                         VerticalContentAlignment="Center"
+                         Padding="4,0"
+                         BorderBrush="#D1D5DB"
+                         BorderThickness="1"/>
                                 <ComboBox Grid.Column="1"
                           Margin="4,0,0,0"
                           MinWidth="100"
