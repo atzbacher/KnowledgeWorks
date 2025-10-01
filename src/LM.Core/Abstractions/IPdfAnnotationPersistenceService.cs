@@ -17,6 +17,8 @@ namespace LM.Core.Abstractions
         /// <param name="overlayJson">Serialized annotation overlay metadata.</param>
         /// <param name="previewImages">PNG preview images keyed by annotation identifier.</param>
         /// <param name="overlaySidecarRelativePath">Optional workspace-relative path for the overlay sidecar JSON. When omitted, a default path is chosen.</param>
+        /// <param name="pdfRelativePath">Workspace-relative path to the PDF file backing the annotations.</param>
+        /// <param name="annotations">Annotation metadata captured from the viewer bridge.</param>
         /// <param name="cancellationToken">Token used to observe cancellation.</param>
         Task PersistAsync(
             string entryId,
@@ -24,6 +26,8 @@ namespace LM.Core.Abstractions
             string overlayJson,
             IReadOnlyDictionary<string, byte[]> previewImages,
             string? overlaySidecarRelativePath,
+            string? pdfRelativePath,
+            IReadOnlyList<Models.Pdf.PdfAnnotationBridgeMetadata> annotations,
             CancellationToken cancellationToken);
     }
 }

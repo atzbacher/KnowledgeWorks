@@ -67,7 +67,7 @@ LM.Infrastructure.PubMed.PubMedClient.PubMedClient() -> void
 LM.Infrastructure.PubMed.PubMedClient.TryGetByDoiAsync(string! doi, bool includeCitedBy, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<LM.Core.Models.PublicationRecord?>!
 LM.Infrastructure.Pdf.PdfAnnotationPersistenceService
 LM.Infrastructure.Pdf.PdfAnnotationPersistenceService.PdfAnnotationPersistenceService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.Infrastructure.Pdf.PdfAnnotationPersistenceService.PersistAsync(string! entryId, string! pdfHash, string! overlayJson, System.Collections.Generic.IReadOnlyDictionary<string!, byte[]!>! previewImages, string? overlaySidecarRelativePath, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+LM.Infrastructure.Pdf.PdfAnnotationPersistenceService.PersistAsync(string! entryId, string! pdfHash, string! overlayJson, System.Collections.Generic.IReadOnlyDictionary<string!, byte[]!>! previewImages, string? overlaySidecarRelativePath, string? pdfRelativePath, System.Collections.Generic.IReadOnlyList<LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata!>! annotations, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.PdfAnnotationPreviewStorage(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>!
