@@ -448,24 +448,30 @@ function notifyReadyOnce() {
 }
 
 function initializeBridge() {
-  ensurePdfBridge();
+    console.log("knowledgeworks-bridge: initializeBridge called");
+    ensurePdfBridge();
 
   var host = getHostObject();
-  if (!host) {
+    if (!host) {
+    console.log("knowledgeworks-bridge: host not ready, retrying...");
     scheduleRetry();
     return;
   }
 
-  notifyReadyOnce();
+  console.log("knowledgeworks-bridge: host found");
 
   var app = getViewerApplication();
   if (!app) {
-
+    console.log("knowledgeworks-bridge: PDFViewerApplication not ready, retrying...");
     scheduleRetry();
     return;
   }
 
+  console.log("knowledgeworks-bridge: PDFViewerApplication found, waiting for initialization...");
+
   app.initializedPromise.then(function () {
+      console.log("knowledgeworks-bridge: viewer fully initialized");
+      notifyReadyOnce();
 
     registerSelectionHandlers(app);
     registerNavigationHandlers(app);
