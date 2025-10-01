@@ -41,6 +41,21 @@ namespace LM.App.Wpf.Views
         private bool _isHostObjectRegistered;
         private bool _isViewerAssetRequestHandlerAttached;
 
+        private static string DescribeForLog(string? value, int maxLength = 256)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return "(empty)";
+            }
+
+            if (value.Length <= maxLength)
+            {
+                return value;
+            }
+
+            return string.Concat(value.AsSpan(0, maxLength), "…");
+        }
+
         public PdfViewer()
         {
             InitializeComponent();
@@ -378,6 +393,9 @@ namespace LM.App.Wpf.Views
             try
             {
                 var json = e.WebMessageAsJson;
+                Trace.TraceInformation(
+                    "PdfViewer received WebView message (Json length={0})",
+                    json?.Length ?? 0);
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     json = e.TryGetWebMessageAsString();
@@ -385,33 +403,45 @@ namespace LM.App.Wpf.Views
 
                 if (string.IsNullOrWhiteSpace(json))
                 {
+                    Trace.TraceWarning("PdfViewer received an empty WebView message payload");
                     return;
                 }
+
+                Trace.TraceInformation(
+                    "PdfViewer processing WebView message payload: {0}",
+                    DescribeForLog(json));
 
                 using var document = JsonDocument.Parse(json);
                 var root = document.RootElement;
 
                 if (!root.TryGetProperty("type", out var typeElement))
                 {
+                    Trace.TraceWarning("PdfViewer WebView message missing type: {0}", DescribeForLog(json));
                     return;
                 }
 
                 var messageType = typeElement.GetString();
+                Trace.TraceInformation("PdfViewer dispatching WebView message of type '{0}'", messageType ?? "(null)");
                 switch (messageType)
                 {
                     case "ready":
+                        Trace.TraceInformation("PdfViewer received viewer ready notification");
                         _viewModel.HandleViewerReady();
                         break;
                     case "selection-changed":
+                        Trace.TraceInformation("PdfViewer received selection change message");
                         HandleSelectionChanged(root);
                         break;
                     case "highlight-created":
+                        Trace.TraceInformation("PdfViewer received highlight created message");
                         await HandleHighlightCreatedAsync(root).ConfigureAwait(true);
                         break;
                     case "nav-changed":
+                        Trace.TraceInformation("PdfViewer received navigation change message");
                         HandleNavigationChanged(root);
                         break;
                     default:
+                        Trace.TraceInformation("PdfViewer encountered unhandled WebView message type '{0}'", messageType);
                         break;
                 }
             }
@@ -474,6 +504,7 @@ namespace LM.App.Wpf.Views
 
             if (!root.TryGetProperty("selection", out var selectionElement) || selectionElement.ValueKind == JsonValueKind.Null)
             {
+                Trace.TraceInformation("PdfViewer clearing selection snapshot (no selection payload)");
                 _viewModel.UpdateSelection(null, null);
                 return;
             }
@@ -491,6 +522,10 @@ namespace LM.App.Wpf.Views
                 }
             }
 
+            Trace.TraceInformation(
+                "PdfViewer updating selection snapshot (textLength={0}, pageNumber={1})",
+                string.IsNullOrEmpty(text) ? 0 : text!.Length,
+                pageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             _viewModel.UpdateSelection(text, pageNumber);
         }
 
@@ -503,12 +538,14 @@ namespace LM.App.Wpf.Views
 
             if (!root.TryGetProperty("annotationId", out var annotationElement))
             {
+                Trace.TraceWarning("Highlight creation payload missing annotationId");
                 return;
             }
 
             var annotationId = annotationElement.GetString();
             if (string.IsNullOrWhiteSpace(annotationId))
             {
+                Trace.TraceWarning("Highlight creation payload contained empty annotationId");
                 return;
             }
 
@@ -521,21 +558,29 @@ namespace LM.App.Wpf.Views
                 }
             }
 
+            Trace.TraceInformation(
+                "PdfViewer handling highlight '{0}' (pageIndex={1}, pageNumber={2})",
+                annotationId,
+                root.TryGetProperty("pageIndex", out var idx) && idx.ValueKind == JsonValueKind.Number ? idx.GetInt32() : (int?)null,
+                pageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             _viewModel.HandleHighlightCreated(annotationId, pageNumber);
 
             if (!root.TryGetProperty("preview", out var previewElement))
             {
+                Trace.TraceInformation("Highlight '{0}' had no preview payload", annotationId);
                 return;
             }
 
             if (!previewElement.TryGetProperty("base64", out var dataElement))
             {
+                Trace.TraceWarning("Highlight '{0}' preview payload missing base64 data", annotationId);
                 return;
             }
 
             var base64 = dataElement.GetString();
             if (string.IsNullOrWhiteSpace(base64))
             {
+                Trace.TraceWarning("Highlight '{0}' preview payload contained empty image data", annotationId);
                 return;
             }
 
@@ -547,6 +592,13 @@ namespace LM.App.Wpf.Views
                 : 0;
 
             var pngBytes = Convert.FromBase64String(base64);
+
+            Trace.TraceInformation(
+                "Highlight '{0}' preview received (width={1}, height={2}, bytes={3})",
+                annotationId,
+                width,
+                height,
+                pngBytes.Length);
 
             await _viewModel.HandleHighlightPreviewAsync(annotationId, pngBytes, width, height).ConfigureAwait(true);
         }
