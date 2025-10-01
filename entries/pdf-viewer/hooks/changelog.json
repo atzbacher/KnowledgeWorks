@@ -48,6 +48,12 @@
       "timestampUtc": "2025-10-01T09:03:07Z",
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-local-file-loading-updated"
+    },
+    {
+      "eventId": "c451d7762e5b42bd9650f1621a157c39",
+      "timestampUtc": "2025-10-01T19:54:14Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-bridge-selection-cache-updated"
     }
   ]
 }

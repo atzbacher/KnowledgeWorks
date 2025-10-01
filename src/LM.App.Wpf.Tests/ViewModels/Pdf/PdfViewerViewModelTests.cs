@@ -140,6 +140,37 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
             Assert.NotNull(persistence.Annotations);
         }
 
+        [Fact]
+        public async Task CreateHighlightAsync_UsesCachedSelectionAfterNullUpdate()
+        {
+            using var workspace = new TemporaryWorkspace();
+            var orchestrator = new HookOrchestrator(workspace);
+            var viewModel = new PdfViewerViewModel(
+                orchestrator,
+                new FixedUserContext("qa-user"),
+                new NoopPreviewStorage(),
+                new NoopPersistenceService(),
+                new NullOverlayReader(),
+                workspace,
+                new NullClipboardService());
+
+            const string selectionText = "Important quote";
+
+            viewModel.UpdateSelection(selectionText, 3);
+            viewModel.UpdateSelection(null, null);
+
+            var annotationId = await viewModel.CreateHighlightAsync("{\"annotationId\":\"ann-1\",\"pageNumber\":3}").ConfigureAwait(true);
+
+            Assert.Equal("ann-1", annotationId);
+
+            var annotation = Assert.Single(viewModel.Annotations);
+            Assert.Equal(selectionText, annotation.TextSnippet);
+            Assert.Equal(selectionText, annotation.Note);
+
+            var selectionJson = await viewModel.GetCurrentSelectionAsync().ConfigureAwait(true);
+            Assert.Null(selectionJson);
+        }
+
         private static void InvokeQueueOverlayForViewer(PdfViewerViewModel viewModel, string overlayJson)
         {
             var method = typeof(PdfViewerViewModel).GetMethod("QueueOverlayForViewer", BindingFlags.Instance | BindingFlags.NonPublic);
