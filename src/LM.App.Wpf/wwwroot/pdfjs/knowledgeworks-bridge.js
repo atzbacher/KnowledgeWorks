@@ -112,27 +112,35 @@ async function loadPdfInternal(targetUrl) {
   try {
     var app = getViewerApplication();
     if (!app) {
+      console.warn("knowledgeworks-bridge: viewer application not available");
       return;
     }
 
     await app.initializedPromise;
 
     var url = typeof targetUrl === "string" ? targetUrl.trim() : "";
-    if (!url) {
+    if (url) {
+      console.log("knowledgeworks-bridge: loading PDF from provided URL");
+    } else {
       var host = getHostObject();
-      if (!host) {
+      if (!host || typeof host.LoadPdfAsync !== "function") {
+        console.warn("knowledgeworks-bridge: host not ready to supply PDF URL");
         return;
       }
 
+      console.log("knowledgeworks-bridge: requesting PDF URL from host");
       var result = host.LoadPdfAsync();
-      url = typeof result === "string" ? result : await Promise.resolve(result);
-      if (typeof url === "string") {
-        url = url.trim();
+      var resolved = typeof result === "string" ? result : await Promise.resolve(result);
+      if (typeof resolved === "string") {
+        url = resolved.trim();
       }
-    }
 
-    if (!url) {
-      return;
+      if (!url) {
+        console.warn("knowledgeworks-bridge: host returned an empty PDF URL");
+        return;
+      }
+
+      console.log("knowledgeworks-bridge: opening host-provided PDF URL");
     }
 
     await app.open({

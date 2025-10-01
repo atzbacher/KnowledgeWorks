@@ -42,6 +42,12 @@
       "timestampUtc": "2025-10-01T08:21:18Z",
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-document-resolution-updated"
+    },
+    {
+      "eventId": "101008592e55437ebc3070693af66fff",
+      "timestampUtc": "2025-10-01T09:03:07Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-local-file-loading-updated"
     }
   ]
 }

@@ -228,9 +228,9 @@ namespace LM.App.Wpf.Views
 
             _viewModel?.UpdateVirtualDocumentSource(virtualDocumentSource);
 
-            if (virtualDocumentSource is not null)
+            if (ShouldAppendDocumentQuery(documentSource, virtualDocumentSource))
             {
-                var safeAbsolute = virtualDocumentSource.GetComponents(UriComponents.AbsoluteUri, UriFormat.SafeUnescaped);
+                var safeAbsolute = virtualDocumentSource!.GetComponents(UriComponents.AbsoluteUri, UriFormat.SafeUnescaped);
                 var encodedPdf = Uri.EscapeDataString(safeAbsolute);
                 target = string.Concat(target, "?file=", encodedPdf);
             }
@@ -238,6 +238,26 @@ namespace LM.App.Wpf.Views
             InitializeBridge(coreWebView);
 
             coreWebView.Navigate(target);
+        }
+
+        private static bool ShouldAppendDocumentQuery(System.Uri? documentSource, System.Uri? virtualDocumentSource)
+        {
+            if (virtualDocumentSource is null)
+            {
+                return false;
+            }
+
+            if (documentSource is null)
+            {
+                return false;
+            }
+
+            if (!documentSource.IsAbsoluteUri)
+            {
+                return false;
+            }
+
+            return !string.Equals(documentSource.Scheme, System.Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase);
         }
 
         private void InitializeBridge(CoreWebView2 coreWebView)
