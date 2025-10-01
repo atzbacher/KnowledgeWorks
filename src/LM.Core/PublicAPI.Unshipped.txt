@@ -30,7 +30,7 @@ LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata
 LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.AnnotationId.get -> string!
 LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.Note.get -> string?
 LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.ColorHex.get -> string?
-LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.PdfAnnotationBridgeMetadata(string! annotationId, string? text, string? note, string? colorHex) -> void
+LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.PdfAnnotationBridgeMetadata(string! annotationId, string? text, string? note, string? colorHex = null) -> void
 LM.Core.Models.Pdf.PdfAnnotationBridgeMetadata.Text.get -> string?
 LM.Core.Abstractions.IPdfAnnotationPreviewStorage
 LM.Core.Abstractions.IPdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>!
