@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -367,14 +367,19 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         private void OnOverlaySnapshotReceived(string? overlayJson, string? sidecarPath, string? hashOverride)
         {
+            // ADD THIS AT THE TOP:
+            Trace.TraceInformation("📤 OnOverlaySnapshotReceived called");
+
             if (string.IsNullOrWhiteSpace(overlayJson))
             {
+                Trace.TraceWarning("   ⚠️ overlayJson is empty - nothing to persist");
                 return;
             }
 
             var entryId = EntryId;
             if (string.IsNullOrWhiteSpace(entryId))
             {
+                Trace.TraceWarning("   ⚠️ EntryId is null - cannot persist without EntryId!");
                 return;
             }
 
@@ -384,6 +389,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
             if (string.IsNullOrWhiteSpace(normalizedHash))
             {
+                Trace.TraceWarning("   ⚠️ PDF Hash is null - cannot persist without hash!");
                 return;
             }
 
@@ -394,7 +400,15 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 PdfHash = normalizedHash;
             }
 
+            // ADD THIS:
+            Trace.TraceInformation($"   ✓ All checks passed");
+            Trace.TraceInformation($"   EntryId: {entryId}");
+            Trace.TraceInformation($"   PdfHash: {normalizedHash}");
+            Trace.TraceInformation($"   Scheduling persistence...");
+
             ScheduleOverlayPersistence(entryId!, normalizedHash, overlayJson, sidecarPath);
+
+            Trace.TraceInformation("   ✓ Persistence scheduled");
         }
 
         private void ScheduleOverlayPersistence(string entryId, string pdfHash, string overlayJson, string? sidecarPath)
@@ -416,6 +430,9 @@ namespace LM.App.Wpf.ViewModels.Pdf
             {
                 try
                 {
+                    // ADD THIS:
+                    Trace.TraceInformation("⏳ PersistOverlayAsync - Waiting 500ms before persisting...");
+
                     await Task.Delay(OverlayPersistenceDelay, cancellationToken).ConfigureAwait(false);
 
                     Dictionary<string, byte[]> previewSnapshot;
@@ -430,14 +447,27 @@ namespace LM.App.Wpf.ViewModels.Pdf
                         _pendingPreviewBytes.Clear();
                     }
 
+                    // ADD THIS:
+                    Trace.TraceInformation($"💾 CALLING _annotationPersistence.PersistAsync");
+                    Trace.TraceInformation($"   EntryId: {entryId}");
+                    Trace.TraceInformation($"   PdfHash: {pdfHash}");
+                    Trace.TraceInformation($"   Overlay length: {overlayJson.Length} chars");
+                    Trace.TraceInformation($"   Preview count: {previewSnapshot.Count}");
+                    Trace.TraceInformation($"   Sidecar: {sidecarPath ?? "(null)"}");
+
                     await _annotationPersistence.PersistAsync(entryId, pdfHash, overlayJson, previewSnapshot, sidecarPath, cancellationToken).ConfigureAwait(false);
+
+                    // ADD THIS:
+                    Trace.TraceInformation("   ✅ PersistAsync completed successfully!");
+                    Trace.TraceInformation("   Annotations should be saved to disk now.");
                 }
                 catch (OperationCanceledException)
                 {
+                    Trace.TraceWarning("   ⚠️ PersistAsync was cancelled");
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError("Failed to persist PDF annotations for '{0}': {1}", entryId, ex);
+                    Trace.TraceError("   ✗ Failed to persist PDF annotations for '{0}': {1}", entryId, ex);
                 }
             }, cancellationToken);
         }

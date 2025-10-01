@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -112,8 +112,14 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         public Task SetOverlayAsync(string payloadJson)
         {
+            // ADD THIS AT THE TOP:
+            Trace.TraceInformation("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            Trace.TraceInformation("📥 SetOverlayAsync CALLED!");
+            Trace.TraceInformation($"   Payload length: {payloadJson?.Length ?? 0} characters");
+
             if (string.IsNullOrWhiteSpace(payloadJson))
             {
+                Trace.TraceWarning("   ⚠️ Payload is empty or null - nothing to save!");
                 UpdateOverlaySnapshot(null, null);
                 return Task.CompletedTask;
             }
@@ -131,16 +137,29 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     ? sidecarElement.GetString()
                     : null;
 
+                // ADD THIS:
+                Trace.TraceInformation($"   Overlay JSON length: {overlayJson?.Length ?? 0}");
+                Trace.TraceInformation($"   Sidecar path: {sidecarPath ?? "(null)"}");
+                Trace.TraceInformation($"   EntryId: {EntryId ?? "(null)"}");
+                Trace.TraceInformation($"   PdfHash: {PdfHash ?? "(null)"}");
+
                 UpdateOverlaySnapshot(overlayJson, sidecarPath);
                 var hash = root.TryGetProperty("hash", out var hashElement)
                     ? hashElement.GetString()
                     : null;
 
+                // ADD THIS:
+                Trace.TraceInformation($"   Hash from payload: {hash ?? "(null)"}");
+                Trace.TraceInformation("   Calling OnOverlaySnapshotReceived...");
+
                 OnOverlaySnapshotReceived(overlayJson, sidecarPath, hash);
+
+                Trace.TraceInformation("   ✓ SetOverlayAsync completed successfully");
+                Trace.TraceInformation("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             }
             catch (JsonException ex)
             {
-                Trace.TraceError("Failed to parse overlay payload: {0}", ex);
+                Trace.TraceError("   ✗ Failed to parse overlay payload: {0}", ex);
             }
 
             return Task.CompletedTask;

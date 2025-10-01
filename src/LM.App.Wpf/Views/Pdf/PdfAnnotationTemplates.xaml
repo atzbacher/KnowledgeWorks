@@ -1,11 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Pdf"
-                    xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf">
+                    xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    
+    <pdf:AnnotationColorParameterConverter x:Key="AnnotationColorParameterConverter" />
 
     <!-- ===================================================================
        CRITICAL: ControlTemplate MUST be defined BEFORE GroupStyle!
-       StaticResource requires forward references to be resolved.
        ================================================================ -->
 
     <ControlTemplate x:Key="PdfAnnotationGroupTemplate" TargetType="GroupItem">
@@ -19,7 +21,6 @@
         </Expander>
     </ControlTemplate>
 
-    <!-- NOW the GroupStyle can reference the template above -->
     <GroupStyle x:Key="PdfAnnotationGroupStyle">
         <GroupStyle.ContainerStyle>
             <Style TargetType="GroupItem">
@@ -89,52 +90,69 @@
                 <ContextMenu>
                     <MenuItem Header="Copy"
                     Command="{Binding PlacementTarget.Tag.DataContext.CopyAnnotationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                    CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    CommandParameter="{Binding}" />
                     <Separator />
                     <MenuItem Header="Highlight Color">
                         <MenuItem Header="Yellow"
-                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      Tag="Yellow">
                             <MenuItem.CommandParameter>
-                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      ColorName="Yellow" />
+                                <MultiBinding Converter="{StaticResource AnnotationColorParameterConverter}">
+                                    <Binding />
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
                             </MenuItem.CommandParameter>
                         </MenuItem>
                         <MenuItem Header="Green"
-                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      Tag="Green">
                             <MenuItem.CommandParameter>
-                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      ColorName="Green" />
+                                <MultiBinding Converter="{StaticResource AnnotationColorParameterConverter}">
+                                    <Binding />
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
                             </MenuItem.CommandParameter>
                         </MenuItem>
                         <MenuItem Header="Blue"
-                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      Tag="Blue">
                             <MenuItem.CommandParameter>
-                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      ColorName="Blue" />
+                                <MultiBinding Converter="{StaticResource AnnotationColorParameterConverter}">
+                                    <Binding />
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
                             </MenuItem.CommandParameter>
                         </MenuItem>
                         <MenuItem Header="Pink"
-                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      Tag="Pink">
                             <MenuItem.CommandParameter>
-                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      ColorName="Pink" />
+                                <MultiBinding Converter="{StaticResource AnnotationColorParameterConverter}">
+                                    <Binding />
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
                             </MenuItem.CommandParameter>
                         </MenuItem>
                         <MenuItem Header="Clear"
-                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                      Command="{Binding PlacementTarget.Tag.DataContext.ChangeAnnotationColorCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      Tag="">
                             <MenuItem.CommandParameter>
-                                <vm:PdfAnnotationColorCommandParameter Annotation="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                      ColorName="" />
+                                <MultiBinding Converter="{StaticResource AnnotationColorParameterConverter}">
+                                    <Binding />
+                                    <Binding Path="Tag" RelativeSource="{RelativeSource Self}" />
+                                </MultiBinding>
                             </MenuItem.CommandParameter>
                         </MenuItem>
                     </MenuItem>
                     <Separator />
                     <MenuItem Header="Delete"
                     Command="{Binding PlacementTarget.Tag.DataContext.DeleteAnnotationCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                    CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    CommandParameter="{Binding}" />
                 </ContextMenu>
             </Border.ContextMenu>
         </Border>
     </DataTemplate>
+
+
 
 </ResourceDictionary>
