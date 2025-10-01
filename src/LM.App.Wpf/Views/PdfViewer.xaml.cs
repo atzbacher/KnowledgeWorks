@@ -986,17 +986,6 @@ namespace LM.App.Wpf.Views
                 return false;
             }
 
-            var requestedFileName = Uri.UnescapeDataString(segments[^1]);
-            if (string.IsNullOrWhiteSpace(requestedFileName))
-            {
-                return false;
-            }
-
-            var mappedFileName = Path.GetFileName(mappedPath);
-            if (!string.Equals(requestedFileName, mappedFileName, StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
 
             path = mappedPath;
             return true;
