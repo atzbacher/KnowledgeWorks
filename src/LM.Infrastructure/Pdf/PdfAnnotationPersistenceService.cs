@@ -104,7 +104,8 @@ namespace LM.Infrastructure.Pdf
             {
                 OverlayPath = NormalizeRelativePath(overlayRelativePath),
                 Previews = previews,
-                Annotations = BuildAnnotationMetadata(annotationSnapshot)
+                Annotations = PdfAnnotationMetadataProjector.CreateMetadataList(annotationSnapshot)
+
             };
 
             await _hookWriter.SavePdfAnnotationsAsync(normalizedEntryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
@@ -233,63 +234,7 @@ namespace LM.Infrastructure.Pdf
             var secondSegment = pdfHash[2..4];
             var hashedOverlayFileName = pdfHash + ".overlay" + OverlayExtension;
             return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, hashedOverlayFileName));
-        }
 
-        private static List<PdfAnnotationMetadata> BuildAnnotationMetadata(IReadOnlyList<PdfAnnotationBridgeMetadata> annotations)
-        {
-            if (annotations is null || annotations.Count == 0)
-            {
-                return new List<PdfAnnotationMetadata>();
-            }
-
-            var map = new Dictionary<string, PdfAnnotationMetadata>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var annotation in annotations)
-            {
-                if (annotation is null || string.IsNullOrWhiteSpace(annotation.AnnotationId))
-                {
-                    continue;
-                }
-
-                var normalizedId = annotation.AnnotationId.Trim();
-                map[normalizedId] = new PdfAnnotationMetadata
-                {
-                    AnnotationId = normalizedId,
-                    Text = annotation.Text,
-                    Note = annotation.Note
-                };
-            }
-
-            return new List<PdfAnnotationMetadata>(map.Values);
-
-        }
-
-        private static List<PdfAnnotationMetadata> BuildAnnotationMetadata(IReadOnlyList<PdfAnnotationBridgeMetadata> annotations)
-        {
-            if (annotations is null || annotations.Count == 0)
-            {
-                return new List<PdfAnnotationMetadata>();
-            }
-
-            var map = new Dictionary<string, PdfAnnotationMetadata>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var annotation in annotations)
-            {
-                if (annotation is null || string.IsNullOrWhiteSpace(annotation.AnnotationId))
-                {
-                    continue;
-                }
-
-                var normalizedId = annotation.AnnotationId.Trim();
-                map[normalizedId] = new PdfAnnotationMetadata
-                {
-                    AnnotationId = normalizedId,
-                    Text = annotation.Text,
-                    Note = annotation.Note
-                };
-            }
-
-            return new List<PdfAnnotationMetadata>(map.Values);
         }
 
         private static string? NormalizeAnnotationId(string? raw)
