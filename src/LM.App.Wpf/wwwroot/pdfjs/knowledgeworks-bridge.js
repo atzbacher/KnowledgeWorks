@@ -215,71 +215,154 @@ function registerNavigationHandlers(app) {
 }
 
 function monitorAnnotationStorage(app) {
-  var storage = app && app.pdfDocument ? app.pdfDocument.annotationStorage : null;
-  if (!storage) {
-    return;
-  }
+    console.log("🔍 monitorAnnotationStorage called");
 
-  function scheduleFlush() {
-    if (overlayFlushHandle) {
-      window.clearTimeout(overlayFlushHandle);
+    var storage = app && app.pdfDocument ? app.pdfDocument.annotationStorage : null;
+    if (!storage) {
+        console.error("   ❌ No annotation storage found!");
+        console.error("   app:", app);
+        console.error("   app.pdfDocument:", app ? app.pdfDocument : "no app");
+        return false;
     }
 
-    overlayFlushHandle = window.setTimeout(function () {
-      overlayFlushHandle = 0;
-      void flushOverlayAsync(storage);
-    }, OVERLAY_FLUSH_DELAY_MS);
-  }
+    console.log("   ✓ Annotation storage exists");
+    console.log("   Storage has onSetModified:", typeof storage.onSetModified);
+    console.log("   Storage has onResetModified:", typeof storage.onResetModified);
 
-  var previousSet = storage.onSetModified;
-  storage.onSetModified = function () {
-    if (typeof previousSet === "function") {
-      previousSet();
+    // Check if already hooked
+    if (storage.__kwBridgeMonitored) {
+        console.log("   ⚠️ Storage already being monitored");
+        return true;
     }
 
-    scheduleFlush();
-  };
+    function scheduleFlush() {
+        console.log("⏰ scheduleFlush called");
 
-  var previousReset = storage.onResetModified;
-  storage.onResetModified = function () {
-    if (typeof previousReset === "function") {
-      previousReset();
+        if (overlayFlushHandle) {
+            console.log("   Clearing existing timeout:", overlayFlushHandle);
+            window.clearTimeout(overlayFlushHandle);
+        }
+
+        overlayFlushHandle = window.setTimeout(function () {
+            console.log("⏱️ Flush timeout triggered! Calling flushOverlayAsync...");
+            overlayFlushHandle = 0;
+            void flushOverlayAsync(storage);
+        }, OVERLAY_FLUSH_DELAY_MS);
+
+        console.log("   ✓ Timeout scheduled with handle:", overlayFlushHandle, "delay:", OVERLAY_FLUSH_DELAY_MS, "ms");
     }
 
-    scheduleFlush();
-  };
+    var previousSet = storage.onSetModified;
+    storage.onSetModified = function () {
+        console.log("📝 storage.onSetModified triggered!");
+
+        if (typeof previousSet === "function") {
+            console.log("   Calling previous onSetModified...");
+            previousSet();
+        }
+
+        scheduleFlush();
+    };
+
+    var previousReset = storage.onResetModified;
+    storage.onResetModified = function () {
+        console.log("🔄 storage.onResetModified triggered!");
+
+        if (typeof previousReset === "function") {
+            console.log("   Calling previous onResetModified...");
+            previousReset();
+        }
+
+        scheduleFlush();
+    };
+
+    // Mark as monitored
+    storage.__kwBridgeMonitored = true;
+
+    console.log("✅ monitorAnnotationStorage setup complete");
+    return true;
 }
 
 async function flushOverlayAsync(storage) {
-  var host = getHostObject();
-  if (!host) {
-    return;
-  }
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("💾 flushOverlayAsync CALLED!");
+    console.log("   Storage:", storage);
 
-  try {
-    var serializable = storage.serializable;
-    var overlay = {};
-
-    if (serializable && serializable.map instanceof Map) {
-      serializable.map.forEach(function (value, key) {
-        overlay[key] = value;
-      });
+    var host = getHostObject();
+    if (!host) {
+        console.error("   ❌ NO HOST OBJECT! Cannot flush overlay.");
+        console.error("   window.chrome:", window.chrome);
+        console.error("   window.chrome?.webview:", window.chrome ? window.chrome.webview : "no chrome");
+        console.error("   window.chrome?.webview?.hostObjects:", window.chrome && window.chrome.webview ? window.chrome.webview.hostObjects : "no webview");
+        return;
     }
 
-    var payload = {
-      overlay: overlay,
-      hash: serializable && typeof serializable.hash !== "undefined" ? serializable.hash : null,
-    };
+    console.log("   ✓ Host object exists:", host);
+    console.log("   Host has SetOverlayAsync:", typeof host.SetOverlayAsync);
 
-    if (payload.hash && payload.hash === lastOverlayHash) {
-      return;
+    try {
+        var serializable = storage.serializable;
+        console.log("   Serializable:", serializable);
+        console.log("   Serializable.map:", serializable ? serializable.map : "no serializable");
+        console.log("   Is Map:", serializable && serializable.map instanceof Map);
+
+        var overlay = {};
+
+        if (serializable && serializable.map instanceof Map) {
+            console.log("   📊 Converting Map to object...");
+            console.log("   Map size:", serializable.map.size);
+
+            serializable.map.forEach(function (value, key) {
+                console.log("      Entry:", key, "=", value);
+                overlay[key] = value;
+            });
+
+            console.log("   ✓ Converted overlay object:", overlay);
+            console.log("   Overlay keys count:", Object.keys(overlay).length);
+        } else {
+            console.log("   ⚠️ No serializable map - overlay will be empty");
+        }
+
+        var hash = serializable && typeof serializable.hash !== "undefined"
+            ? serializable.hash
+            : null;
+
+        console.log("   Hash:", hash);
+
+        var payload = {
+            overlay: overlay,
+            hash: hash,
+        };
+
+        console.log("   📦 Payload to send:", JSON.stringify(payload).substring(0, 200), "...");
+        console.log("   Payload overlay keys:", Object.keys(payload.overlay).length);
+        console.log("   Payload hash:", payload.hash);
+
+        // Check for duplicate hash
+        if (payload.hash && payload.hash === lastOverlayHash) {
+            console.log("   ⏭️ SKIPPING - Same hash as last time:", lastOverlayHash);
+            return;
+        }
+
+        lastOverlayHash = payload.hash ? payload.hash : null;
+        console.log("   Updated lastOverlayHash to:", lastOverlayHash);
+
+        console.log("   🚀 CALLING host.SetOverlayAsync NOW!");
+        var payloadString = JSON.stringify(payload);
+        console.log("   Payload string length:", payloadString.length);
+
+        var result = host.SetOverlayAsync(payloadString);
+        console.log("   SetOverlayAsync returned:", result);
+
+        await Promise.resolve(result);
+        console.log("   ✅ SetOverlayAsync completed successfully!");
+
+    } catch (error) {
+        console.error("   ❌ ERROR in flushOverlayAsync:", error);
+        console.error("   Error stack:", error.stack);
     }
 
-    lastOverlayHash = payload.hash ? payload.hash : null;
-    await Promise.resolve(host.SetOverlayAsync(JSON.stringify(payload)));
-  } catch (error) {
-    console.error("knowledgeworks-bridge: failed to persist overlay", error);
-  }
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 
 function patchAnnotationManager() {
@@ -536,33 +619,89 @@ function initializeBridge() {
 
   console.log("knowledgeworks-bridge: PDFViewerApplication found, waiting for initialization...");
 
-  app.initializedPromise.then(function () {
-      console.log("knowledgeworks-bridge: viewer fully initialized");
-      notifyReadyOnce();
+    app.initializedPromise.then(function () {
+        console.log("knowledgeworks-bridge: viewer fully initialized");
+        notifyReadyOnce();
 
-      var editorButtons = document.getElementById("editorModeButtons");
-      if (editorButtons) {
-          editorButtons.classList.remove("hidden");
-          console.log("knowledgeworks-bridge: editor buttons unhidden");
-      }
+        var editorButtons = document.getElementById("editorModeButtons");
+        if (editorButtons) {
+            editorButtons.classList.remove("hidden");
+            console.log("knowledgeworks-bridge: editor buttons unhidden");
+        }
 
-      setupAnnotationEditorListener();
+        setupAnnotationEditorListener();
+        registerSelectionHandlers(app);
+        registerNavigationHandlers(app);
 
-    registerSelectionHandlers(app);
-    registerNavigationHandlers(app);
-    monitorAnnotationStorage(app);
+        // CRITICAL: Setup storage monitoring with proper event handling
+        console.log("🎯 Setting up storage monitoring...");
 
-      console.log("Waiting 500ms before patching annotation manager...");
-      setTimeout(function () {
-          console.log("Now attempting to patch annotation manager...");
-          patchAnnotationManager();
-      }, 500);
+        // Try immediately first
+        if (!setupStorageMonitoring()) {
+            console.log("   Storage not ready yet, setting up event listeners...");
 
-    void applyOverlayInternal();
-    void loadPdfInternal();
-  }).catch(function (error) {
-    console.error("knowledgeworks-bridge: viewer initialization failed", error);
-  });
+            if (app.eventBus && typeof app.eventBus.on === "function") {
+                // Listen for document loaded event
+                app.eventBus.on("documentloaded", function () {
+                    console.log("📄 documentloaded event fired! Attempting storage setup...");
+                    setTimeout(function () {
+                        if (setupStorageMonitoring()) {
+                            console.log("   ✅ Storage monitoring active after documentloaded");
+                        }
+                    }, 100);
+                });
+
+                // Also try after document init
+                app.eventBus.on("documentinit", function () {
+                    console.log("📄 documentinit event fired! Attempting storage setup...");
+                    setTimeout(function () {
+                        setupStorageMonitoring();
+                    }, 100);
+                });
+
+                // And after pages init
+                app.eventBus.on("pagesinit", function () {
+                    console.log("📄 pagesinit event fired! Attempting storage setup...");
+                    setTimeout(function () {
+                        setupStorageMonitoring();
+                    }, 100);
+                });
+
+                console.log("   ✓ Event listeners registered");
+            }
+
+            // Fallback: poll periodically
+            console.log("   ⏰ Starting polling fallback...");
+            var pollAttempts = 0;
+            var maxPolls = 20;
+            var pollInterval = setInterval(function () {
+                pollAttempts++;
+                console.log("   📡 Poll attempt", pollAttempts);
+
+                if (setupStorageMonitoring()) {
+                    console.log("   ✅ Storage found via polling! Stopping poll.");
+                    clearInterval(pollInterval);
+                } else if (pollAttempts >= maxPolls) {
+                    console.error("   ❌ Gave up after", maxPolls, "poll attempts");
+                    clearInterval(pollInterval);
+                }
+            }, 500);
+        } else {
+            console.log("   ✅ Storage monitoring active immediately");
+        }
+
+        // Patch annotation manager
+        console.log("Waiting 500ms before patching annotation manager...");
+        setTimeout(function () {
+            console.log("Now attempting to patch annotation manager...");
+            patchAnnotationManager();
+        }, 500);
+
+        void applyOverlayInternal();
+        void loadPdfInternal();
+    }).catch(function (error) {
+        console.error("knowledgeworks-bridge: viewer initialization failed", error);
+    });
 }
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -593,3 +732,28 @@ function setupAnnotationEditorListener() {
 
     console.log("✓ Listening for annotationeditoruimanager event");
 }
+
+
+function setupStorageMonitoring() {
+    console.log("🎯 setupStorageMonitoring called");
+
+    var app = getViewerApplication();
+    if (!app) {
+        console.log("   ⚠️ App not available");
+        return false;
+    }
+
+    if (!app.pdfDocument) {
+        console.log("   ⚠️ pdfDocument is null - PDF not loaded yet!");
+        return false;
+    }
+
+    if (!app.pdfDocument.annotationStorage) {
+        console.log("   ⚠️ annotationStorage is null!");
+        return false;
+    }
+
+    console.log("   ✅ Storage exists! Setting up monitoring...");
+    return monitorAnnotationStorage(app);
+}
+
