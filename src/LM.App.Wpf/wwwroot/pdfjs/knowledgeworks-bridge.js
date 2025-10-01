@@ -1,6 +1,7 @@
 ﻿const INITIALIZE_RETRY_DELAY_MS = 200;
 const OVERLAY_FLUSH_DELAY_MS = 400;
 const MAX_SELECTION_LENGTH = 4096;
+const LOG_SNIPPET_PREVIEW_LENGTH = 120;
 
 var retryHandle = 0;
 var overlayFlushHandle = 0;
@@ -8,6 +9,32 @@ var pendingOverlayPayload = null;
 var lastOverlayHash = null;
 var readyPosted = false;
 var knownAnnotationIds = new Set();
+
+function describeSnippet(text) {
+  if (typeof text !== "string" || text.length === 0) {
+    return "(empty)";
+  }
+
+  var collapsed = text.replace(/\s+/g, " ").trim();
+  if (!collapsed) {
+    return "(whitespace)";
+  }
+
+  if (collapsed.length <= LOG_SNIPPET_PREVIEW_LENGTH) {
+    return "len=" + collapsed.length + ", text=\"" + collapsed + "\"";
+  }
+
+  var preview = collapsed.slice(0, LOG_SNIPPET_PREVIEW_LENGTH);
+  return "len=" + collapsed.length + ", text=\"" + preview + "…\"";
+}
+
+function logBridgeEvent(scope, details) {
+  if (!console || typeof console.debug !== "function") {
+    return;
+  }
+
+  console.debug("knowledgeworks-bridge:" + scope, details);
+}
 
 function registerAllowedDocumentOrigins() {
   if (typeof window === "undefined") {
@@ -67,6 +94,21 @@ function postMessage(message) {
   }
 
   try {
+    if (message.type === "selection-changed" && message.selection && typeof message.selection === "object") {
+      logBridgeEvent(" posting selection", {
+        pageNumber: message.selection.pageNumber ?? null,
+        snippet: describeSnippet(message.selection.text),
+      });
+    } else {
+      var keys = [];
+      for (var key in message) {
+        if (Object.prototype.hasOwnProperty.call(message, key)) {
+          keys.push(key);
+        }
+      }
+
+      logBridgeEvent(" posting message", { type: message.type ?? "(unknown)", payloadKeys: keys });
+    }
     webview.postMessage(message);
   } catch (error) {
     console.error("knowledgeworks-bridge: failed to post message", error);
@@ -157,6 +199,7 @@ function registerSelectionHandlers(app) {
     try {
       var selection = window.getSelection ? window.getSelection() : null;
       if (!selection || selection.isCollapsed) {
+        logBridgeEvent(" selection-change", { state: "collapsed" });
         postMessage({ type: "selection-changed", selection: null });
         return;
       }
@@ -167,6 +210,7 @@ function registerSelectionHandlers(app) {
       }
 
       if (!text) {
+        logBridgeEvent(" selection-change", { state: "empty" });
         postMessage({ type: "selection-changed", selection: null });
         return;
       }
@@ -179,6 +223,12 @@ function registerSelectionHandlers(app) {
       if (app && app.pdfViewer && typeof app.pdfViewer.currentPageNumber === "number") {
         pageNumber = app.pdfViewer.currentPageNumber;
       }
+
+      logBridgeEvent(" selection-change", {
+        state: "published",
+        pageNumber: pageNumber,
+        snippet: describeSnippet(text),
+      });
 
       postMessage({
         type: "selection-changed",
@@ -443,17 +493,31 @@ async function handleHighlightCreatedAsync(editor) {
   try {
     var host = getHostObject();
     if (!host) {
+      logBridgeEvent(" highlight", { state: "host-missing" });
       return;
     }
 
     var annotationId = editor.annotationElementId || editor.id;
     if (!annotationId || knownAnnotationIds.has(annotationId)) {
+      logBridgeEvent(" highlight", { state: "duplicate", annotationId: annotationId || "(null)" });
       return;
     }
 
     knownAnnotationIds.add(annotationId);
 
+    logBridgeEvent(" highlight", { state: "capturing", annotationId: annotationId });
+
     var selectionSnapshot = await getSelectionSnapshotAsync();
+    if (selectionSnapshot) {
+      logBridgeEvent(" highlight", {
+        state: "selection-snapshot",
+        annotationId: annotationId,
+        pageNumber: selectionSnapshot.pageNumber ?? null,
+        snippet: describeSnippet(selectionSnapshot.text),
+      });
+    } else {
+      logBridgeEvent(" highlight", { state: "selection-missing", annotationId: annotationId });
+    }
     var pageNumber = null;
     if (typeof editor.pageIndex === "number" && isFinite(editor.pageIndex)) {
       pageNumber = editor.pageIndex + 1;
@@ -464,8 +528,12 @@ async function handleHighlightCreatedAsync(editor) {
     var textSnippet = null;
     if (selectionSnapshot && typeof selectionSnapshot.text === "string") {
       textSnippet = selectionSnapshot.text;
+      logBridgeEvent(" highlight", { state: "using-selection-text", annotationId: annotationId, snippet: describeSnippet(textSnippet) });
     } else if (editor && typeof editor.text === "string") {
       textSnippet = editor.text;
+      logBridgeEvent(" highlight", { state: "using-editor-text", annotationId: annotationId, snippet: describeSnippet(textSnippet) });
+    } else {
+      logBridgeEvent(" highlight", { state: "no-text", annotationId: annotationId });
     }
 
     var payload = {
@@ -475,7 +543,16 @@ async function handleHighlightCreatedAsync(editor) {
       color: editor && editor.color ? editor.color : null,
     };
 
+    logBridgeEvent(" highlight", {
+      state: "dispatch",
+      annotationId: annotationId,
+      pageNumber: pageNumber,
+      color: payload.color ?? "(none)",
+      snippet: describeSnippet(textSnippet),
+    });
+
     await Promise.resolve(host.CreateHighlightAsync(JSON.stringify(payload)));
+    logBridgeEvent(" highlight", { state: "dispatch-complete", annotationId: annotationId });
   } catch (error) {
     console.error("knowledgeworks-bridge: failed to notify highlight creation", error);
   }
@@ -485,17 +562,28 @@ async function getSelectionSnapshotAsync() {
   try {
     var host = getHostObject();
     if (!host || typeof host.GetCurrentSelectionAsync !== "function") {
+      logBridgeEvent(" selection-snapshot", { state: "host-missing" });
       return null;
     }
 
+    logBridgeEvent(" selection-snapshot", { state: "request" });
     var result = host.GetCurrentSelectionAsync();
     var json = typeof result === "string" ? result : await Promise.resolve(result);
     if (!json) {
+      logBridgeEvent(" selection-snapshot", { state: "empty-response" });
       return null;
     }
 
-    return JSON.parse(json);
+    var parsed = JSON.parse(json);
+    logBridgeEvent(" selection-snapshot", {
+      state: "received",
+      pageNumber: parsed && typeof parsed.pageNumber === "number" ? parsed.pageNumber : null,
+      snippet: parsed ? describeSnippet(parsed.text) : "(null)",
+    });
+
+    return parsed;
   } catch (error) {
+    logBridgeEvent(" selection-snapshot", { state: "error", message: error && error.message ? error.message : String(error) });
     return null;
   }
 }
