@@ -21957,6 +21957,28 @@ initCom(PDFViewerApplication);
 }
 {
   const HOSTED_VIEWER_ORIGINS = new Set(["null", "http://mozilla.github.io", "https://mozilla.github.io"]);
+  let knowledgeWorksAllowedOrigins;
+  function getKnowledgeWorksAllowedOrigins() {
+    if (knowledgeWorksAllowedOrigins) {
+      return knowledgeWorksAllowedOrigins;
+    }
+    knowledgeWorksAllowedOrigins = new Set(["https://viewer-documents.knowledgeworks"]);
+    const globalScope = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : undefined;
+    const allowed = globalScope?.KnowledgeWorksAllowedDocumentOrigins;
+    if (Array.isArray(allowed)) {
+      for (const entry of allowed) {
+        if (typeof entry !== "string" || entry.trim() === "") {
+          continue;
+        }
+        const parsed = URL.parse(entry, window.location);
+        const origin = parsed?.origin;
+        if (origin) {
+          knowledgeWorksAllowedOrigins.add(origin);
+        }
+      }
+    }
+    return knowledgeWorksAllowedOrigins;
+  }
   var validateFileURL = function (file) {
     if (!file) {
       return;
@@ -21967,6 +21989,9 @@ initCom(PDFViewerApplication);
     }
     const fileOrigin = URL.parse(file, window.location)?.origin;
     if (fileOrigin === viewerOrigin) {
+      return;
+    }
+    if (getKnowledgeWorksAllowedOrigins().has(fileOrigin)) {
       return;
     }
     const ex = new Error("file origin does not match viewer's");

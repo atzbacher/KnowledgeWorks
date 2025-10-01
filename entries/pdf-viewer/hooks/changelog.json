@@ -30,7 +30,12 @@
       "timestampUtc": "2025-10-01T06:16:29Z",
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-environment-shim-added"
-
+    },
+    {
+      "eventId": "0a3f2148f2d847469c62e4c3e85743ac",
+      "timestampUtc": "2025-10-01T07:45:00Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-origin-policy-updated"
     }
   ]
 }
