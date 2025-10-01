@@ -88,6 +88,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         public Task<string?> CreateHighlightAsync(string payloadJson)
         {
+            Trace.WriteLine($"CreateHighlightAsync called with: {payloadJson}");
             var annotation = EnsureAnnotationFromPayload(payloadJson);
             return Task.FromResult(annotation?.Id);
         }

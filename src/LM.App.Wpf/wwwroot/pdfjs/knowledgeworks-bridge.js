@@ -498,6 +498,13 @@ function initializeBridge() {
       console.log("knowledgeworks-bridge: viewer fully initialized");
       notifyReadyOnce();
 
+      var editorButtons = document.getElementById("editorModeButtons");
+      if (editorButtons) {
+          editorButtons.classList.remove("hidden");
+          console.log("knowledgeworks-bridge: editor buttons unhidden");
+      }
+
+
     registerSelectionHandlers(app);
     registerNavigationHandlers(app);
     monitorAnnotationStorage(app);

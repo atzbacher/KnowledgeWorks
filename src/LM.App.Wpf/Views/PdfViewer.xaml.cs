@@ -214,6 +214,11 @@ namespace LM.App.Wpf.Views
             EnsureVirtualHostMapping(coreWebView, webRootPath);
             EnsureViewerAssetRequestHandler(coreWebView);
 
+            if (documentSource != null)
+            {
+                EnsureDocumentRequestHandler(coreWebView); // Call this first
+            }
+
             var viewerUri = new Uri(string.Concat("https://", ViewerVirtualHostName, "/pdfjs/web/viewer.html"), UriKind.Absolute);
             var target = viewerUri.AbsoluteUri;
 
@@ -236,6 +241,19 @@ namespace LM.App.Wpf.Views
             }
 
             InitializeBridge(coreWebView);
+
+            await Task.Delay(200); // Small delay to ensure handlers are ready
+
+            // IMPORTANT: Enable annotation editor by adding it to the URL
+            if (target.Contains("?"))
+            {
+                target += "&annotationEditorMode=0"; // 0 = NONE allows manual switching
+            }
+            else
+            {
+                target += "?annotationEditorMode=0";
+            }
+
 
             coreWebView.Navigate(target);
         }
@@ -661,6 +679,9 @@ namespace LM.App.Wpf.Views
 
             var targetPath = string.Concat(token, "/", Uri.EscapeDataString(fileName));
             var target = string.Concat("https://", DocumentVirtualHostName, "/", targetPath);
+
+            Trace.WriteLine($"Created virtual document URI: {target}");
+
             return new System.Uri(target, UriKind.Absolute);
         }
 
@@ -668,8 +689,11 @@ namespace LM.App.Wpf.Views
         {
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(pdfPath))
             {
+                Trace.TraceWarning("Token or path is empty");
                 return;
             }
+
+            Trace.WriteLine($"Registering mapping - Token: {token}, Path: {pdfPath}");
 
             _currentDocumentFilePath = pdfPath;
             _currentDocumentToken = token;
@@ -701,6 +725,8 @@ namespace LM.App.Wpf.Views
                 }
 
                 _documentRequestMappings.Remove(staleToken);
+                Trace.WriteLine($"Total mappings: {_documentRequestMappings.Count}");
+
             }
         }
 
@@ -708,35 +734,50 @@ namespace LM.App.Wpf.Views
         {
             if (_isDocumentRequestHandlerAttached)
             {
+                Trace.WriteLine("Document request handler already attached");
                 return;
             }
 
             var documentHost = string.Concat("https://", DocumentVirtualHostName, "/*");
 
+            Trace.WriteLine($"Attaching document request handler for: {documentHost}");
+
             try
             {
                 coreWebView.AddWebResourceRequestedFilter(documentHost, CoreWebView2WebResourceContext.All);
+                Trace.WriteLine("WebResourceRequestedFilter added successfully");
             }
-            catch (NotImplementedException)
+            catch (NotImplementedException ex)
             {
+                Trace.TraceWarning($"NotImplementedException when adding filter: {ex}");
             }
 
             coreWebView.WebResourceRequested += OnDocumentWebResourceRequested;
             _isDocumentRequestHandlerAttached = true;
+
+            Trace.WriteLine("Document request handler attached successfully");
         }
 
         private void OnDocumentWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
         {
+
+            Trace.WriteLine($"Document request received: {e.Request.Uri}");
+
             var environment = PdfWebView.CoreWebView2?.Environment;
             if (environment is null)
             {
+                Trace.TraceWarning("Environment is null");
                 return;
             }
 
             if (!TryResolveDocumentRequest(e.Request.Uri, out var resolvedPath))
             {
+                Trace.TraceWarning($"Failed to resolve document request: {e.Request.Uri}");
                 return;
             }
+
+            Trace.WriteLine($"Resolved path: {resolvedPath}");
+
 
             CoreWebView2Deferral? deferral = null;
 
@@ -763,7 +804,21 @@ namespace LM.App.Wpf.Views
                 }
 
                 var fileInfo = new FileInfo(resolvedPath);
-                var rangeHeader = e.Request.Headers.GetHeader("Range");
+
+
+                // FIX: Safely get the Range header - GetHeader throws if header doesn't exist
+                string? rangeHeader = null;
+                try
+                {
+                    rangeHeader = e.Request.Headers.GetHeader("Range");
+                }
+                catch (COMException ex) when (ex.HResult == ElementNotFoundHResult)
+                {
+                    // Range header not present - this is normal for initial requests
+                    rangeHeader = null;
+                }
+
+
 
                 if (TryCreateRangeResponse(environment, resolvedPath, fileInfo.Length, rangeHeader, out var rangeResponse))
                 {
