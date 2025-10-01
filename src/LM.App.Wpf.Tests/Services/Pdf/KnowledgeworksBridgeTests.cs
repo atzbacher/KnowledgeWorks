@@ -77,6 +77,21 @@ namespace LM.App.Wpf.Tests.Services.Pdf
             Assert.Equal("app://shared.pdf", harness.OpenedUrl);
         }
 
+        [Fact]
+        public void LoadPdfFromHostWhenTargetUrlMissing()
+        {
+            using var harness = KnowledgeworksBridgeHarness.Create();
+
+            harness.SetPdfViewerApplication();
+            harness.SetHostObject("app://virtual.pdf");
+
+            harness.InvokePdfBridgeLoad(string.Empty);
+            harness.DrainTimers();
+
+            Assert.Equal(1, harness.LoadPdfInvocationCount);
+            Assert.Equal("app://virtual.pdf", harness.OpenedUrl);
+        }
+
         private sealed class KnowledgeworksBridgeHarness : IDisposable
         {
             private readonly Engine _engine;
