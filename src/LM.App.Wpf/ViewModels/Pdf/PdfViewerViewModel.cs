@@ -14,6 +14,7 @@ using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Review;
 using LM.Infrastructure.Hooks;
 using LM.Core.Abstractions;
+using LM.Core.Models.Pdf;
 
 namespace LM.App.Wpf.ViewModels.Pdf
 {
@@ -411,8 +412,67 @@ namespace LM.App.Wpf.ViewModels.Pdf
             Trace.TraceInformation("   ✓ Persistence scheduled");
         }
 
+        private IReadOnlyList<PdfAnnotationBridgeMetadata> CaptureAnnotationMetadataSnapshot()
+        {
+            if (Annotations.Count == 0)
+            {
+                return Array.Empty<PdfAnnotationBridgeMetadata>();
+            }
+
+            var snapshot = new List<PdfAnnotationBridgeMetadata>(Annotations.Count);
+
+            foreach (var annotation in Annotations)
+            {
+                if (annotation is null || string.IsNullOrWhiteSpace(annotation.Id))
+                {
+                    continue;
+                }
+
+                snapshot.Add(new PdfAnnotationBridgeMetadata(
+                    annotation.Id,
+                    annotation.TextSnippet,
+                    annotation.Note));
+            }
+
+            return snapshot;
+        }
+
+        private string? TryGetPdfRelativePath()
+        {
+            var pdfPath = PdfPath;
+            if (string.IsNullOrWhiteSpace(pdfPath))
+            {
+                return null;
+            }
+
+            try
+            {
+                var workspaceRoot = _workspace.GetWorkspaceRoot();
+                var absolutePdf = Path.GetFullPath(pdfPath);
+                var absoluteRoot = Path.GetFullPath(workspaceRoot);
+
+                if (!absolutePdf.StartsWith(absoluteRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return null;
+                }
+
+                var relative = Path.GetRelativePath(absoluteRoot, absolutePdf);
+                return string.IsNullOrWhiteSpace(relative)
+                    ? null
+                    : relative.Replace('\\', '/');
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning("   ⚠️ Failed to compute PDF relative path: {0}", ex.Message);
+                return null;
+            }
+        }
+
         private void ScheduleOverlayPersistence(string entryId, string pdfHash, string overlayJson, string? sidecarPath)
         {
+            var pdfRelativePath = TryGetPdfRelativePath();
+            var annotationsSnapshot = CaptureAnnotationMetadataSnapshot();
+
             lock (_overlayPersistenceGate)
             {
                 _overlayPersistenceCts?.Cancel();
@@ -420,11 +480,18 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
                 var cts = new CancellationTokenSource();
                 _overlayPersistenceCts = cts;
-                _overlayPersistenceTask = PersistOverlayAsync(entryId, pdfHash, overlayJson, sidecarPath, cts.Token);
+                _overlayPersistenceTask = PersistOverlayAsync(entryId, pdfHash, overlayJson, sidecarPath, pdfRelativePath, annotationsSnapshot, cts.Token);
             }
         }
 
-        private Task PersistOverlayAsync(string entryId, string pdfHash, string overlayJson, string? sidecarPath, CancellationToken cancellationToken)
+        private Task PersistOverlayAsync(
+            string entryId,
+            string pdfHash,
+            string overlayJson,
+            string? sidecarPath,
+            string? pdfRelativePath,
+            IReadOnlyList<PdfAnnotationBridgeMetadata> annotations,
+            CancellationToken cancellationToken)
         {
             return Task.Run(async () =>
             {
@@ -454,8 +521,18 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     Trace.TraceInformation($"   Overlay length: {overlayJson.Length} chars");
                     Trace.TraceInformation($"   Preview count: {previewSnapshot.Count}");
                     Trace.TraceInformation($"   Sidecar: {sidecarPath ?? "(null)"}");
+                    Trace.TraceInformation($"   PDF relative path: {pdfRelativePath ?? "(null)"}");
+                    Trace.TraceInformation($"   Annotation snapshot count: {annotations.Count}");
 
-                    await _annotationPersistence.PersistAsync(entryId, pdfHash, overlayJson, previewSnapshot, sidecarPath, cancellationToken).ConfigureAwait(false);
+                    await _annotationPersistence.PersistAsync(
+                        entryId,
+                        pdfHash,
+                        overlayJson,
+                        previewSnapshot,
+                        sidecarPath,
+                        pdfRelativePath,
+                        annotations,
+                        cancellationToken).ConfigureAwait(false);
 
                     // ADD THIS:
                     Trace.TraceInformation("   ✅ PersistAsync completed successfully!");

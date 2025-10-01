@@ -12,8 +12,23 @@ namespace LM.HubSpoke.Models
         [JsonPropertyName("overlayPath")]
         public string OverlayPath { get; init; } = string.Empty;
 
+        [JsonPropertyName("annotations")]
+        public List<PdfAnnotationMetadata> Annotations { get; init; } = new();
+
         [JsonPropertyName("previews")]
         public List<PdfAnnotationPreview> Previews { get; init; } = new();
+    }
+
+    public sealed class PdfAnnotationMetadata
+    {
+        [JsonPropertyName("annotationId")]
+        public string AnnotationId { get; init; } = string.Empty;
+
+        [JsonPropertyName("text")]
+        public string? Text { get; init; }
+
+        [JsonPropertyName("note")]
+        public string? Note { get; init; }
     }
 
     public sealed class PdfAnnotationPreview
