@@ -76,9 +76,11 @@ namespace LM.Infrastructure.Hooks
             if (hook is null)
                 throw new ArgumentNullException(nameof(hook));
 
-            var normalizedHash = pdfHash.Trim().ToLowerInvariant();
+            var normalizedEntryId = entryId.Trim();
+            if (normalizedEntryId.Length == 0)
+                throw new ArgumentException("Entry id must be non-empty.", nameof(entryId));
 
-            var relDir = Path.Combine("entries", normalizedHash, "hooks");
+            var relDir = Path.Combine("entries", normalizedEntryId, "hooks");
             var absDir = _workspace.GetAbsolutePath(relDir);
             Directory.CreateDirectory(absDir);
 
@@ -98,8 +100,7 @@ namespace LM.Infrastructure.Hooks
                 Events = new List<HookM.EntryChangeLogEvent> { changeEvent }
             };
 
-            await AppendChangeLogAsync(entryId, changeLog, ct).ConfigureAwait(false);
-            await AppendChangeLogAsync(normalizedHash, changeLog, ct).ConfigureAwait(false);
+            await AppendChangeLogAsync(normalizedEntryId, changeLog, ct).ConfigureAwait(false);
         }
 
         public async Task AppendChangeLogAsync(string entryId, HookM.EntryChangeLogHook hook, CancellationToken ct)
