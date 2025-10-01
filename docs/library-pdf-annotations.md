@@ -19,7 +19,7 @@ warning dialog and skips launch so testers can correct the workspace data.
 ## Storage layout
 
 * Annotations are persisted to `entries/<hash>/hooks/pdf_annotations.json`.
-* Overlay payloads continue to live under `library/<hash[0..1]>/<hash>/`.
+* Overlay payloads now live alongside the PDF under `library/<first two characters>/<next two characters>/`.
 * Both the entry (`entries/<entryId>/hooks/changelog.json`) and PDF hash
   (`entries/<hash>/hooks/changelog.json`) changelog hooks receive events tagged
   with the current Windows username whenever annotations are saved.

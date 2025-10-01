@@ -35,7 +35,7 @@ namespace LM.Infrastructure.Tests.Pdf
             });
 
             var reader = new PdfAnnotationOverlayReader(workspace, entryStore);
-            var overlayRelative = $"library/{hash[..2]}/{hash}/{hash}.json";
+            var overlayRelative = $"library/{hash[..2]}/{hash[2..4]}/{hash}.json";
             var overlayAbsolute = Path.Combine(temp.Path, overlayRelative.Replace('/', Path.DirectorySeparatorChar));
             Directory.CreateDirectory(Path.GetDirectoryName(overlayAbsolute)!);
             const string overlayPayload = "{\"foo\":\"bar\"}";
