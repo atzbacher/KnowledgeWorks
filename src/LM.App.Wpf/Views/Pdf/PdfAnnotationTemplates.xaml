@@ -2,8 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:LM.App.Wpf.ViewModels.Pdf"
                     xmlns:pdf="clr-namespace:LM.App.Wpf.Views.Pdf"
-                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-                    xmlns:xml="http://www.w3.org/XML/1998/namespace">
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <pdf:AnnotationColorParameterConverter x:Key="AnnotationColorParameterConverter" />
     <pdf:NullOrEmptyToVisibilityConverter x:Key="AnnotationTypeVisibilityConverter" />
