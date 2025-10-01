@@ -41,8 +41,8 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var annotations = new List<PdfAnnotationBridgeMetadata>
             {
-                new("ann1", "Snippet One", "Note One"),
-                new("ann2", "Snippet Two", null)
+                new("ann1", "Snippet One", "Note One", "#FFFF98"),
+                new("ann2", "Snippet Two", null, "#53FFBC")
             };
 
             await service.PersistAsync(entryId, hash, overlayJson, previews, null, pdfRelativePath, annotations, CancellationToken.None);
@@ -72,9 +72,18 @@ namespace LM.Infrastructure.Tests.Pdf
             var first = hook.Annotations.First(a => a.AnnotationId == "ann1");
             Assert.Equal("Snippet One", first.Text);
             Assert.Equal("Note One", first.Note);
+            Assert.NotNull(first.Color);
+            Assert.Equal(255, first.Color!.Red);
+            Assert.Equal(255, first.Color.Green);
+            Assert.Equal(152, first.Color.Blue);
+
             var second = hook.Annotations.First(a => a.AnnotationId == "ann2");
             Assert.Equal("Snippet Two", second.Text);
             Assert.Null(second.Note);
+            Assert.NotNull(second.Color);
+            Assert.Equal(83, second.Color!.Red);
+            Assert.Equal(255, second.Color.Green);
+            Assert.Equal(188, second.Color.Blue);
 
             var changeLogPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "changelog.json");
             var changeLog = JsonSerializer.Deserialize<EntryChangeLogHook>(await File.ReadAllTextAsync(changeLogPath));
@@ -121,6 +130,7 @@ namespace LM.Infrastructure.Tests.Pdf
             var annotation = Assert.Single(hook.Annotations);
             Assert.Equal("Snippet", annotation.Text);
             Assert.Equal("Note", annotation.Note);
+            Assert.Null(annotation.Color);
 
             var debugOverlayPath = Path.Combine(temp.Path, "debug", normalized + ".debug.json");
             Assert.True(File.Exists(debugOverlayPath));
@@ -144,7 +154,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var firstAnnotations = new List<PdfAnnotationBridgeMetadata>
             {
-                new("existing", "Initial", "First note")
+                new("existing", "Initial", "First note", "#101010")
             };
 
             await service.PersistAsync(
@@ -162,7 +172,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var updatedAnnotations = new List<PdfAnnotationBridgeMetadata>
             {
-                new("existing", "Updated", "Second note")
+                new("existing", "Updated", "Second note", "#202020")
             };
 
             await service.PersistAsync(
@@ -185,6 +195,10 @@ namespace LM.Infrastructure.Tests.Pdf
             var annotation = Assert.Single(hook.Annotations);
             Assert.Equal("Updated", annotation.Text);
             Assert.Equal("Second note", annotation.Note);
+            Assert.NotNull(annotation.Color);
+            Assert.Equal(32, annotation.Color!.Red);
+            Assert.Equal(32, annotation.Color.Green);
+            Assert.Equal(32, annotation.Color.Blue);
 
             var previewPath = Path.Combine(temp.Path, "extraction", normalized, "existing.png");
             Assert.True(File.Exists(previewPath));

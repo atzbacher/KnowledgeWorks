@@ -8,7 +8,41 @@ var overlayFlushHandle = 0;
 var pendingOverlayPayload = null;
 var lastOverlayHash = null;
 var readyPosted = false;
-var knownAnnotationIds = new Set();
+var processedHighlightEditors = typeof WeakSet === "function" ? new WeakSet() : null;
+
+function hasHighlightEditorBeenProcessed(editor) {
+  if (!editor || typeof editor !== "object") {
+    return false;
+  }
+
+  if (processedHighlightEditors) {
+    return processedHighlightEditors.has(editor);
+  }
+
+  return editor.__kwHighlightHandled === true;
+}
+
+function markHighlightEditorProcessed(editor) {
+  if (!editor || typeof editor !== "object") {
+    return;
+  }
+
+  if (processedHighlightEditors) {
+    processedHighlightEditors.add(editor);
+    return;
+  }
+
+  try {
+    Object.defineProperty(editor, "__kwHighlightHandled", {
+      configurable: false,
+      enumerable: false,
+      writable: false,
+      value: true,
+    });
+  } catch (error) {
+    editor.__kwHighlightHandled = true;
+  }
+}
 
 function describeSnippet(text) {
   if (typeof text !== "string" || text.length === 0) {
@@ -497,13 +531,19 @@ async function handleHighlightCreatedAsync(editor) {
       return;
     }
 
-    var annotationId = editor.annotationElementId || editor.id;
-    if (!annotationId || knownAnnotationIds.has(annotationId)) {
-      logBridgeEvent(" highlight", { state: "duplicate", annotationId: annotationId || "(null)" });
+    if (hasHighlightEditorBeenProcessed(editor)) {
+      var duplicateId = editor && (editor.annotationElementId || editor.id) ? editor.annotationElementId || editor.id : "(unknown)";
+      logBridgeEvent(" highlight", { state: "duplicate-editor", annotationId: duplicateId });
       return;
     }
 
-    knownAnnotationIds.add(annotationId);
+    markHighlightEditorProcessed(editor);
+
+    var annotationId = editor.annotationElementId || editor.id;
+    if (!annotationId) {
+      logBridgeEvent(" highlight", { state: "missing-id" });
+      return;
+    }
 
     logBridgeEvent(" highlight", { state: "capturing", annotationId: annotationId });
 
@@ -541,6 +581,7 @@ async function handleHighlightCreatedAsync(editor) {
       pageNumber: pageNumber,
       textSnippet: textSnippet,
       color: editor && editor.color ? editor.color : null,
+      annotationType: editor && typeof editor.name === "string" ? editor.name : null,
     };
 
     logBridgeEvent(" highlight", {

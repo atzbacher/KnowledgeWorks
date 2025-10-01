@@ -431,7 +431,8 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 snapshot.Add(new PdfAnnotationBridgeMetadata(
                     annotation.Id,
                     annotation.TextSnippet,
-                    annotation.Note));
+                    annotation.Note,
+                    annotation.ColorHex));
             }
 
             return snapshot;
