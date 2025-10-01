@@ -105,6 +105,7 @@ namespace LM.Infrastructure.Pdf
                 OverlayPath = NormalizeRelativePath(overlayRelativePath),
                 Previews = previews,
                 Annotations = PdfAnnotationMetadataProjector.CreateMetadataList(annotationSnapshot)
+
             };
 
             await _hookWriter.SavePdfAnnotationsAsync(normalizedEntryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
@@ -233,6 +234,7 @@ namespace LM.Infrastructure.Pdf
             var secondSegment = pdfHash[2..4];
             var hashedOverlayFileName = pdfHash + ".overlay" + OverlayExtension;
             return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, hashedOverlayFileName));
+
         }
 
         private static string? NormalizeAnnotationId(string? raw)
