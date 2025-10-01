@@ -479,6 +479,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
                     annotation.ColorName = colorElement.GetString();
                 }
 
+                if (root.TryGetProperty("annotationType", out var typeElement))
+                {
+                    annotation.AnnotationType = typeElement.GetString();
+                }
+
                 return annotation;
             }
             catch (JsonException ex)

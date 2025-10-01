@@ -316,11 +316,21 @@ LM.HubSpoke.Models.PdfAnnotationsHook.PdfAnnotationsHook() -> void
 LM.HubSpoke.Models.PdfAnnotationMetadata
 LM.HubSpoke.Models.PdfAnnotationMetadata.AnnotationId.get -> string!
 LM.HubSpoke.Models.PdfAnnotationMetadata.AnnotationId.init -> void
+LM.HubSpoke.Models.PdfAnnotationMetadata.Color.get -> LM.HubSpoke.Models.PdfAnnotationColorMetadata?
+LM.HubSpoke.Models.PdfAnnotationMetadata.Color.init -> void
 LM.HubSpoke.Models.PdfAnnotationMetadata.Note.get -> string?
 LM.HubSpoke.Models.PdfAnnotationMetadata.Note.init -> void
 LM.HubSpoke.Models.PdfAnnotationMetadata.PdfAnnotationMetadata() -> void
 LM.HubSpoke.Models.PdfAnnotationMetadata.Text.get -> string?
 LM.HubSpoke.Models.PdfAnnotationMetadata.Text.init -> void
+LM.HubSpoke.Models.PdfAnnotationColorMetadata
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Blue.get -> int
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Blue.init -> void
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Green.get -> int
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Green.init -> void
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.PdfAnnotationColorMetadata() -> void
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Red.get -> int
+LM.HubSpoke.Models.PdfAnnotationColorMetadata.Red.init -> void
 LM.HubSpoke.Models.EntryHooks
 LM.HubSpoke.Models.EntryHooks.Article.get -> string?
 LM.HubSpoke.Models.EntryHooks.Article.init -> void
