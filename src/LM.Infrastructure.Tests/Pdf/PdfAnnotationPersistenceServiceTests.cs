@@ -36,7 +36,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             await service.PersistAsync(entryId, hash, overlayJson, previews, null, CancellationToken.None);
 
-            var overlayPath = Path.Combine(temp.Path, "library", normalized[..2], normalized, normalized + ".json");
+            var overlayPath = Path.Combine(temp.Path, "library", normalized[..2], normalized[2..4], normalized + ".json");
             Assert.True(File.Exists(overlayPath), $"Expected overlay at: {overlayPath}");
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(overlayPath));
 
@@ -52,7 +52,7 @@ namespace LM.Infrastructure.Tests.Pdf
 
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
-            Assert.Equal($"library/{normalized[..2]}/{normalized}/{normalized}.json", hook!.OverlayPath);
+            Assert.Equal($"library/{normalized[..2]}/{normalized[2..4]}/{normalized}.json", hook!.OverlayPath);
             Assert.Equal(2, hook.Previews.Count);
             Assert.Contains(hook.Previews, p => p.AnnotationId == "ann1" && p.ImagePath == $"extraction/{normalized}/ann1.png");
             Assert.Contains(hook.Previews, p => p.AnnotationId == "ann2" && p.ImagePath == $"extraction/{normalized}/ann2.png");

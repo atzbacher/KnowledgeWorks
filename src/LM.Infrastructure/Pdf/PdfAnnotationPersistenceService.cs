@@ -46,8 +46,8 @@ namespace LM.Infrastructure.Pdf
                 throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
 
             var normalizedHash = pdfHash.Trim().ToLowerInvariant();
-            if (normalizedHash.Length < 2)
-                throw new ArgumentException("PDF hash must contain at least two characters.", nameof(pdfHash));
+            if (normalizedHash.Length < 4)
+                throw new ArgumentException("PDF hash must contain at least four characters.", nameof(pdfHash));
             if (overlayJson is null)
                 throw new ArgumentNullException(nameof(overlayJson));
 
@@ -208,9 +208,10 @@ namespace LM.Infrastructure.Pdf
                 return NormalizeRelativePath(trimmed);
             }
 
-            var folder = pdfHash[..2];
+            var firstSegment = pdfHash[..2];
+            var secondSegment = pdfHash[2..4];
             var fileName = pdfHash + OverlayExtension;
-            return NormalizeRelativePath(Path.Combine("library", folder, pdfHash, fileName));
+            return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, fileName));
         }
 
         private static string? NormalizeAnnotationId(string? raw)
