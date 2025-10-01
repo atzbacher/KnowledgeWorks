@@ -47,7 +47,7 @@ namespace LM.Infrastructure.Tests.Pdf
                 Assert.Equal(previews[previewId], await File.ReadAllBytesAsync(previewPath));
             }
 
-            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
             Assert.True(File.Exists(hookPath));
 
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
@@ -64,10 +64,10 @@ namespace LM.Infrastructure.Tests.Pdf
             Assert.Equal("pdf-annotations-updated", changeEvent.Action);
             Assert.Equal(Environment.UserName, changeEvent.PerformedBy);
 
-            var hashChangeLogPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "changelog.json");
-            Assert.True(File.Exists(hashChangeLogPath));
+            var hashDir = Path.Combine(temp.Path, "entries", normalized);
+            Assert.False(Directory.Exists(hashDir));
 
-            var debugOverlayPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.overlay.json");
+            var debugOverlayPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.overlay.json");
             Assert.True(File.Exists(debugOverlayPath));
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
         }
@@ -93,12 +93,12 @@ namespace LM.Infrastructure.Tests.Pdf
             var overlayPath = Path.Combine(temp.Path, sidecar);
             Assert.True(File.Exists(overlayPath));
 
-            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
             Assert.Equal(sidecar.Replace("\\", "/"), hook!.OverlayPath);
 
-            var debugOverlayPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.overlay.json");
+            var debugOverlayPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.overlay.json");
             Assert.True(File.Exists(debugOverlayPath));
             Assert.Equal(overlayJson, await File.ReadAllTextAsync(debugOverlayPath));
         }
@@ -136,7 +136,7 @@ namespace LM.Infrastructure.Tests.Pdf
                 null,
                 CancellationToken.None);
 
-            var hookPath = Path.Combine(temp.Path, "entries", normalized, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
             var hook = JsonSerializer.Deserialize<PdfAnnotationsHook>(await File.ReadAllTextAsync(hookPath));
             Assert.NotNull(hook);
             var preview = Assert.Single(hook!.Previews);

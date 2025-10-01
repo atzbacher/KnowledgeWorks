@@ -11,10 +11,12 @@ namespace LM.Infrastructure.Pdf
     public sealed class PdfAnnotationOverlayReader : IPdfAnnotationOverlayReader
     {
         private readonly IWorkSpaceService _workspace;
+        private readonly IEntryStore _entryStore;
 
-        public PdfAnnotationOverlayReader(IWorkSpaceService workspace)
+        public PdfAnnotationOverlayReader(IWorkSpaceService workspace, IEntryStore entryStore)
         {
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
         }
 
         public async Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
@@ -24,8 +26,13 @@ namespace LM.Infrastructure.Pdf
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));
             }
 
-            var normalizedHash = pdfHash.Trim().ToLowerInvariant();
-            var hookRelativePath = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+            var entry = await _entryStore.FindByHashAsync(pdfHash, cancellationToken).ConfigureAwait(false);
+            if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
+            {
+                return null;
+            }
+
+            var hookRelativePath = Path.Combine("entries", entry.Id, "hooks", "pdf_annotations.json");
             var hookAbsolutePath = _workspace.GetAbsolutePath(hookRelativePath);
 
             if (string.IsNullOrWhiteSpace(hookAbsolutePath) || !File.Exists(hookAbsolutePath))
