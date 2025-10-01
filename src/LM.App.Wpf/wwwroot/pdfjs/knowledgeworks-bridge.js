@@ -135,11 +135,10 @@ async function loadPdfInternal(targetUrl) {
       return;
     }
 
-    try {
-      await app.open({ url: url });
-    } catch (error) {
-      await app.open(url);
-    }
+    await app.open({
+      url: url,
+      originalUrl: url,
+    });
   } catch (error) {
     console.error("knowledgeworks-bridge: failed to load PDF", error);
   }

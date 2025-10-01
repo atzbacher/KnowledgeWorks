@@ -206,12 +206,15 @@ namespace LM.App.Wpf.Tests.Services.Pdf
                         eventBus: { on: function() {} },
                         pdfViewer: {},
                         open: function(args) {
+                            if (typeof args === 'string') {
+                                throw new Error('string overload not supported');
+                            }
+
                             var next = '';
                             if (args && typeof args.url === 'string') {
                                 next = args.url;
-                            } else if (typeof args === 'string') {
-                                next = args;
                             }
+
                             this.url = next;
                             __kwRecordOpen(next);
                         }
