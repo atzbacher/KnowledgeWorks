@@ -16,9 +16,20 @@
     {
       "eventId": "264ae037d21346a0aac2ec69156d294d",
       "timestampUtc": "2025-09-30T20:49:28Z",
-
       "performedBy": "KnowledgeWorks\\root",
       "action": "pdf-viewer-html-updated"
+    },
+    {
+      "eventId": "362375d691b542a7a2bdc1c96e49c2d1",
+      "timestampUtc": "2025-09-30T22:58:25Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-bridge-updated"
+    },
+    {
+      "eventId": "a4684e840f22427284e6d78e3438fb96",
+      "timestampUtc": "2025-10-01T06:16:29Z",
+      "performedBy": "KnowledgeWorks\\root",
+      "action": "pdf-viewer-environment-shim-added"
     }
   ]
 }
