@@ -47,6 +47,10 @@ namespace LM.Infrastructure.Pdf
             if (overlayJson is null)
                 throw new ArgumentNullException(nameof(overlayJson));
 
+            var normalizedEntryId = entryId.Trim();
+            if (normalizedEntryId.Length == 0)
+                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+
             var safePreviewImages = previewImages ?? new Dictionary<string, byte[]>(capacity: 0);
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -62,7 +66,7 @@ namespace LM.Infrastructure.Pdf
             var previewRootAbsolute = _workspace.GetAbsolutePath(previewRootRelative);
             Directory.CreateDirectory(previewRootAbsolute);
 
-            var previewMap = await LoadExistingPreviewsAsync(normalizedHash, cancellationToken).ConfigureAwait(false);
+            var previewMap = await LoadExistingPreviewsAsync(normalizedEntryId, normalizedHash, cancellationToken).ConfigureAwait(false);
 
             foreach (var kvp in safePreviewImages)
             {
@@ -98,21 +102,28 @@ namespace LM.Infrastructure.Pdf
                 Previews = previews
             };
 
-            await _hookWriter.SavePdfAnnotationsAsync(entryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
+            await _hookWriter.SavePdfAnnotationsAsync(normalizedEntryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
 
-            await WriteDebugOverlayCopyAsync(normalizedHash, overlayJson, cancellationToken).ConfigureAwait(false);
+            await WriteDebugOverlayCopyAsync(normalizedEntryId, overlayJson, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string normalizedHash, CancellationToken cancellationToken)
+        private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string entryId, string normalizedHash, CancellationToken cancellationToken)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            var hookRelative = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+            var hookRelative = Path.Combine("entries", entryId, "hooks", "pdf_annotations.json");
             var hookAbsolute = _workspace.GetAbsolutePath(hookRelative);
 
             if (string.IsNullOrWhiteSpace(hookAbsolute) || !File.Exists(hookAbsolute))
             {
-                return result;
+                var legacyRelative = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+                var legacyAbsolute = _workspace.GetAbsolutePath(legacyRelative);
+                if (string.IsNullOrWhiteSpace(legacyAbsolute) || !File.Exists(legacyAbsolute))
+                {
+                    return result;
+                }
+
+                hookAbsolute = legacyAbsolute;
             }
 
             try
@@ -166,7 +177,7 @@ namespace LM.Infrastructure.Pdf
             return result;
         }
 
-        private async Task WriteDebugOverlayCopyAsync(string normalizedHash, string overlayJson, CancellationToken cancellationToken)
+        private async Task WriteDebugOverlayCopyAsync(string entryId, string overlayJson, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(overlayJson))
             {
@@ -175,7 +186,7 @@ namespace LM.Infrastructure.Pdf
 
             try
             {
-                var debugRelative = Path.Combine("entries", normalizedHash, "hooks", DebugOverlayFileName);
+                var debugRelative = Path.Combine("entries", entryId, "hooks", DebugOverlayFileName);
                 var debugAbsolute = _workspace.GetAbsolutePath(debugRelative);
                 EnsureDirectoryForFile(debugAbsolute);
 

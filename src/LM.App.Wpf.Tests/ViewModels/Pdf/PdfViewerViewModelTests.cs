@@ -247,7 +247,7 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
 
         private sealed class NullOverlayReader : IPdfAnnotationOverlayReader
         {
-            public Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
+            public Task<string?> GetOverlayJsonAsync(string entryId, string pdfHash, CancellationToken cancellationToken = default)
                 => Task.FromResult<string?>(null);
         }
 
