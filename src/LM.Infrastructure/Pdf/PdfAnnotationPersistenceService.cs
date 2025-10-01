@@ -231,8 +231,37 @@ namespace LM.Infrastructure.Pdf
 
             var firstSegment = pdfHash[..2];
             var secondSegment = pdfHash[2..4];
-            var fileName = pdfHash + ".overlay" + OverlayExtension;
-            return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, fileName));
+            var hashedOverlayFileName = pdfHash + ".overlay" + OverlayExtension;
+            return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, hashedOverlayFileName));
+        }
+
+        private static List<PdfAnnotationMetadata> BuildAnnotationMetadata(IReadOnlyList<PdfAnnotationBridgeMetadata> annotations)
+        {
+            if (annotations is null || annotations.Count == 0)
+            {
+                return new List<PdfAnnotationMetadata>();
+            }
+
+            var map = new Dictionary<string, PdfAnnotationMetadata>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var annotation in annotations)
+            {
+                if (annotation is null || string.IsNullOrWhiteSpace(annotation.AnnotationId))
+                {
+                    continue;
+                }
+
+                var normalizedId = annotation.AnnotationId.Trim();
+                map[normalizedId] = new PdfAnnotationMetadata
+                {
+                    AnnotationId = normalizedId,
+                    Text = annotation.Text,
+                    Note = annotation.Note
+                };
+            }
+
+            return new List<PdfAnnotationMetadata>(map.Values);
+
         }
 
         private static List<PdfAnnotationMetadata> BuildAnnotationMetadata(IReadOnlyList<PdfAnnotationBridgeMetadata> annotations)
