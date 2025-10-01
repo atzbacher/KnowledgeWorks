@@ -21,6 +21,31 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private bool _pendingDocumentLoadRequest;
         private string? _pendingOverlayPayload;
 
+        private static string DescribeSnapshotValue(string? value, int maxLength = 120)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "(null/empty)";
+            }
+
+            var collapsed = value.Trim();
+            if (collapsed.Length <= maxLength)
+            {
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    "len={0}, text=\"{1}\"",
+                    collapsed.Length,
+                    collapsed);
+            }
+
+            var preview = string.Concat(collapsed.AsSpan(0, maxLength), "…");
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "len={0}, text=\"{1}\"",
+                collapsed.Length,
+                preview);
+        }
+
         public bool IsViewerReady
         {
             get => _isViewerReady;
@@ -86,10 +111,18 @@ namespace LM.App.Wpf.ViewModels.Pdf
             return fallback?.AbsoluteUri;
         }
 
-        public Task<string?> CreateHighlightAsync(string payloadJson)
+        public Task<string?> CreateHighlightAsync(string? payloadJson)
         {
-            Trace.WriteLine($"CreateHighlightAsync called with: {payloadJson}");
+            Trace.TraceInformation(
+                "PdfViewerViewModel.CreateHighlightAsync invoked (payload length={0})",
+                payloadJson?.Length ?? 0);
+            Trace.TraceInformation(
+                "PdfViewerViewModel.CreateHighlightAsync payload preview: {0}",
+                DescribeSnapshotValue(payloadJson));
             var annotation = EnsureAnnotationFromPayload(payloadJson);
+            Trace.TraceInformation(
+                "PdfViewerViewModel.CreateHighlightAsync resolved annotationId: {0}",
+                annotation?.Id ?? "(null)");
             return Task.FromResult(annotation?.Id);
         }
 
@@ -97,6 +130,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
         {
             if (CurrentSelectionText is null && SelectionPageNumber is null)
             {
+                Trace.TraceInformation("PdfViewerViewModel.GetCurrentSelectionAsync returning null (no selection)");
                 return Task.FromResult<string?>(null);
             }
 
@@ -107,10 +141,14 @@ namespace LM.App.Wpf.ViewModels.Pdf
             };
 
             var json = JsonSerializer.Serialize(snapshot);
+            Trace.TraceInformation(
+                "PdfViewerViewModel.GetCurrentSelectionAsync returning snapshot (text={0}, pageNumber={1})",
+                DescribeSnapshotValue(CurrentSelectionText),
+                SelectionPageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             return Task.FromResult<string?>(json);
         }
 
-        public Task SetOverlayAsync(string payloadJson)
+        public Task SetOverlayAsync(string? payloadJson)
         {
             // ADD THIS AT THE TOP:
             Trace.TraceInformation("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -256,6 +294,10 @@ namespace LM.App.Wpf.ViewModels.Pdf
 
         internal void UpdateSelection(string? text, int? pageNumber)
         {
+            Trace.TraceInformation(
+                "PdfViewerViewModel.UpdateSelection received (text={0}, pageNumber={1})",
+                DescribeSnapshotValue(text),
+                pageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             CurrentSelectionText = text;
             SelectionPageNumber = pageNumber;
         }
@@ -296,12 +338,21 @@ namespace LM.App.Wpf.ViewModels.Pdf
         {
             if (string.IsNullOrWhiteSpace(annotationId))
             {
+                Trace.TraceWarning("PdfViewerViewModel.HandleHighlightCreated invoked with empty annotationId");
                 return;
             }
 
+            Trace.TraceInformation(
+                "PdfViewerViewModel.HandleHighlightCreated processing annotation '{0}' for page {1}",
+                annotationId,
+                pageNumber?.ToString(CultureInfo.InvariantCulture) ?? "(null)");
             var annotation = Annotations.FirstOrDefault(a => string.Equals(a.Id, annotationId, StringComparison.OrdinalIgnoreCase));
             if (annotation is not null && pageNumber.HasValue && pageNumber.Value > 0)
             {
+                Trace.TraceInformation(
+                    "PdfViewerViewModel.HandleHighlightCreated updating annotation '{0}' to page {1}",
+                    annotationId,
+                    pageNumber.Value.ToString(CultureInfo.InvariantCulture));
                 annotation.PageNumber = pageNumber.Value;
             }
         }
@@ -312,7 +363,7 @@ namespace LM.App.Wpf.ViewModels.Pdf
             OverlaySidecarPath = sidecarPath;
         }
 
-        private PdfAnnotation? EnsureAnnotationFromPayload(string payloadJson)
+        private PdfAnnotation? EnsureAnnotationFromPayload(string? payloadJson)
         {
             if (string.IsNullOrWhiteSpace(payloadJson))
             {

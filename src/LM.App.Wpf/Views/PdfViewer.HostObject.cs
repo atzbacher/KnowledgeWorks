@@ -19,13 +19,13 @@ namespace LM.App.Wpf.Views
             Task<string?> LoadPdfAsync();
 
             [DispId(2)]
-            Task<string?> CreateHighlightAsync(string payloadJson);
+            Task<string?> CreateHighlightAsync(string? payloadJson);
 
             [DispId(3)]
             Task<string?> GetCurrentSelectionAsync();
 
             [DispId(4)]
-            Task SetOverlayAsync(string payloadJson);
+            Task SetOverlayAsync(string? payloadJson);
         }
 
         [ComVisible(true)]
@@ -43,24 +43,63 @@ namespace LM.App.Wpf.Views
 
             public Task<string?> LoadPdfAsync()
             {
-                return InvokeAsync(viewModel => viewModel.LoadPdfAsync());
+                Trace.TraceInformation("PdfViewerHostObject.LoadPdfAsync invoked");
+                return InvokeAsync(async viewModel =>
+                {
+                    Trace.TraceInformation("PdfViewerHostObject delegating LoadPdfAsync to view model");
+                    var result = await viewModel.LoadPdfAsync().ConfigureAwait(true);
+                    Trace.TraceInformation(
+                        "PdfViewerHostObject.LoadPdfAsync returning {0}",
+                        string.IsNullOrEmpty(result) ? "(null/empty)" : DescribeForLog(result));
+                    return result;
+                });
             }
 
-            public Task<string?> CreateHighlightAsync(string payloadJson)
+            public Task<string?> CreateHighlightAsync(string? payloadJson)
             {
-                return InvokeAsync(viewModel => viewModel.CreateHighlightAsync(payloadJson ?? string.Empty));
+                Trace.TraceInformation(
+                    "PdfViewerHostObject.CreateHighlightAsync invoked (payload length={0})",
+                    payloadJson?.Length ?? 0);
+                return InvokeAsync(async viewModel =>
+                {
+                    var payload = payloadJson ?? string.Empty;
+                    Trace.TraceInformation(
+                        "PdfViewerHostObject forwarding highlight payload: {0}",
+                        DescribeForLog(payload));
+                    var result = await viewModel.CreateHighlightAsync(payload).ConfigureAwait(true);
+                    Trace.TraceInformation(
+                        "PdfViewerHostObject.CreateHighlightAsync result: {0}",
+                        string.IsNullOrEmpty(result) ? "(null/empty)" : DescribeForLog(result));
+                    return result;
+                });
             }
 
             public Task<string?> GetCurrentSelectionAsync()
             {
-                return InvokeAsync(viewModel => viewModel.GetCurrentSelectionAsync());
-            }
-
-            public Task SetOverlayAsync(string payloadJson)
-            {
+                Trace.TraceInformation("PdfViewerHostObject.GetCurrentSelectionAsync invoked");
                 return InvokeAsync(async viewModel =>
                 {
-                    await viewModel.SetOverlayAsync(payloadJson ?? string.Empty).ConfigureAwait(true);
+                    var snapshot = await viewModel.GetCurrentSelectionAsync().ConfigureAwait(true);
+                    Trace.TraceInformation(
+                        "PdfViewerHostObject returning selection snapshot: {0}",
+                        string.IsNullOrEmpty(snapshot) ? "(null/empty)" : DescribeForLog(snapshot));
+                    return snapshot;
+                });
+            }
+
+            public Task SetOverlayAsync(string? payloadJson)
+            {
+                Trace.TraceInformation(
+                    "PdfViewerHostObject.SetOverlayAsync invoked (payload length={0})",
+                    payloadJson?.Length ?? 0);
+                return InvokeAsync(async viewModel =>
+                {
+                    var payload = payloadJson ?? string.Empty;
+                    Trace.TraceInformation(
+                        "PdfViewerHostObject forwarding overlay payload: {0}",
+                        DescribeForLog(payload));
+                    await viewModel.SetOverlayAsync(payload).ConfigureAwait(true);
+                    Trace.TraceInformation("PdfViewerHostObject.SetOverlayAsync completed");
                     return (string?)null;
                 });
             }
