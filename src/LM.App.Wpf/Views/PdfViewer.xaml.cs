@@ -975,7 +975,7 @@ namespace LM.App.Wpf.Views
             }
 
             var segments = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-            if (segments.Length == 0)
+            if (segments.Length < 2)
             {
                 return false;
             }
@@ -985,6 +985,7 @@ namespace LM.App.Wpf.Views
             {
                 return false;
             }
+
 
             path = mappedPath;
             return true;
