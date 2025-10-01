@@ -17,16 +17,30 @@ namespace LM.Infrastructure.Pdf
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
         }
 
-        public async Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
+        public async Task<string?> GetOverlayJsonAsync(string entryId, string pdfHash, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+            }
             if (string.IsNullOrWhiteSpace(pdfHash))
             {
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));
             }
 
+            var normalizedEntryId = entryId.Trim();
+            if (normalizedEntryId.Length == 0)
+            {
+                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+            }
             var normalizedHash = pdfHash.Trim().ToLowerInvariant();
             var hookRelativePath = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
-            var hookAbsolutePath = _workspace.GetAbsolutePath(hookRelativePath);
+            var hookAbsolutePath = _workspace.GetAbsolutePath(Path.Combine("entries", normalizedEntryId, "hooks", "pdf_annotations.json"));
+
+            if (string.IsNullOrWhiteSpace(hookAbsolutePath) || !File.Exists(hookAbsolutePath))
+            {
+                hookAbsolutePath = _workspace.GetAbsolutePath(hookRelativePath);
+            }
 
             if (string.IsNullOrWhiteSpace(hookAbsolutePath) || !File.Exists(hookAbsolutePath))
             {

@@ -77,8 +77,11 @@ namespace LM.Infrastructure.Hooks
                 throw new ArgumentNullException(nameof(hook));
 
             var normalizedHash = pdfHash.Trim().ToLowerInvariant();
+            var normalizedEntryId = entryId.Trim();
+            if (normalizedEntryId.Length == 0)
+                throw new ArgumentException("Entry id must be non-empty.", nameof(entryId));
 
-            var relDir = Path.Combine("entries", normalizedHash, "hooks");
+            var relDir = Path.Combine("entries", normalizedEntryId, "hooks");
             var absDir = _workspace.GetAbsolutePath(relDir);
             Directory.CreateDirectory(absDir);
 
@@ -98,8 +101,77 @@ namespace LM.Infrastructure.Hooks
                 Events = new List<HookM.EntryChangeLogEvent> { changeEvent }
             };
 
-            await AppendChangeLogAsync(entryId, changeLog, ct).ConfigureAwait(false);
-            await AppendChangeLogAsync(normalizedHash, changeLog, ct).ConfigureAwait(false);
+            await AppendChangeLogAsync(normalizedEntryId, changeLog, ct).ConfigureAwait(false);
+
+            CleanupLegacyPdfHook(normalizedHash, normalizedEntryId);
+        }
+
+        private void CleanupLegacyPdfHook(string normalizedHash, string normalizedEntryId)
+        {
+            if (string.IsNullOrWhiteSpace(normalizedHash))
+            {
+                return;
+            }
+
+            if (string.Equals(normalizedHash, normalizedEntryId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            try
+            {
+                var legacyDir = Path.Combine("entries", normalizedHash, "hooks");
+                var legacyAbsolute = _workspace.GetAbsolutePath(legacyDir);
+                if (string.IsNullOrWhiteSpace(legacyAbsolute) || !Directory.Exists(legacyAbsolute))
+                {
+                    return;
+                }
+
+                TryDeleteFile(Path.Combine(legacyAbsolute, "pdf_annotations.json"));
+                TryDeleteFile(Path.Combine(legacyAbsolute, "changelog.json"));
+
+                if (IsDirectoryEmpty(legacyAbsolute))
+                {
+                    Directory.Delete(legacyAbsolute, recursive: false);
+
+                    var parent = Path.GetDirectoryName(legacyAbsolute);
+                    if (!string.IsNullOrEmpty(parent) && Directory.Exists(parent) && IsDirectoryEmpty(parent))
+                    {
+                        Directory.Delete(parent, recursive: false);
+                    }
+                }
+            }
+            catch
+            {
+                // Best-effort cleanup; ignore failures.
+            }
+        }
+
+        private static void TryDeleteFile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch
+            {
+                // Ignore cleanup failures.
+            }
+        }
+
+        private static bool IsDirectoryEmpty(string path)
+        {
+            try
+            {
+                return Directory.GetFileSystemEntries(path).Length == 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task AppendChangeLogAsync(string entryId, HookM.EntryChangeLogHook hook, CancellationToken ct)

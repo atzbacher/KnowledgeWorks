@@ -21,6 +21,7 @@ namespace LM.Infrastructure.Tests.Pdf
             await workspace.EnsureWorkspaceAsync(temp.Path);
 
             var reader = new PdfAnnotationOverlayReader(workspace);
+            const string entryId = "entry-7";
             const string hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
             var overlayRelative = $"library/{hash[..2]}/{hash}/{hash}.json";
             var overlayAbsolute = Path.Combine(temp.Path, overlayRelative.Replace('/', Path.DirectorySeparatorChar));
@@ -28,7 +29,7 @@ namespace LM.Infrastructure.Tests.Pdf
             const string overlayPayload = "{\"foo\":\"bar\"}";
             await File.WriteAllTextAsync(overlayAbsolute, overlayPayload);
 
-            var hookDirectory = Path.Combine(temp.Path, "entries", hash, "hooks");
+            var hookDirectory = Path.Combine(temp.Path, "entries", entryId, "hooks");
             Directory.CreateDirectory(hookDirectory);
             var hook = new PdfAnnotationsHook
             {
@@ -37,9 +38,10 @@ namespace LM.Infrastructure.Tests.Pdf
             var hookPath = Path.Combine(hookDirectory, "pdf_annotations.json");
             await File.WriteAllTextAsync(hookPath, JsonSerializer.Serialize(hook, JsonStd.Options));
 
-            var result = await reader.GetOverlayJsonAsync(hash, CancellationToken.None);
+            var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
 
             Assert.Equal(overlayPayload, result);
+            Assert.False(Directory.Exists(Path.Combine(temp.Path, "entries", hash)), "Legacy hash directory should not be created.");
         }
 
         [Fact]
@@ -51,11 +53,43 @@ namespace LM.Infrastructure.Tests.Pdf
             await workspace.EnsureWorkspaceAsync(temp.Path);
 
             var reader = new PdfAnnotationOverlayReader(workspace);
+            const string entryId = "entry-9";
             const string hash = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-            var result = await reader.GetOverlayJsonAsync(hash, CancellationToken.None);
+            var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
 
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task GetOverlayJsonAsync_FallsBackToLegacyHashDirectory()
+        {
+            using var temp = new TempDir();
+
+            var workspace = new WorkspaceService();
+            await workspace.EnsureWorkspaceAsync(temp.Path);
+
+            var reader = new PdfAnnotationOverlayReader(workspace);
+            const string entryId = "entry-legacy";
+            const string hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+            var overlayRelative = $"library/{hash[..2]}/{hash}/{hash}.json";
+            var overlayAbsolute = Path.Combine(temp.Path, overlayRelative.Replace('/', Path.DirectorySeparatorChar));
+            Directory.CreateDirectory(Path.GetDirectoryName(overlayAbsolute)!);
+            const string payload = "{\"legacy\":true}";
+            await File.WriteAllTextAsync(overlayAbsolute, payload);
+
+            var legacyHookDir = Path.Combine(temp.Path, "entries", hash, "hooks");
+            Directory.CreateDirectory(legacyHookDir);
+            var legacyHookPath = Path.Combine(legacyHookDir, "pdf_annotations.json");
+            await File.WriteAllTextAsync(legacyHookPath, JsonSerializer.Serialize(new PdfAnnotationsHook
+            {
+                OverlayPath = overlayRelative
+            }, JsonStd.Options));
+
+            var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
+
+            Assert.Equal(payload, result);
         }
 
         private sealed class TempDir : IDisposable

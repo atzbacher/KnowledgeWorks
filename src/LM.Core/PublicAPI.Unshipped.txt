@@ -29,7 +29,7 @@ LM.Core.Abstractions.IPdfAnnotationPersistenceService.PersistAsync(string! entry
 LM.Core.Abstractions.IPdfAnnotationPreviewStorage
 LM.Core.Abstractions.IPdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IPdfAnnotationOverlayReader
-LM.Core.Abstractions.IPdfAnnotationOverlayReader.GetOverlayJsonAsync(string! pdfHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+LM.Core.Abstractions.IPdfAnnotationOverlayReader.GetOverlayJsonAsync(string! entryId, string! pdfHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
 LM.Core.Abstractions.IMetadataDebugSlideExporter
 LM.Core.Abstractions.IMetadataDebugSlideExporter.ExportAsync(System.Collections.Generic.IEnumerable<LM.Core.Models.FileMetadata!>! items, string! outputPath, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.Core.Abstractions.IMetadataExtractor

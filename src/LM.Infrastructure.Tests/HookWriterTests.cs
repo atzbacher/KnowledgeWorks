@@ -89,7 +89,7 @@ namespace LM.Infrastructure.Tests.Hooks
 
             await writer.SavePdfAnnotationsAsync(entryId, pdfHash, hook, CancellationToken.None);
 
-            var hookPath = Path.Combine(temp.Path, "entries", pdfHash, "hooks", "pdf_annotations.json");
+            var hookPath = Path.Combine(temp.Path, "entries", entryId, "hooks", "pdf_annotations.json");
             Assert.True(File.Exists(hookPath), $"Expected pdf annotations hook at: {hookPath}");
 
             var hookJson = await File.ReadAllTextAsync(hookPath);
@@ -108,15 +108,7 @@ namespace LM.Infrastructure.Tests.Hooks
             Assert.Equal("pdf-annotations-updated", evt.Action);
             Assert.Equal(Environment.UserName, evt.PerformedBy);
 
-            var hashChangeLogPath = Path.Combine(temp.Path, "entries", pdfHash, "hooks", "changelog.json");
-            Assert.True(File.Exists(hashChangeLogPath), $"Expected hash changelog at: {hashChangeLogPath}");
-
-            var hashChangeLogJson = await File.ReadAllTextAsync(hashChangeLogPath);
-            var hashChangeLog = JsonSerializer.Deserialize<HookM.EntryChangeLogHook>(hashChangeLogJson);
-            Assert.NotNull(hashChangeLog);
-            Assert.NotNull(hashChangeLog!.Events);
-            var hashEvent = Assert.Single(hashChangeLog.Events!);
-            Assert.Equal("pdf-annotations-updated", hashEvent.Action);
+            Assert.False(Directory.Exists(Path.Combine(temp.Path, "entries", pdfHash)), "Legacy hash directory should be cleaned.");
         }
 
         [Fact]

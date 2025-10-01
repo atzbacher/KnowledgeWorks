@@ -89,7 +89,7 @@ namespace LM.App.Wpf.Tests.Pdf
 
         private sealed class TestOverlayReader : IPdfAnnotationOverlayReader
         {
-            public Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
+            public Task<string?> GetOverlayJsonAsync(string entryId, string pdfHash, CancellationToken cancellationToken = default)
                 => Task.FromResult<string?>(null);
         }
 
