@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using LM.Core.Abstractions;
+using LM.Core.Models.Pdf;
 using LM.HubSpoke.Models;
 using LM.Infrastructure.Hooks;
 
@@ -18,7 +19,7 @@ namespace LM.Infrastructure.Pdf
     {
         private const string OverlayExtension = ".json";
         private const string PreviewExtension = ".png";
-        private const string DebugOverlayFileName = "pdf_annotations.overlay.json";
+        private const string DebugDirectoryName = "debug";
 
         private readonly IWorkSpaceService _workspace;
         private readonly HookWriter _hookWriter;
@@ -35,6 +36,8 @@ namespace LM.Infrastructure.Pdf
             string overlayJson,
             IReadOnlyDictionary<string, byte[]> previewImages,
             string? overlaySidecarRelativePath,
+            string? pdfRelativePath,
+            IReadOnlyList<PdfAnnotationBridgeMetadata> annotations,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(entryId))
@@ -52,10 +55,11 @@ namespace LM.Infrastructure.Pdf
                 throw new ArgumentNullException(nameof(overlayJson));
 
             var safePreviewImages = previewImages ?? new Dictionary<string, byte[]>(capacity: 0);
+            var annotationSnapshot = annotations ?? Array.Empty<PdfAnnotationBridgeMetadata>();
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var overlayRelativePath = ResolveOverlayRelativePath(normalizedHash, overlaySidecarRelativePath);
+            var overlayRelativePath = ResolveOverlayRelativePath(normalizedHash, overlaySidecarRelativePath, pdfRelativePath);
             var overlayAbsolutePath = _workspace.GetAbsolutePath(overlayRelativePath);
             EnsureDirectoryForFile(overlayAbsolutePath);
 
@@ -99,12 +103,13 @@ namespace LM.Infrastructure.Pdf
             var hook = new PdfAnnotationsHook
             {
                 OverlayPath = NormalizeRelativePath(overlayRelativePath),
-                Previews = previews
+                Previews = previews,
+                Annotations = BuildAnnotationMetadata(annotationSnapshot)
             };
 
             await _hookWriter.SavePdfAnnotationsAsync(normalizedEntryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
 
-            await WriteDebugOverlayCopyAsync(normalizedEntryId, overlayJson, cancellationToken).ConfigureAwait(false);
+            await WriteDebugOverlaySnapshotAsync(normalizedHash, overlayJson, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string entryId, CancellationToken cancellationToken)
@@ -170,16 +175,16 @@ namespace LM.Infrastructure.Pdf
             return result;
         }
 
-        private async Task WriteDebugOverlayCopyAsync(string entryId, string overlayJson, CancellationToken cancellationToken)
+        private async Task WriteDebugOverlaySnapshotAsync(string pdfHash, string overlayJson, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrWhiteSpace(overlayJson))
+            if (string.IsNullOrWhiteSpace(overlayJson) || string.IsNullOrWhiteSpace(pdfHash))
             {
                 return;
             }
 
             try
             {
-                var debugRelative = Path.Combine("entries", entryId, "hooks", DebugOverlayFileName);
+                var debugRelative = Path.Combine(DebugDirectoryName, pdfHash + ".debug.json");
                 var debugAbsolute = _workspace.GetAbsolutePath(debugRelative);
                 EnsureDirectoryForFile(debugAbsolute);
 
@@ -195,7 +200,7 @@ namespace LM.Infrastructure.Pdf
             }
         }
 
-        private static string ResolveOverlayRelativePath(string pdfHash, string? sidecar)
+        private static string ResolveOverlayRelativePath(string pdfHash, string? sidecar, string? pdfRelativePath)
         {
             if (!string.IsNullOrWhiteSpace(sidecar))
             {
@@ -208,10 +213,54 @@ namespace LM.Infrastructure.Pdf
                 return NormalizeRelativePath(trimmed);
             }
 
+            if (!string.IsNullOrWhiteSpace(pdfRelativePath))
+            {
+                var sanitized = NormalizeRelativePath(pdfRelativePath.Trim());
+                var directory = Path.GetDirectoryName(sanitized);
+                var fileName = Path.GetFileNameWithoutExtension(sanitized);
+
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    var overlayFileName = fileName + ".overlay.json";
+                    var combined = string.IsNullOrWhiteSpace(directory)
+                        ? overlayFileName
+                        : Path.Combine(directory, overlayFileName);
+                    return NormalizeRelativePath(combined);
+                }
+            }
+
             var firstSegment = pdfHash[..2];
             var secondSegment = pdfHash[2..4];
-            var fileName = pdfHash + OverlayExtension;
-            return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, fileName));
+            var hashedOverlayFileName = pdfHash + ".overlay" + OverlayExtension;
+            return NormalizeRelativePath(Path.Combine("library", firstSegment, secondSegment, hashedOverlayFileName));
+        }
+
+        private static List<PdfAnnotationMetadata> BuildAnnotationMetadata(IReadOnlyList<PdfAnnotationBridgeMetadata> annotations)
+        {
+            if (annotations is null || annotations.Count == 0)
+            {
+                return new List<PdfAnnotationMetadata>();
+            }
+
+            var map = new Dictionary<string, PdfAnnotationMetadata>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var annotation in annotations)
+            {
+                if (annotation is null || string.IsNullOrWhiteSpace(annotation.AnnotationId))
+                {
+                    continue;
+                }
+
+                var normalizedId = annotation.AnnotationId.Trim();
+                map[normalizedId] = new PdfAnnotationMetadata
+                {
+                    AnnotationId = normalizedId,
+                    Text = annotation.Text,
+                    Note = annotation.Note
+                };
+            }
+
+            return new List<PdfAnnotationMetadata>(map.Values);
         }
 
         private static string? NormalizeAnnotationId(string? raw)

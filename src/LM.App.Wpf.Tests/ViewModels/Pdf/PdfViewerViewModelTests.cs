@@ -8,6 +8,7 @@ using LM.App.Wpf.Common;
 using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Pdf;
 using LM.Core.Abstractions;
+using LM.Core.Models.Pdf;
 using LM.Infrastructure.Hooks;
 using Xunit;
 
@@ -106,6 +107,9 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
             Assert.Equal("{\"foo\":1}", persistence.OverlayJson);
             Assert.NotNull(persistence.PreviewImages);
             Assert.Empty(persistence.PreviewImages!);
+            Assert.Equal("doc.pdf", persistence.PdfRelativePath);
+            Assert.NotNull(persistence.Annotations);
+            Assert.Empty(persistence.Annotations!);
         }
 
         [Fact]
@@ -132,6 +136,8 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
 
             Assert.True(persistence.PreviewImages!.ContainsKey("ann-1"));
             Assert.Equal(new byte[] { 9, 9, 9 }, persistence.PreviewImages["ann-1"]);
+            Assert.Equal("doc.pdf", persistence.PdfRelativePath);
+            Assert.NotNull(persistence.Annotations);
         }
 
         private static void InvokeQueueOverlayForViewer(PdfViewerViewModel viewModel, string overlayJson)
@@ -212,7 +218,15 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
 
         private sealed class NoopPersistenceService : IPdfAnnotationPersistenceService
         {
-            public Task PersistAsync(string entryId, string pdfHash, string overlayJson, IReadOnlyDictionary<string, byte[]> previewImages, string? overlaySidecarRelativePath, CancellationToken cancellationToken)
+            public Task PersistAsync(
+                string entryId,
+                string pdfHash,
+                string overlayJson,
+                IReadOnlyDictionary<string, byte[]> previewImages,
+                string? overlaySidecarRelativePath,
+                string? pdfRelativePath,
+                IReadOnlyList<PdfAnnotationBridgeMetadata> annotations,
+                CancellationToken cancellationToken)
                 => Task.CompletedTask;
         }
 
@@ -224,13 +238,25 @@ namespace LM.App.Wpf.Tests.ViewModels.Pdf
             public string? PdfHash { get; private set; }
             public string? OverlayJson { get; private set; }
             public Dictionary<string, byte[]>? PreviewImages { get; private set; }
+            public string? PdfRelativePath { get; private set; }
+            public IReadOnlyList<PdfAnnotationBridgeMetadata>? Annotations { get; private set; }
 
-            public Task PersistAsync(string entryId, string pdfHash, string overlayJson, IReadOnlyDictionary<string, byte[]> previewImages, string? overlaySidecarRelativePath, CancellationToken cancellationToken)
+            public Task PersistAsync(
+                string entryId,
+                string pdfHash,
+                string overlayJson,
+                IReadOnlyDictionary<string, byte[]> previewImages,
+                string? overlaySidecarRelativePath,
+                string? pdfRelativePath,
+                IReadOnlyList<PdfAnnotationBridgeMetadata> annotations,
+                CancellationToken cancellationToken)
             {
                 EntryId = entryId;
                 PdfHash = pdfHash;
                 OverlayJson = overlayJson;
                 PreviewImages = new Dictionary<string, byte[]>(previewImages, StringComparer.OrdinalIgnoreCase);
+                PdfRelativePath = pdfRelativePath;
+                Annotations = annotations;
                 _completion.TrySetResult(true);
                 return Task.CompletedTask;
             }

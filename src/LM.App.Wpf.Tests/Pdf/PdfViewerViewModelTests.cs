@@ -9,6 +9,7 @@ using LM.App.Wpf.Services;
 using LM.App.Wpf.ViewModels.Pdf;
 using LM.Core.Abstractions;
 using LM.Infrastructure.Hooks;
+using LM.Core.Models.Pdf;
 using Xunit;
 
 namespace LM.App.Wpf.Tests.Pdf
@@ -83,7 +84,15 @@ namespace LM.App.Wpf.Tests.Pdf
 
         private sealed class TestPersistenceService : IPdfAnnotationPersistenceService
         {
-            public Task PersistAsync(string entryId, string pdfHash, string overlayJson, IReadOnlyDictionary<string, byte[]> previewImages, string? overlaySidecarRelativePath, CancellationToken cancellationToken)
+            public Task PersistAsync(
+                string entryId,
+                string pdfHash,
+                string overlayJson,
+                IReadOnlyDictionary<string, byte[]> previewImages,
+                string? overlaySidecarRelativePath,
+                string? pdfRelativePath,
+                IReadOnlyList<PdfAnnotationBridgeMetadata> annotations,
+                CancellationToken cancellationToken)
                 => Task.CompletedTask;
         }
 

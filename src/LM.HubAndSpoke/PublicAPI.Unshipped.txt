@@ -304,6 +304,8 @@ LM.HubSpoke.Models.PdfAnnotationPreview.ImagePath.get -> string!
 LM.HubSpoke.Models.PdfAnnotationPreview.ImagePath.init -> void
 LM.HubSpoke.Models.PdfAnnotationPreview.PdfAnnotationPreview() -> void
 LM.HubSpoke.Models.PdfAnnotationsHook
+LM.HubSpoke.Models.PdfAnnotationsHook.Annotations.get -> System.Collections.Generic.List<LM.HubSpoke.Models.PdfAnnotationMetadata!>!
+LM.HubSpoke.Models.PdfAnnotationsHook.Annotations.init -> void
 LM.HubSpoke.Models.PdfAnnotationsHook.OverlayPath.get -> string!
 LM.HubSpoke.Models.PdfAnnotationsHook.OverlayPath.init -> void
 LM.HubSpoke.Models.PdfAnnotationsHook.Previews.get -> System.Collections.Generic.List<LM.HubSpoke.Models.PdfAnnotationPreview!>!
@@ -311,6 +313,14 @@ LM.HubSpoke.Models.PdfAnnotationsHook.Previews.init -> void
 LM.HubSpoke.Models.PdfAnnotationsHook.SchemaVersion.get -> string!
 LM.HubSpoke.Models.PdfAnnotationsHook.SchemaVersion.init -> void
 LM.HubSpoke.Models.PdfAnnotationsHook.PdfAnnotationsHook() -> void
+LM.HubSpoke.Models.PdfAnnotationMetadata
+LM.HubSpoke.Models.PdfAnnotationMetadata.AnnotationId.get -> string!
+LM.HubSpoke.Models.PdfAnnotationMetadata.AnnotationId.init -> void
+LM.HubSpoke.Models.PdfAnnotationMetadata.Note.get -> string?
+LM.HubSpoke.Models.PdfAnnotationMetadata.Note.init -> void
+LM.HubSpoke.Models.PdfAnnotationMetadata.PdfAnnotationMetadata() -> void
+LM.HubSpoke.Models.PdfAnnotationMetadata.Text.get -> string?
+LM.HubSpoke.Models.PdfAnnotationMetadata.Text.init -> void
 LM.HubSpoke.Models.EntryHooks
 LM.HubSpoke.Models.EntryHooks.Article.get -> string?
 LM.HubSpoke.Models.EntryHooks.Article.init -> void
