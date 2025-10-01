@@ -460,11 +460,13 @@ function initializeBridge() {
 
   var app = getViewerApplication();
   if (!app) {
+
     scheduleRetry();
     return;
   }
 
   app.initializedPromise.then(function () {
+
     registerSelectionHandlers(app);
     registerNavigationHandlers(app);
     monitorAnnotationStorage(app);
