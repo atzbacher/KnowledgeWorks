@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -29,8 +30,13 @@ namespace LM.App.Wpf.Views
         private PdfWebViewBridge? _bridge;
         private PdfViewerHostObject? _hostObject;
         private string? _mappedWebRootPath;
+        private const int MaxDocumentRequestMappings = 4;
+
         private string? _currentDocumentFilePath;
         private string? _currentDocumentToken;
+        private readonly Dictionary<string, string> _documentRequestMappings = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, LinkedListNode<string>> _documentRequestTokenNodes = new(StringComparer.Ordinal);
+        private readonly LinkedList<string> _documentRequestTokenOrder = new();
         private bool _isDocumentRequestHandlerAttached;
         private bool _isHostObjectRegistered;
         private bool _isViewerAssetRequestHandlerAttached;
@@ -213,7 +219,7 @@ namespace LM.App.Wpf.Views
 
             if (documentSource is null)
             {
-                ClearDocumentRequestMapping();
+                ClearDocumentRequestMapping(preserveMappings: true);
             }
 
             var virtualDocumentSource = documentSource is null
@@ -604,39 +610,78 @@ namespace LM.App.Wpf.Views
 
             if (!documentSource.IsAbsoluteUri)
             {
-                ClearDocumentRequestMapping();
+                ClearDocumentRequestMapping(preserveMappings: true);
                 return documentSource;
             }
 
             if (!string.Equals(documentSource.Scheme, System.Uri.UriSchemeFile, StringComparison.OrdinalIgnoreCase))
             {
-                ClearDocumentRequestMapping();
+                ClearDocumentRequestMapping(preserveMappings: true);
                 return documentSource;
             }
 
             var pdfPath = documentSource.LocalPath;
             if (string.IsNullOrWhiteSpace(pdfPath) || !File.Exists(pdfPath))
             {
-                ClearDocumentRequestMapping();
+                ClearDocumentRequestMapping(preserveMappings: true);
                 return null;
             }
 
             var fileName = Path.GetFileName(pdfPath);
             if (string.IsNullOrEmpty(fileName))
             {
-                ClearDocumentRequestMapping();
+                ClearDocumentRequestMapping(preserveMappings: true);
                 return null;
             }
 
             EnsureDocumentRequestHandler(coreWebView);
 
             var token = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
-            _currentDocumentFilePath = pdfPath;
-            _currentDocumentToken = token;
+            RegisterDocumentRequestMapping(token, pdfPath);
 
             var targetPath = string.Concat(token, "/", Uri.EscapeDataString(fileName));
             var target = string.Concat("https://", DocumentVirtualHostName, "/", targetPath);
             return new System.Uri(target, UriKind.Absolute);
+        }
+
+        private void RegisterDocumentRequestMapping(string token, string pdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(pdfPath))
+            {
+                return;
+            }
+
+            _currentDocumentFilePath = pdfPath;
+            _currentDocumentToken = token;
+
+            if (_documentRequestTokenNodes.TryGetValue(token, out var existingNode))
+            {
+                _documentRequestTokenOrder.Remove(existingNode);
+            }
+
+            var node = _documentRequestTokenOrder.AddLast(token);
+            _documentRequestTokenNodes[token] = node;
+            _documentRequestMappings[token] = pdfPath;
+
+            while (_documentRequestTokenOrder.Count > MaxDocumentRequestMappings)
+            {
+                var firstNode = _documentRequestTokenOrder.First;
+                if (firstNode is null)
+                {
+                    break;
+                }
+
+                var staleToken = firstNode.Value;
+                _documentRequestTokenOrder.RemoveFirst();
+                _documentRequestTokenNodes.Remove(staleToken);
+
+                if (string.Equals(staleToken, _currentDocumentToken, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                _documentRequestMappings.Remove(staleToken);
+            }
         }
 
         private void EnsureDocumentRequestHandler(CoreWebView2 coreWebView)
@@ -919,11 +964,6 @@ namespace LM.App.Wpf.Views
                 return false;
             }
 
-            if (_currentDocumentToken is null || _currentDocumentFilePath is null)
-            {
-                return false;
-            }
-
             if (!System.Uri.TryCreate(requestUri, UriKind.Absolute, out var uri))
             {
                 return false;
@@ -935,28 +975,30 @@ namespace LM.App.Wpf.Views
             }
 
             var segments = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-            if (segments.Length == 0)
+            if (segments.Length < 2)
             {
                 return false;
             }
 
-            if (!string.Equals(segments[0], _currentDocumentToken, StringComparison.Ordinal))
+            var token = segments[0];
+            if (!_documentRequestMappings.TryGetValue(token, out var mappedPath))
             {
                 return false;
             }
 
-            var requestedFileName = segments.Length > 1
-                ? Uri.UnescapeDataString(segments[^1])
-                : string.Empty;
-
-            var currentFileName = Path.GetFileName(_currentDocumentFilePath);
-
-            if (!string.Equals(requestedFileName, currentFileName, StringComparison.OrdinalIgnoreCase))
+            var requestedFileName = Uri.UnescapeDataString(segments[^1]);
+            if (string.IsNullOrWhiteSpace(requestedFileName))
             {
                 return false;
             }
 
-            path = _currentDocumentFilePath;
+            var mappedFileName = Path.GetFileName(mappedPath);
+            if (!string.Equals(requestedFileName, mappedFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            path = mappedPath;
             return true;
         }
 
@@ -1043,8 +1085,22 @@ namespace LM.App.Wpf.Views
 
         private void ClearDocumentRequestMapping()
         {
+            ClearDocumentRequestMapping(preserveMappings: false);
+        }
+
+        private void ClearDocumentRequestMapping(bool preserveMappings)
+        {
+            if (preserveMappings)
+            {
+                _currentDocumentToken = null;
+                return;
+            }
+
             _currentDocumentFilePath = null;
             _currentDocumentToken = null;
+            _documentRequestMappings.Clear();
+            _documentRequestTokenNodes.Clear();
+            _documentRequestTokenOrder.Clear();
         }
 
         private sealed class PdfWebViewBridge : IPdfWebViewBridge
