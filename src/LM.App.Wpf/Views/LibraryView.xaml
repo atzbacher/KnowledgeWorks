@@ -58,12 +58,12 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                                 <Button Content="Save search"
-                        Command="{Binding SaveSearchCommand}"
+                        Command="{Binding SavePresetCommand}"
                         Margin="0,0,4,0"
                         Padding="6,3"
                         Height="26"/>
                                 <Button Content="Clear"
-                        Command="{Binding ClearSearchCommand}"
+                        Command="{Binding ClearCommand}"
                         Padding="6,3"
                         Height="26"/>
                             </StackPanel>
@@ -74,7 +74,7 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBox Grid.Column="0"
-                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}"
                          Height="26"
                          VerticalContentAlignment="Center"
                          Padding="4,0"
@@ -85,12 +85,13 @@
                           MinWidth="100"
                           Height="26"
                           ItemsSource="{Binding SortOptions}"
-                          SelectedItem="{Binding SelectedSort}"/>
+                          SelectedItem="{Binding SelectedSort}"
+                          DisplayMemberPath="DisplayName"/>
                                 <CheckBox Grid.Column="2"
                           Content="Full text"
                           Margin="8,0,0,0"
                           VerticalAlignment="Center"
-                          IsChecked="{Binding IsFullTextSearchEnabled}"/>
+                          IsChecked="{Binding UseFullTextSearch}"/>
                             </Grid>
                         </DockPanel>
                     </StackPanel>
@@ -157,7 +158,7 @@
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
-                                    <ItemsControl ItemsSource="{Binding Presets}"
+                                    <ItemsControl ItemsSource="{Binding SavedPresets}"
                                 Margin="0"
                                 Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <ItemsControl.ItemTemplate>
@@ -571,7 +572,7 @@
                         HorizontalScrollBarVisibility="Disabled">
                         <Grid>
                             <ContentPresenter x:Name="EntryDetailPresenter"
-                                Content="{Binding Results.SelectedEntry}"
+                                Content="{Binding Results.Selected}"
                                 ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
                                 Margin="8"/>
                             <TextBlock Text="Select an entry to view details"

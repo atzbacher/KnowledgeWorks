@@ -158,7 +158,7 @@ namespace LM.App.Wpf.ViewModels.Library
             });
         }
 
-        public async Task LoadFullTextResultsAsync(IReadOnlyList<FullTextSearchHit> hits)
+        public async Task LoadFullTextResultsAsync(IReadOnlyList<FullTextSearchHit> hits, Func<Entry, bool>? entryFilter = null)
         {
             ArgumentNullException.ThrowIfNull(hits);
 
@@ -174,6 +174,11 @@ namespace LM.App.Wpf.ViewModels.Library
                 var entry = await _store.GetByIdAsync(hit.EntryId).ConfigureAwait(false);
                 if (entry is null)
                     continue;
+
+                if (entryFilter is not null && !entryFilter(entry))
+                {
+                    continue;
+                }
 
                 PrepareEntry(entry);
                 var result = new LibrarySearchResult(entry, hit.Score, hit.Highlight);
