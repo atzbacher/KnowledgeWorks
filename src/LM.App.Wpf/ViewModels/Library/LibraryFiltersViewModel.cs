@@ -37,10 +37,13 @@ namespace LM.App.Wpf.ViewModels.Library
         private double _lastLeftPanelWidth = DefaultLeftPanelWidth;
         private double _lastRightPanelWidth = DefaultRightPanelWidth;
         private static readonly System.StringComparer TagComparer = System.StringComparer.OrdinalIgnoreCase;
+        private static readonly LibraryInlineDirectiveParser InlineDirectiveParser = new();
 
         private const double DefaultLeftPanelWidth = 310;
         private const double DefaultRightPanelWidth = 360;
         private const double CollapsedPanelWidth = 0;
+        private bool _fromDirectiveActive;
+        private bool _toDirectiveActive;
 
         [ObservableProperty]
         private bool useFullTextSearch;
@@ -373,6 +376,8 @@ namespace LM.App.Wpf.ViewModels.Library
             DateTo = null;
             SelectedSort = LibrarySortOptions.NewestFirst;
             SelectedTags.Clear();
+            _fromDirectiveActive = false;
+            _toDirectiveActive = false;
         }
 
         [RelayCommand]
@@ -385,6 +390,87 @@ namespace LM.App.Wpf.ViewModels.Library
         private void ToggleRightPanel()
         {
             IsRightPanelCollapsed = !IsRightPanelCollapsed;
+        }
+
+        internal LibraryInlineDirectiveResult ApplyInlineSearchDirectives()
+        {
+            var query = UnifiedQuery ?? string.Empty;
+            var directives = InlineDirectiveParser.Parse(query);
+
+            var normalizedFullText = directives.FullTextQuery ?? string.Empty;
+            var hasFullText = directives.HasFullTextDirective && !string.IsNullOrWhiteSpace(normalizedFullText);
+
+            if (!string.Equals(FullTextQuery ?? string.Empty, normalizedFullText, StringComparison.Ordinal))
+            {
+                FullTextQuery = normalizedFullText;
+                Trace.WriteLine($"[LibraryFiltersViewModel] Inline FULLTEXT query set to '{normalizedFullText}'.");
+            }
+
+            if (UseFullTextSearch != hasFullText)
+            {
+                Trace.WriteLine(hasFullText
+                    ? "[LibraryFiltersViewModel] Inline FULLTEXT directive detected; switching to full-text search."
+                    : "[LibraryFiltersViewModel] Inline FULLTEXT directive missing; using metadata search.");
+                UseFullTextSearch = hasFullText;
+            }
+
+            if (directives.HasFromDirective)
+            {
+                _fromDirectiveActive = true;
+                if (directives.FromDate.HasValue)
+                {
+                    if (DateFrom != directives.FromDate)
+                    {
+                        DateFrom = directives.FromDate;
+                        Trace.WriteLine($"[LibraryFiltersViewModel] Applied inline FROM directive: {DateFrom:yyyy-MM-dd}.");
+                    }
+                }
+                else if (DateFrom is not null)
+                {
+                    DateFrom = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] FROM directive present but invalid; cleared date filter.");
+                }
+            }
+            else if (_fromDirectiveActive)
+            {
+                if (DateFrom is not null)
+                {
+                    DateFrom = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] Removed inline FROM directive; cleared date filter.");
+                }
+
+                _fromDirectiveActive = false;
+            }
+
+            if (directives.HasToDirective)
+            {
+                _toDirectiveActive = true;
+                if (directives.ToDate.HasValue)
+                {
+                    if (DateTo != directives.ToDate)
+                    {
+                        DateTo = directives.ToDate;
+                        Trace.WriteLine($"[LibraryFiltersViewModel] Applied inline TO directive: {DateTo:yyyy-MM-dd}.");
+                    }
+                }
+                else if (DateTo is not null)
+                {
+                    DateTo = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] TO directive present but invalid; cleared date filter.");
+                }
+            }
+            else if (_toDirectiveActive)
+            {
+                if (DateTo is not null)
+                {
+                    DateTo = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] Removed inline TO directive; cleared date filter.");
+                }
+
+                _toDirectiveActive = false;
+            }
+
+            return directives;
         }
 
         public string GetNormalizedFullTextQuery()

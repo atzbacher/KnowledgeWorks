@@ -70,17 +70,11 @@
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
-                            <ToggleButton x:Name="FullTextToggle"
-                                          Width="52"
-                                          Height="26"
-                                          Margin="0,0,8,0"
-                                          IsChecked="{Binding UseFullTextSearch}"
-                                          Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"
-                                          Style="{StaticResource LibraryPillToggleStyle}">
-                            </ToggleButton>
-                            <TextBlock Text="Full text"
+                            <TextBlock Text="Use FULLTEXT: keyword for document search"
+                                       Margin="0,0,8,0"
                                        VerticalAlignment="Center"
-                                       Foreground="#4B5563"/>
+                                       Foreground="#4B5563"
+                                       FontSize="12"/>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -345,7 +339,7 @@
                           Padding="6,4">
                                         <DockPanel>
                                             <ToggleButton DockPanel.Dock="Left"
-                                    Name="FullTextToggle"
+                                    Name="FullTextOptionsToggle"
                                     IsChecked="False"
                                     Width="16"
                                     Height="16"
@@ -381,7 +375,7 @@
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
-                                    <StackPanel Visibility="{Binding IsChecked, ElementName=FullTextToggle, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <StackPanel Visibility="{Binding IsChecked, ElementName=FullTextOptionsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"
                              Margin="4"
                              Height="24"
