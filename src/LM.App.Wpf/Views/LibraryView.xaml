@@ -389,7 +389,7 @@
                                             <TextBlock Text="FULL TEXT SEARCH"
                                  FontSize="11"
                                  FontWeight="SemiBold"
-                                 Foreground="#6B280"
+                                 Foreground="#6B7280"
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
