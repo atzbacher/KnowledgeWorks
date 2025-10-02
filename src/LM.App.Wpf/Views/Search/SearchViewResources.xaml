@@ -104,39 +104,68 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ComboBox">
-          <Border x:Name="Chrome"
-                  Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}"
-                  BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="4">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="32" />
-              </Grid.ColumnDefinitions>
-              <ToggleButton x:Name="ToggleButton"
-                           Grid.Column="1"
-                           Focusable="False"
-                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                           ClickMode="Press"
-                           Background="Transparent"
-                           BorderThickness="0"
-                           FontFamily="Segoe MDL2 Assets"
-                           FontSize="10"
-                           Foreground="{StaticResource SearchGlyphBrush}">
-                <ContentPresenter HorizontalAlignment="Center"
+          <Grid>
+            <Border x:Name="Chrome"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="4">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="32" />
+                </Grid.ColumnDefinitions>
+                <ContentPresenter x:Name="ContentSite"
+                                  Margin="6,0,0,0"
                                   VerticalAlignment="Center"
-                                  Content="&#xE70D;" />
-              </ToggleButton>
-              <ContentPresenter x:Name="ContentSite"
-                                Margin="6,0,0,0"
-                                VerticalAlignment="Center"
-                                HorizontalAlignment="Left"
-                                Content="{TemplateBinding SelectionBoxItem}"
-                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
-            </Grid>
-          </Border>
+                                  HorizontalAlignment="Left"
+                                  Content="{TemplateBinding SelectionBoxItem}"
+                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                  ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}" />
+                <ToggleButton x:Name="ToggleButton"
+                              Grid.Column="1"
+                              Focusable="False"
+                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                              ClickMode="Press"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              FontFamily="Segoe MDL2 Assets"
+                              FontSize="10"
+                              Foreground="{StaticResource SearchGlyphBrush}">
+                  <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="&#xE70D;" />
+                </ToggleButton>
+              </Grid>
+            </Border>
+
+            <Popup x:Name="PART_Popup"
+                   Placement="Bottom"
+                   PlacementTarget="{Binding ElementName=ToggleButton}"
+                   AllowsTransparency="True"
+                   Focusable="False"
+                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                   PopupAnimation="Slide">
+              <Grid MaxHeight="{TemplateBinding MaxDropDownHeight}" SnapsToDevicePixels="True"
+                    MinWidth="{Binding ActualWidth, ElementName=Chrome}">
+                <Border Background="{StaticResource SearchPanelBrush}"
+                        BorderBrush="{StaticResource SearchPanelBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4">
+                  <ScrollViewer Margin="0,4,0,4"
+                                CanContentScroll="True"
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Auto">
+                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                  </ScrollViewer>
+                </Border>
+              </Grid>
+            </Popup>
+          </Grid>
           <ControlTemplate.Triggers>
+            <Trigger Property="HasItems" Value="False">
+              <Setter TargetName="PART_Popup" Property="MinHeight" Value="0" />
+            </Trigger>
             <Trigger Property="IsEnabled" Value="False">
               <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
             </Trigger>
