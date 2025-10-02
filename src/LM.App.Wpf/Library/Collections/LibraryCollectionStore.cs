@@ -206,6 +206,82 @@ namespace LM.App.Wpf.Library.Collections
             Trace.WriteLine($"[LibraryCollectionStore] Removed {removed} entry id(s) from folder '{folder.Name}'.");
         }
 
+        public async Task RenameFolderAsync(string folderId, string newName, string performedBy, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LibraryCollectionFolder.RootId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var trimmed = newName?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                Trace.WriteLine("[LibraryCollectionStore] Ignoring rename because the new name was empty.");
+                return;
+            }
+
+            var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
+            if (!root.TryFindFolder(folderId, out var folder, out var parent) || folder is null)
+            {
+                Trace.WriteLine($"[LibraryCollectionStore] Cannot rename folder '{folderId}'; not found.");
+                return;
+            }
+
+            folder.Name = trimmed;
+            folder.Metadata.ModifiedBy = NormalizeUser(performedBy);
+            folder.Metadata.ModifiedUtc = DateTime.UtcNow;
+            if (parent is not null)
+            {
+                parent.Metadata.ModifiedBy = folder.Metadata.ModifiedBy;
+                parent.Metadata.ModifiedUtc = folder.Metadata.ModifiedUtc;
+            }
+
+            await SaveAsync(file, ct).ConfigureAwait(false);
+            Trace.WriteLine($"[LibraryCollectionStore] Renamed folder '{folderId}' to '{trimmed}'.");
+        }
+
+        public async Task MoveFolderAsync(string folderId, string targetFolderId, int insertIndex, string performedBy, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LibraryCollectionFolder.RootId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
+            if (!root.TryFindFolder(folderId, out var folder, out var currentParent) || folder is null || currentParent is null)
+            {
+                Trace.WriteLine($"[LibraryCollectionStore] Cannot move folder '{folderId}'; not found.");
+                return;
+            }
+
+            var destination = ResolveFolder(root, targetFolderId);
+            if (ReferenceEquals(destination, folder) || IsDescendantOf(folder, destination))
+            {
+                Trace.WriteLine($"[LibraryCollectionStore] Ignoring move of folder '{folder.Id}' into itself or descendant.");
+                return;
+            }
+
+            currentParent.Folders.Remove(folder);
+
+            var index = Math.Clamp(insertIndex, 0, destination.Folders.Count);
+            destination.Folders.Insert(index, folder);
+
+            var user = NormalizeUser(performedBy);
+            var now = DateTime.UtcNow;
+
+            folder.Metadata.ModifiedBy = user;
+            folder.Metadata.ModifiedUtc = now;
+            currentParent.Metadata.ModifiedBy = user;
+            currentParent.Metadata.ModifiedUtc = now;
+            destination.Metadata.ModifiedBy = user;
+            destination.Metadata.ModifiedUtc = now;
+
+            await SaveAsync(file, ct).ConfigureAwait(false);
+            Trace.WriteLine($"[LibraryCollectionStore] Moved folder '{folder.Id}' to '{destination.Id}' at index {index}.");
+        }
+
         private async Task<LibraryCollectionFile> LoadAsync(CancellationToken ct)
         {
             var path = GetFilePath();
@@ -300,6 +376,24 @@ namespace LM.App.Wpf.Library.Collections
 
             Trace.WriteLine($"[LibraryCollectionStore] Falling back to root for missing folder '{folderId}'.");
             return root;
+        }
+
+        private static bool IsDescendantOf(LibraryCollectionFolder potentialAncestor, LibraryCollectionFolder candidate)
+        {
+            foreach (var child in potentialAncestor.Folders)
+            {
+                if (ReferenceEquals(child, candidate))
+                {
+                    return true;
+                }
+
+                if (IsDescendantOf(child, candidate))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string NormalizeUser(string? user)
