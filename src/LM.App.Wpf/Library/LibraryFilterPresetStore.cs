@@ -465,14 +465,17 @@ namespace LM.App.Wpf.Library
         {
             for (var i = 0; i < ordered.Count; i++)
             {
-                switch (ordered[i].Kind)
+                var item = ordered[i];
+
+                if (item.Kind == LibraryPresetNodeKind.Folder && item.Folder is not null)
                 {
-                    case LibraryPresetNodeKind.Folder when ordered[i].Folder is not null:
-                        ordered[i].Folder.SortOrder = i;
-                        break;
-                    case LibraryPresetNodeKind.Preset when ordered[i].Preset is not null:
-                        ordered[i].Preset.SortOrder = i;
-                        break;
+                    item.Folder.SortOrder = i;
+                    continue;
+                }
+
+                if (item.Kind == LibraryPresetNodeKind.Preset && item.Preset is not null)
+                {
+                    item.Preset.SortOrder = i;
                 }
             }
 

@@ -268,7 +268,7 @@ LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! name, Syst
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetByIdAsync(string! presetId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryPresetFolder
 LM.App.Wpf.Library.LibraryPresetFolder.Clone() -> LM.App.Wpf.Library.LibraryPresetFolder!
-LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem>
+LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem!>!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryPresetFolder!>!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.set -> void
 LM.App.Wpf.Library.LibraryPresetFolder.Id.get -> string!
