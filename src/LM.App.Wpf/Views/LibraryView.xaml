@@ -9,7 +9,8 @@
              xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
              xmlns:lit="clr-namespace:LM.App.Wpf.ViewModels.Library.LitSearch"
              xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
-             x:Name="LibraryViewControl"
+
+            x:Name="LibraryViewControl"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1000">
     <UserControl.Resources>
@@ -504,10 +505,10 @@
                     </i:Interaction.Behaviors>
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Sorting">
-                            <core:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridSorting" />
+                            <i:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridSorting" />
                         </i:EventTrigger>
                         <i:EventTrigger EventName="Loaded">
-                            <core:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridLoaded" />
+                            <i:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridLoaded" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                     <DataGrid.ContextMenu>
@@ -740,6 +741,4 @@
                     </EventTrigger>
                 </Grid.Triggers>
             </Grid>
-        </Border>
-    </Grid>
-</UserControl>
+        </UserControl>

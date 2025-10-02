@@ -170,7 +170,7 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
                 return;
             }
 
-            var result = MessageBox.Show(
+            var result = System.Windows.MessageBox.Show(
                 $"Delete collection '{folder.Name}' and all sub-collections?",
                 "Delete Collection",
                 MessageBoxButton.YesNo,
