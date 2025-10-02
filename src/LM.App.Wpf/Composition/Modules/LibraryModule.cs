@@ -5,6 +5,8 @@ using LM.App.Wpf.Views.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
+using LM.App.Wpf.Library.LitSearch;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Infrastructure.Hooks;
@@ -25,6 +27,7 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<IClipboardService, ClipboardService>();
             services.AddSingleton<IFileExplorerService, FileExplorerService>();
             services.AddSingleton<LibraryFilterPresetStore>();
+            services.AddSingleton<LitSearchOrganizerStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
             services.AddTransient<LibraryPresetSaveDialogViewModel>();
             services.AddTransient<LibraryPresetSaveDialog>();
@@ -38,6 +41,12 @@ namespace LM.App.Wpf.Composition.Modules
 
             services.AddSingleton(sp => new LibraryFiltersViewModel(
                 sp.GetRequiredService<LibraryFilterPresetStore>(),
+                sp.GetRequiredService<ILibraryPresetPrompt>(),
+                sp.GetRequiredService<IEntryStore>(),
+                sp.GetRequiredService<IWorkSpaceService>()));
+
+            services.AddSingleton(sp => new LitSearchTreeViewModel(
+                sp.GetRequiredService<LitSearchOrganizerStore>(),
                 sp.GetRequiredService<ILibraryPresetPrompt>(),
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IWorkSpaceService>()));
@@ -62,7 +71,8 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IUserPreferencesStore>(),
                 sp.GetRequiredService<IClipboardService>(),
                 sp.GetRequiredService<IFileExplorerService>(),
-                sp.GetRequiredService<ILibraryDocumentService>()));
+                sp.GetRequiredService<ILibraryDocumentService>(),
+                sp.GetRequiredService<LitSearchTreeViewModel>()));
         }
     }
 }
