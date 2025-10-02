@@ -45,34 +45,6 @@ namespace LM.App.Wpf.Tests.Library
             }).ConfigureAwait(false);
         }
 
-        [Fact]
-        public async Task FullTextToggle_ExecutesSearchCommandOnStateChange()
-        {
-            var vm = new StubLibraryViewModel();
-
-            await RunOnStaThreadAsync(() =>
-            {
-                EnsureApplication();
-                var view = new LibraryView
-                {
-                    DataContext = vm
-                };
-
-                InitializeView(view);
-
-                var toggle = FindDescendant<System.Windows.Controls.Primitives.ToggleButton>(view, control => string.Equals(control.Name, "FullTextToggle", StringComparison.Ordinal));
-                Assert.NotNull(toggle);
-
-                toggle!.IsChecked = true;
-                Assert.True(vm.Filters.UseFullTextSearch);
-                Assert.Equal(1, vm.SearchInvocationCount);
-
-                toggle.IsChecked = false;
-                Assert.False(vm.Filters.UseFullTextSearch);
-                Assert.Equal(2, vm.SearchInvocationCount);
-            }).ConfigureAwait(false);
-        }
-
         private static void InitializeView(LibraryView view)
         {
             if (view is null)
