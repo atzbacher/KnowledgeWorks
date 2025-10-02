@@ -58,12 +58,12 @@
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
                                 <Button Content="Save search"
-                        Command="{Binding SaveSearchCommand}"
+                        Command="{Binding SavePresetCommand}"
                         Margin="0,0,4,0"
                         Padding="6,3"
                         Height="26"/>
                                 <Button Content="Clear"
-                        Command="{Binding ClearSearchCommand}"
+                        Command="{Binding ClearCommand}"
                         Padding="6,3"
                         Height="26"/>
                             </StackPanel>
