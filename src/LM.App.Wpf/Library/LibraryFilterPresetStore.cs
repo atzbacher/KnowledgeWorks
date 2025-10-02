@@ -139,8 +139,16 @@ namespace LM.App.Wpf.Library
         public bool FullTextInTitle { get; set; } = true;
         public bool FullTextInAbstract { get; set; } = true;
         public bool FullTextInContent { get; set; } = true;
+        public System.DateTime? DateFrom { get; set; }
+        public System.DateTime? DateTo { get; set; }
+        public string? SortKey { get; set; }
+        public string[] Tags { get; set; } = Array.Empty<string>();
 
         internal LibraryFilterState Clone()
-            => (LibraryFilterState)MemberwiseClone();
+        {
+            var clone = (LibraryFilterState)MemberwiseClone();
+            clone.Tags = Tags?.ToArray() ?? Array.Empty<string>();
+            return clone;
+        }
     }
 }

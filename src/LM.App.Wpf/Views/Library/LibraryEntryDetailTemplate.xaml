@@ -111,7 +111,7 @@
 
         <Button Grid.Column="1"
                 Content="Edit"
-                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                 Margin="12,0,0,0"
                 Padding="12,4"
                 HorizontalAlignment="Right"
@@ -135,14 +135,14 @@
       </TextBlock>
 
       <TextBlock Text="Abstract" Style="{StaticResource SectionHeaderTextStyle}" />
-      <TextBlock Text="{Binding DataContext.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+      <TextBlock Text="{Binding DataContext.Results.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                  Style="{StaticResource SectionTextStyle}"
-                 Visibility="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}" />
+                 Visibility="{Binding DataContext.Results.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}" />
       <TextBlock Text="No abstract available.">
         <TextBlock.Style>
           <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
             <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
+              <DataTrigger Binding="{Binding DataContext.Results.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
                 <Setter Property="Visibility" Value="Visible" />
               </DataTrigger>
             </Style.Triggers>
@@ -210,8 +210,8 @@
       </TextBlock>
 
       <TextBlock Text="Links" Style="{StaticResource SectionHeaderTextStyle}" />
-      <ItemsControl ItemsSource="{Binding DataContext.LinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                    Visibility="{Binding DataContext.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}">
+      <ItemsControl ItemsSource="{Binding DataContext.Results.LinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                    Visibility="{Binding DataContext.Results.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <TextBlock Style="{StaticResource SectionTextStyle}" TextWrapping="Wrap">
@@ -228,7 +228,7 @@
         <TextBlock.Style>
           <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
             <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
+              <DataTrigger Binding="{Binding DataContext.Results.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
                 <Setter Property="Visibility" Value="Visible" />
               </DataTrigger>
             </Style.Triggers>

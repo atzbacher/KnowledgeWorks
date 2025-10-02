@@ -264,6 +264,14 @@ LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.get -> bool
 LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.set -> void
 LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.get -> bool
 LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.set -> void
+LM.App.Wpf.Library.LibraryFilterState.DateFrom.get -> System.DateTime?
+LM.App.Wpf.Library.LibraryFilterState.DateFrom.set -> void
+LM.App.Wpf.Library.LibraryFilterState.DateTo.get -> System.DateTime?
+LM.App.Wpf.Library.LibraryFilterState.DateTo.set -> void
+LM.App.Wpf.Library.LibraryFilterState.SortKey.get -> string?
+LM.App.Wpf.Library.LibraryFilterState.SortKey.set -> void
+LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string[]!
+LM.App.Wpf.Library.LibraryFilterState.Tags.set -> void
 LM.App.Wpf.ViewModels.AddPipeline
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
@@ -604,6 +612,26 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.get -> string
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UseFullTextSearch.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UseFullTextSearch.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateFrom.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateFrom.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateTo.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateTo.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedSort.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedSort.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SortOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RemoveTagCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand<string?>!
+LM.App.Wpf.ViewModels.Library.LibrarySortOption
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.LibrarySortOption(string! key, string! displayName) -> void
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.Key.get -> string!
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.ToString() -> string!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions.NewestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions.OldestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleAscending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleDescending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions.All.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.Category = 0 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.SavedSearch = 1 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
@@ -636,7 +664,7 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.Core.Abstractions.IHasher! hasher, LM.App.Wpf.Services.Pdf.IPdfViewerLauncher! pdfViewerLauncher) -> void
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits, System.Func<LM.Core.Models.Entry!, bool>? entryFilter = null) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ResultsAreFullText.get -> bool

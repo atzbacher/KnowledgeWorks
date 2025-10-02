@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,7 @@ namespace LM.App.Wpf.ViewModels.Library
         private bool _suppressRightPanelSync;
         private double _lastLeftPanelWidth = DefaultLeftPanelWidth;
         private double _lastRightPanelWidth = DefaultRightPanelWidth;
+        private static readonly System.StringComparer TagComparer = System.StringComparer.OrdinalIgnoreCase;
 
         private const double DefaultLeftPanelWidth = 310;
         private const double DefaultRightPanelWidth = 360;
@@ -73,7 +75,20 @@ namespace LM.App.Wpf.ViewModels.Library
         [ObservableProperty]
         private IReadOnlyList<LibraryPresetSummary> savedPresets = Array.Empty<LibraryPresetSummary>();
 
+        [ObservableProperty]
+        private System.DateTime? dateFrom;
+
+        [ObservableProperty]
+        private System.DateTime? dateTo;
+
+        [ObservableProperty]
+        private LibrarySortOption selectedSort = LibrarySortOptions.NewestFirst;
+
         public ObservableCollection<LibraryNavigationNodeViewModel> NavigationRoots { get; } = new();
+
+        public ObservableCollection<string> SelectedTags { get; } = new();
+
+        public IReadOnlyList<LibrarySortOption> SortOptions => LibrarySortOptions.All;
 
         public bool HasSavedPresets => SavedPresets.Count > 0;
 
@@ -82,6 +97,8 @@ namespace LM.App.Wpf.ViewModels.Library
         public string KeywordTooltip { get; } = BuildKeywordTooltip();
 
         public IRelayCommand ClearCommand { get; }
+
+        public IRelayCommand<string?> RemoveTagCommand { get; }
 
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore,
                                        ILibraryPresetPrompt presetPrompt,
@@ -93,7 +110,10 @@ namespace LM.App.Wpf.ViewModels.Library
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
 
-           ClearCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Clear);
+            RemoveTagCommand = new RelayCommand<string?>(RemoveTag, CanRemoveTag);
+            SelectedTags.CollectionChanged += OnSelectedTagsCollectionChanged;
+
+            ClearCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Clear);
         }
 
         private static string BuildKeywordTooltip()
@@ -106,6 +126,105 @@ namespace LM.App.Wpf.ViewModels.Library
 
             var formatted = tokens.Select(static token => string.Concat(token, ":"));
             return "Supported keywords: " + string.Join(", ", formatted);
+        }
+
+        private void OnSelectedTagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RemoveTagCommand.NotifyCanExecuteChanged();
+            Trace.WriteLine($"[LibraryFiltersViewModel] Selected tags updated via {e.Action}; total tags: {SelectedTags.Count}");
+        }
+
+        private bool CanRemoveTag(string? tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return false;
+            }
+
+            var normalized = tag.Trim();
+            return SelectedTags.Any(existing => string.Equals(existing, normalized, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void RemoveTag(string? tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return;
+            }
+
+            var normalized = tag.Trim();
+            var removed = false;
+            for (var i = SelectedTags.Count - 1; i >= 0; i--)
+            {
+                if (!string.Equals(SelectedTags[i], normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                SelectedTags.RemoveAt(i);
+                removed = true;
+            }
+
+            if (removed)
+            {
+                Trace.WriteLine($"[LibraryFiltersViewModel] Removed tag '{normalized}'.");
+            }
+        }
+
+        private void ReplaceTags(IEnumerable<string> tags)
+        {
+            SelectedTags.Clear();
+
+            if (tags is null)
+            {
+                return;
+            }
+
+            var unique = new HashSet<string>(TagComparer);
+            foreach (var tag in tags)
+            {
+                if (string.IsNullOrWhiteSpace(tag))
+                {
+                    continue;
+                }
+
+                var normalized = tag.Trim();
+                if (unique.Add(normalized))
+                {
+                    SelectedTags.Add(normalized);
+                }
+            }
+
+            Trace.WriteLine($"[LibraryFiltersViewModel] Loaded {SelectedTags.Count} tag filter(s).");
+        }
+
+        private static LibrarySortOption ResolveSortOption(string? key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return LibrarySortOptions.NewestFirst;
+            }
+
+            var resolved = LibrarySortOptions.All.FirstOrDefault(option => string.Equals(option.Key, key, StringComparison.OrdinalIgnoreCase));
+            return resolved ?? LibrarySortOptions.NewestFirst;
+        }
+
+        partial void OnDateFromChanged(System.DateTime? value)
+        {
+            if (value.HasValue && DateTo.HasValue && value.Value > DateTo.Value)
+            {
+                Trace.WriteLine("[LibraryFiltersViewModel] Adjusting DateTo to match new DateFrom value.");
+                DateTo = value;
+            }
+        }
+
+        partial void OnDateToChanged(System.DateTime? value)
+        {
+            if (value.HasValue && DateFrom.HasValue && value.Value < DateFrom.Value)
+            {
+                Trace.WriteLine("[LibraryFiltersViewModel] Adjusting DateFrom to match new DateTo value.");
+                DateFrom = value;
+            }
         }
 
         partial void OnLeftPanelWidthChanged(System.Windows.GridLength value)
@@ -243,12 +362,17 @@ namespace LM.App.Wpf.ViewModels.Library
 
         public void Clear()
         {
+            Trace.WriteLine("[LibraryFiltersViewModel] Clearing all filter values.");
             UseFullTextSearch = false;
             UnifiedQuery = string.Empty;
             FullTextQuery = string.Empty;
             FullTextInTitle = true;
             FullTextInAbstract = true;
             FullTextInContent = true;
+            DateFrom = null;
+            DateTo = null;
+            SelectedSort = LibrarySortOptions.NewestFirst;
+            SelectedTags.Clear();
         }
 
         [RelayCommand]
@@ -309,7 +433,15 @@ namespace LM.App.Wpf.ViewModels.Library
                 FullTextQuery = FullTextQuery,
                 FullTextInTitle = FullTextInTitle,
                 FullTextInAbstract = FullTextInAbstract,
-                FullTextInContent = FullTextInContent
+                FullTextInContent = FullTextInContent,
+                DateFrom = DateFrom?.Date,
+                DateTo = DateTo?.Date,
+                SortKey = SelectedSort?.Key,
+                Tags = SelectedTags
+                    .Where(static tag => !string.IsNullOrWhiteSpace(tag))
+                    .Select(static tag => tag.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
             };
 
         public void ApplyState(LibraryFilterState state)
@@ -325,6 +457,11 @@ namespace LM.App.Wpf.ViewModels.Library
             FullTextInTitle = state.FullTextInTitle;
             FullTextInAbstract = state.FullTextInAbstract;
             FullTextInContent = state.FullTextInContent;
+            DateFrom = state.DateFrom?.Date;
+            DateTo = state.DateTo?.Date;
+            SelectedSort = ResolveSortOption(state.SortKey);
+            ReplaceTags(state.Tags ?? Array.Empty<string>());
+            Trace.WriteLine("[LibraryFiltersViewModel] Applied preset state to filters.");
         }
 
         [RelayCommand]
