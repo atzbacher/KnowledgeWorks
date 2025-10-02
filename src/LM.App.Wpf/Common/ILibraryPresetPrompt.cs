@@ -10,7 +10,11 @@ namespace LM.App.Wpf.Common
         Task<LibraryPresetSelectionResult?> RequestSelectionAsync(LibraryPresetSelectionContext context);
     }
 
-    public sealed record LibraryPresetSaveContext(string DefaultName, IReadOnlyCollection<string> ExistingNames);
+    public sealed record LibraryPresetSaveContext(
+        string DefaultName,
+        IReadOnlyCollection<string> ExistingNames,
+        string Title = "Save Library Preset",
+        string Prompt = "Name this filter preset.");
 
     public sealed record LibraryPresetSaveResult(string Name);
 
@@ -19,7 +23,7 @@ namespace LM.App.Wpf.Common
         bool AllowLoad,
         string Title);
 
-    public sealed record LibraryPresetSelectionResult(string? SelectedPresetName, IReadOnlyList<string> DeletedPresetNames);
+    public sealed record LibraryPresetSelectionResult(string? SelectedPresetId, IReadOnlyList<string> DeletedPresetIds);
 
-    public sealed record LibraryPresetSummary(string Name, DateTime SavedUtc);
+    public sealed record LibraryPresetSummary(string Id, string Name, DateTime SavedUtc);
 }
