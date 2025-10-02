@@ -18,7 +18,6 @@ using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
 using LM.Infrastructure.Hooks;
-using LM.App.Wpf.Views.Behaviors;
 using System.Windows.Controls;
 using System.Windows.Data;
 using HookM = LM.HubSpoke.Models;
