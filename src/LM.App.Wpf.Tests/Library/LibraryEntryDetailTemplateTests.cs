@@ -27,10 +27,12 @@ namespace LM.App.Wpf.Tests.Library
                 var root = CreateTemplateHost(result, host);
 
                 Trace.WriteLine("Locating metadata section expander for keyboard focus validation.");
-
                 var metadata = FindDescendant<System.Windows.Controls.Expander>(root, static expander => string.Equals(expander.Name, "MetadataSection", StringComparison.Ordinal));
                 Assert.NotNull(metadata);
                 Assert.True(metadata!.IsExpanded);
+                Trace.WriteLine($"Metadata header content: {metadata.Header}");
+                Assert.Equal("METADATA", metadata.Header);
+
 
                 metadata.ApplyTemplate();
                 var headerToggle = metadata.Template.FindName("HeaderToggle", metadata) as System.Windows.Controls.ToggleButton;
@@ -38,6 +40,19 @@ namespace LM.App.Wpf.Tests.Library
                 Assert.NotNull(headerToggle);
                 Assert.True(headerToggle!.IsTabStop);
                 Assert.True(headerToggle.Focusable);
+
+                headerToggle.ApplyTemplate();
+                var headerBorder = headerToggle.Template.FindName("HeaderBorder", headerToggle) as System.Windows.Controls.Border;
+                var headerBorderBrush = headerBorder?.Background as System.Windows.Media.SolidColorBrush;
+                Trace.WriteLine($"Header border background color: {headerBorderBrush?.Color}");
+                Assert.NotNull(headerBorderBrush);
+                Assert.Equal(System.Windows.Media.Color.FromRgb(0xF3, 0xF4, 0xF6), headerBorderBrush!.Color);
+
+                var headerForeground = headerToggle.Foreground as System.Windows.Media.SolidColorBrush;
+                Trace.WriteLine($"Header toggle foreground color: {headerForeground?.Color}");
+                Assert.NotNull(headerForeground);
+                Assert.Equal(System.Windows.Media.Color.FromRgb(0x6B, 0x72, 0x80), headerForeground!.Color);
+
 
                 metadata.IsExpanded = false;
                 metadata.UpdateLayout();
@@ -95,7 +110,6 @@ namespace LM.App.Wpf.Tests.Library
         private static void AssertVisibility(System.Windows.DependencyObject root, string elementName, System.Windows.Visibility expected)
         {
             Trace.WriteLine($"Searching for element '{elementName}' to validate visibility state.");
-
             var textBlock = FindDescendant<System.Windows.Controls.TextBlock>(root, element => string.Equals(element.Name, elementName, StringComparison.Ordinal));
             Assert.NotNull(textBlock);
             Assert.Equal(expected, textBlock!.Visibility);

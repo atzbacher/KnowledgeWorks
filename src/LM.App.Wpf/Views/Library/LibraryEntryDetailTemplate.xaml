@@ -38,17 +38,18 @@
   </Style>
 
   <Style x:Key="LibraryDetailExpanderToggleStyle" TargetType="ToggleButton">
-    <Setter Property="Background" Value="#F3F4F6" />
-    <Setter Property="Foreground" Value="#1F2937" />
-    <Setter Property="Padding" Value="12,10" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="#6B7280" />
+    <Setter Property="Padding" Value="12,8" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="11" />
 
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToggleButton">
           <Border x:Name="HeaderBorder"
-                  Background="{TemplateBinding Background}"
+                  Background="#F3F4F6"
                   BorderBrush="#E5E7EB"
                   BorderThickness="0,0,0,1"
                   CornerRadius="4,4,0,0"
@@ -65,7 +66,10 @@
                          Text="&#xE70D;" />
               <ContentPresenter Margin="8,0,0,0"
                                 VerticalAlignment="Center"
-                                RecognizesAccessKey="True" />
+                                RecognizesAccessKey="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}"
+                                TextElement.FontWeight="{TemplateBinding FontWeight}"
+                                TextElement.FontSize="{TemplateBinding FontSize}" />
             </DockPanel>
 
           </Border>
@@ -90,36 +94,33 @@
   </Style>
 
   <Style x:Key="LibraryDetailExpanderStyle" TargetType="Expander">
-    <Setter Property="Background" Value="White" />
-    <Setter Property="BorderBrush" Value="#E5E7EB" />
-    <Setter Property="BorderThickness" Value="1" />
+
     <Setter Property="IsExpanded" Value="True" />
     <Setter Property="Margin" Value="0,12,0,0" />
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Expander">
-          <Border Background="{TemplateBinding Background}"
-                  BorderBrush="{TemplateBinding BorderBrush}"
-                  BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="4">
-            <DockPanel>
-              <ToggleButton x:Name="HeaderToggle"
-                            DockPanel.Dock="Top"
-                            Focusable="True"
-                            IsTabStop="True"
-                            Style="{StaticResource LibraryDetailExpanderToggleStyle}"
-                            Content="{TemplateBinding Header}"
-                            IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
-              <Border x:Name="ContentHost"
-                      Background="White"
-                      CornerRadius="0,0,4,4">
-                <ContentPresenter x:Name="ExpandSite"
-                                  Margin="12"
-                                  Visibility="Collapsed"
-                                  ContentSource="Content" />
-              </Border>
+          <Border Background="Transparent" Padding="0">
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4">
+              <DockPanel>
+                <ToggleButton x:Name="HeaderToggle"
+                              DockPanel.Dock="Top"
+                              Focusable="True"
+                              IsTabStop="True"
+                              Style="{StaticResource LibraryDetailExpanderToggleStyle}"
+                              Content="{TemplateBinding Header}"
+                              IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
+                <Border x:Name="ContentHost"
+                        Background="White"
+                        CornerRadius="0,0,4,4">
+                  <ContentPresenter x:Name="ExpandSite"
+                                    Margin="12"
+                                    Visibility="Collapsed"
+                                    ContentSource="Content" />
+                </Border>
+              </DockPanel>
+            </Border>
 
-            </DockPanel>
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsExpanded" Value="True">
@@ -187,7 +188,8 @@
       </Grid>
 
       <Expander x:Name="MetadataSection"
-                Header="Metadata"
+                Header="METADATA"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}"
                 Margin="0,16,0,0">
         <StackPanel>
@@ -221,7 +223,8 @@
       </Expander>
 
       <Expander x:Name="AbstractSection"
-                Header="Abstract"
+                Header="ABSTRACT"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding DataContext.Results.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
@@ -243,7 +246,8 @@
       </Expander>
 
       <Expander x:Name="NotesSection"
-                Header="Notes"
+                Header="NOTES"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding Entry.Notes}"
@@ -265,7 +269,8 @@
       </Expander>
 
       <Expander x:Name="UserNotesSection"
-                Header="User notes"
+                Header="USER NOTES"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding Entry.UserNotes}"
@@ -287,7 +292,8 @@
       </Expander>
 
       <Expander x:Name="IdentifiersSection"
-                Header="Identifiers"
+                Header="IDENTIFIERS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Visibility="{Binding HasInternalId, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -323,7 +329,8 @@
       </Expander>
 
       <Expander x:Name="LinksSection"
-                Header="Links"
+                Header="LINKS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="LinksItemsControl"
@@ -358,7 +365,8 @@
       </Expander>
 
       <Expander x:Name="AttachmentsSection"
-                Header="Attachments"
+                Header="ATTACHMENTS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="AttachmentsItemsControl"
@@ -425,7 +433,8 @@
       </Expander>
 
       <Expander x:Name="RelationsSection"
-                Header="Relations"
+                Header="RELATIONS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="RelationsItemsControl"
