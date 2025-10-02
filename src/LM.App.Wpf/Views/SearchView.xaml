@@ -280,7 +280,6 @@
                        Style="{StaticResource SearchSectionHeader}" />
             <ComboBox Style="{StaticResource SearchComboBoxStyle}"
                       ItemsSource="{Binding Providers.Databases}"
-                      DisplayMemberPath="DisplayName"
                       SelectedValuePath="Value"
                       SelectedValue="{Binding Providers.SelectedDatabase, Mode=TwoWay}">
               <ComboBox.ItemTemplate>
