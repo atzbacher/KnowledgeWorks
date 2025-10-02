@@ -30,11 +30,21 @@ namespace LM.App.Wpf.Library
 
             foreach (var folder in Folders ?? Enumerable.Empty<LibraryPresetFolder>())
             {
+                if (folder is null)
+                {
+                    continue;
+                }
+
                 combined.Add(new LibraryPresetTreeItem(LibraryPresetNodeKind.Folder, folder.SortOrder, folder, null));
             }
 
             foreach (var preset in Presets ?? Enumerable.Empty<LibraryFilterPreset>())
             {
+                if (preset is null)
+                {
+                    continue;
+                }
+
                 combined.Add(new LibraryPresetTreeItem(LibraryPresetNodeKind.Preset, preset.SortOrder, null, preset));
             }
 
@@ -54,11 +64,21 @@ namespace LM.App.Wpf.Library
 
             foreach (var folder in Folders ?? Enumerable.Empty<LibraryPresetFolder>())
             {
+                if (folder is null)
+                {
+                    continue;
+                }
+
                 clone.Folders.Add(folder.Clone());
             }
 
             foreach (var preset in Presets ?? Enumerable.Empty<LibraryFilterPreset>())
             {
+                if (preset is null)
+                {
+                    continue;
+                }
+
                 clone.Presets.Add(preset.Clone());
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using Microsoft.Xaml.Behaviors;
 
@@ -139,13 +140,13 @@ namespace LM.App.Wpf.Views.Behaviors
             e.Handled = true;
         }
 
-        private static bool TryGetDragSource(System.Windows.DragEventArgs e, out SavedSearchNodeViewModel? source)
+        private static bool TryGetDragSource(System.Windows.DragEventArgs e, [NotNullWhen(true)] out SavedSearchNodeViewModel? source)
         {
             source = e.Data.GetData(typeof(SavedSearchNodeViewModel)) as SavedSearchNodeViewModel;
             return source is not null;
         }
 
-        private bool TryGetTree(out SavedSearchTreeViewModel tree)
+        private bool TryGetTree([NotNullWhen(true)] out SavedSearchTreeViewModel? tree)
         {
             tree = AssociatedObject.DataContext as SavedSearchTreeViewModel;
             return tree is not null;
@@ -157,6 +158,8 @@ namespace LM.App.Wpf.Views.Behaviors
                                            out SavedSearchFolderViewModel targetFolder,
                                            out int insertIndex)
         {
+            ArgumentNullException.ThrowIfNull(source);
+
             var item = FindTreeViewItem(sourceElement);
             switch (item?.DataContext)
             {

@@ -640,8 +640,8 @@ LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.Preset.get -> LM.App.Wpf.Library.LibraryFilterPreset!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.SavedSearchPresetViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, LM.App.Wpf.Library.LibraryFilterPreset! preset, int sortOrder) -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.SavedUtc.get -> System.DateTime
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.Summary.get -> LM.App.Wpf.Common.LibraryPresetSummary
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.ToSummary() -> LM.App.Wpf.Common.LibraryPresetSummary
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.Summary.get -> LM.App.Wpf.Common.LibraryPresetSummary!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.ToSummary() -> LM.App.Wpf.Common.LibraryPresetSummary!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.Presets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.SavedSearchTreeChangedEventArgs(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>! presets) -> void

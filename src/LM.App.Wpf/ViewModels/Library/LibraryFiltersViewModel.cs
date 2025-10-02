@@ -960,7 +960,10 @@ namespace LM.App.Wpf.ViewModels.Library
 
         private void OnSavedSearchTreeChanged(object? sender, SavedSearchTreeChangedEventArgs e)
         {
-            var _ = InvokeOnDispatcherAsync(() => SavedPresets = e.Presets);
+            var _ = InvokeOnDispatcherAsync(() =>
+            {
+                SavedPresets = e.Presets;
+            });
             if (!_suppressNavigationRefresh)
             {
                 Trace.WriteLine($"[LibraryFiltersViewModel] Saved search tree changed; scheduling navigation refresh for {e.Presets.Count} preset(s).");
