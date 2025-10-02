@@ -31,6 +31,7 @@ LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get 
 LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! DefaultName, System.Collections.Generic.IReadOnlyCollection<string!>! ExistingNames, string! Title = "Save Library Preset", string! Prompt = "Name this filter preset.") -> void
 LM.App.Wpf.Library.Collections.LibraryCollectionEntry.LibraryCollectionEntry() -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.RenameFolderAsync(string! folderId, string! newName, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
 LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem>!
