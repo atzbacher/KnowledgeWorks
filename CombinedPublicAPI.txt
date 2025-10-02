@@ -13627,3 +13627,1010 @@ static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.NewestFirst.get -> LM.Ap
 static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.OldestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
 static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleAscending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
 static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleDescending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+---------- LM.App.Wpf ----------
+#nullable enable
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.ColumnKeyProperty -> System.Windows.DependencyProperty!
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.GetColumnKey(System.Windows.DependencyObject! element) -> string?
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.SetColumnKey(System.Windows.DependencyObject! element, string? value) -> void
+#nullable enable
+const LM.App.Wpf.Library.LibraryPresetFolder.RootId = "root" -> string!
+const LM.App.Wpf.ViewModels.StagingItem.DuplicateThreshold = 0.999 -> double
+const LM.App.Wpf.ViewModels.StagingItem.NearThreshold = 0.75 -> double
+LM.App.Wpf.App
+LM.App.Wpf.App.App() -> void
+LM.App.Wpf.App.InitializeComponent() -> void
+LM.App.Wpf.Common.AsyncRelayCommand
+LM.App.Wpf.Common.AsyncRelayCommand.AsyncRelayCommand(System.Func<object?, System.Threading.Tasks.Task!>! execute, System.Func<object?, bool>? canExecute = null) -> void
+LM.App.Wpf.Common.AsyncRelayCommand.AsyncRelayCommand(System.Func<System.Threading.Tasks.Task!>! execute, System.Func<bool>? canExecute = null) -> void
+LM.App.Wpf.Common.AsyncRelayCommand.CanExecute(object? parameter) -> bool
+LM.App.Wpf.Common.AsyncRelayCommand.CanExecuteChanged -> System.EventHandler?
+LM.App.Wpf.Common.AsyncRelayCommand.Execute(object? parameter) -> void
+LM.App.Wpf.Common.AsyncRelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.IAsyncRelayCommand
+LM.App.Wpf.Common.IAsyncRelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter
+LM.App.Wpf.Common.BooleanToOpacityConverter.BooleanToOpacityConverter() -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Common.BooleanToOpacityConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.get -> double
+LM.App.Wpf.Common.BooleanToOpacityConverter.FalseOpacity.set -> void
+LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
+LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
+LM.App.Wpf.Common.Converters.ProjectEditorConverters
+LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get -> System.Windows.Data.IMultiValueConverter!
+LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! DefaultName, System.Collections.Generic.IReadOnlyCollection<string!>! ExistingNames, string! Title = "Save Library Preset", string! Prompt = "Name this filter preset.") -> void
+LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
+LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
+LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem>!
+LM.App.Wpf.Library.LibraryPresetNodeKind.Folder = 0 -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetNodeKind.Preset = 1 -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetTreeItem.LibraryPresetTreeItem() -> void
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, LM.Review.Core.Models.ReviewTemplateKind template, string! metadataNotes, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CheckedEntryIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CreatedAtUtc.get -> System.DateTimeOffset
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CreatedBy.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.HookRelativePath.get -> string?
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.LitSearchEntryId.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.LitSearchRunId.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Name.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Template.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.MetadataNotes.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectId.get -> string!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.Stages.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>!
+LM.App.Wpf.Services.Review.Design.ProjectBlueprint.With(string? name = null, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>? stages = null, LM.Review.Core.Models.ReviewTemplateKind? template = null, string? metadataNotes = null, string? litSearchEntryId = null, string? litSearchRunId = null, System.Collections.Generic.IReadOnlyList<string!>? checkedEntryIds = null) -> LM.App.Wpf.Services.Review.Design.ProjectBlueprint!
+LM.App.Wpf.Services.Review.Design.StageBlueprint
+LM.App.Wpf.Services.Review.Design.StageBlueprint.StageBlueprint(string! stageId, string! name, LM.Review.Core.Models.ReviewStageType stageType, int primaryReviewers, int secondaryReviewers, bool requiresConsensus, int minimumAgreements, bool escalateOnDisagreement, LM.Review.Core.Models.StageDisplayProfile! displayProfile) -> void
+LM.App.Wpf.Services.Review.Design.StageBlueprint.EscalateOnDisagreement.get -> bool
+LM.App.Wpf.Services.Review.Design.StageBlueprint.MinimumAgreements.get -> int
+LM.App.Wpf.Services.Review.Design.StageBlueprint.Name.get -> string!
+LM.App.Wpf.Services.Review.Design.StageBlueprint.PrimaryReviewers.get -> int
+LM.App.Wpf.Services.Review.Design.StageBlueprint.RequiresConsensus.get -> bool
+LM.App.Wpf.Services.Review.Design.StageBlueprint.SecondaryReviewers.get -> int
+LM.App.Wpf.Services.Review.Design.StageBlueprint.StageId.get -> string!
+LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
+LM.App.Wpf.Services.Pdf.IPdfViewerLauncher
+LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbsolutePath, string! pdfHash) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.SavedSearchDragDropRequest() -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SavedSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest!>!
+LM.App.Wpf.ViewModels.LibraryViewModel.OpenPdfAnnotationsCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.LibrarySearchResult?>!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Dispose() -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.PdfAnnotationColorCommandParameter() -> void
+LM.App.Wpf.Views.Converters.EnumEqualsConverter
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.EnumEqualsConverter.EnumEqualsConverter() -> void
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.InverseBooleanToVisibilityConverter() -> void
+LM.App.Wpf.Views.Pdf.PdfAnnotationList
+LM.App.Wpf.Views.Pdf.PdfAnnotationList.PdfAnnotationList() -> void
+LM.App.Wpf.Views.Pdf.PdfAnnotationList.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewerWindow
+LM.App.Wpf.Views.PdfViewerWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewerWindow.PdfViewerWindow() -> void
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.LoadPdfAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.CreateHighlightAsync(string! payloadJson) -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.GetCurrentSelectionAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.IPdfViewerHostObject.SetOverlayAsync(string! payloadJson) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.PdfViewerHostObject(LM.App.Wpf.Views.PdfViewer! owner) -> void
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.LoadPdfAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.CreateHighlightAsync(string! payloadJson) -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.GetCurrentSelectionAsync() -> System.Threading.Tasks.Task<string?>!
+LM.App.Wpf.Views.PdfViewer.PdfViewerHostObject.SetOverlayAsync(string! payloadJson) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogCloseRequestedEventArgs(bool? dialogResult) -> void
+LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs.DialogResult.get -> bool?
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.CloseRequested -> System.EventHandler<LM.App.Wpf.Common.Dialogs.DialogCloseRequestedEventArgs!>?
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.DialogViewModelBase() -> void
+LM.App.Wpf.Common.Dialogs.DialogViewModelBase.RequestClose(bool? dialogResult) -> void
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowOpenFileDialog(LM.App.Wpf.Common.Dialogs.FilePickerOptions! options) -> string![]?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.WpfDialogService(System.IServiceProvider! services) -> void
+LM.App.Wpf.Common.ILibraryPresetPrompt
+LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
+LM.App.Wpf.Common.ILibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
+LM.App.Wpf.Common.IClipboardService
+LM.App.Wpf.Common.IClipboardService.SetText(string! text) -> void
+LM.App.Wpf.Common.ClipboardService
+LM.App.Wpf.Common.ClipboardService.ClipboardService() -> void
+LM.App.Wpf.Common.ClipboardService.SetText(string! text) -> void
+LM.App.Wpf.Common.IFileExplorerService
+LM.App.Wpf.Common.IFileExplorerService.RevealInExplorer(string! path) -> void
+LM.App.Wpf.Common.FileExplorerService
+LM.App.Wpf.Common.FileExplorerService.FileExplorerService() -> void
+LM.App.Wpf.Common.FileExplorerService.RevealInExplorer(string! path) -> void
+LM.App.Wpf.Common.ISearchSavePrompt
+LM.App.Wpf.Common.ISearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
+LM.App.Wpf.Common.SearchSavePromptContext
+LM.App.Wpf.Common.SearchSavePromptContext.Database.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultName.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultNotes.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultTags.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.From.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.Query.init -> void
+LM.App.Wpf.Common.SearchSavePromptContext.SearchSavePromptContext(string! Query, LM.Core.Models.SearchDatabase Database, System.DateTime? From, System.DateTime? To, string! DefaultName, string! DefaultNotes, System.Collections.Generic.IReadOnlyList<string!>! DefaultTags) -> void
+LM.App.Wpf.Common.SearchSavePromptContext.Database.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultName.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultNotes.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.DefaultTags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Common.SearchSavePromptContext.From.get -> System.DateTime?
+LM.App.Wpf.Common.SearchSavePromptContext.Query.get -> string!
+LM.App.Wpf.Common.SearchSavePromptContext.To.get -> System.DateTime?
+LM.App.Wpf.Common.SearchSavePromptContext.To.init -> void
+LM.App.Wpf.Common.SearchSavePromptResult
+LM.App.Wpf.Common.SearchSavePromptResult.Name.init -> void
+LM.App.Wpf.Common.SearchSavePromptResult.Notes.init -> void
+LM.App.Wpf.Common.SearchSavePromptResult.Tags.init -> void
+LM.App.Wpf.Common.SearchSavePromptResult.SearchSavePromptResult(string! Name, string! Notes, string! Tags) -> void
+LM.App.Wpf.Common.SearchSavePromptResult.Name.get -> string!
+LM.App.Wpf.Common.SearchSavePromptResult.Notes.get -> string!
+LM.App.Wpf.Common.SearchSavePromptResult.Tags.get -> string!
+LM.App.Wpf.Common.LibraryPresetSaveContext
+LM.App.Wpf.Common.LibraryPresetSaveContext.DefaultName.get -> string!
+LM.App.Wpf.Common.LibraryPresetSaveContext.DefaultName.init -> void
+LM.App.Wpf.Common.LibraryPresetSaveContext.ExistingNames.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
+LM.App.Wpf.Common.LibraryPresetSaveContext.ExistingNames.init -> void
+LM.App.Wpf.Common.LibraryPresetSaveContext.Prompt.get -> string!
+LM.App.Wpf.Common.LibraryPresetSaveContext.Prompt.init -> void
+LM.App.Wpf.Common.LibraryPresetSaveContext.Title.get -> string!
+LM.App.Wpf.Common.LibraryPresetSaveContext.Title.init -> void
+LM.App.Wpf.Common.LibraryPresetSaveResult
+LM.App.Wpf.Common.LibraryPresetSaveResult.LibraryPresetSaveResult(string! Name) -> void
+LM.App.Wpf.Common.LibraryPresetSaveResult.Name.get -> string!
+LM.App.Wpf.Common.LibraryPresetSaveResult.Name.init -> void
+LM.App.Wpf.Common.LibraryPresetSelectionContext
+LM.App.Wpf.Common.LibraryPresetSelectionContext.AllowLoad.get -> bool
+LM.App.Wpf.Common.LibraryPresetSelectionContext.AllowLoad.init -> void
+LM.App.Wpf.Common.LibraryPresetSelectionContext.LibraryPresetSelectionContext(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>! Presets, bool AllowLoad, string! Title) -> void
+LM.App.Wpf.Common.LibraryPresetSelectionContext.Presets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.Common.LibraryPresetSelectionContext.Presets.init -> void
+LM.App.Wpf.Common.LibraryPresetSelectionContext.Title.get -> string!
+LM.App.Wpf.Common.LibraryPresetSelectionContext.Title.init -> void
+LM.App.Wpf.Common.LibraryPresetSelectionResult
+LM.App.Wpf.Common.LibraryPresetSelectionResult.DeletedPresetIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Common.LibraryPresetSelectionResult.DeletedPresetIds.init -> void
+LM.App.Wpf.Common.LibraryPresetSelectionResult.LibraryPresetSelectionResult(string? SelectedPresetId, System.Collections.Generic.IReadOnlyList<string!>! DeletedPresetIds) -> void
+LM.App.Wpf.Common.LibraryPresetSelectionResult.SelectedPresetId.get -> string?
+LM.App.Wpf.Common.LibraryPresetSelectionResult.SelectedPresetId.init -> void
+LM.App.Wpf.Common.LibraryPresetSummary
+LM.App.Wpf.Common.LibraryPresetSummary.Id.get -> string!
+LM.App.Wpf.Common.LibraryPresetSummary.Id.init -> void
+LM.App.Wpf.Common.LibraryPresetSummary.LibraryPresetSummary(string! Id, string! Name, System.DateTime SavedUtc) -> void
+LM.App.Wpf.Common.LibraryPresetSummary.Name.get -> string!
+LM.App.Wpf.Common.LibraryPresetSummary.Name.init -> void
+LM.App.Wpf.Common.LibraryPresetSummary.SavedUtc.get -> System.DateTime
+LM.App.Wpf.Common.LibraryPresetSummary.SavedUtc.init -> void
+LM.App.Wpf.Common.RelayCommand
+LM.App.Wpf.Common.RelayCommand.CanExecute(object? parameter) -> bool
+LM.App.Wpf.Common.RelayCommand.CanExecuteChanged -> System.EventHandler?
+LM.App.Wpf.Common.RelayCommand.Execute(object? parameter) -> void
+LM.App.Wpf.Common.RelayCommand.RaiseCanExecuteChanged() -> void
+LM.App.Wpf.Common.RelayCommand.RelayCommand(System.Action<object?>! exec, System.Func<object?, bool>? can = null) -> void
+LM.App.Wpf.Common.Dialogs.FilePickerOptions
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.AllowMultiple.get -> bool
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.AllowMultiple.init -> void
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.Filter.get -> string?
+LM.App.Wpf.Common.Dialogs.FilePickerOptions.Filter.init -> void
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.get -> string?
+LM.App.Wpf.Common.Dialogs.FolderPickerOptions.Description.init -> void
+LM.App.Wpf.Common.Dialogs.IDialogService
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.IDialogService.ShowProjectEditor(LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel! editor) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowFolderBrowserDialog(LM.App.Wpf.Common.Dialogs.FolderPickerOptions! options) -> string?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowStagingEditor(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> bool?
+LM.App.Wpf.Common.Dialogs.WpfDialogService.ShowProjectEditor(LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel! editor) -> bool?
+LM.App.Wpf.Common.StringJoinConverter
+LM.App.Wpf.Common.StringJoinConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
+LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
+LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
+LM.App.Wpf.Common.ViewModelBase
+LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ChangeColorCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ChangeColorCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ClearColorCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ClearColorCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorName.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorName.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.CopyCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.CopyCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.DeleteCommand.get -> System.Windows.Input.ICommand?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.DeleteCommand.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Id.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Note.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.Annotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.Annotation.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.ColorName.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.ColorName.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.get -> int
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PageNumber.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PdfAnnotation(string! id, string! title) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImage.get -> System.Windows.Media.Imaging.BitmapImage?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImage.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImagePath.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.PreviewImagePath.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.TextSnippet.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.TextSnippet.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Title.get -> string!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Title.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.Annotations.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Pdf.PdfAnnotation!>!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.ChangeAnnotationColorCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.CopyAnnotationCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.DocumentSource.get -> System.Uri?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.EntryId.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.HandleAnnotationSelectionAsync(LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.LoadPdfCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfHash.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfPath.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.PdfViewerViewModel(LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.App.Wpf.Services.IUserContext! userContext, LM.Core.Abstractions.IPdfAnnotationPreviewStorage! previewStorage, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.Common.IClipboardService! clipboard) -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.RecordAnnotationChangeCommand.get -> LM.App.Wpf.Common.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.get -> LM.App.Wpf.ViewModels.Pdf.PdfAnnotation?
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.SelectedAnnotation.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.WebViewBridge.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfViewerViewModel.DeleteAnnotationCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.Library.LibraryFilterPreset
+LM.App.Wpf.Library.LibraryFilterPreset.LibraryFilterPreset() -> void
+LM.App.Wpf.Library.LibraryFilterPreset.Id.get -> string!
+LM.App.Wpf.Library.LibraryFilterPreset.Id.set -> void
+LM.App.Wpf.Library.LibraryFilterPreset.Name.get -> string!
+LM.App.Wpf.Library.LibraryFilterPreset.Name.set -> void
+LM.App.Wpf.Library.LibraryFilterPreset.SavedUtc.get -> System.DateTime
+LM.App.Wpf.Library.LibraryFilterPreset.SavedUtc.set -> void
+LM.App.Wpf.Library.LibraryFilterPreset.SortOrder.get -> int
+LM.App.Wpf.Library.LibraryFilterPreset.SortOrder.set -> void
+LM.App.Wpf.Library.LibraryFilterPreset.State.get -> LM.App.Wpf.Library.LibraryFilterState!
+LM.App.Wpf.Library.LibraryFilterPreset.State.set -> void
+LM.App.Wpf.Library.LibraryFilterPresetStore
+LM.App.Wpf.Library.LibraryFilterPresetStore.CreateFolderAsync(string! parentFolderId, string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.App.Wpf.Library.LibraryFilterPresetStore.DeleteFolderAsync(string! folderId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.GetHierarchyAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryPresetFolder!>!
+LM.App.Wpf.Library.LibraryFilterPresetStore.MoveFolderAsync(string! folderId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.MovePresetAsync(string! presetId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.LibraryFilterPresetStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.LibraryFilterPreset!>!>!
+LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, string? targetFolderId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetByIdAsync(string! presetId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
+LM.App.Wpf.Library.LibraryPresetFolder
+LM.App.Wpf.Library.LibraryPresetFolder.Clone() -> LM.App.Wpf.Library.LibraryPresetFolder!
+LM.App.Wpf.Library.LibraryPresetFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryPresetFolder!>!
+LM.App.Wpf.Library.LibraryPresetFolder.Folders.set -> void
+LM.App.Wpf.Library.LibraryPresetFolder.Id.get -> string!
+LM.App.Wpf.Library.LibraryPresetFolder.Id.set -> void
+LM.App.Wpf.Library.LibraryPresetFolder.LibraryPresetFolder() -> void
+LM.App.Wpf.Library.LibraryPresetFolder.Name.get -> string!
+LM.App.Wpf.Library.LibraryPresetFolder.Name.set -> void
+LM.App.Wpf.Library.LibraryPresetFolder.Presets.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryFilterPreset!>!
+LM.App.Wpf.Library.LibraryPresetFolder.Presets.set -> void
+LM.App.Wpf.Library.LibraryPresetFolder.SortOrder.get -> int
+LM.App.Wpf.Library.LibraryPresetFolder.SortOrder.set -> void
+LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetTreeItem
+LM.App.Wpf.Library.LibraryPresetTreeItem.Folder.get -> LM.App.Wpf.Library.LibraryPresetFolder?
+LM.App.Wpf.Library.LibraryPresetTreeItem.Kind.get -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetTreeItem.LibraryPresetTreeItem(LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder, LM.App.Wpf.Library.LibraryPresetFolder? folder, LM.App.Wpf.Library.LibraryFilterPreset? preset) -> void
+LM.App.Wpf.Library.LibraryPresetTreeItem.Preset.get -> LM.App.Wpf.Library.LibraryFilterPreset?
+LM.App.Wpf.Library.LibraryPresetTreeItem.SortOrder.get -> int
+LM.App.Wpf.Library.ILibraryEntryEditor
+LM.App.Wpf.Library.ILibraryEntryEditor.EditEntryAsync(LM.Core.Models.Entry! entry) -> System.Threading.Tasks.Task<System.Boolean>!
+LM.App.Wpf.Library.LibraryFilterState
+LM.App.Wpf.Library.LibraryFilterState.LibraryFilterState() -> void
+LM.App.Wpf.Library.LibraryFilterState.UseFullTextSearch.get -> bool
+LM.App.Wpf.Library.LibraryFilterState.UseFullTextSearch.set -> void
+LM.App.Wpf.Library.LibraryFilterState.UnifiedQuery.get -> string?
+LM.App.Wpf.Library.LibraryFilterState.UnifiedQuery.set -> void
+LM.App.Wpf.Library.LibraryFilterState.FullTextQuery.get -> string?
+LM.App.Wpf.Library.LibraryFilterState.FullTextQuery.set -> void
+LM.App.Wpf.Library.LibraryFilterState.DateFrom.get -> System.DateTime?
+LM.App.Wpf.Library.LibraryFilterState.DateFrom.set -> void
+LM.App.Wpf.Library.LibraryFilterState.DateTo.get -> System.DateTime?
+LM.App.Wpf.Library.LibraryFilterState.DateTo.set -> void
+LM.App.Wpf.Library.LibraryFilterState.SortKey.get -> string?
+LM.App.Wpf.Library.LibraryFilterState.SortKey.set -> void
+LM.App.Wpf.Library.LibraryFilterState.Tags.set -> void
+LM.App.Wpf.ViewModels.AddPipeline
+LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.AddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
+LM.App.Wpf.ViewModels.AddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
+LM.App.Wpf.ViewModels.AddViewModel
+LM.App.Wpf.ViewModels.AddViewModel.AddFilesCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.App.Wpf.ViewModels.WatchedFolderScanner? scanner = null, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore? watchedFolderSettings = null, LM.App.Wpf.ViewModels.StagingListViewModel? stagingList = null, LM.App.Wpf.ViewModels.WatchedFoldersViewModel? watchedFolders = null, LM.App.Wpf.Common.Dialogs.IDialogService? dialogService = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
+LM.App.Wpf.ViewModels.AddViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.BulkAddFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.ClearCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.CommitSelectedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
+LM.App.Wpf.ViewModels.AddViewModel.Current.set -> void
+LM.App.Wpf.ViewModels.AddViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.AddViewModel.EntryTypes.get -> System.Array!
+LM.App.Wpf.ViewModels.AddViewModel.IndexLabel.get -> string!
+LM.App.Wpf.ViewModels.AddViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.AddViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.AddViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.AddViewModel.ReviewStagedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.AddViewModel.SelectByOffset(int delta) -> void
+LM.App.Wpf.ViewModels.AddViewModel.SelectedType.get -> LM.Core.Models.EntryType
+LM.App.Wpf.ViewModels.AddViewModel.SelectedType.set -> void
+LM.App.Wpf.ViewModels.AddViewModel.Staging.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.AddViewModel.StagingListViewModel.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
+LM.App.Wpf.ViewModels.AddViewModel.WatchedFolders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.AddViewModel.WatchedFoldersViewModel.get -> LM.App.Wpf.ViewModels.WatchedFoldersViewModel!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.DeletedPresetIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Initialize(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.LibraryPresetPickerDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.Presets.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel.SelectedPresetId.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.EntryId.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.HookAbsolutePath.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.HookRelativePath.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Label.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Query.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel.Runs.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel!>!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.DisplayLabel.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.ExecutedBy.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.IsFavorite.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.Owner.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.RunId.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.RunUtc.get -> System.DateTime
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel.TotalHits.get -> int
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.CancelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.ConfirmCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.Entries.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel!>!
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.HasEntries.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.HasEntries.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.LitSearchRunPickerViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedEntry.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunEntryItemViewModel?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedEntry.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedRun.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunItemViewModel?
+LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel.SelectedRun.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Initialize(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.LibraryPresetSaveDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.ResultName.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Prompt.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel.Prompt.set -> void
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Initialize(LM.App.Wpf.Common.SearchSavePromptContext! context) -> void
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultName.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultNotes.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.ResultTags.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.SearchSaveDialogViewModel() -> void
+LM.App.Wpf.ViewModels.Dialogs.SearchSaveDialogViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingEditorViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList) -> void
+LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel.StagingList.get -> LM.App.Wpf.ViewModels.StagingListViewModel!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.SelectedWorkspacePath.get -> string?
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.get -> string!
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.Title.set -> void
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.get -> bool
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.RequireExistingDirectory.set -> void
+LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel.WorkspaceChooserViewModel(LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.CanAcceptFileDrop(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleFileDropAsync(System.Collections.Generic.IEnumerable<string!>? filePaths, LM.App.Wpf.ViewModels.LibrarySearchResult? dropTarget = null) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.LibrarySearchResult
+LM.App.Wpf.ViewModels.LibrarySearchResult.Entry.get -> LM.Core.Models.Entry!
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasAttachments.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasDoi.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasIdentifiers.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasInternalId.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasLinks.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNct.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasNotes.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasPmid.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasRelations.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasSource.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasUserNotes.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.Highlight.get -> string?
+LM.App.Wpf.ViewModels.LibrarySearchResult.HighlightDisplay.get -> string?
+LM.App.Wpf.ViewModels.LibrarySearchResult.IsFullText.get -> bool
+LM.App.Wpf.ViewModels.LibrarySearchResult.LibrarySearchResult(LM.Core.Models.Entry! entry, double? score, string? highlight) -> void
+LM.App.Wpf.ViewModels.LibrarySearchResult.Score.get -> double?
+LM.App.Wpf.ViewModels.LibrarySearchResult.ScoreDisplay.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.LibraryLinkItem(string! DisplayText, string! Target, LM.App.Wpf.ViewModels.Library.LinkItemKind Kind) -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.DisplayText.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.DisplayText.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Target.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Target.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Kind.get -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LibraryLinkItem.Kind.init -> void
+LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.Url = 0 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.File = 1 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Library.LinkItemKind.Folder = 2 -> LM.App.Wpf.ViewModels.Library.LinkItemKind
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.RunAndBasics = 0 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Metadata = 1 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Workflow = 2 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStep.Summary = 3 -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.ProjectEditorStepDescriptor(LM.App.Wpf.ViewModels.Review.ProjectEditorStep Step, string! Title, string! Description) -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Step.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Step.init -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Title.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Title.init -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor.Description.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.ReviewTemplateOption(LM.Review.Core.Models.ReviewTemplateKind Kind, string! Title, string! Description) -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Kind.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Kind.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Title.get -> string!
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Title.init -> void
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.ReviewTemplateOption.Description.init -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectEditorViewModel() -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.AddStageCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CancelCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CheckedEntryCount.get -> int
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CheckedEntrySummary.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ErrorMessage.get -> string?
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.HookRelativePath.get -> string?
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Initialize(LM.App.Wpf.Services.Review.Design.ProjectBlueprint! blueprint) -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.LitSearchEntryId.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.LitSearchRunId.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MoveStageDownCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MoveStageUpCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectName.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ProjectName.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.RemoveStageCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Result.get -> LM.App.Wpf.Services.Review.Design.ProjectBlueprint?
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SaveCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedStage.get -> LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel?
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedStage.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.StageTypes.get -> System.Collections.Generic.IReadOnlyList<LM.Review.Core.Models.ReviewStageType>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Stages.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.Steps.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.TemplateOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Review.ReviewTemplateOption!>!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStep.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStep
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStepDescriptor.get -> LM.App.Wpf.ViewModels.Review.ProjectEditorStepDescriptor!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.CurrentStepIndex.get -> int
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.IsSummaryStep.get -> bool
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateOption.get -> LM.App.Wpf.ViewModels.Review.ReviewTemplateOption!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateOption.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.SelectedTemplateKind.get -> LM.Review.Core.Models.ReviewTemplateKind
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MetadataNotes.get -> string!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.MetadataNotes.set -> void
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.NextCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.BackCommand.get -> CommunityToolkit.Mvvm.Input.RelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ChangeRunCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand!
+LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel.ConfigureRunReloadHandler(System.Func<System.Threading.CancellationToken, System.Threading.Tasks.Task<LM.App.Wpf.Services.Review.Design.ProjectBlueprint?>!>! handler) -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.StageDisplayOptionViewModel(LM.Review.Core.Models.StageContentArea area, bool isSelected) -> void
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Area.get -> LM.Review.Core.Models.StageContentArea
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Label.get -> string!
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.Description.get -> string!
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.get -> bool
+LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel.IsSelected.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageBlueprintViewModel(LM.App.Wpf.Services.Review.Design.StageBlueprint! blueprint) -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.get -> bool
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.EscalateOnDisagreement.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.MinimumAgreements.get -> int
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.MinimumAgreements.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.Name.get -> string!
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.Name.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.PrimaryReviewers.get -> int
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.PrimaryReviewers.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.RequiresConsensus.get -> bool
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.RequiresConsensus.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.SecondaryReviewers.get -> int
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.SecondaryReviewers.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageId.get -> string!
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageType.get -> LM.Review.Core.Models.ReviewStageType
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.StageType.set -> void
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.TotalReviewers.get -> int
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.DisplayOptions.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Review.StageDisplayOptionViewModel!>!
+LM.App.Wpf.ViewModels.Review.StageBlueprintViewModel.TryBuild(out LM.App.Wpf.Services.Review.Design.StageBlueprint! stage, out string? errorMessage) -> bool
+LM.App.Wpf.ViewModels.StagingListViewModel
+LM.App.Wpf.ViewModels.StagingListViewModel.AddStagedItemsAsync(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.Clear() -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.CommitSelectedAsync(System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.Current.get -> LM.App.Wpf.ViewModels.StagingItem?
+LM.App.Wpf.ViewModels.StagingListViewModel.Current.set -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.EntryTypes.get -> System.Array!
+LM.App.Wpf.ViewModels.StagingListViewModel.HasItems.get -> bool
+LM.App.Wpf.ViewModels.StagingListViewModel.HasSelectedItems.get -> bool
+LM.App.Wpf.ViewModels.StagingListViewModel.IndexLabel.get -> string!
+LM.App.Wpf.ViewModels.StagingListViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.StagingListViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectByOffset(int delta) -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectedType.get -> LM.Core.Models.EntryType
+LM.App.Wpf.ViewModels.StagingListViewModel.SelectedType.set -> void
+LM.App.Wpf.ViewModels.StagingListViewModel.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.StagingListViewModel.StagingListViewModel(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.AddWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.Dispose() -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.RemoveWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.ScanAllWatchedFoldersCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.ScanWatchedFolderCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.SetCommandGuard(System.Func<System.Func<System.Threading.Tasks.Task!>!, System.Threading.Tasks.Task!>! guard) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.UpdateParentBusy(bool isBusy) -> void
+LM.App.Wpf.ViewModels.WatchedFoldersViewModel.WatchedFoldersViewModel(LM.App.Wpf.ViewModels.StagingListViewModel! stagingList, LM.App.Wpf.ViewModels.WatchedFolderScanner! scanner, LM.Core.Abstractions.Configuration.IWatchedFolderSettingsStore! settingsStore, LM.App.Wpf.Common.Dialogs.IDialogService! dialogService) -> void
+LM.App.Wpf.ViewModels.WatchedFolder
+LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.get -> bool
+LM.App.Wpf.ViewModels.WatchedFolder.IsEnabled.set -> void
+LM.App.Wpf.ViewModels.WatchedFolder.LastScanDisplay.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolder.LastScanUtc.get -> System.DateTimeOffset?
+LM.App.Wpf.ViewModels.WatchedFolder.LastScanWasUnchanged.get -> bool?
+LM.App.Wpf.ViewModels.WatchedFolder.Path.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolder.Path.set -> void
+LM.App.Wpf.ViewModels.WatchedFolder.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.WatchedFolder.ResetScanState() -> void
+LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusLabel.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolder.ScanStatusToolTip.get -> string!
+LM.App.Wpf.ViewModels.WatchedFolder.WatchedFolder() -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> LM.Core.Models.WatchedFolderState?
+LM.App.Wpf.ViewModels.WatchedFolderConfig.GetState(string! path) -> LM.Core.Models.WatchedFolderState?
+LM.App.Wpf.ViewModels.WatchedFolderConfig
+LM.App.Wpf.ViewModels.WatchedFolderConfig.ApplyState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.ClearState(LM.App.Wpf.ViewModels.WatchedFolder! folder) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.Folders.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.WatchedFolder!>!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.CreateSnapshot() -> LM.Core.Models.WatchedFolderSettings!
+LM.App.Wpf.ViewModels.WatchedFolderConfig.Load(LM.Core.Models.WatchedFolderSettings! settings) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.StoreState(LM.App.Wpf.ViewModels.WatchedFolder! folder, LM.Core.Models.WatchedFolderState! state) -> void
+LM.App.Wpf.ViewModels.WatchedFolderConfig.WatchedFolderConfig() -> void
+LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs
+LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs.Folder.get -> LM.App.Wpf.ViewModels.WatchedFolder!
+LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs.Items.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!
+LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs.WatchedFolderScanEventArgs(LM.App.Wpf.ViewModels.WatchedFolder! folder, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>! items) -> void
+LM.App.Wpf.ViewModels.WatchedFolderScanner
+LM.App.Wpf.ViewModels.WatchedFolderScanner.Attach(LM.App.Wpf.ViewModels.WatchedFolderConfig! config) -> void
+LM.App.Wpf.ViewModels.WatchedFolderScanner.Dispose() -> void
+LM.App.Wpf.ViewModels.WatchedFolderScanner.ItemsStaged -> System.EventHandler<LM.App.Wpf.ViewModels.WatchedFolderScanEventArgs!>?
+LM.App.Wpf.ViewModels.WatchedFolderScanner.ScanAsync(LM.App.Wpf.ViewModels.WatchedFolder? folder, System.Threading.CancellationToken ct, bool force = false) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.WatchedFolderScanner.WatchedFolderScanner(LM.App.Wpf.ViewModels.IAddPipeline! pipeline) -> void
+LM.App.Wpf.ViewModels.IAddPipeline
+LM.App.Wpf.ViewModels.IAddPipeline.CommitAsync(System.Collections.Generic.IEnumerable<LM.App.Wpf.ViewModels.StagingItem!>! selectedRows, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
+LM.App.Wpf.ViewModels.IAddPipeline.StagePathsAsync(System.Collections.Generic.IEnumerable<string!>! paths, System.Threading.CancellationToken ct) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.StagingItem!>!>!
+LM.App.Wpf.Library.ILibraryDocumentService
+LM.App.Wpf.Library.ILibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.ILibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
+LM.App.Wpf.Library.LibraryDocumentService
+LM.App.Wpf.Library.LibraryDocumentService.LibraryDocumentService(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.Library.LibraryDocumentService.OpenEntry(LM.Core.Models.Entry! entry) -> void
+LM.App.Wpf.Library.LibraryDocumentService.OpenAttachment(LM.Core.Models.Attachment! attachment) -> void
+LM.App.Wpf.Library.IAttachmentMetadataPrompt
+LM.App.Wpf.Library.IAttachmentMetadataPrompt.RequestMetadataAsync(LM.App.Wpf.Library.AttachmentMetadataPromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.AttachmentMetadataPromptResult?>!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.EntryTitle.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.FilePaths.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.FilePaths.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptContext.AttachmentMetadataPromptContext(string! EntryTitle, System.Collections.Generic.IReadOnlyList<string!>! FilePaths) -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptResult
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.Attachments.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.AttachmentMetadataSelection!>!
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.Attachments.init -> void
+LM.App.Wpf.Library.AttachmentMetadataPromptResult.AttachmentMetadataPromptResult(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.AttachmentMetadataSelection!>! Attachments) -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection
+LM.App.Wpf.Library.AttachmentMetadataSelection.AttachmentMetadataSelection(string! SourcePath, string! Title, LM.Core.Models.AttachmentKind Kind, System.Collections.Generic.IReadOnlyList<string!>! Tags) -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Kind.get -> LM.Core.Models.AttachmentKind
+LM.App.Wpf.Library.AttachmentMetadataSelection.Kind.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.SourcePath.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataSelection.SourcePath.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Library.AttachmentMetadataSelection.Tags.init -> void
+LM.App.Wpf.Library.AttachmentMetadataSelection.Title.get -> string!
+LM.App.Wpf.Library.AttachmentMetadataSelection.Title.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LibraryFiltersViewModel(LM.App.Wpf.Library.LibraryFilterPresetStore! presetStore, LM.App.Wpf.Common.ILibraryPresetPrompt! presetPrompt, LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.InsertIndex.get -> int
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.InsertIndex.init -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.Source.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel?
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.Source.init -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.TargetFolder.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.TargetFolder.init -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel.Children.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel.SavedSearchFolderViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, int sortOrder) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Id.get -> string!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Kind.get -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Name.get -> string
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Name.set -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Parent.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SortOrder.get -> int
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SortOrder.set -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.Tree.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.Preset.get -> LM.App.Wpf.Library.LibraryFilterPreset!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.SavedSearchPresetViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, LM.App.Wpf.Library.LibraryFilterPreset! preset, int sortOrder) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.SavedUtc.get -> System.DateTime
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.Summary.get -> LM.App.Wpf.Common.LibraryPresetSummary!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.ToSummary() -> LM.App.Wpf.Common.LibraryPresetSummary!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.Presets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.SavedSearchTreeChangedEventArgs(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>! presets) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.CreateFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RefreshAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.Root.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.SavedSearchTreeViewModel(LM.App.Wpf.Library.LibraryFilterPresetStore! store, LM.App.Wpf.Common.ILibraryPresetPrompt! prompt) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.TreeChanged -> System.EventHandler<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs!>?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ClearCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyPresetAsync(LM.App.Wpf.Common.LibraryPresetSummary! summary, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<bool>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ApplyState(LM.App.Wpf.Library.LibraryFilterState! state) -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.CaptureState() -> LM.App.Wpf.Library.LibraryFilterState!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.Clear() -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.KeywordTooltip.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.KeywordTokens.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.BuildFullTextQuery(string! normalizedQuery) -> LM.Core.Models.Search.FullTextSearchQuery!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.HasSavedPresets.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.GetNormalizedFullTextQuery() -> string!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.NavigationRoots.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RefreshNavigationAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedPresets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedSearches.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsLeftPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsLeftPanelCollapsed.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsRightPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsRightPanelCollapsed.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ToggleLeftPanelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.ToggleRightPanelCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UnifiedQuery.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UseFullTextSearch.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.UseFullTextSearch.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateFrom.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateFrom.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateTo.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.DateTo.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedSort.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedSort.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SortOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SelectedTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RemoveTagCommand.get -> CommunityToolkit.Mvvm.Input.IRelayCommand<string?>!
+LM.App.Wpf.ViewModels.Library.LibrarySortOption
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.LibrarySortOption(string! key, string! displayName) -> void
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.Library.LibrarySortOption.Key.get -> string!
+LM.App.Wpf.ViewModels.Library.LibrarySortOptions
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.Category = 0 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.SavedSearch = 1 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.LitSearchEntry = 2 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.LitSearchRun = 3 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.LibraryNavigationNodeViewModel(string! name, LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind kind) -> void
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Children.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel!>!
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.HasChildren.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Kind.get -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Name.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Payload.get -> object?
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Payload.init -> void
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Subtitle.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel.Subtitle.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.IsVisible.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.IsVisible.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.Key.get -> string!
+LM.App.Wpf.ViewModels.Library.LibraryColumnOption.LibraryColumnOption(string! key, string! displayName, bool isVisible) -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.this[string! key].set -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LibraryColumnVisibility() -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.LoadFrom(System.Collections.Generic.IReadOnlyDictionary<string!, bool>! source) -> void
+LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Snapshot() -> System.Collections.Generic.IReadOnlyDictionary<string!, bool>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.Core.Abstractions.IHasher! hasher, LM.App.Wpf.Services.Pdf.IPdfViewerLauncher! pdfViewerLauncher) -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits, System.Func<LM.Core.Models.Entry!, bool>? entryFilter = null) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.MarkAsMetadataResults() -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ResultsAreFullText.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.get -> LM.App.Wpf.ViewModels.LibrarySearchResult?
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Selected.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.set -> void
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LinkItems.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryLinkItem!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditEntryAsync(LM.App.Wpf.ViewModels.LibrarySearchResult? target) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleSelectionChangedCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelection.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelectedAbstract.get -> bool
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.get -> string?
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.set -> void
+LM.App.Wpf.ViewModels.LibrarySearchResult.HasPrimaryAttachment.get -> bool
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.LibrarySearchQueryBox() -> void
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.get -> string!
+LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
+LM.App.Wpf.ViewModels.LibraryViewModel
+LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
+LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
+LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
+LM.App.Wpf.ViewModels.SearchItemViewModel
+LM.App.Wpf.ViewModels.SearchItemViewModel.Header.get -> string!
+LM.App.Wpf.ViewModels.SearchItemViewModel.SearchItemViewModel(string! header, LM.App.Wpf.ViewModels.LibraryViewModel! vm) -> void
+LM.App.Wpf.ViewModels.SearchItemViewModel.Vm.get -> LM.App.Wpf.ViewModels.LibraryViewModel!
+LM.App.Wpf.ViewModels.SearchViewModel
+LM.App.Wpf.ViewModels.SearchViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
+LM.App.Wpf.ViewModels.SearchViewModel.ExportSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.From.get -> System.DateTime?
+LM.App.Wpf.ViewModels.SearchViewModel.From.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.SearchViewModel.LoadSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.PreviousRuns.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.PreviousSearchSummary!>!
+LM.App.Wpf.ViewModels.SearchViewModel.RecentSearchHistory.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.Core.Models.Search.SearchHistoryEntry!>!
+LM.App.Wpf.ViewModels.SearchViewModel.PreviousRunsCount.get -> int
+LM.App.Wpf.ViewModels.SearchViewModel.Query.get -> string!
+LM.App.Wpf.ViewModels.SearchViewModel.Query.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedResult.get -> LM.Core.Models.SearchHit?
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedResult.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.RunSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.SaveSearchCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleLeftPanelCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleRightPanelCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.SearchViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IWorkSpaceService! ws, LM.App.Wpf.Common.ISearchSavePrompt! savePrompt, LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel! providers, LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel! history, LM.Infrastructure.Search.PubMedSearchProvider! pubMedProvider, LM.Core.Abstractions.Configuration.IUserPreferencesStore? preferencesStore = null) -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedDatabase.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.get -> LM.App.Wpf.ViewModels.PreviousSearchSummary?
+LM.App.Wpf.ViewModels.SearchViewModel.SelectedPreviousRun.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.StartPreviousRunCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ShowRunDetailsCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.ToggleFavoriteCommand.get -> System.Windows.Input.ICommand!
+LM.App.Wpf.ViewModels.SearchViewModel.LeftPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.SearchViewModel.LeftPanelWidth.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.RightPanelWidth.get -> System.Windows.GridLength
+LM.App.Wpf.ViewModels.SearchViewModel.RightPanelWidth.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.IsLeftPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.SearchViewModel.IsRightPanelCollapsed.get -> bool
+LM.App.Wpf.ViewModels.SearchViewModel.To.get -> System.DateTime?
+LM.App.Wpf.ViewModels.SearchViewModel.To.set -> void
+LM.App.Wpf.ViewModels.SearchViewModel.History.get -> LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel!
+LM.App.Wpf.ViewModels.SearchViewModel.Providers.get -> LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.RecordExecutionAsync(LM.Core.Models.Search.SearchExecutionResult! result, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.RecentSearchHistory.get -> System.Collections.ObjectModel.ReadOnlyObservableCollection<LM.Core.Models.Search.SearchHistoryEntry!>!
+LM.App.Wpf.ViewModels.Search.SearchHistoryViewModel.SearchHistoryViewModel(LM.Core.Abstractions.Configuration.ISearchHistoryStore! store) -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Databases.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.SearchDatabaseOption!>!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.From.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.From.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.IsBusy.get -> bool
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Query.get -> string!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Query.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.Results.get -> System.Collections.ObjectModel.ObservableCollection<LM.Core.Models.SearchHit!>!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.ExecuteSearchAsync() -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.RunSearchCommand.get -> LM.App.Wpf.Common.AsyncRelayCommand!
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SearchExecuted -> System.EventHandler<LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs!>?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SearchProvidersViewModel(LM.Core.Abstractions.Search.ISearchExecutionService! executionService) -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SelectedDatabase.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.SelectedDatabase.set -> void
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.To.get -> System.DateTime?
+LM.App.Wpf.ViewModels.Search.SearchProvidersViewModel.To.set -> void
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs.Result.get -> LM.Core.Models.Search.SearchExecutionResult!
+LM.App.Wpf.ViewModels.Search.SearchExecutedEventArgs.SearchExecutedEventArgs(LM.Core.Models.Search.SearchExecutionResult! result) -> void
+LM.App.Wpf.ViewModels.PreviousSearchSummary
+LM.App.Wpf.ViewModels.PreviousSearchSummary.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.EntryId.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.FavoriteRunId.get -> string?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.IsFavorite.get -> bool
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastFrom.get -> System.DateTime?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastRunUtc.get -> System.DateTime
+LM.App.Wpf.ViewModels.PreviousSearchSummary.LastTo.get -> System.DateTime?
+LM.App.Wpf.ViewModels.PreviousSearchSummary.Provider.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.Query.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.RunCount.get -> int
+LM.App.Wpf.ViewModels.PreviousSearchSummary.RunId.get -> string!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.TotalHits.get -> int
+LM.App.Wpf.ViewModels.PreviousSearchSummary.Tags.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.ViewModels.PreviousSearchSummary.TagsDisplay.get -> string!
+LM.App.Wpf.ViewModels.SearchDatabaseOption
+LM.App.Wpf.ViewModels.SearchDatabaseOption.DisplayName.get -> string!
+LM.App.Wpf.ViewModels.SearchDatabaseOption.SearchDatabaseOption(LM.Core.Models.SearchDatabase value, string! displayName) -> void
+LM.App.Wpf.ViewModels.SearchDatabaseOption.Value.get -> LM.Core.Models.SearchDatabase
+LM.App.Wpf.ViewModels.StagingItem
+LM.App.Wpf.ViewModels.StagingItem.ArticleHook.get -> LM.HubSpoke.Models.ArticleHook?
+LM.App.Wpf.ViewModels.StagingItem.ArticleHook.set -> void
+LM.App.Wpf.ViewModels.StagingItem.AttachToEntryId.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.AttachToEntryId.set -> void
+LM.App.Wpf.ViewModels.StagingItem.AttachToTitle.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.AttachToTitle.set -> void
+LM.App.Wpf.ViewModels.StagingItem.AuthorsCsv.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.AuthorsCsv.set -> void
+LM.App.Wpf.ViewModels.StagingItem.DisplayName.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.DisplayName.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Doi.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.Doi.set -> void
+LM.App.Wpf.ViewModels.StagingItem.FilePath.get -> string!
+LM.App.Wpf.ViewModels.StagingItem.FilePath.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Internal.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.Internal.set -> void
+LM.App.Wpf.ViewModels.StagingItem.InternalId.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.InternalId.set -> void
+LM.App.Wpf.ViewModels.StagingItem.IsDuplicate.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.IsInternal.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.IsInternal.set -> void
+LM.App.Wpf.ViewModels.StagingItem.IsNearMatch.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.MatchedTitle.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.MatchedTitle.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Notes.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.Notes.set -> void
+LM.App.Wpf.ViewModels.StagingItem.OriginalFileName.get -> string!
+LM.App.Wpf.ViewModels.StagingItem.Pmid.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.Pmid.set -> void
+LM.App.Wpf.ViewModels.StagingItem.PropertyChanged -> System.ComponentModel.PropertyChangedEventHandler?
+LM.App.Wpf.ViewModels.StagingItem.Selected.get -> bool
+LM.App.Wpf.ViewModels.StagingItem.Selected.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Similarity.get -> double
+LM.App.Wpf.ViewModels.StagingItem.Similarity.set -> void
+LM.App.Wpf.ViewModels.StagingItem.SimilarToEntryId.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.SimilarToEntryId.set -> void
+LM.App.Wpf.ViewModels.StagingItem.SimilarToTitle.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.SimilarToTitle.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Source.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.Source.set -> void
+LM.App.Wpf.ViewModels.StagingItem.StagingItem() -> void
+LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.get -> string!
+LM.App.Wpf.ViewModels.StagingItem.SuggestedAction.set -> void
+LM.App.Wpf.ViewModels.StagingItem.TagsCsv.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.TagsCsv.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Title.get -> string?
+LM.App.Wpf.ViewModels.StagingItem.Title.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Type.get -> LM.Core.Models.EntryType
+LM.App.Wpf.ViewModels.StagingItem.Type.set -> void
+LM.App.Wpf.ViewModels.StagingItem.Year.get -> int?
+LM.App.Wpf.ViewModels.StagingItem.Year.set -> void
+LM.App.Wpf.Views.AddView
+LM.App.Wpf.Views.Behaviors.FileDropRequest
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Args.get -> System.Windows.DragEventArgs!
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Args.init -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.DropTarget.get -> object?
+LM.App.Wpf.Views.Behaviors.FileDropRequest.DropTarget.init -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.FileDropRequest(System.Collections.Generic.IReadOnlyList<string!>! Paths, object? DropTarget, System.Windows.DragEventArgs! Args) -> void
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Paths.get -> System.Collections.Generic.IReadOnlyList<string!>!
+LM.App.Wpf.Views.Behaviors.FileDropRequest.Paths.init -> void
+LM.App.Wpf.Views.Behaviors.SavedSearchTreeDragDropBehavior
+LM.App.Wpf.Views.Behaviors.SavedSearchTreeDragDropBehavior.SavedSearchTreeDragDropBehavior() -> void
+LM.App.Wpf.Views.AddView.AddView() -> void
+LM.App.Wpf.Views.AddView.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog
+LM.App.Wpf.Views.LibraryPresetPickerDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog.LibraryPresetPickerDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetPickerDialog.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LibraryPresetPickerDialogViewModel!
+LM.App.Wpf.Views.LibraryPresetPrompt.LibraryPresetPrompt(System.IServiceProvider! services) -> void
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.Library.AttachmentMetadataDialog.AttachmentMetadataDialog(LM.App.Wpf.ViewModels.Library.AttachmentMetadataDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog
+LM.App.Wpf.Views.LibraryPresetSaveDialog.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog.LibraryPresetSaveDialog(LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel! viewModel) -> void
+LM.App.Wpf.Views.LibraryPresetSaveDialog.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LibraryPresetSaveDialogViewModel!
+LM.App.Wpf.Views.LibraryView
+LM.App.Wpf.Views.LibraryView.InitializeComponent() -> void
+LM.App.Wpf.Views.LibraryView.LibraryView() -> void
+LM.App.Wpf.Views.PdfViewer
+LM.App.Wpf.Views.PdfViewer.InitializeComponent() -> void
+LM.App.Wpf.Views.PdfViewer.PdfViewer() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector
+LM.App.Wpf.Views.Library.TagTokenSelector.InitializeComponent() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.FilteredSuggestions.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
+LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>?
+LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTags.set -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.TagTokenSelector() -> void
+LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabulary.get -> System.Collections.Generic.IEnumerable<string!>!
+LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabulary.set -> void
+field System.Windows.DependencyProperty! LM.App.Wpf.Views.Library.TagTokenSelector.SelectedTagsProperty
+field System.Windows.DependencyProperty! LM.App.Wpf.Views.Library.TagTokenSelector.TagVocabularyProperty
+LM.App.Wpf.Views.LibraryPresetPrompt
+LM.App.Wpf.Views.LibraryPresetPrompt.RequestSaveAsync(LM.App.Wpf.Common.LibraryPresetSaveContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSaveResult?>!
+LM.App.Wpf.Views.LibraryPresetPrompt.RequestSelectionAsync(LM.App.Wpf.Common.LibraryPresetSelectionContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.LibraryPresetSelectionResult?>!
+LM.App.Wpf.Views.Review.Controls.DecisionBadge
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.DecisionBadge() -> void
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.Status.get -> LM.Review.Core.Models.ScreeningStatus
+LM.App.Wpf.Views.Review.Controls.DecisionBadge.Status.set -> void
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.ExtractionFieldEditor.ExtractionFieldEditor() -> void
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.Controls.ScreeningQueueControl.ScreeningQueueControl() -> void
+LM.App.Wpf.Views.Review.ReviewView
+LM.App.Wpf.Views.Review.ReviewView.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.ReviewView.ReviewView() -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.LitSearchRunPickerWindow(LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel! viewModel) -> void
+LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.ViewModel.get -> LM.App.Wpf.ViewModels.Dialogs.LitSearchRunPickerViewModel!
+LM.App.Wpf.Views.Review.ProjectEditorWindow
+LM.App.Wpf.Views.Review.ProjectEditorWindow.Attach(LM.App.Wpf.ViewModels.Review.ProjectEditorViewModel! viewModel) -> void
+LM.App.Wpf.Views.Review.ProjectEditorWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.Review.ProjectEditorWindow.ProjectEditorWindow() -> void
+LM.App.Wpf.Views.SearchSavePrompt
+LM.App.Wpf.Views.SearchSavePrompt.RequestAsync(LM.App.Wpf.Common.SearchSavePromptContext! context) -> System.Threading.Tasks.Task<LM.App.Wpf.Common.SearchSavePromptResult?>!
+LM.App.Wpf.Views.SearchSavePrompt.SearchSavePrompt(System.IServiceProvider! services) -> void
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.DataGridColumnVisibilityBehavior() -> void
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility?
+LM.App.Wpf.Views.Behaviors.DataGridColumnVisibilityBehavior.VisibilityMap.set -> void
+LM.App.Wpf.Views.SearchView
+LM.App.Wpf.Views.SearchView.InitializeComponent() -> void
+LM.App.Wpf.Views.SearchView.SearchView() -> void
+LM.App.Wpf.Views.ShellWindow
+LM.App.Wpf.Views.ShellWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.ShellWindow.LoadWorkspaceRequested -> System.EventHandler?
+LM.App.Wpf.Views.ShellWindow.NewWorkspaceRequested -> System.EventHandler?
+LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
+LM.App.Wpf.Views.StagingEditorWindow
+LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
+LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
+override LM.App.Wpf.ViewModels.Library.LibrarySortOption.ToString() -> string!
+override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
+LM.App.Wpf.Views.WorkspaceChooser
+LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
+LM.App.Wpf.Views.WorkspaceChooser.SelectedWorkspacePath.get -> string?
+LM.App.Wpf.Views.WorkspaceChooser.WorkspaceChooser(LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel! viewModel) -> void
+LM.App.Wpf.Views.WorkspaceChooser.Configure(System.Action<LM.App.Wpf.ViewModels.Dialogs.WorkspaceChooserViewModel!>! configure) -> void
+override LM.App.Wpf.App.OnExit(System.Windows.ExitEventArgs! e) -> void
+override LM.App.Wpf.App.OnStartup(System.Windows.StartupEventArgs! e) -> void
+override LM.App.Wpf.Views.LibraryPresetPickerDialog.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.LibraryPresetSaveDialog.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.StagingEditorWindow.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.Review.ProjectEditorWindow.OnClosed(System.EventArgs! e) -> void
+override LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.OnClosed(System.EventArgs! e) -> void
+static LM.App.Wpf.App.Main() -> void
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.All.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.NewestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.OldestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleAscending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleDescending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!

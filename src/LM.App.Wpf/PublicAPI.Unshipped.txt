@@ -1,4 +1,5 @@
 #nullable enable
+const LM.App.Wpf.Library.LibraryPresetFolder.RootId = "root" -> string!
 const LM.App.Wpf.ViewModels.StagingItem.DuplicateThreshold = 0.999 -> double
 const LM.App.Wpf.ViewModels.StagingItem.NearThreshold = 0.75 -> double
 LM.App.Wpf.App
@@ -23,7 +24,14 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
 LM.App.Wpf.Common.Converters.ProjectEditorConverters
 LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get -> System.Windows.Data.IMultiValueConverter!
+LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! DefaultName, System.Collections.Generic.IReadOnlyCollection<string!>! ExistingNames, string! Title = "Save Library Preset", string! Prompt = "Name this filter preset.") -> void
+LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
+LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem>!
+LM.App.Wpf.Library.LibraryPresetNodeKind.Folder = 0 -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetNodeKind.Preset = 1 -> LM.App.Wpf.Library.LibraryPresetNodeKind
+LM.App.Wpf.Library.LibraryPresetTreeItem.LibraryPresetTreeItem() -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, LM.Review.Core.Models.ReviewTemplateKind template, string! metadataNotes, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CheckedEntryIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
@@ -51,6 +59,11 @@ LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core
 LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbsolutePath, string! pdfHash) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.SavedSearchDragDropRequest() -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SavedSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder) -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenPdfAnnotationsCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.LibrarySearchResult?>!
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Dispose() -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.PdfAnnotationColorCommandParameter() -> void
@@ -133,7 +146,6 @@ LM.App.Wpf.Common.LibraryPresetSaveContext.DefaultName.get -> string!
 LM.App.Wpf.Common.LibraryPresetSaveContext.DefaultName.init -> void
 LM.App.Wpf.Common.LibraryPresetSaveContext.ExistingNames.get -> System.Collections.Generic.IReadOnlyCollection<string!>!
 LM.App.Wpf.Common.LibraryPresetSaveContext.ExistingNames.init -> void
-LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! DefaultName, System.Collections.Generic.IReadOnlyCollection<string!>! ExistingNames, string! Title, string! Prompt) -> void
 LM.App.Wpf.Common.LibraryPresetSaveContext.Prompt.get -> string!
 LM.App.Wpf.Common.LibraryPresetSaveContext.Prompt.init -> void
 LM.App.Wpf.Common.LibraryPresetSaveContext.Title.get -> string!
@@ -254,7 +266,6 @@ LM.App.Wpf.Library.LibraryFilterPreset.SortOrder.set -> void
 LM.App.Wpf.Library.LibraryFilterPreset.State.get -> LM.App.Wpf.Library.LibraryFilterState!
 LM.App.Wpf.Library.LibraryFilterPreset.State.set -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore
-LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.CreateFolderAsync(string! parentFolderId, string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
 LM.App.Wpf.Library.LibraryFilterPresetStore.DeleteFolderAsync(string! folderId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.GetHierarchyAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryPresetFolder!>!
@@ -264,11 +275,9 @@ LM.App.Wpf.Library.LibraryFilterPresetStore.LibraryFilterPresetStore(LM.Core.Abs
 LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Library.LibraryFilterPreset!>!>!
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, string? targetFolderId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! name, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetByIdAsync(string! presetId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryPresetFolder
 LM.App.Wpf.Library.LibraryPresetFolder.Clone() -> LM.App.Wpf.Library.LibraryPresetFolder!
-LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem!>!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryPresetFolder!>!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.set -> void
 LM.App.Wpf.Library.LibraryPresetFolder.Id.get -> string!
@@ -641,9 +650,6 @@ LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.Pres
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeChangedEventArgs.SavedSearchTreeChangedEventArgs(System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>! presets) -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.CreateFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RefreshAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.Root.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.SavedSearchTreeViewModel(LM.App.Wpf.Library.LibraryFilterPresetStore! store, LM.App.Wpf.Common.ILibraryPresetPrompt! prompt) -> void
