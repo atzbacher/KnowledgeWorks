@@ -33,7 +33,7 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260" MinWidth="200"/>
+            <ColumnDefinition Width="260" MinWidth="0" Name="LeftColumn"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*" MinWidth="300"/>
             <ColumnDefinition Width="Auto"/>
@@ -481,6 +481,38 @@
                 </StackPanel>
             </ScrollViewer>
         </Border>
+
+        <!-- Toggle Left Panel Button -->
+        <ToggleButton Grid.Row="1"
+                      Grid.Column="1"
+                      x:Name="LeftPanelToggle"
+                      IsChecked="True"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Top"
+                      Width="20"
+                      Height="32"
+                      Padding="0"
+                      Margin="2,8,2,0"
+                      FontFamily="Segoe MDL2 Assets"
+                      FontSize="12"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      ToolTip="Toggle left panel">
+            <ToggleButton.Style>
+                <Style TargetType="ToggleButton">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Content" Value="&#xE0E2;"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Content" Value="&#xE0E3;"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#F3F4F6"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ToggleButton.Style>
+        </ToggleButton>
 
         <!-- Splitter -->
         <GridSplitter Grid.Row="1"
