@@ -605,9 +605,6 @@ namespace LM.App.Wpf.Library
         public bool UseFullTextSearch { get; set; }
         public string? UnifiedQuery { get; set; }
         public string? FullTextQuery { get; set; }
-        public bool FullTextInTitle { get; set; } = true;
-        public bool FullTextInAbstract { get; set; } = true;
-        public bool FullTextInContent { get; set; } = true;
         public DateTime? DateFrom { get; set; }
         public DateTime? DateTo { get; set; }
         public string? SortKey { get; set; }

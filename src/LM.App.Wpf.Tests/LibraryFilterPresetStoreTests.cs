@@ -24,10 +24,7 @@ public class LibraryFilterPresetStoreTests
             {
                 UseFullTextSearch = true,
                 UnifiedQuery = "title:heart",
-                FullTextQuery = "heart",
-                FullTextInTitle = false,
-                FullTextInAbstract = true,
-                FullTextInContent = false
+                FullTextQuery = "heart"
             }
         };
 
@@ -45,6 +42,8 @@ public class LibraryFilterPresetStoreTests
         var loaded = Assert.Single(presets);
         Assert.Equal(savedPreset.Id, loaded.Id);
         Assert.Equal(preset.State.UnifiedQuery, loaded.State.UnifiedQuery);
+        Assert.True(loaded.State.UseFullTextSearch);
+        Assert.Equal("heart", loaded.State.FullTextQuery);
 
         await store.DeletePresetAsync(savedPreset.Id!);
         var afterDelete = await store.ListPresetsAsync();
