@@ -8,7 +8,6 @@
              xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
              xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
-             xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:core="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"

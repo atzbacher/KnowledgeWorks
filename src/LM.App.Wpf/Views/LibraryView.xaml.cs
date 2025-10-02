@@ -72,6 +72,8 @@ namespace LM.App.Wpf.Views
             else
             {
                 Trace.TraceInformation("LibraryView: Search command unavailable after full-text toggle change.");
+            }
+        }
 
         private async void OnLitSearchSelected(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
         {
