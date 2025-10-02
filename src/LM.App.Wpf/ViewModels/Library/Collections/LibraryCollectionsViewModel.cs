@@ -131,11 +131,13 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
                 return;
             }
 
+            var target = folder!;
+
             var siblings = await InvokeOnDispatcherAsync(() =>
             {
-                var container = folder!.Parent ?? Root;
+                var container = target.Parent ?? Root;
                 return container.Children
-                    .Where(child => child is LibraryCollectionFolderViewModel candidate && !string.Equals(candidate.Id, folder.Id, StringComparison.Ordinal))
+                    .Where(child => child is LibraryCollectionFolderViewModel candidate && !string.Equals(candidate.Id, target.Id, StringComparison.Ordinal))
                     .Select(child => child.Name)
                     .ToArray();
             }).ConfigureAwait(false);
@@ -145,10 +147,10 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
                 return Microsoft.VisualBasic.Interaction.InputBox(
                     "Enter new name for collection:",
                     "Rename Collection",
-                    folder!.Name);
+                    target.Name);
             }).ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, folder.Name, StringComparison.Ordinal))
+            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, target.Name, StringComparison.Ordinal))
             {
                 Trace.WriteLine("[LibraryCollectionsViewModel] Rename cancelled or unchanged.");
                 return;
@@ -160,8 +162,8 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
                 return;
             }
 
-            await _store.RenameFolderAsync(folder.Id, newName.Trim(), GetCurrentUserName(), CancellationToken.None).ConfigureAwait(false);
-            Trace.WriteLine($"[LibraryCollectionsViewModel] Renamed folder '{folder.Id}' to '{newName}'.");
+            await _store.RenameFolderAsync(target.Id, newName.Trim(), GetCurrentUserName(), CancellationToken.None).ConfigureAwait(false);
+            Trace.WriteLine($"[LibraryCollectionsViewModel] Renamed folder '{target.Id}' to '{newName}'.");
             await RefreshAsync().ConfigureAwait(false);
         }
 

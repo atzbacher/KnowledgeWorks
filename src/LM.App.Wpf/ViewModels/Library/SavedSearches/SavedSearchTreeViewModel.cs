@@ -224,55 +224,6 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             TreeChanged?.Invoke(this, new SavedSearchTreeChangedEventArgs(summaries.ToArray()));
         }
 
-        private static Task InvokeOnDispatcherAsync(Action action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
-            {
-                action();
-                return Task.CompletedTask;
-            }
-
-            return dispatcher.InvokeAsync(action).Task;
-        }
-
-        private static Task<TResult> InvokeOnDispatcherAsync<TResult>(Func<TResult> action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
-            {
-                return Task.FromResult(action());
-            }
-
-            return dispatcher.InvokeAsync(action).Task;
-        }
-    }
-
-    public sealed class SavedSearchTreeChangedEventArgs : EventArgs
-    {
-        public SavedSearchTreeChangedEventArgs(IReadOnlyList<LibraryPresetSummary> presets)
-        {
-            Presets = presets ?? Array.Empty<LibraryPresetSummary>();
-        }
-
-        public IReadOnlyList<LibraryPresetSummary> Presets { get; }
-    }
-
-    public sealed class SavedSearchDragDropRequest
-    {
-        public SavedSearchNodeViewModel? Source { get; init; }
-
-        public SavedSearchFolderViewModel? TargetFolder { get; init; }
-
-        public int InsertIndex { get; init; }
-
-
         private bool CanRenameFolder(SavedSearchFolderViewModel? folder)
         {
             return folder is not null && !string.Equals(folder.Id, LibraryPresetFolder.RootId, StringComparison.Ordinal);
@@ -315,12 +266,59 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
                 return;
             }
 
-            // The preset will be loaded by the LibraryFiltersViewModel
-            // We just need to trigger the event or notify
             Trace.WriteLine($"[SavedSearchTreeViewModel] Load preset '{preset.Name}' requested.");
-
-            // Note: This should be handled by the parent view model or through event aggregation
-            // For now, we'll just log it. The actual loading is done in LibraryView.xaml.cs OnSavedSearchSelected
         }
+
+        private static Task InvokeOnDispatcherAsync(Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+
+        private static Task<TResult> InvokeOnDispatcherAsync<TResult>(Func<TResult> action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                return Task.FromResult(action());
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+    }
+
+    public sealed class SavedSearchTreeChangedEventArgs : EventArgs
+    {
+        public SavedSearchTreeChangedEventArgs(IReadOnlyList<LibraryPresetSummary> presets)
+        {
+            Presets = presets ?? Array.Empty<LibraryPresetSummary>();
+        }
+
+        public IReadOnlyList<LibraryPresetSummary> Presets { get; }
+    }
+
+    public sealed class SavedSearchDragDropRequest
+    {
+        public SavedSearchNodeViewModel? Source { get; init; }
+
+        public SavedSearchFolderViewModel? TargetFolder { get; init; }
+
+        public int InsertIndex { get; init; }
     }
 }

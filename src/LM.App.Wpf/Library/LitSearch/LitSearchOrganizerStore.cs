@@ -100,7 +100,7 @@ namespace LM.App.Wpf.Library.LitSearch
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
             var root = EnsureRoot(file);
-            var (_, folder) = TryFindFolder(root, folderId);
+            var (parent, folder) = TryFindFolder(root, folderId);
             if (folder is null || parent is null)
             {
                 Trace.WriteLine($"[LitSearchOrganizerStore] Folder '{folderId}' not found for deletion.");
