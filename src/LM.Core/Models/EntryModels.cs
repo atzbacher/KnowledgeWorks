@@ -53,6 +53,9 @@ namespace LM.Core.Models
         // Security
         public bool IsInternal { get; set; }
 
+        // Blacklist flag for hiding entries in the library view
+        public bool IsBlacklisted { get; set; }
+
         // Tags (manual + inherited later)
         public List<string> Tags { get; set; } = new();
 

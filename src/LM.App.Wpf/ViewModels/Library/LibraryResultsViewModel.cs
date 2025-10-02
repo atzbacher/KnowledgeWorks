@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -11,12 +12,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
-using LM.App.Wpf.Views.Behaviors;
 using LM.App.Wpf.Services.Pdf;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
 using LM.Infrastructure.Hooks;
+using System.Windows.Controls;
+using System.Windows.Data;
 using HookM = LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Library
@@ -41,6 +43,9 @@ namespace LM.App.Wpf.ViewModels.Library
         private readonly IHasher _hasher;
         private readonly IPdfViewerLauncher _pdfViewerLauncher;
         private CancellationTokenSource? _abstractLoadCts;
+        private readonly List<(string PropertyName, ListSortDirection Direction)> _activeSorts = new();
+        private bool _hasUserSort;
+        private WeakReference<DataGrid>? _dataGrid;
 
         [ObservableProperty]
         private LibrarySearchResult? selected;
@@ -92,10 +97,29 @@ namespace LM.App.Wpf.ViewModels.Library
             _pdfViewerLauncher = pdfViewerLauncher ?? throw new ArgumentNullException(nameof(pdfViewerLauncher));
 
             Items = new ObservableCollection<LibrarySearchResult>();
+            ItemsView = new ListCollectionView(Items);
             LinkItems = new ObservableCollection<LibraryLinkItem>();
         }
 
         public ObservableCollection<LibrarySearchResult> Items { get; }
+
+        public ICollectionView ItemsView { get; }
+
+        public void ResetSortForSearch(LibrarySortOption defaultOption)
+        {
+            if (defaultOption is null)
+            {
+                throw new ArgumentNullException(nameof(defaultOption));
+            }
+
+            if (_hasUserSort && _activeSorts.Count > 0)
+            {
+                ApplyActiveSort();
+                return;
+            }
+
+            ApplySortPreset(defaultOption);
+        }
 
         [RelayCommand]
         private void HandleSelectionChanged(IList? selectedItems)
@@ -156,6 +180,8 @@ namespace LM.App.Wpf.ViewModels.Library
                     Items.Add(result);
                 }
             });
+
+            ApplyActiveSort();
         }
 
         public async Task LoadFullTextResultsAsync(IReadOnlyList<FullTextSearchHit> hits, Func<Entry, bool>? entryFilter = null)
@@ -185,6 +211,42 @@ namespace LM.App.Wpf.ViewModels.Library
 
                 ExecuteOnDispatcher(() => Items.Add(result));
             }
+
+            ApplyActiveSort();
+        }
+
+        public void HandleGridLoaded(System.Windows.RoutedEventArgs args)
+        {
+            if (args?.Source is DataGrid grid)
+            {
+                _dataGrid = new WeakReference<DataGrid>(grid);
+                ApplySortIndicators();
+            }
+        }
+
+        public void HandleGridSorting(DataGridSortingEventArgs args)
+        {
+            if (args is null || args.Column is null)
+            {
+                return;
+            }
+
+            var memberPath = ResolveSortMemberPath(args.Column);
+            if (string.IsNullOrWhiteSpace(memberPath))
+            {
+                return;
+            }
+
+            args.Handled = true;
+
+            var nextDirection = args.Column.SortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+
+            ClearOtherColumnSortIndicators(args.Column);
+            args.Column.SortDirection = nextDirection;
+
+            SetSorts(new[] { (memberPath, nextDirection) }, userSort: true);
         }
 
         public void MarkAsMetadataResults()
@@ -1046,6 +1108,231 @@ namespace LM.App.Wpf.ViewModels.Library
                 icon);
         }
 
+        private void ApplySortPreset(LibrarySortOption option)
+        {
+            var sorts = BuildPresetSort(option);
+            SetSorts(sorts, userSort: false);
+        }
+
+        private void ApplyActiveSort()
+        {
+            UpdateSortDescriptions(_activeSorts);
+        }
+
+        private void SetSorts(IEnumerable<(string PropertyName, ListSortDirection Direction)> sorts, bool userSort)
+        {
+            _activeSorts.Clear();
+            foreach (var sort in sorts)
+            {
+                if (string.IsNullOrWhiteSpace(sort.PropertyName))
+                {
+                    continue;
+                }
+
+                _activeSorts.Add(sort);
+            }
+
+            _hasUserSort = userSort && _activeSorts.Count > 0;
+            ApplyActiveSort();
+        }
+
+        private void UpdateSortDescriptions(IReadOnlyList<(string PropertyName, ListSortDirection Direction)> sorts)
+        {
+            ExecuteOnDispatcher(() =>
+            {
+                if (ItemsView is not ListCollectionView view)
+                {
+                    return;
+                }
+
+                view.SortDescriptions.Clear();
+
+                if (sorts is not null)
+                {
+                    foreach (var (property, direction) in sorts)
+                    {
+                        if (string.IsNullOrWhiteSpace(property))
+                        {
+                            continue;
+                        }
+
+                        view.SortDescriptions.Add(new SortDescription(property, direction));
+                    }
+                }
+
+                view.Refresh();
+            });
+
+            ApplySortIndicators();
+        }
+
+        private void ApplySortIndicators()
+        {
+            if (_dataGrid is null || !_dataGrid.TryGetTarget(out var grid))
+            {
+                return;
+            }
+
+            ExecuteOnDispatcher(() =>
+            {
+                foreach (var column in grid.Columns)
+                {
+                    if (column is null)
+                    {
+                        continue;
+                    }
+
+                    var memberPath = ResolveSortMemberPath(column);
+                    if (_activeSorts.Count > 0 && string.Equals(memberPath, _activeSorts[0].PropertyName, StringComparison.Ordinal))
+                    {
+                        column.SortDirection = _activeSorts[0].Direction;
+                    }
+                    else
+                    {
+                        column.SortDirection = null;
+                    }
+                }
+            });
+        }
+
+        private static string? ResolveSortMemberPath(DataGridColumn column)
+        {
+            if (column is null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrWhiteSpace(column.SortMemberPath))
+            {
+                return column.SortMemberPath;
+            }
+
+            if (column is DataGridBoundColumn boundColumn && boundColumn.Binding is Binding binding && binding.Path is not null)
+            {
+                return binding.Path.Path;
+            }
+
+            return null;
+        }
+
+        private static void ClearOtherColumnSortIndicators(DataGridColumn activeColumn)
+        {
+            if (activeColumn is null)
+            {
+                return;
+            }
+
+            var grid = activeColumn.DataGridOwner;
+            if (grid is null)
+            {
+                return;
+            }
+
+            foreach (var column in grid.Columns)
+            {
+                if (!ReferenceEquals(column, activeColumn))
+                {
+                    column.SortDirection = null;
+                }
+            }
+        }
+
+        private static IReadOnlyList<(string PropertyName, ListSortDirection Direction)> BuildPresetSort(LibrarySortOption option)
+        {
+            if (option is null)
+            {
+                throw new ArgumentNullException(nameof(option));
+            }
+
+            var key = option.Key ?? string.Empty;
+
+            if (string.Equals(key, LibrarySortOptions.OldestFirst.Key, StringComparison.OrdinalIgnoreCase))
+            {
+                return new List<(string, ListSortDirection)>
+                {
+                    (nameof(LibrarySearchResult.YearPresenceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.YearAscendingSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.TitleSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.SourceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.AddedOnSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.IdSortKey), ListSortDirection.Ascending)
+                };
+            }
+
+            if (string.Equals(key, LibrarySortOptions.TitleAscending.Key, StringComparison.OrdinalIgnoreCase))
+            {
+                return new List<(string, ListSortDirection)>
+                {
+                    (nameof(LibrarySearchResult.TitleSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.YearPresenceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.YearDescendingSortKey), ListSortDirection.Descending),
+                    (nameof(LibrarySearchResult.SourceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.AddedOnSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.IdSortKey), ListSortDirection.Ascending)
+                };
+            }
+
+            if (string.Equals(key, LibrarySortOptions.TitleDescending.Key, StringComparison.OrdinalIgnoreCase))
+            {
+                return new List<(string, ListSortDirection)>
+                {
+                    (nameof(LibrarySearchResult.TitleSortKey), ListSortDirection.Descending),
+                    (nameof(LibrarySearchResult.YearPresenceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.YearDescendingSortKey), ListSortDirection.Descending),
+                    (nameof(LibrarySearchResult.SourceSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.AddedOnSortKey), ListSortDirection.Ascending),
+                    (nameof(LibrarySearchResult.IdSortKey), ListSortDirection.Ascending)
+                };
+            }
+
+            return new List<(string, ListSortDirection)>
+            {
+                (nameof(LibrarySearchResult.YearPresenceSortKey), ListSortDirection.Ascending),
+                (nameof(LibrarySearchResult.YearDescendingSortKey), ListSortDirection.Descending),
+                (nameof(LibrarySearchResult.TitleSortKey), ListSortDirection.Ascending),
+                (nameof(LibrarySearchResult.SourceSortKey), ListSortDirection.Ascending),
+                (nameof(LibrarySearchResult.AddedOnSortKey), ListSortDirection.Ascending),
+                (nameof(LibrarySearchResult.IdSortKey), ListSortDirection.Ascending)
+            };
+        }
+
+        private async Task PersistBlacklistChangeLogAsync(string entryId, bool isBlacklisted)
+        {
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                return;
+            }
+
+            var events = new List<HookM.EntryChangeLogEvent>
+            {
+                new HookM.EntryChangeLogEvent
+                {
+                    Action = isBlacklisted ? "EntryBlacklisted" : "EntryUnblacklisted",
+                    PerformedBy = GetCurrentUserName(),
+                    TimestampUtc = DateTime.UtcNow
+                }
+            };
+
+            var hook = new HookM.EntryChangeLogHook
+            {
+                Events = events
+            };
+
+            var context = new HookContext
+            {
+                ChangeLog = hook
+            };
+
+            try
+            {
+                await _hookOrchestrator.ProcessAsync(entryId, context, CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[LibraryResultsViewModel] Failed to persist blacklist change-log: {ex}");
+            }
+        }
+
         private static void PrepareEntry(Entry entry)
         {
             var title = string.IsNullOrWhiteSpace(entry.Title) ? "(untitled)" : entry.Title!.Trim();
@@ -1196,6 +1483,61 @@ namespace LM.App.Wpf.ViewModels.Library
                     "Edit Entry",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        public async Task ToggleBlacklistAsync(LibrarySearchResult? target)
+        {
+            var resolved = EnsureSelection(target);
+            var entry = resolved?.Entry;
+            if (entry is null)
+            {
+                return;
+            }
+
+            var nextState = !entry.IsBlacklisted;
+            var originalState = entry.IsBlacklisted;
+            entry.IsBlacklisted = nextState;
+
+            var entryId = entry.Id;
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                entry.IsBlacklisted = originalState;
+                System.Windows.MessageBox.Show(
+                    "Entry is missing an identifier and cannot be updated.",
+                    "Hide Entry",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            try
+            {
+                await _store.SaveAsync(entry).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                entry.IsBlacklisted = originalState;
+                System.Windows.MessageBox.Show(
+                    $"Failed to update entry visibility:\n{ex.Message}",
+                    "Hide Entry",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            await PersistBlacklistChangeLogAsync(entryId!, nextState).ConfigureAwait(false);
+
+            if (nextState)
+            {
+                ExecuteOnDispatcher(() =>
+                {
+                    Items.Remove(resolved);
+                    if (ReferenceEquals(Selected, resolved))
+                    {
+                        Selected = Items.Count > 0 ? Items[0] : null;
+                    }
+                });
             }
         }
     }

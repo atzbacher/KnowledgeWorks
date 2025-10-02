@@ -12,6 +12,8 @@ namespace LM.App.Wpf.ViewModels
             Entry = entry ?? throw new ArgumentNullException(nameof(entry));
             Score = score;
             Highlight = string.IsNullOrWhiteSpace(highlight) ? null : highlight.Trim();
+
+            PrimaryAttachmentGlyphKind = ResolvePrimaryAttachmentGlyph(entry);
         }
 
         public Entry Entry { get; }
@@ -40,11 +42,78 @@ namespace LM.App.Wpf.ViewModels
         public bool HasAttachments => Entry.Attachments is { Count: > 0 };
         public bool HasRelations => Entry.Relations is { Count: > 0 };
 
-        public bool HasPrimaryAttachment => HasAttachmentWithSupportedExtension(Entry.MainFilePath)
-            || (Entry.Attachments is { Count: > 0 } && Entry.Attachments.Exists(static attachment => attachment is not null && HasAttachmentWithSupportedExtension(attachment.RelativePath)));
+        public LibraryAttachmentGlyph PrimaryAttachmentGlyphKind { get; }
 
-        private static bool HasAttachmentWithSupportedExtension(string? path)
+        public int PrimaryAttachmentSortKey => PrimaryAttachmentGlyphKind switch
         {
+            LibraryAttachmentGlyph.Pdf => 0,
+            LibraryAttachmentGlyph.Document => 1,
+            LibraryAttachmentGlyph.Presentation => 2,
+            LibraryAttachmentGlyph.Generic => 3,
+            _ => 4
+        };
+
+        public bool HasPrimaryAttachment => PrimaryAttachmentGlyphKind != LibraryAttachmentGlyph.None;
+
+        public string TitleSortKey => Entry.Title ?? string.Empty;
+        public int YearPresenceSortKey => Entry.Year.HasValue ? 0 : 1;
+        public int YearDescendingSortKey => Entry.Year ?? int.MinValue;
+        public int YearAscendingSortKey => Entry.Year ?? int.MaxValue;
+        public string SourceSortKey => Entry.Source ?? string.Empty;
+        public string TypeSortKey => Entry.Type.ToString();
+        public DateTime AddedOnSortKey => Entry.AddedOnUtc;
+        public string AddedBySortKey => Entry.AddedBy ?? string.Empty;
+        public string InternalIdSortKey => Entry.InternalId ?? string.Empty;
+        public string DoiSortKey => Entry.Doi ?? string.Empty;
+        public string PmidSortKey => Entry.Pmid ?? string.Empty;
+        public string NctSortKey => Entry.Nct ?? string.Empty;
+        public string IdSortKey => Entry.Id ?? string.Empty;
+        public string AuthorsSortKey => Entry.Authors is { Count: > 0 } ? string.Join(", ", Entry.Authors) : string.Empty;
+        public string TagsSortKey => Entry.Tags is { Count: > 0 } ? string.Join(", ", Entry.Tags) : string.Empty;
+        public int IsInternalSortKey => Entry.IsInternal ? 0 : 1;
+        public string SnippetSortKey => HighlightDisplay ?? string.Empty;
+        public double ScoreSortKey => Score ?? double.MinValue;
+
+        private static LibraryAttachmentGlyph ResolvePrimaryAttachmentGlyph(Entry entry)
+        {
+            if (entry is null)
+            {
+                return LibraryAttachmentGlyph.None;
+            }
+
+            if (TryClassifyPath(entry.MainFilePath, out var glyph))
+            {
+                return glyph;
+            }
+
+            if (entry.Attachments is not null)
+            {
+                foreach (var attachment in entry.Attachments)
+                {
+                    if (attachment is null)
+                    {
+                        continue;
+                    }
+
+                    if (TryClassifyPath(attachment.RelativePath, out glyph))
+                    {
+                        return glyph;
+                    }
+                }
+
+                if (entry.Attachments.Count > 0)
+                {
+                    return LibraryAttachmentGlyph.Generic;
+                }
+            }
+
+            return LibraryAttachmentGlyph.None;
+        }
+
+        private static bool TryClassifyPath(string? path, out LibraryAttachmentGlyph glyph)
+        {
+            glyph = LibraryAttachmentGlyph.None;
+
             if (string.IsNullOrWhiteSpace(path))
             {
                 return false;
@@ -53,14 +122,31 @@ namespace LM.App.Wpf.ViewModels
             var extension = Path.GetExtension(path);
             if (string.IsNullOrWhiteSpace(extension))
             {
-                return false;
+                glyph = LibraryAttachmentGlyph.Generic;
+                return true;
             }
 
-            return extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".doc", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".docx", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".ppt", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase);
+            if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+            {
+                glyph = LibraryAttachmentGlyph.Pdf;
+                return true;
+            }
+
+            if (extension.Equals(".doc", StringComparison.OrdinalIgnoreCase) || extension.Equals(".docx", StringComparison.OrdinalIgnoreCase))
+            {
+                glyph = LibraryAttachmentGlyph.Document;
+                return true;
+            }
+
+            if (extension.Equals(".ppt", StringComparison.OrdinalIgnoreCase) || extension.Equals(".pptx", StringComparison.OrdinalIgnoreCase))
+            {
+                glyph = LibraryAttachmentGlyph.Presentation;
+                return true;
+            }
+
+            glyph = LibraryAttachmentGlyph.Generic;
+            return true;
         }
     }
 }
+

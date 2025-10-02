@@ -73,6 +73,7 @@ namespace LM.App.Wpf.ViewModels
             CopyMetadataCommand.NotifyCanExecuteChanged();
             CopyWorkspacePathCommand.NotifyCanExecuteChanged();
             EditEntryCommand.NotifyCanExecuteChanged();
+            ToggleBlacklistCommand.NotifyCanExecuteChanged();
         }
 
         private void OnColumnOptionChanged(object? sender, PropertyChangedEventArgs e)
@@ -335,6 +336,20 @@ namespace LM.App.Wpf.ViewModels
                 return;
 
             await Results.EditEntryAsync(target).ConfigureAwait(false);
+        }
+
+        private bool CanToggleBlacklist(LibrarySearchResult? result) => GetSelection(result, updateSelection: false) is not null;
+
+        [RelayCommand(CanExecute = nameof(CanToggleBlacklist))]
+        private async Task ToggleBlacklistAsync(LibrarySearchResult? result)
+        {
+            var target = GetSelection(result, updateSelection: true);
+            if (target is null)
+            {
+                return;
+            }
+
+            await Results.ToggleBlacklistAsync(target).ConfigureAwait(false);
         }
     }
 }

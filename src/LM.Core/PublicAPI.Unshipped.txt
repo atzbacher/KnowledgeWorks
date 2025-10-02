@@ -118,6 +118,8 @@ LM.Core.Models.Entry.InternalId.get -> string?
 LM.Core.Models.Entry.InternalId.set -> void
 LM.Core.Models.Entry.IsInternal.get -> bool
 LM.Core.Models.Entry.IsInternal.set -> void
+LM.Core.Models.Entry.IsBlacklisted.get -> bool
+LM.Core.Models.Entry.IsBlacklisted.set -> void
 LM.Core.Models.Entry.Links.get -> System.Collections.Generic.List<string!>!
 LM.Core.Models.Entry.Links.set -> void
 LM.Core.Models.Entry.MainFileHashSha256.get -> string?

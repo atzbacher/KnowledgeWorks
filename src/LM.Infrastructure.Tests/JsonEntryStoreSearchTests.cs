@@ -182,6 +182,37 @@ namespace LM.Infrastructure.Tests.Entries
             Assert.Equal("not-1", entry.Id);
         }
 
+        [Fact]
+        public async Task SaveAsync_PersistsBlacklistFlag()
+        {
+            using var temp = new TempWorkspace();
+            var store = await CreateStoreAsync(temp.Path);
+
+            var entry = new Entry { Id = "blk-1", Title = "Hidden", IsBlacklisted = true };
+            await store.SaveAsync(entry);
+
+            var jsonPath = Path.Combine(temp.Path, "entries", entry.Id!, "entry.json");
+            var json = await File.ReadAllTextAsync(jsonPath);
+
+            Assert.Contains("\"isBlacklisted\": true", json, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task InitializeAsync_LoadsBlacklistFlag()
+        {
+            using var temp = new TempWorkspace();
+            var store = await CreateStoreAsync(temp.Path);
+
+            var entry = new Entry { Id = "blk-2", Title = "Hidden", IsBlacklisted = true };
+            await store.SaveAsync(entry);
+
+            var rehydrated = await CreateStoreAsync(temp.Path);
+            var loaded = await rehydrated.GetByIdAsync("blk-2");
+
+            Assert.NotNull(loaded);
+            Assert.True(loaded!.IsBlacklisted);
+        }
+
         private static async Task<JsonEntryStore> CreateStoreAsync(string workspacePath)
         {
             var ws = new WorkspaceService();

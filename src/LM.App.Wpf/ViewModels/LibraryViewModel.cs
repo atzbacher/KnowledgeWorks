@@ -128,20 +128,24 @@ namespace LM.App.Wpf.ViewModels
                 matches.Add(entry);
             }
 
-            Trace.WriteLine($"[LibraryViewModel] Metadata filters excluded {filteredOut} entries before sorting.");
+            Trace.WriteLine($"[LibraryViewModel] Metadata filters excluded {filteredOut} entries.");
 
-            var ordered = SortEntries(matches);
+            var sortOption = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
+            Results.ResetSortForSearch(sortOption);
 
-            Debug.WriteLine($"[LibraryViewModel] Metadata search → {ordered.Count} rows");
+            Debug.WriteLine($"[LibraryViewModel] Metadata search → {matches.Count} rows");
 
-            Results.LoadMetadataResults(ordered);
+            Results.LoadMetadataResults(matches);
 
-            if (ordered.Count == 0)
+            if (matches.Count == 0)
                 Debug.WriteLine("[LibraryViewModel] No entries matched metadata query");
         }
 
         private async Task RunFullTextSearchAsync()
         {
+            var sortOption = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
+            Results.ResetSortForSearch(sortOption);
+
             var trimmed = Filters.GetNormalizedFullTextQuery();
             if (string.IsNullOrEmpty(trimmed))
             {
@@ -211,8 +215,9 @@ namespace LM.App.Wpf.ViewModels
                 return;
             }
 
-            var ordered = SortEntries(entries);
-            Results.LoadMetadataResults(ordered);
+            var sortOption = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
+            Results.ResetSortForSearch(sortOption);
+            Results.LoadMetadataResults(entries);
         }
 
         private async Task<List<Entry>> ReadCheckedEntriesAsync(LibraryLitSearchRunPayload payload)
@@ -256,57 +261,16 @@ namespace LM.App.Wpf.ViewModels
             return results;
         }
 
-        private IReadOnlyList<Entry> SortEntries(IEnumerable<Entry> entries)
-        {
-            var validEntries = entries
-                .Where(static entry => entry is not null)
-                .ToList();
-
-            var sort = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
-            Trace.WriteLine($"[LibraryViewModel] Sorting {validEntries.Count} entries using option '{sort.Key}'.");
-
-            var ordered = sort.Key switch
-            {
-                var key when string.Equals(key, LibrarySortOptions.OldestFirst.Key, StringComparison.OrdinalIgnoreCase)
-                    => validEntries
-                        .OrderBy(entry => entry.Year.HasValue ? 0 : 1)
-                        .ThenBy(entry => entry.Year ?? int.MaxValue)
-                        .ThenBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.AddedOnUtc)
-                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-                var key when string.Equals(key, LibrarySortOptions.TitleAscending.Key, StringComparison.OrdinalIgnoreCase)
-                    => validEntries
-                        .OrderBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenByDescending(entry => entry.Year.HasValue)
-                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
-                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.AddedOnUtc)
-                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-                var key when string.Equals(key, LibrarySortOptions.TitleDescending.Key, StringComparison.OrdinalIgnoreCase)
-                    => validEntries
-                        .OrderByDescending(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenByDescending(entry => entry.Year.HasValue)
-                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
-                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.AddedOnUtc)
-                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
-                _ => validEntries
-                        .OrderByDescending(entry => entry.Year.HasValue)
-                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
-                        .ThenBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                        .ThenBy(entry => entry.AddedOnUtc)
-                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-            };
-
-            return ordered.Take(1000).ToList();
-        }
-
         private bool MatchesFilters(Entry entry)
         {
             if (entry is null)
             {
+                return false;
+            }
+
+            if (entry.IsBlacklisted)
+            {
+                Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out because it is blacklisted.");
                 return false;
             }
 
