@@ -297,12 +297,6 @@ LM.App.Wpf.Library.LibraryFilterState.UnifiedQuery.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.UnifiedQuery.set -> void
 LM.App.Wpf.Library.LibraryFilterState.FullTextQuery.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.FullTextQuery.set -> void
-LM.App.Wpf.Library.LibraryFilterState.FullTextInTitle.get -> bool
-LM.App.Wpf.Library.LibraryFilterState.FullTextInTitle.set -> void
-LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.get -> bool
-LM.App.Wpf.Library.LibraryFilterState.FullTextInAbstract.set -> void
-LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.get -> bool
-LM.App.Wpf.Library.LibraryFilterState.FullTextInContent.set -> void
 LM.App.Wpf.Library.LibraryFilterState.DateFrom.get -> System.DateTime?
 LM.App.Wpf.Library.LibraryFilterState.DateFrom.set -> void
 LM.App.Wpf.Library.LibraryFilterState.DateTo.get -> System.DateTime?
@@ -664,12 +658,6 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.KeywordTokens.get -> Syste
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.get -> System.Windows.GridLength
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.LeftPanelWidth.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.BuildFullTextQuery(string! normalizedQuery) -> LM.Core.Models.Search.FullTextSearchQuery!
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInAbstract.get -> bool
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInAbstract.set -> void
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInContent.get -> bool
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInContent.set -> void
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInTitle.get -> bool
-LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextInTitle.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.FullTextQuery.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.HasSavedPresets.get -> bool

@@ -69,15 +69,6 @@ namespace LM.App.Wpf.ViewModels.Library
         private string? fullTextQuery;
 
         [ObservableProperty]
-        private bool fullTextInTitle = true;
-
-        [ObservableProperty]
-        private bool fullTextInAbstract = true;
-
-        [ObservableProperty]
-        private bool fullTextInContent = true;
-
-        [ObservableProperty]
         private IReadOnlyList<LibraryPresetSummary> savedPresets = Array.Empty<LibraryPresetSummary>();
 
         [ObservableProperty]
@@ -375,9 +366,6 @@ namespace LM.App.Wpf.ViewModels.Library
             UseFullTextSearch = false;
             UnifiedQuery = string.Empty;
             FullTextQuery = string.Empty;
-            FullTextInTitle = true;
-            FullTextInAbstract = true;
-            FullTextInContent = true;
             DateFrom = null;
             DateTo = null;
             SelectedSort = LibrarySortOptions.NewestFirst;
@@ -491,29 +479,10 @@ namespace LM.App.Wpf.ViewModels.Library
                 throw new ArgumentNullException(nameof(normalizedQuery));
             }
 
-            var fields = FullTextSearchField.None;
-            if (FullTextInTitle)
-            {
-                fields |= FullTextSearchField.Title;
-            }
-            if (FullTextInAbstract)
-            {
-                fields |= FullTextSearchField.Abstract;
-            }
-            if (FullTextInContent)
-            {
-                fields |= FullTextSearchField.Content;
-            }
-
-            if (fields == FullTextSearchField.None)
-            {
-                fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content;
-            }
-
             return new FullTextSearchQuery
             {
                 Text = normalizedQuery,
-                Fields = fields
+                Fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content
             };
         }
 
@@ -523,9 +492,6 @@ namespace LM.App.Wpf.ViewModels.Library
                 UseFullTextSearch = UseFullTextSearch,
                 UnifiedQuery = UnifiedQuery,
                 FullTextQuery = FullTextQuery,
-                FullTextInTitle = FullTextInTitle,
-                FullTextInAbstract = FullTextInAbstract,
-                FullTextInContent = FullTextInContent,
                 DateFrom = DateFrom?.Date,
                 DateTo = DateTo?.Date,
                 SortKey = SelectedSort?.Key,
@@ -546,9 +512,6 @@ namespace LM.App.Wpf.ViewModels.Library
             UseFullTextSearch = state.UseFullTextSearch;
             UnifiedQuery = state.UnifiedQuery;
             FullTextQuery = state.FullTextQuery;
-            FullTextInTitle = state.FullTextInTitle;
-            FullTextInAbstract = state.FullTextInAbstract;
-            FullTextInContent = state.FullTextInContent;
             DateFrom = state.DateFrom?.Date;
             DateTo = state.DateTo?.Date;
             SelectedSort = ResolveSortOption(state.SortKey);
