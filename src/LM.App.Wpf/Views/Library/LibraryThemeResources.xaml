@@ -133,8 +133,9 @@
     <Setter Property="BorderBrush" Value="{StaticResource LibraryPanelBorderBrush}" />
     <Setter Property="BorderThickness" Value="1" />
     <Setter Property="Foreground" Value="{StaticResource LibraryPrimaryForegroundBrush}" />
-    <Setter Property="Padding" Value="14,10" />
+    <Setter Property="Padding" Value="12,6" />
     <Setter Property="FontSize" Value="14" />
+    <Setter Property="MinHeight" Value="32" />
     <Setter Property="SnapsToDevicePixels" Value="True" />
     <Setter Property="Template">
       <Setter.Value>
