@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Services.Pdf;
+using LM.App.Wpf.Views.Behaviors;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
