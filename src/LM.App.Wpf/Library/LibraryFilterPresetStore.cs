@@ -211,7 +211,7 @@ namespace LM.App.Wpf.Library
 
             var destination = ResolveFolder(root, targetFolderId);
             var ordered = currentParent.EnumerateChildren().ToList();
-            var removed = ordered.FindIndex(static item => item.Kind == LibraryPresetNodeKind.Preset && item.Preset is not null && ReferenceEquals(item.Preset, preset));
+            var removed = ordered.FindIndex(item => item.Kind == LibraryPresetNodeKind.Preset && item.Preset is not null && ReferenceEquals(item.Preset, preset));
             if (removed >= 0)
             {
                 ordered.RemoveAt(removed);
@@ -248,7 +248,7 @@ namespace LM.App.Wpf.Library
             }
 
             var ordered = currentParent.EnumerateChildren().ToList();
-            var removed = ordered.FindIndex(static item => item.Kind == LibraryPresetNodeKind.Folder && item.Folder is not null && ReferenceEquals(item.Folder, folder));
+            var removed = ordered.FindIndex(item => item.Kind == LibraryPresetNodeKind.Folder && item.Folder is not null && ReferenceEquals(item.Folder, folder));
             if (removed >= 0)
             {
                 ordered.RemoveAt(removed);
@@ -491,15 +491,11 @@ namespace LM.App.Wpf.Library
 
         private static void NormalizeTree(LibraryPresetFolder root)
         {
-            if (root.Folders is null)
-            {
-                root.Folders = new List<LibraryPresetFolder>();
-            }
+            var folders = root.Folders ?? new List<LibraryPresetFolder>();
+            root.Folders = folders;
 
-            if (root.Presets is null)
-            {
-                root.Presets = new List<LibraryFilterPreset>();
-            }
+            var presets = root.Presets ?? new List<LibraryFilterPreset>();
+            root.Presets = presets;
 
             if (string.IsNullOrWhiteSpace(root.Id))
             {
@@ -514,12 +510,15 @@ namespace LM.App.Wpf.Library
             var ordered = root.EnumerateChildren().ToList();
             ReassignChildren(root, ordered);
 
-            foreach (var folder in root.Folders.ToArray())
+            folders = root.Folders ?? folders;
+            presets = root.Presets ?? presets;
+
+            foreach (var folder in folders.ToArray())
             {
                 NormalizeTree(folder);
             }
 
-            foreach (var preset in root.Presets)
+            foreach (var preset in presets)
             {
                 if (string.IsNullOrWhiteSpace(preset.Id))
                 {
