@@ -81,7 +81,8 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IFileExplorerService>(),
                 sp.GetRequiredService<ILibraryDocumentService>(),
                 sp.GetRequiredService<LitSearchTreeViewModel>(),
-                sp.GetRequiredService<LibraryCollectionsViewModel>()));
+                sp.GetRequiredService<LibraryCollectionsViewModel>(),
+                sp.GetRequiredService<LibraryCollectionStore>()));
         }
     }
 }

@@ -389,6 +389,8 @@ LM.App.Wpf.Library.Collections.LibraryCollectionStore.DeleteFolderAsync(string! 
 LM.App.Wpf.Library.Collections.LibraryCollectionStore.GetHierarchyAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.Collections.LibraryCollectionFolder!>!
 LM.App.Wpf.Library.Collections.LibraryCollectionStore.LibraryCollectionStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.Library.Collections.LibraryCollectionStore.RemoveEntriesAsync(string! folderId, System.Collections.Generic.IEnumerable<string!>! entryIds, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.RenameFolderAsync(string! folderId, string! newName, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.MoveFolderAsync(string! folderId, string! targetFolderId, int insertIndex, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryPresetFolder
 LM.App.Wpf.Library.LibraryPresetFolder.Clone() -> LM.App.Wpf.Library.LibraryPresetFolder!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryPresetFolder!>!
@@ -912,7 +914,7 @@ LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.get -> string!
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! litSearchOrganizer, LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel! collections) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! litSearchOrganizer, LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel! collections, LM.App.Wpf.Library.Collections.LibraryCollectionStore! collectionStore) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.Collections.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
@@ -1191,6 +1193,7 @@ LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.GetHierarchyAsync(System.Th
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.LitSearchOrganizerStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.MoveEntryAsync(string! entryId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.MoveFolderAsync(string! folderId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.RenameFolderAsync(string! folderId, string! newName, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.SyncEntriesAsync(System.Collections.Generic.IEnumerable<string!>! entryIds, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder!>!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerSchema
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerSchema.CurrentVersion -> int
@@ -1226,4 +1229,4 @@ LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.get -> int
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel?
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.TargetFolder.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?
-~LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.LitSearchTreeViewModel(LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore! store, ILitSearchStore! litSearchStore, ) -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.LitSearchTreeViewModel(LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore! store, LM.App.Wpf.Common.ILibraryPresetPrompt! prompt, LM.Core.Abstractions.IEntryStore! entryStore, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void

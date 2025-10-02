@@ -26,29 +26,30 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
         private readonly IWorkSpaceService _workspace;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
 
-        public IAsyncRelayCommand<LitSearchFolderViewModel> RenameFolderCommand { get; }
-
-
         public LitSearchTreeViewModel(LitSearchOrganizerStore store,
                                       ILibraryPresetPrompt prompt,
-                                      ILitSearchStore litSearchStore,
+
                                       IEntryStore entryStore,
                                       IWorkSpaceService workspace)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
-            _litSearchStore = litSearchStore ?? throw new ArgumentNullException(nameof(litSearchStore));
+            _prompt = prompt ?? throw new ArgumentNullException(nameof(prompt));
+            _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
+            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
 
-            Root = new LitSearchFolderViewModel(this, LitSearchOrganizerFolder.RootId, "LitSearches", true);
+            Root = new LitSearchFolderViewModel(this, LitSearchOrganizerFolder.RootId, "LitSearch", isRoot: true);
 
             CreateFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel?>(CreateFolderAsync);
             RenameFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(RenameFolderAsync, CanRenameFolder);
-            DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
-            MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest>(MoveAsync, request => request?.Source is not null);
+            DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(DeleteFolderAsync, folder => folder is { CanDelete: true });
+            MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest>(MoveAsync, request => request?.Source is not null && request.TargetFolder is not null);
         }
 
         public LitSearchFolderViewModel Root { get; }
 
         public IAsyncRelayCommand<LitSearchFolderViewModel?> CreateFolderCommand { get; }
+
+        public IAsyncRelayCommand<LitSearchFolderViewModel> RenameFolderCommand { get; }
 
         public IAsyncRelayCommand<LitSearchFolderViewModel> DeleteFolderCommand { get; }
 
@@ -145,6 +146,45 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
 
             var id = await _store.CreateFolderAsync(target.Id, result.Name.Trim(), CancellationToken.None).ConfigureAwait(false);
             Trace.WriteLine($"[LitSearchTreeViewModel] Created folder '{result.Name}' ({id}) under '{target.Id}'.");
+            await RefreshAsync().ConfigureAwait(false);
+        }
+
+        private bool CanRenameFolder(LitSearchFolderViewModel? folder)
+        {
+            return folder is not null && !folder.IsRoot;
+        }
+
+        private async Task RenameFolderAsync(LitSearchFolderViewModel? folder)
+        {
+            if (!CanRenameFolder(folder))
+            {
+                return;
+            }
+
+            var siblingNames = await InvokeOnDispatcherAsync(() =>
+            {
+                var container = folder!.Parent ?? Root;
+                return container.Children
+                    .OfType<LitSearchFolderViewModel>()
+                    .Where(candidate => !string.Equals(candidate.Id, folder.Id, StringComparison.Ordinal))
+                    .Select(candidate => candidate.Name)
+                    .ToArray();
+            }).ConfigureAwait(false);
+
+            var context = new LibraryPresetSaveContext(
+                folder.Name,
+                siblingNames,
+                "Rename Folder",
+                "Enter new name for this folder.");
+
+            var result = await _prompt.RequestSaveAsync(context).ConfigureAwait(false);
+            if (result is null || string.IsNullOrWhiteSpace(result.Name) || string.Equals(result.Name, folder.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            await _store.RenameFolderAsync(folder.Id, result.Name.Trim(), CancellationToken.None).ConfigureAwait(false);
+            Trace.WriteLine($"[LitSearchTreeViewModel] Renamed folder '{folder.Id}' to '{result.Name}'.");
             await RefreshAsync().ConfigureAwait(false);
         }
 
@@ -376,16 +416,16 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
             }
 
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
+            if (dispatcher is not null && !dispatcher.CheckAccess())
             {
-                action();
-                return Task.CompletedTask;
+                return dispatcher.InvokeAsync(action).Task;
             }
 
-            return dispatcher.InvokeAsync(action).Task;
+            action();
+            return Task.CompletedTask;
         }
 
-        private static Task<TResult> InvokeOnDispatcherAsync<TResult>(Func<TResult> callback)
+        private static Task<T> InvokeOnDispatcherAsync<T>(Func<T> callback)
         {
             if (callback is null)
             {
@@ -393,13 +433,21 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
             }
 
             var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
+            if (dispatcher is not null && !dispatcher.CheckAccess())
             {
-                return Task.FromResult(callback());
+                return dispatcher.InvokeAsync(callback).Task;
             }
 
-            return dispatcher.InvokeAsync(callback).Task;
+            return Task.FromResult(callback());
         }
+
+        private sealed record LitSearchEntrySnapshot(string EntryId, string Title, string? Query, string HookPath)
+        {
+            public List<LitSearchRunSnapshot> Runs { get; } = new();
+        }
+
+        private sealed record LitSearchRunSnapshot(string RunId, string Label, string? CheckedEntriesPath);
+
     }
 
     public sealed class LitSearchDragDropRequest
@@ -410,11 +458,4 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
 
         public int InsertIndex { get; init; }
     }
-
-    internal sealed record LitSearchEntrySnapshot(string EntryId, string Title, string? Query, string HookPath)
-    {
-        public List<LitSearchRunSnapshot> Runs { get; } = new();
-    }
-
-    internal sealed record LitSearchRunSnapshot(string RunId, string Label, string? CheckedEntriesPath);
 }

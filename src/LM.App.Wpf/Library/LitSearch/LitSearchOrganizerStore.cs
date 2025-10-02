@@ -100,7 +100,7 @@ namespace LM.App.Wpf.Library.LitSearch
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
             var root = EnsureRoot(file);
-            var (parent, folder) = TryFindFolder(root, folderId);
+            var (_, folder) = TryFindFolder(root, folderId);
             if (folder is null || parent is null)
             {
                 Trace.WriteLine($"[LitSearchOrganizerStore] Folder '{folderId}' not found for deletion.");
@@ -123,6 +123,35 @@ namespace LM.App.Wpf.Library.LitSearch
             NormalizeTree(root);
             await SaveAsync(file, ct).ConfigureAwait(false);
             Trace.WriteLine($"[LitSearchOrganizerStore] Deleted folder '{folder.Name}' ({folder.Id}). Moved {entryIds.Length} entrie(s) to '{parent.Id}'.");
+        }
+
+        public async Task RenameFolderAsync(string folderId, string newName, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LitSearchOrganizerFolder.RootId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var trimmed = newName?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                Trace.WriteLine("[LitSearchOrganizerStore] Ignoring rename because the new name was empty.");
+                return;
+            }
+
+            var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
+            var (_, folder) = TryFindFolder(root, folderId);
+            if (folder is null)
+            {
+                Trace.WriteLine($"[LitSearchOrganizerStore] Cannot rename folder '{folderId}'; not found.");
+                return;
+            }
+
+            folder.Name = trimmed;
+            NormalizeTree(root);
+            await SaveAsync(file, ct).ConfigureAwait(false);
+            Trace.WriteLine($"[LitSearchOrganizerStore] Renamed folder '{folderId}' to '{trimmed}'.");
         }
 
         public async Task MoveEntryAsync(string entryId, string targetFolderId, int insertIndex, CancellationToken ct = default)

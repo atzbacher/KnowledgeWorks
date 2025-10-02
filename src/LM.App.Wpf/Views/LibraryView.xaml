@@ -14,7 +14,16 @@
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="1000">
     <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Library/LibraryCommonResources.xaml" />
+                <ResourceDictionary Source="Library/LibraryThemeResources.xaml" />
+                <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
+                <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>

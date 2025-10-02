@@ -1,6 +1,17 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.App.Wpf.Library.Collections;
 using LM.App.Wpf.Library.Search;
 using LM.App.Wpf.ViewModels.Library;
 using LM.App.Wpf.ViewModels.Library.Collections;
@@ -10,19 +21,6 @@ using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
 using LM.Core.Models.Search;
 using LM.HubSpoke.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using LM.App.Wpf.Library.Collections;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -35,8 +33,15 @@ namespace LM.App.Wpf.ViewModels
         private readonly IFullTextSearchService _fullTextSearch;
         private readonly LibrarySearchParser _metadataParser = new();
         private readonly LibrarySearchEvaluator _metadataEvaluator = new();
+        private readonly IWorkSpaceService _workspace;
+        private readonly IUserPreferencesStore _preferencesStore;
+        private readonly IClipboardService _clipboard;
+        private readonly IFileExplorerService _fileExplorer;
+        private readonly ILibraryDocumentService _documentService;
         private readonly LitSearchTreeViewModel _litSearchOrganizer;
         private readonly LibraryCollectionsViewModel _collections;
+        private readonly LibraryCollectionStore _collectionStore;
+        private readonly ObservableCollection<string> _allTags = new();
 
         public LibraryViewModel(IEntryStore store,
                                 IFullTextSearchService fullTextSearch,
@@ -48,7 +53,8 @@ namespace LM.App.Wpf.ViewModels
                                 IFileExplorerService fileExplorer,
                                 ILibraryDocumentService documentService,
                                 LitSearchTreeViewModel litSearchOrganizer,
-                                LibraryCollectionsViewModel collections)
+                                LibraryCollectionsViewModel collections,
+                                LibraryCollectionStore collectionStore)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
@@ -62,6 +68,7 @@ namespace LM.App.Wpf.ViewModels
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
             _litSearchOrganizer = litSearchOrganizer ?? throw new ArgumentNullException(nameof(litSearchOrganizer));
             _collections = collections ?? throw new ArgumentNullException(nameof(collections));
+            _collectionStore = collectionStore ?? throw new ArgumentNullException(nameof(collectionStore));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
 
@@ -73,16 +80,15 @@ namespace LM.App.Wpf.ViewModels
         }
 
         public LibraryFiltersViewModel Filters { get; }
+
         public LibraryResultsViewModel Results { get; }
 
         public LitSearchTreeViewModel LitSearchOrganizer => _litSearchOrganizer;
 
         public LibraryCollectionsViewModel Collections => _collections;
 
-
-        // Add this property to store all unique tags
-        private ObservableCollection<string> _allTags = new();
         public ObservableCollection<string> AllTags => _allTags;
+
 
         [RelayCommand]
         private async Task SearchAsync()
@@ -148,7 +154,9 @@ namespace LM.App.Wpf.ViewModels
             Results.LoadMetadataResults(matches);
 
             if (matches.Count == 0)
+            {
                 Debug.WriteLine("[LibraryViewModel] No entries matched metadata query");
+            }
         }
 
         private async Task RunFullTextSearchAsync()
@@ -183,7 +191,9 @@ namespace LM.App.Wpf.ViewModels
             Trace.WriteLine($"[LibraryViewModel] Full-text filters excluded {filteredOut} hits before rendering results.");
 
             if (hits.Count == 0)
+            {
                 Debug.WriteLine("[LibraryViewModel] Full-text search returned no matches");
+            }
         }
 
         internal async Task HandleNavigationSelectionAsync(LibraryNavigationNodeViewModel? node)
@@ -200,6 +210,7 @@ namespace LM.App.Wpf.ViewModels
                     {
                         await SearchAsync().ConfigureAwait(false);
                     }
+
                     break;
 
                 case LibraryNavigationNodeKind.LitSearchRun when node.Payload is LibraryLitSearchRunPayload run:
@@ -228,116 +239,6 @@ namespace LM.App.Wpf.ViewModels
             var sortOption = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
             Results.ResetSortForSearch(sortOption);
             Results.LoadMetadataResults(entries);
-        }
-
-        public async Task LoadCollectionEntriesAsync(string collectionId, CancellationToken ct = default)
-        {
-            try
-            {
-                Trace.WriteLine($"[LibraryViewModel] Loading entries for collection '{collectionId}'.");
-
-                // Get the collection hierarchy to find entry IDs
-                var hierarchy = await _collectionStore.GetHierarchyAsync(ct).ConfigureAwait(false);
-
-                // Find the specific folder
-                if (!hierarchy.TryFindFolder(collectionId, out var folder, out _) || folder is null)
-                {
-                    Trace.WriteLine($"[LibraryViewModel] Collection '{collectionId}' not found.");
-                    return;
-                }
-
-                // Extract entry IDs from the collection
-                var entryIds = folder.Entries.Select(e => e.EntryId).ToHashSet(StringComparer.Ordinal);
-
-                if (entryIds.Count == 0)
-                {
-                    Trace.WriteLine("[LibraryViewModel] Collection is empty.");
-                    await InvokeOnDispatcherAsync(() =>
-                    {
-                        Results.Items.Clear();
-                        Results.TotalCount = 0;
-                    }).ConfigureAwait(false);
-                    return;
-                }
-
-                // Load all entries from the database
-                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
-
-                // Filter to only entries in this collection
-                var collectionEntries = allEntries
-                    .Where(e => entryIds.Contains(e.InternalId))
-                    .ToList();
-
-                Trace.WriteLine($"[LibraryViewModel] Loaded {collectionEntries.Count} entries from collection.");
-
-                // Update the results
-                await InvokeOnDispatcherAsync(() =>
-                {
-                    Results.LoadMetadataResults(collectionEntries);
-                    Results.TotalCount = collectionEntries.Count;
-                }).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"[LibraryViewModel] Failed to load collection entries: {ex.Message}");
-
-            }
-        }
-
-// Method to refresh all tags from the database
-        public async Task RefreshTagsAsync(CancellationToken ct = default)
-        {
-            try
-            {
-                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
-
-                var uniqueTags = allEntries
-                    .Where(e => e.Tags != null && e.Tags.Count > 0)
-                    .SelectMany(e => e.Tags)
-                    .Where(tag => !string.IsNullOrWhiteSpace(tag))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(tag => tag, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                await InvokeOnDispatcherAsync(() =>
-                {
-                    _allTags.Clear();
-                    foreach (var tag in uniqueTags)
-                    {
-                        _allTags.Add(tag);
-                    }
-                }).ConfigureAwait(false);
-
-                Trace.WriteLine($"[LibraryViewModel] Refreshed {uniqueTags.Count} unique tags.");
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"[LibraryViewModel] Failed to refresh tags: {ex.Message}");
-            }
-        }
-
-        // Initialize method that should be called when the view loads
-        public async Task InitializeAsync(CancellationToken ct = default)
-        {
-            await Filters.InitializeAsync(ct).ConfigureAwait(false);
-            await Collections.RefreshAsync(ct).ConfigureAwait(false);
-            await LitSearchOrganizer.RefreshAsync(ct).ConfigureAwait(false);
-            await RefreshTagsAsync(ct).ConfigureAwait(false);
-        }
-
-        private static Task InvokeOnDispatcherAsync(Action action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
-            {
-                action();
-                return Task.CompletedTask;
-            }
-
-            return dispatcher.InvokeAsync(action).Task;
         }
 
         private async Task<List<Entry>> ReadCheckedEntriesAsync(LibraryLitSearchRunPayload payload)
@@ -394,13 +295,15 @@ namespace LM.App.Wpf.ViewModels
                 return false;
             }
 
-            if (Filters.DateFrom is System.DateTime from && entry.AddedOnUtc.Date < from.Date)
+
+            if (Filters.DateFrom is DateTime from && entry.AddedOnUtc.Date < from.Date)
+
             {
                 Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out before {from:yyyy-MM-dd}.");
                 return false;
             }
 
-            if (Filters.DateTo is System.DateTime to && entry.AddedOnUtc.Date > to.Date)
+            if (Filters.DateTo is DateTime to && entry.AddedOnUtc.Date > to.Date)
             {
                 Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out after {to:yyyy-MM-dd}.");
                 return false;
@@ -436,6 +339,133 @@ namespace LM.App.Wpf.ViewModels
             }
 
             return true;
+        }
+
+        public async Task LoadCollectionEntriesAsync(string collectionId, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(collectionId))
+            {
+                Trace.WriteLine("[LibraryViewModel] LoadCollectionEntriesAsync skipped - collection id missing.");
+                return;
+            }
+
+            try
+            {
+                var hierarchy = await _collectionStore.GetHierarchyAsync(ct).ConfigureAwait(false);
+
+                if (!hierarchy.TryFindFolder(collectionId, out var folder, out _) || folder is null)
+                {
+                    Trace.WriteLine($"[LibraryViewModel] Collection '{collectionId}' not found.");
+                    return;
+                }
+
+                var entryIds = folder.Entries
+                    .Select(entry => entry.EntryId)
+                    .Where(id => !string.IsNullOrWhiteSpace(id))
+                    .Distinct(StringComparer.Ordinal)
+                    .ToArray();
+
+                if (entryIds.Length == 0)
+                {
+                    Trace.WriteLine("[LibraryViewModel] Collection is empty.");
+                    Results.Clear();
+                    return;
+                }
+
+                var entries = new List<Entry>(entryIds.Length);
+
+                foreach (var entryId in entryIds)
+                {
+                    if (ct.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    var entry = await _store.GetByIdAsync(entryId, ct).ConfigureAwait(false);
+                    if (entry is not null)
+                    {
+                        entries.Add(entry);
+                    }
+                }
+
+                Trace.WriteLine($"[LibraryViewModel] Loaded {entries.Count} entries from collection '{collectionId}'.");
+
+                var sortOption = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
+                Results.ResetSortForSearch(sortOption);
+                Results.LoadMetadataResults(entries);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[LibraryViewModel] Failed to load collection entries: {ex}");
+            }
+        }
+
+        public async Task RefreshTagsAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                await foreach (var entry in _store.EnumerateAsync(ct))
+                {
+                    if (entry?.Tags is null || entry.Tags.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    foreach (var tag in entry.Tags)
+                    {
+                        if (string.IsNullOrWhiteSpace(tag))
+                        {
+                            continue;
+                        }
+
+                        tags.Add(tag.Trim());
+                    }
+                }
+
+                var ordered = tags.OrderBy(tag => tag, StringComparer.OrdinalIgnoreCase).ToList();
+
+                await InvokeOnDispatcherAsync(() =>
+                {
+                    _allTags.Clear();
+                    foreach (var tag in ordered)
+                    {
+                        _allTags.Add(tag);
+                    }
+                }).ConfigureAwait(false);
+
+                Trace.WriteLine($"[LibraryViewModel] Refreshed {ordered.Count} unique tags.");
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[LibraryViewModel] Failed to refresh tags: {ex}");
+            }
+        }
+
+        public async Task InitializeAsync(CancellationToken ct = default)
+        {
+            await Filters.InitializeAsync(ct).ConfigureAwait(false);
+            await Collections.RefreshAsync(ct).ConfigureAwait(false);
+            await LitSearchOrganizer.RefreshAsync(ct).ConfigureAwait(false);
+            await RefreshTagsAsync(ct).ConfigureAwait(false);
+        }
+
+        private static Task InvokeOnDispatcherAsync(Action action)
+        {
+            if (action is null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is not null && !dispatcher.CheckAccess())
+            {
+                return dispatcher.InvokeAsync(action).Task;
+            }
+
+            action();
+            return Task.CompletedTask;
         }
 
         private sealed record CheckedEntryIdsSidecar
