@@ -33,11 +33,6 @@ namespace LM.App.Wpf.ViewModels
         private readonly IFullTextSearchService _fullTextSearch;
         private readonly LibrarySearchParser _metadataParser = new();
         private readonly LibrarySearchEvaluator _metadataEvaluator = new();
-        private readonly IWorkSpaceService _workspace;
-        private readonly IUserPreferencesStore _preferencesStore;
-        private readonly IClipboardService _clipboard;
-        private readonly IFileExplorerService _fileExplorer;
-        private readonly ILibraryDocumentService _documentService;
         private readonly LitSearchTreeViewModel _litSearchOrganizer;
         private readonly LibraryCollectionsViewModel _collections;
         private readonly LibraryCollectionStore _collectionStore;
