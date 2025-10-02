@@ -77,8 +77,9 @@ namespace LM.App.Wpf.Library
         public async Task<IReadOnlyList<LibraryFilterPreset>> ListPresetsAsync(CancellationToken ct = default)
         {
             var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
             var results = new List<LibraryFilterPreset>();
-            Flatten(file.Root, results);
+            Flatten(root, results);
             Trace.WriteLine($"[LibraryFilterPresetStore] Listed {results.Count} preset(s).");
             return results.Select(static preset => preset.Clone()).ToArray();
         }
@@ -86,8 +87,9 @@ namespace LM.App.Wpf.Library
         public async Task<LibraryPresetFolder> GetHierarchyAsync(CancellationToken ct = default)
         {
             var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
             Trace.WriteLine("[LibraryFilterPresetStore] Loaded hierarchy snapshot.");
-            return file.Root.Clone();
+            return root.Clone();
         }
 
         public async Task<LibraryFilterPreset?> TryGetPresetByIdAsync(string presetId, CancellationToken ct = default)
@@ -98,7 +100,8 @@ namespace LM.App.Wpf.Library
             }
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
-            var (_, preset) = TryFindPreset(file.Root, presetId);
+            var root = EnsureRoot(file);
+            var (_, preset) = TryFindPreset(root, presetId);
             return preset?.Clone();
         }
 
@@ -110,13 +113,14 @@ namespace LM.App.Wpf.Library
             }
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
-            var (_, presetById) = TryFindPreset(file.Root, key);
+            var root = EnsureRoot(file);
+            var (_, presetById) = TryFindPreset(root, key);
             if (presetById is not null)
             {
                 return presetById.Clone();
             }
 
-            var (_, preset) = TryFindPresetByName(file.Root, key);
+            var (_, preset) = TryFindPresetByName(root, key);
             return preset?.Clone();
         }
 
@@ -128,10 +132,11 @@ namespace LM.App.Wpf.Library
             }
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
-            var (parent, preset) = TryFindPreset(file.Root, key);
+            var root = EnsureRoot(file);
+            var (parent, preset) = TryFindPreset(root, key);
             if (preset is null)
             {
-                (parent, preset) = TryFindPresetByName(file.Root, key);
+                (parent, preset) = TryFindPresetByName(root, key);
             }
 
             if (preset is null || parent is null)
@@ -141,7 +146,7 @@ namespace LM.App.Wpf.Library
             }
 
             parent.Presets.Remove(preset);
-            NormalizeTree(file.Root);
+            NormalizeTree(root);
             await SaveAsync(file, ct).ConfigureAwait(false);
             Trace.WriteLine($"[LibraryFilterPresetStore] Deleted preset '{preset.Name}' ({preset.Id}).");
         }
@@ -174,7 +179,8 @@ namespace LM.App.Wpf.Library
             }
 
             var file = await LoadAsync(ct).ConfigureAwait(false);
-            var (parent, folder) = TryFindFolder(file.Root, folderId);
+            var root = EnsureRoot(file);
+            var (parent, folder) = TryFindFolder(root, folderId);
             if (folder is null || parent is null)
             {
                 Trace.WriteLine($"[LibraryFilterPresetStore] Folder '{folderId}' not found for deletion.");
@@ -182,7 +188,7 @@ namespace LM.App.Wpf.Library
             }
 
             parent.Folders.Remove(folder);
-            NormalizeTree(file.Root);
+            NormalizeTree(root);
             await SaveAsync(file, ct).ConfigureAwait(false);
             Trace.WriteLine($"[LibraryFilterPresetStore] Deleted folder '{folder.Name}' ({folder.Id}).");
         }
