@@ -228,6 +228,41 @@ namespace LM.App.Wpf.Library
             await SaveAsync(file, ct).ConfigureAwait(false);
             Trace.WriteLine($"[LibraryFilterPresetStore] Renamed folder '{folder.Id}' to '{folder.Name}'.");
         }
+        public async Task RenamePresetAsync(string presetId, string newName, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(presetId))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Ignoring rename for preset '{presetId}'.");
+                return;
+            }
+
+            var trimmedName = newName?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedName))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Ignoring rename for preset '{presetId}' due to empty name.");
+                return;
+            }
+
+            var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
+            var (_, preset) = TryFindPreset(root, presetId);
+            if (preset is null)
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Preset '{presetId}' not found for rename.");
+                return;
+            }
+
+            if (string.Equals(preset.Name, trimmedName, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Rename skipped for preset '{preset.Id}'; name unchanged.");
+                return;
+            }
+
+            preset.Name = trimmedName;
+            NormalizeTree(root);
+            await SaveAsync(file, ct).ConfigureAwait(false);
+            Trace.WriteLine($"[LibraryFilterPresetStore] Renamed preset '{preset.Id}' to '{preset.Name}'.");
+        }
 
         public async Task MovePresetAsync(string presetId, string targetFolderId, int insertIndex, CancellationToken ct = default)
         {

@@ -18,6 +18,7 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
         public IAsyncRelayCommand<SavedSearchFolderViewModel?> RenameFolderCommand { get; }
         public IAsyncRelayCommand<SavedSearchPresetViewModel?> LoadPresetCommand { get; }
+        public IAsyncRelayCommand<SavedSearchPresetViewModel?> RenamePresetCommand { get; }
 
         public SavedSearchTreeViewModel(LibraryFilterPresetStore store, ILibraryPresetPrompt prompt)
         {
@@ -32,6 +33,7 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(DeletePresetAsync, canExecute: static preset => preset is not null);
             LoadPresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(LoadPresetAsync, canExecute: static preset => preset is not null);
             MoveCommand = new AsyncRelayCommand<SavedSearchDragDropRequest?>(MoveAsync, canExecute: request => request?.Source is not null);
+            RenamePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(RenamePresetAsync, canExecute: static preset => preset is not null);
         }
 
         public SavedSearchFolderViewModel Root { get; }
@@ -72,6 +74,35 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             }
         }
 
+        private async Task RenamePresetAsync(SavedSearchPresetViewModel? preset)
+        {
+            if (preset is null)
+            {
+                return;
+            }
+
+            var existing = await InvokeOnDispatcherAsync(() => preset.Parent?.Children
+                .OfType<SavedSearchPresetViewModel>()
+                .Where(p => p.Id != preset.Id)
+                .Select(p => p.Name)
+                .ToArray() ?? Array.Empty<string>()).ConfigureAwait(false);
+
+            var context = new LibraryPresetSaveContext(
+                preset.Name,
+                existing,
+                "Rename Saved Search",
+                "Enter new name for this search.");
+
+            var result = await _prompt.RequestSaveAsync(context).ConfigureAwait(false);
+            if (result is null || string.IsNullOrWhiteSpace(result.Name) || string.Equals(result.Name, preset.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            await _store.RenamePresetAsync(preset.Id, result.Name.Trim(), CancellationToken.None).ConfigureAwait(false);
+            Trace.WriteLine($"[SavedSearchTreeViewModel] Renamed preset '{preset.Id}' to '{result.Name}'.");
+            await RefreshAsync().ConfigureAwait(false);
+        }
         private async Task CreateFolderAsync(SavedSearchFolderViewModel? parent)
         {
             var target = parent ?? Root;

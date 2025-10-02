@@ -32,6 +32,7 @@ LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! Defa
 LM.App.Wpf.Library.Collections.LibraryCollectionEntry.LibraryCollectionEntry() -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.RenameFolderAsync(string! folderId, string! newName, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.LibraryFilterPresetStore.RenamePresetAsync(string! presetId, string! newName, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
 LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.LibraryPresetTreeItem>!
@@ -95,6 +96,7 @@ LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePrese
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.LoadPresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel?>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest?>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RenamePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel?>!
 LM.App.Wpf.ViewModels.LibraryViewModel.AllTags.get -> System.Collections.ObjectModel.ObservableCollection<string!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.LibraryViewModel.LitSearchOrganizer.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel!
