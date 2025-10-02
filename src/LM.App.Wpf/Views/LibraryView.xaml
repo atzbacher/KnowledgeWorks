@@ -5,9 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
+             xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:core="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
@@ -48,58 +50,51 @@
 
                 <!-- Compact Search header -->
                 <Border Grid.Row="0"
-                Grid.Column="0"
-                Grid.ColumnSpan="5"
-                Background="#FAFAFA"
-                BorderBrush="#E5E7EB"
-                BorderThickness="0,0,0,1"
-                Padding="8,6">
-                    <StackPanel DataContext="{Binding Filters}">
-                        <DockPanel>
-                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                <Button Content="Save search"
-                        Command="{Binding SavePresetCommand}"
-                        Margin="0,0,4,0"
-                        Padding="6,3"
-                        Height="26"/>
-                                <Button Content="Clear"
-                        Command="{Binding ClearCommand}"
-                        Padding="6,3"
-                        Height="26"/>
-                            </StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MaxWidth="500"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0"
-                         Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Height="26"
-                         VerticalContentAlignment="Center"
-                         Padding="4,0"
-                         BorderBrush="#D1D5DB"
-                         BorderThickness="1">
-                                    <TextBox.InputBindings>
-                                        <KeyBinding Key="Enter"
-                                                    Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
-                                    </TextBox.InputBindings>
-                                </TextBox>
-                                <ComboBox Grid.Column="1"
-                          Margin="4,0,0,0"
-                          MinWidth="100"
-                          Height="26"
-                          ItemsSource="{Binding SortOptions}"
-                          SelectedItem="{Binding SelectedSort}"
-                          DisplayMemberPath="DisplayName"/>
-                                <CheckBox Grid.Column="2"
-                          Content="Full text"
-                          Margin="8,0,0,0"
-                          VerticalAlignment="Center"
-                          IsChecked="{Binding UseFullTextSearch}"/>
-                            </Grid>
-                        </DockPanel>
-                    </StackPanel>
+                        Grid.Column="0"
+                        Grid.ColumnSpan="5"
+                        Background="#FAFAFA"
+                        BorderBrush="#E5E7EB"
+                        BorderThickness="0,0,0,1"
+                        Padding="8,6">
+                    <Grid DataContext="{Binding Filters}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <controls:LibrarySearchQueryBox x:Name="UnifiedQueryBox"
+                                                        Grid.Column="0"
+                                                        Margin="0,0,12,0"
+                                                        MaxWidth="600"
+                                                        VerticalAlignment="Center"
+                                                        Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}">
+                            <controls:LibrarySearchQueryBox.InputBindings>
+                                <KeyBinding Key="Enter"
+                                            Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
+                            </controls:LibrarySearchQueryBox.InputBindings>
+                        </controls:LibrarySearchQueryBox>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton x:Name="FullTextToggle"
+                                          Width="52"
+                                          Height="26"
+                                          Margin="0,0,8,0"
+                                          IsChecked="{Binding UseFullTextSearch}"
+                                          Style="{StaticResource LibraryPillToggleStyle}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="Checked">
+                                        <core:InvokeCommandAction Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
+                                    </i:EventTrigger>
+                                    <i:EventTrigger EventName="Unchecked">
+                                        <core:InvokeCommandAction Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                            </ToggleButton>
+                            <TextBlock Text="Full text"
+                                       VerticalAlignment="Center"
+                                       Foreground="#4B5563"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
 
                 <!-- Left Panel - Collections/Tags (Zotero-style) -->
