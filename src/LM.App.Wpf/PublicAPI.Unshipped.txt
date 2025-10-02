@@ -66,26 +66,26 @@ LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core
 LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbsolutePath, string! pdfHash) -> void
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.MoveFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest!>!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.MoveFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest?>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ItemsView.get -> System.ComponentModel.ICollectionView!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.init -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.LitSearchDragDropRequest() -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.init -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.TargetFolder.init -> void
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel!>!
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest!>!
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest?>!
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.SavedSearchDragDropRequest() -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SavedSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder) -> void
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel!>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.LoadPresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel!>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest!>!
-LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.LoadPresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest?>!
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
 LM.App.Wpf.ViewModels.LibraryViewModel.AllTags.get -> ObservableCollection<string!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.InitializeAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.LibraryViewModel.LitSearchOrganizer.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel!

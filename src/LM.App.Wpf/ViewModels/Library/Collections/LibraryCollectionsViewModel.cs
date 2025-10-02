@@ -31,11 +31,11 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
             Root = new LibraryCollectionFolderViewModel(this, LibraryCollectionFolder.RootId, "Collections", new LibraryCollectionMetadata());
 
             CreateFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(CreateFolderAsync);
-            RenameFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(RenameFolderAsync, CanRenameFolder);
-            DeleteFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
-            AddSelectionToFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(AddSelectionToFolderAsync, CanModifyFolder);
-            RemoveSelectionFromFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(RemoveSelectionFromFolderAsync, CanModifyFolder);
-            MoveFolderCommand = new AsyncRelayCommand<CollectionDragDropRequest>(MoveFolderAsync, request => request?.Source is not null && request.TargetFolder is not null);
+            RenameFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(RenameFolderAsync, canExecute: CanRenameFolder);
+            DeleteFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(DeleteFolderAsync, canExecute: CanDeleteFolder);
+            AddSelectionToFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(AddSelectionToFolderAsync, canExecute: CanModifyFolder);
+            RemoveSelectionFromFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(RemoveSelectionFromFolderAsync, canExecute: CanModifyFolder);
+            MoveFolderCommand = new AsyncRelayCommand<CollectionDragDropRequest?>(MoveFolderAsync, canExecute: request => request?.Source is not null && request.TargetFolder is not null);
 
             _results.SelectionChanged += OnSelectionChanged;
         }
@@ -44,15 +44,15 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
 
         public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> CreateFolderCommand { get; }
 
-        public IAsyncRelayCommand<LibraryCollectionFolderViewModel> RenameFolderCommand { get; }
+        public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> RenameFolderCommand { get; }
 
-        public IAsyncRelayCommand<LibraryCollectionFolderViewModel> DeleteFolderCommand { get; }
+        public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> DeleteFolderCommand { get; }
 
-        public IAsyncRelayCommand<LibraryCollectionFolderViewModel> AddSelectionToFolderCommand { get; }
+        public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> AddSelectionToFolderCommand { get; }
 
-        public IAsyncRelayCommand<LibraryCollectionFolderViewModel> RemoveSelectionFromFolderCommand { get; }
+        public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> RemoveSelectionFromFolderCommand { get; }
 
-        public IAsyncRelayCommand<CollectionDragDropRequest> MoveFolderCommand { get; }
+        public IAsyncRelayCommand<CollectionDragDropRequest?> MoveFolderCommand { get; }
 
         public async Task RefreshAsync(CancellationToken ct = default)
         {
