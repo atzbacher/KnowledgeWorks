@@ -79,7 +79,12 @@
                          VerticalContentAlignment="Center"
                          Padding="4,0"
                          BorderBrush="#D1D5DB"
-                         BorderThickness="1"/>
+                         BorderThickness="1">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter"
+                                                    Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
+                                    </TextBox.InputBindings>
+                                </TextBox>
                                 <ComboBox Grid.Column="1"
                           Margin="4,0,0,0"
                           MinWidth="100"
