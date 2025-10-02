@@ -69,6 +69,7 @@ LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbso
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ItemsView.get -> System.ComponentModel.ICollectionView!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.init -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.LitSearchDragDropRequest() -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.init -> void
@@ -93,6 +94,8 @@ LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.HighlightBrush.get -> System.Windows.Med
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.PdfAnnotationColorCommandParameter() -> void
 LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior
 LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior.LitSearchTreeDragDropBehavior() -> void
+LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.AttachmentGlyphToIconConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
@@ -242,11 +245,9 @@ LM.App.Wpf.Common.StringJoinConverter.ConvertBack(object? value, System.Type! ta
 LM.App.Wpf.Common.StringJoinConverter.StringJoinConverter() -> void
 LM.App.Wpf.Views.Converters.AttachmentGlyphToIconConverter
 LM.App.Wpf.Views.Converters.AttachmentGlyphToIconConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
-LM.App.Wpf.Views.Converters.AttachmentGlyphToIconConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Views.Converters.AttachmentGlyphToIconConverter.AttachmentGlyphToIconConverter() -> void
 LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter
 LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
-LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter.AttachmentGlyphToDescriptionConverter() -> void
 LM.App.Wpf.Common.ViewModelBase
 LM.App.Wpf.Common.ViewModelBase.ViewModelBase() -> void
@@ -849,7 +850,6 @@ LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility.Snapshot() -> System.Colle
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Clear() -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.Items.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ItemsView.get -> System.Windows.Data.ICollectionView!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LibraryResultsViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.App.Wpf.Library.ILibraryEntryEditor! entryEditor, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.Library.IAttachmentMetadataPrompt! attachmentPrompt, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator, LM.Core.Abstractions.IHasher! hasher, LM.App.Wpf.Services.Pdf.IPdfViewerLauncher! pdfViewerLauncher) -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadFullTextResultsAsync(System.Collections.Generic.IReadOnlyList<LM.Core.Models.Search.FullTextSearchHit!>! hits, System.Func<LM.Core.Models.Entry!, bool>? entryFilter = null) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LoadMetadataResults(System.Collections.Generic.IEnumerable<LM.Core.Models.Entry!>! entries) -> void
@@ -864,7 +864,6 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasLinkItems.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.LinkItems.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryLinkItem!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.EditEntryAsync(LM.App.Wpf.ViewModels.LibrarySearchResult? target) -> System.Threading.Tasks.Task!
-LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HandleSelectionChangedCommand.get -> System.Windows.Input.ICommand!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelection.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedItems.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.LibrarySearchResult!>!
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System.EventHandler?

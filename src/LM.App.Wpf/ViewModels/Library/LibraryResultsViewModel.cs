@@ -1207,7 +1207,7 @@ namespace LM.App.Wpf.ViewModels.Library
                 return column.SortMemberPath;
             }
 
-            if (column is DataGridBoundColumn boundColumn && boundColumn.Binding is Binding binding && binding.Path is not null)
+            if (column is DataGridBoundColumn boundColumn && boundColumn.Binding is System.Windows.Data.Binding binding && binding.Path is not null)
             {
                 return binding.Path.Path;
             }
