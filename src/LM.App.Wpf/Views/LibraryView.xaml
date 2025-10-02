@@ -5,12 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
+             xmlns:common="clr-namespace:LM.App.Wpf.Common"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
+             xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="900">
+             d:DesignHeight="600"
+             d:DesignWidth="900">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,574 +21,362 @@
                 <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
                 <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Add BooleanToVisibilityConverter if not already in resources -->
-            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-
-            <!-- Inverse Boolean Converter -->
-            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Background="#F6F6F6">
-        <Border Margin="0"
-            Background="#FFFFFF"
-            BorderBrush="#D1D5DB"
-            BorderThickness="1">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="240" MinWidth="0" Name="LeftColumn"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="300" MinWidth="0" Name="RightColumn"/>
-                </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-                <!-- Compact Search header -->
-                <Border Grid.Row="0"
-                Grid.Column="0"
-                Grid.ColumnSpan="5"
+        <Border Grid.Row="0"
                 Background="#FAFAFA"
                 BorderBrush="#E5E7EB"
                 BorderThickness="0,0,0,1"
-                Padding="8,6">
-                    <StackPanel DataContext="{Binding Filters}">
-                        <DockPanel>
-                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                                <Button Content="Save search"
-                        Command="{Binding SaveSearchCommand}"
-                        Margin="0,0,4,0"
-                        Padding="6,3"
-                        Height="26"/>
-                                <Button Content="Clear"
-                        Command="{Binding ClearSearchCommand}"
-                        Padding="6,3"
-                        Height="26"/>
-                            </StackPanel>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" MaxWidth="500"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBox Grid.Column="0"
-                         Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                         Height="26"
-                         VerticalContentAlignment="Center"
-                         Padding="4,0"
-                         BorderBrush="#D1D5DB"
-                         BorderThickness="1"/>
-                                <ComboBox Grid.Column="1"
-                          Margin="4,0,0,0"
-                          MinWidth="100"
-                          Height="26"
-                          ItemsSource="{Binding SortOptions}"
-                          SelectedItem="{Binding SelectedSort}"/>
-                                <CheckBox Grid.Column="2"
-                          Content="Full text"
-                          Margin="8,0,0,0"
-                          VerticalAlignment="Center"
-                          IsChecked="{Binding IsFullTextSearchEnabled}"/>
-                            </Grid>
-                        </DockPanel>
+                Padding="16,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Vertical">
+                    <controls:LibrarySearchQueryBox Text="{Binding Filters.UnifiedQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    ToolTip="{Binding Filters.KeywordTooltip}" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,8,0,0">
+                        <CheckBox Content="Use full text search"
+                                  IsChecked="{Binding Filters.UseFullTextSearch}"
+                                  VerticalAlignment="Center" />
+                        <TextBox Width="220"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding Filters.FullTextQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Visibility="{Binding Filters.UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding Filters.UseFullTextSearch, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    Margin="12,0,0,0">
+                            <CheckBox Content="Title"
+                                      Margin="0,0,12,0"
+                                      IsChecked="{Binding Filters.FullTextInTitle}" />
+                            <CheckBox Content="Abstract"
+                                      Margin="0,0,12,0"
+                                      IsChecked="{Binding Filters.FullTextInAbstract}" />
+                            <CheckBox Content="Content"
+                                      IsChecked="{Binding Filters.FullTextInContent}" />
+                        </StackPanel>
                     </StackPanel>
-                </Border>
+                </StackPanel>
 
-                <!-- Left Panel - Collections/Tags (Zotero-style) -->
-                <Border Grid.Row="1"
-                Grid.Column="0"
-                Background="#F8F9FA"
-                BorderBrush="#E5E7EB"
-                BorderThickness="0,0,1,0"
-                Name="LeftPanelBorder">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Disabled"
-                        DataContext="{Binding Filters}">
-                        <StackPanel Margin="8">
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top">
+                    <Button Content="Search"
+                            Margin="0,0,8,0"
+                            Command="{Binding SearchCommand}"
+                            Style="{StaticResource LibraryPrimaryButtonStyle}" />
+                    <Button Content="Clear"
+                            Margin="0,0,8,0"
+                            Command="{Binding Filters.ClearCommand}"
+                            Style="{StaticResource LibraryHeaderButtonStyle}" />
+                    <Button Content="Save search"
+                            Margin="0,0,8,0"
+                            Command="{Binding Filters.SavePresetCommand}"
+                            Style="{StaticResource LibraryHeaderButtonStyle}" />
+                    <Button Content="Load saved"
+                            Margin="0,0,8,0"
+                            Command="{Binding Filters.LoadPresetCommand}"
+                            Style="{StaticResource LibraryHeaderButtonStyle}" />
+                    <Button Content="Manage saved"
+                            Command="{Binding Filters.ManagePresetsCommand}"
+                            Style="{StaticResource LibraryHeaderButtonStyle}" />
+                    <ToggleButton Width="28"
+                                  Height="28"
+                                  Margin="16,0,8,0"
+                                  ToolTip="Toggle left panel"
+                                  IsChecked="{Binding Filters.IsLeftPanelCollapsed, Mode=TwoWay}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Background" Value="{StaticResource LibraryPanelSubtleBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource LibraryPanelBorderBrush}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Content" Value="&#xE0E2;" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content" Value="&#xE0E3;" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#F3F4F6" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <ToggleButton Width="28"
+                                  Height="28"
+                                  ToolTip="Toggle right panel"
+                                  IsChecked="{Binding Filters.IsRightPanelCollapsed, Mode=TwoWay}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+                                <Setter Property="FontSize" Value="12" />
+                                <Setter Property="Background" Value="{StaticResource LibraryPanelSubtleBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource LibraryPanelBorderBrush}" />
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="Content" Value="&#xE0E3;" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter Property="Content" Value="&#xE0E2;" />
+                                    </Trigger>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#F3F4F6" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-                            <!-- Saved Searches - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
+        <Grid Grid.Row="1" Background="#F6F6F6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftColumn"
+                                  Width="{Binding Filters.LeftPanelWidth, Mode=TwoWay}"
+                                  MinWidth="200" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition x:Name="RightColumn"
+                                  Width="{Binding Filters.RightPanelWidth, Mode=TwoWay}"
+                                  MinWidth="260" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0"
+                    Background="#FFFFFF"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    Padding="12"
+                    Visibility="{Binding Filters.IsLeftPanelCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="Saved searches"
+                                   FontSize="13"
+                                   FontWeight="SemiBold" />
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <StackPanel Margin="0,0,0,16">
+                                <ItemsControl ItemsSource="{Binding Filters.SavedPresets}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type common:LibraryPresetSummary}">
+                                            <Button Content="{Binding Name}"
+                                                    Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
+                                                    CommandParameter="{Binding}"
+                                                    HorizontalContentAlignment="Stretch"
+                                                    Style="{StaticResource LibraryHeaderButtonStyle}"
+                                                    ToolTip="{Binding SavedUtc, StringFormat='Saved {0:yyyy-MM-dd HH:mm}'}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="No saved searches yet."
+                                           Foreground="#6B7280"
+                                           Margin="4,8,0,0"
+                                           Visibility="{Binding Filters.HasSavedPresets, Converter={StaticResource InverseBoolToVisibilityConverter}}" />
+                            </StackPanel>
+
+                            <Border Background="#F8FAFC"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="1"
+                                    Padding="10"
+                                    CornerRadius="4">
                                 <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="SavedSearchToggle"
-                                    IsChecked="True"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="SAVED SEARCHES"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <ItemsControl ItemsSource="{Binding Presets}"
-                                Margin="0"
-                                Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Content="{Binding Name}"
-                                Command="{Binding DataContext.Filters.LoadPresetCommand, ElementName=LibraryViewControl}"
-                                CommandParameter="{Binding}"
-                                HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Stretch"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Padding="8,4">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}"
-                                      Padding="{TemplateBinding Padding}">
-                                                                <TextBlock Text="{TemplateBinding Content}" 
-                                           TextTrimming="CharacterEllipsis"/>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#F3F4F6"/>
-                                                                </Trigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Tags Filter - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="TagsToggle"
-                                    IsChecked="True"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="TAGS"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <ListBox ItemsSource="{Binding SelectedTags}"
-                           Margin="4"
-                           MinHeight="60"
-                           MaxHeight="150"
-                           BorderThickness="1"
-                           BorderBrush="#E5E7EB"
-                           Visibility="{Binding IsChecked, ElementName=TagsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#E0E7FF"
-                                BorderBrush="#6366F1"
-                                BorderThickness="1"
-                                CornerRadius="2"
-                                Padding="4,2"
-                                Margin="2">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding}"
-                                       FontSize="11"
-                                       Foreground="#4338CA"
-                                       Margin="0,0,4,0"/>
-                                                        <Button Content="X"
-                                    Command="{Binding DataContext.Filters.RemoveTagCommand, ElementName=LibraryViewControl}"
-                                    CommandParameter="{Binding}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="0"
-                                    Width="12"
-                                    Height="12"
-                                    FontSize="12"
-                                    Foreground="#4338CA"/>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Date Filter - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="DateToggle"
-                                    IsChecked="False"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="DATE RANGE"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <StackPanel Margin="8,4"
-                              Visibility="{Binding IsChecked, ElementName=DateToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <DatePicker SelectedDate="{Binding DateFrom}"
-                                Height="24"
-                                Margin="0,2"/>
-                                        <DatePicker SelectedDate="{Binding DateTo}"
-                                Height="24"
-                                Margin="0,2"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Full Text Options - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="FullTextToggle"
-                                    IsChecked="False"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="FULL TEXT SEARCH"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <StackPanel Visibility="{Binding IsChecked, ElementName=FullTextToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <TextBox Text="{Binding FullTextQuery, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="4"
-                             Height="24"
-                             VerticalContentAlignment="Center"/>
-                                        <WrapPanel Margin="4,0,4,4">
-                                            <CheckBox Content="Title"
-                                Margin="0,0,8,4"
-                                IsChecked="{Binding FullTextInTitle}"/>
-                                            <CheckBox Content="Abstract"
-                                Margin="0,0,8,4"
-                                IsChecked="{Binding FullTextInAbstract}"/>
-                                            <CheckBox Content="Content"
-                                Margin="0,0,8,4"
-                                IsChecked="{Binding FullTextInContent}"/>
-                                        </WrapPanel>
-                                    </StackPanel>
+                                    <TextBlock Text="Navigation"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Margin="0,0,0,8" />
+                                    <TreeView ItemsSource="{Binding Filters.NavigationRoots}"
+                                              SelectedItemChanged="OnNavigationSelected">
+                                        <TreeView.ItemTemplate>
+                                            <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                    <TextBlock Text="{Binding Subtitle}"
+                                                               FontSize="11"
+                                                               Foreground="#6B7280">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="Text" Value="">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </Trigger>
+                                                                    <Trigger Property="Text" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.ItemTemplate>
+                                    </TreeView>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
-                </Border>
+                </Grid>
+            </Border>
 
-                <!-- Toggle Left Panel Button -->
-                <ToggleButton Grid.Row="1"
-                      Grid.Column="1"
-                      Name="LeftPanelToggle"
-                      IsChecked="True"
-                      HorizontalAlignment="Left"
-                      VerticalAlignment="Top"
-                      Width="20"
-                      Height="32"
-                      Padding="0"
-                      Margin="2,8,2,0"
-                      FontFamily="Segoe MDL2 Assets"
-                      FontSize="12"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      ToolTip="Toggle left panel">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Content" Value="&#xE0E2;"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Content" Value="&#xE0E3;"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#F3F4F6"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+            <GridSplitter Grid.Column="1"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="#E5E7EB"
+                          Width="6"
+                          ShowsPreview="True" />
 
-                <!-- Center - Results List (Compact Zotero-style) -->
-                <DataGrid Grid.Row="1"
-                  Grid.Column="2"
-                  x:Name="ResultsList"
-                  ItemsSource="{Binding Results.Items}"
-                  SelectedItem="{Binding Results.Selected}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  GridLinesVisibility="Horizontal"
-                  HorizontalGridLinesBrush="#E5E7EB"
-                  BorderThickness="0"
-                  Background="White"
-                  RowHeight="24"
-                  HeadersVisibility="Column">
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="#F9FAFB"/>
-                            <Setter Property="Foreground" Value="#374151"/>
-                            <Setter Property="FontSize" Value="11"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="Height" Value="28"/>
-                            <Setter Property="BorderBrush" Value="#E5E7EB"/>
-                            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-                            <Setter Property="Padding" Value="6,0"/>
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-                    <DataGrid.CellStyle>
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="4,0"/>
-                            <Setter Property="FontSize" Value="11"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Background" Value="#EFF6FF"/>
-                                    <Setter Property="Foreground" Value="#1F2937"/>
-                                    <Setter Property="BorderBrush" Value="#BFDBFE"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.CellStyle>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Title" 
-                                Binding="{Binding Entry.Title}" 
-                                Width="2*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Authors" 
-                                Binding="{Binding Entry.Authors}" 
-                                Width="*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Year" 
-                                Binding="{Binding Entry.Year}" 
-                                Width="50"/>
-                        <DataGridTextColumn Header="Journal" 
-                                Binding="{Binding Entry.Journal}" 
-                                Width="*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Added" 
-                                Binding="{Binding Entry.DateAdded, StringFormat='{}{0:yyyy-MM-dd}'}" 
-                                Width="80"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+            <Border Grid.Column="2"
+                    Background="#FFFFFF"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    Padding="0,12,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <!-- Toggle Right Panel Button -->
-                <ToggleButton Grid.Row="1"
-                      Grid.Column="3"
-                      Name="RightPanelToggle"
-                      IsChecked="True"
-                      HorizontalAlignment="Right"
-                      VerticalAlignment="Top"
-                      Width="20"
-                      Height="32"
-                      Padding="0"
-                      Margin="2,8,2,0"
-                      FontFamily="Segoe MDL2 Assets"
-                      FontSize="12"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      ToolTip="Toggle right panel">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Content" Value="&#xE0E3;"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Content" Value="&#xE0E2;"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#F3F4F6"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+                    <StackPanel Orientation="Horizontal"
+                                Margin="16,0,16,12">
+                        <Button Content="Open"
+                                Margin="0,0,8,0"
+                                Command="{Binding OpenEntryCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                        <Button Content="Folder"
+                                Margin="0,0,8,0"
+                                Command="{Binding OpenContainingFolderCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                        <Button Content="Copy citation"
+                                Margin="0,0,8,0"
+                                Command="{Binding CopyMetadataCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                        <Button Content="Copy path"
+                                Margin="0,0,8,0"
+                                Command="{Binding CopyWorkspacePathCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                        <Button Content="PDF annotations"
+                                Margin="0,0,8,0"
+                                Command="{Binding Results.OpenPdfAnnotationsCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                        <Button Content="Edit"
+                                Command="{Binding EditEntryCommand}"
+                                CommandParameter="{Binding Results.Selected}"
+                                Style="{StaticResource LibraryHeaderButtonStyle}" />
+                    </StackPanel>
 
-                <!-- Right Panel - Entry Details -->
-                <Border Grid.Row="1"
-                Grid.Column="4"
-                Background="White"
-                BorderBrush="#E5E7EB"
-                BorderThickness="1,0,0,0"
-                Name="RightPanelBorder">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Disabled">
+                    <DataGrid Grid.Row="1"
+                              x:Name="ResultsList"
+                              ItemsSource="{Binding Results.Items}"
+                              SelectedItem="{Binding Results.Selected, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              IsReadOnly="True"
+                              SelectionMode="Extended"
+                              SelectionUnit="FullRow"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#E5E7EB"
+                              Background="White"
+                              BorderThickness="0"
+                              HeadersVisibility="Column"
+                              RowHeight="28"
+                              SelectionChanged="OnResultsSelectionChanged"
+                              MouseDoubleClick="OnResultsDoubleClick">
+                        <i:Interaction.Behaviors>
+                            <behaviors:DataGridColumnVisibilityBehavior VisibilityMap="{Binding ColumnVisibility}" />
+                        </i:Interaction.Behaviors>
+                        <DataGrid.Columns>
+                            <StaticResource ResourceKey="LibraryResultsColumn.AttachmentIndicator" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Title" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Score" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Source" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Type" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Year" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.AddedOn" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.AddedBy" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.InternalId" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Doi" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Pmid" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Nct" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Authors" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Tags" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.IsInternal" />
+                            <StaticResource ResourceKey="LibraryResultsColumn.Snippet" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="3"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          Background="#E5E7EB"
+                          Width="6"
+                          ShowsPreview="True" />
+
+            <Border Grid.Column="4"
+                    Background="#FFFFFF"
+                    BorderBrush="#D1D5DB"
+                    BorderThickness="1"
+                    Padding="12"
+                    Visibility="{Binding Filters.IsRightPanelCollapsed, Converter={StaticResource InverseBoolToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="0,0,0,12">
+                        <TextBlock Text="Entry details"
+                                   FontSize="13"
+                                   FontWeight="SemiBold" />
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  DataContext="{Binding Results}">
                         <Grid>
                             <ContentPresenter x:Name="EntryDetailPresenter"
-                                Content="{Binding Results.SelectedEntry}"
-                                ContentTemplate="{StaticResource LibraryEntryDetailTemplate}"
-                                Margin="8"/>
+                                              Content="{Binding Selected}"
+                                              ContentTemplate="{StaticResource LibraryEntryDetailTemplate}" />
                             <TextBlock Text="Select an entry to view details"
-                         Margin="8"
-                         FontStyle="Italic"
-                         Foreground="#9CA3AF"
-                         TextWrapping="Wrap"
-                         VerticalAlignment="Center"
-                         HorizontalAlignment="Center">
+                                       Margin="8"
+                                       FontStyle="Italic"
+                                       Foreground="#9CA3AF"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Content, ElementName=EntryDetailPresenter}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -594,64 +384,8 @@
                             </TextBlock>
                         </Grid>
                     </ScrollViewer>
-                </Border>
-
-                <!-- Triggers for panel visibility -->
-                <Grid.Triggers>
-                    <EventTrigger SourceName="LeftPanelToggle" RoutedEvent="ToggleButton.Checked">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="LeftColumn" 
-                                 Storyboard.TargetProperty="Width.Value"
-                                 To="240" Duration="0:0:0.2"/>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LeftPanelBorder"
-                                                Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                </ObjectAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                    <EventTrigger SourceName="LeftPanelToggle" RoutedEvent="ToggleButton.Unchecked">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="LeftColumn" 
-                                 Storyboard.TargetProperty="Width.Value"
-                                 To="0" Duration="0:0:0.2"/>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="LeftPanelBorder"
-                                                Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.2" Value="{x:Static Visibility.Collapsed}"/>
-                                </ObjectAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                    <EventTrigger SourceName="RightPanelToggle" RoutedEvent="ToggleButton.Checked">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="RightColumn" 
-                                 Storyboard.TargetProperty="Width.Value"
-                                 To="300" Duration="0:0:0.2"/>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RightPanelBorder"
-                                                Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}"/>
-                                </ObjectAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                    <EventTrigger SourceName="RightPanelToggle" RoutedEvent="ToggleButton.Unchecked">
-                        <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetName="RightColumn" 
-                                 Storyboard.TargetProperty="Width.Value"
-                                 To="0" Duration="0:0:0.2"/>
-                                <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RightPanelBorder"
-                                                Storyboard.TargetProperty="Visibility">
-                                    <DiscreteObjectKeyFrame KeyTime="0:0:0.2" Value="{x:Static Visibility.Collapsed}"/>
-                                </ObjectAnimationUsingKeyFrames>
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </Grid.Triggers>
-            </Grid>
-        </Border>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
