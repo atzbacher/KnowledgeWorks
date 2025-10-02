@@ -67,6 +67,7 @@ namespace LM.Infrastructure.Tests.Pdf
             var entryStore = new FakeEntryStore();
             var reader = new PdfAnnotationOverlayReader(workspace, entryStore);
             const string hash = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+            const string entryId = "missing-entry";
 
             var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
 

@@ -17,6 +17,7 @@ using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
 using LM.Infrastructure.Hooks;
+using LM.App.Wpf.Views.Behaviors;
 using System.Windows.Controls;
 using System.Windows.Data;
 using HookM = LM.HubSpoke.Models;
@@ -1215,18 +1216,20 @@ namespace LM.App.Wpf.ViewModels.Library
             return null;
         }
 
-        private static void ClearOtherColumnSortIndicators(DataGridColumn activeColumn)
+        private void ClearOtherColumnSortIndicators(DataGridColumn activeColumn)
         {
             if (activeColumn is null)
             {
                 return;
             }
 
-            var grid = activeColumn.DataGridOwner;
-            if (grid is null)
+            if (_dataGrid is null || !_dataGrid.TryGetTarget(out var grid) || grid is null)
             {
                 return;
             }
+
+            var headerLabel = activeColumn.Header?.ToString() ?? "<none>";
+            Trace.WriteLine($"[LibraryResultsViewModel] Clearing sort indicators for non-active columns. Active header: '{headerLabel}'.");
 
             foreach (var column in grid.Columns)
             {
@@ -1489,7 +1492,13 @@ namespace LM.App.Wpf.ViewModels.Library
         public async Task ToggleBlacklistAsync(LibrarySearchResult? target)
         {
             var resolved = EnsureSelection(target);
-            var entry = resolved?.Entry;
+            if (resolved is null)
+            {
+                Trace.WriteLine("[LibraryResultsViewModel] ToggleBlacklistAsync aborted because no selection could be resolved.");
+                return;
+            }
+
+            var entry = resolved.Entry;
             if (entry is null)
             {
                 return;
