@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -128,32 +127,31 @@ namespace LM.App.Wpf.Library.Collections
 
             if (root is null)
             {
-                Trace.WriteLine($"[LibraryCollectionFolderExtensions] Cannot locate folder '{folderId}' because the root folder is null.");
                 return false;
             }
 
-            var pending = new Stack<(LibraryCollectionFolder Node, LibraryCollectionFolder Parent)>();
-            pending.Push((root, root));
-
-            while (pending.Count > 0)
+            if (string.Equals(root.Id, folderId, StringComparison.Ordinal))
             {
-                var (current, currentParent) = pending.Pop();
+                folder = root;
+                return true;
+            }
 
-                if (string.Equals(current.Id, folderId, StringComparison.Ordinal))
+            foreach (var child in root.Folders)
+            {
+                if (string.Equals(child.Id, folderId, StringComparison.Ordinal))
                 {
-                    folder = current;
-                    parent = currentParent;
-                    Trace.WriteLine($"[LibraryCollectionFolderExtensions] Found folder '{folderId}' with parent '{currentParent.Id}'.");
+                    folder = child;
+                    parent = root;
                     return true;
                 }
 
-                foreach (var child in current.Folders)
+                if (child.TryFindFolder(folderId, out folder, out parent))
                 {
-                    pending.Push((child, current));
+                    parent ??= child;
+                    return true;
                 }
             }
 
-            Trace.WriteLine($"[LibraryCollectionFolderExtensions] Folder '{folderId}' not found starting from root '{root.Id}'.");
             return false;
         }
     }
