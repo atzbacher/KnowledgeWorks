@@ -39,34 +39,35 @@
 
   <Style x:Key="LibraryDetailExpanderToggleStyle" TargetType="ToggleButton">
     <Setter Property="Background" Value="#F3F4F6" />
-    <Setter Property="Padding" Value="12,8" />
-    <Setter Property="Foreground" Value="#111827" />
-    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="#1F2937" />
+    <Setter Property="Padding" Value="12,10" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToggleButton">
           <Border x:Name="HeaderBorder"
                   Background="{TemplateBinding Background}"
-                  BorderBrush="Transparent"
-                  BorderThickness="1"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="0,0,0,1"
                   CornerRadius="4,4,0,0"
                   Padding="{TemplateBinding Padding}">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
+            <DockPanel LastChildFill="True">
               <TextBlock x:Name="Chevron"
-                         Margin="0,0,8,0"
-                         VerticalAlignment="Center"
+                         Width="16"
+                         Height="16"
                          FontFamily="Segoe MDL2 Assets"
-                         FontSize="12"
+                         FontSize="10"
+                         Foreground="#6B7280"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
                          Text="&#xE70D;" />
-              <ContentPresenter Grid.Column="1"
+              <ContentPresenter Margin="8,0,0,0"
                                 VerticalAlignment="Center"
                                 RecognizesAccessKey="True" />
-            </Grid>
+            </DockPanel>
+
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="False">
@@ -78,6 +79,10 @@
             <Trigger Property="IsMouseOver" Value="True">
               <Setter TargetName="HeaderBorder" Property="Background" Value="#E5E7EB" />
             </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="HeaderBorder" Property="Background" Value="#D1D5DB" />
+            </Trigger>
+
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
@@ -105,10 +110,15 @@
                             Style="{StaticResource LibraryDetailExpanderToggleStyle}"
                             Content="{TemplateBinding Header}"
                             IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
-              <ContentPresenter x:Name="ExpandSite"
-                                Margin="12,8,12,12"
-                                Visibility="Collapsed"
-                                ContentSource="Content" />
+              <Border x:Name="ContentHost"
+                      Background="White"
+                      CornerRadius="0,0,4,4">
+                <ContentPresenter x:Name="ExpandSite"
+                                  Margin="12"
+                                  Visibility="Collapsed"
+                                  ContentSource="Content" />
+              </Border>
+
             </DockPanel>
           </Border>
           <ControlTemplate.Triggers>
