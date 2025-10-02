@@ -27,6 +27,7 @@ namespace LM.App.Wpf.Tests.Library
                 var root = CreateTemplateHost(result, host);
 
                 Trace.WriteLine("Locating metadata section expander for keyboard focus validation.");
+
                 var metadata = FindDescendant<System.Windows.Controls.Expander>(root, static expander => string.Equals(expander.Name, "MetadataSection", StringComparison.Ordinal));
                 Assert.NotNull(metadata);
                 Assert.True(metadata!.IsExpanded);
@@ -43,6 +44,7 @@ namespace LM.App.Wpf.Tests.Library
                 System.Windows.Input.Keyboard.Focus(headerToggle);
                 Trace.WriteLine($"Header toggle keyboard focus state after collapse: {headerToggle.IsKeyboardFocused}");
                 Assert.True(headerToggle.IsKeyboardFocused);
+
 
                 var links = FindDescendant<System.Windows.Controls.ItemsControl>(root, static control => string.Equals(control.Name, "LinksItemsControl", StringComparison.Ordinal));
                 Assert.NotNull(links);
@@ -78,6 +80,7 @@ namespace LM.App.Wpf.Tests.Library
                 var root = CreateTemplateHost(result, host);
 
                 Trace.WriteLine("Validating placeholder visibility for empty entry detail template.");
+
                 AssertVisibility(root, "SourcePlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "AbstractPlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "NotesPlaceholder", System.Windows.Visibility.Visible);
@@ -92,6 +95,7 @@ namespace LM.App.Wpf.Tests.Library
         private static void AssertVisibility(System.Windows.DependencyObject root, string elementName, System.Windows.Visibility expected)
         {
             Trace.WriteLine($"Searching for element '{elementName}' to validate visibility state.");
+
             var textBlock = FindDescendant<System.Windows.Controls.TextBlock>(root, element => string.Equals(element.Name, elementName, StringComparison.Ordinal));
             Assert.NotNull(textBlock);
             Assert.Equal(expected, textBlock!.Visibility);

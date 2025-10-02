@@ -43,6 +43,7 @@
     <Setter Property="Padding" Value="12,10" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="FontWeight" Value="SemiBold" />
+
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToggleButton">
@@ -66,6 +67,7 @@
                                 VerticalAlignment="Center"
                                 RecognizesAccessKey="True" />
             </DockPanel>
+
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="False">
@@ -80,6 +82,7 @@
             <Trigger Property="IsPressed" Value="True">
               <Setter TargetName="HeaderBorder" Property="Background" Value="#D1D5DB" />
             </Trigger>
+
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
@@ -115,6 +118,7 @@
                                   Visibility="Collapsed"
                                   ContentSource="Content" />
               </Border>
+
             </DockPanel>
           </Border>
           <ControlTemplate.Triggers>
