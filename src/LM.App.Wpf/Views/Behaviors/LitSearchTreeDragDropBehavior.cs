@@ -1,73 +1,49 @@
 using System;
 using System.Diagnostics;
-=======
 using System.Diagnostics.CodeAnalysis;
-
-using LM.App.Wpf.ViewModels.Library.SavedSearches;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
 using Microsoft.Xaml.Behaviors;
 
 namespace LM.App.Wpf.Views.Behaviors
 {
-    public sealed class SavedSearchTreeDragDropBehavior : Behavior<System.Windows.Controls.TreeView>
+    public sealed class LitSearchTreeDragDropBehavior : Behavior<System.Windows.Controls.TreeView>
     {
         private System.Windows.Point? _dragStart;
-        private SavedSearchNodeViewModel? _dragSource;
+        private LitSearchNodeViewModel? _dragSource;
 
         protected override void OnAttached()
         {
             base.OnAttached();
 
-            if (AssociatedObject is null)
-            {
-                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Attached with null AssociatedObject.");
-                return;
-            }
-
-
             AssociatedObject.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove += OnPreviewMouseMove;
             AssociatedObject.DragOver += OnDragOver;
             AssociatedObject.Drop += OnDrop;
-
-            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Attached to tree '{0}'.", AssociatedObject.Name);
-
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
 
-            if (AssociatedObject is null)
-            {
-                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Detaching with null AssociatedObject.");
-                return;
-            }
-
             AssociatedObject.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove -= OnPreviewMouseMove;
             AssociatedObject.DragOver -= OnDragOver;
             AssociatedObject.Drop -= OnDrop;
-
-            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Detached from tree '{0}'.", AssociatedObject.Name);
-
         }
 
         private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var item = FindTreeViewItem(e.OriginalSource as System.Windows.DependencyObject);
-            if (item?.DataContext is SavedSearchNodeViewModel node)
+            if (item?.DataContext is LitSearchNodeViewModel node && node.IsDraggable)
             {
                 _dragStart = e.GetPosition(AssociatedObject);
                 _dragSource = node;
-                Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Potential drag start from node '{0}'.", node.Name);
-
+                Trace.WriteLine($"[LitSearchTreeDragDropBehavior] Drag start captured for '{node.Id}'.");
             }
             else
             {
                 _dragStart = null;
                 _dragSource = null;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Mouse down outside draggable node.");
-
             }
         }
 
@@ -78,18 +54,15 @@ namespace LM.App.Wpf.Views.Behaviors
                 return;
             }
 
-            var currentPosition = e.GetPosition(AssociatedObject);
-            if (Math.Abs(currentPosition.X - _dragStart.Value.X) < System.Windows.SystemParameters.MinimumHorizontalDragDistance &&
-                Math.Abs(currentPosition.Y - _dragStart.Value.Y) < System.Windows.SystemParameters.MinimumVerticalDragDistance)
+            var current = e.GetPosition(AssociatedObject);
+            if (Math.Abs(current.X - _dragStart.Value.X) < System.Windows.SystemParameters.MinimumHorizontalDragDistance &&
+                Math.Abs(current.Y - _dragStart.Value.Y) < System.Windows.SystemParameters.MinimumVerticalDragDistance)
             {
                 return;
             }
 
-            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Initiating drag for node '{0}'.", _dragSource.Name);
-
-
-            var data = new System.Windows.DataObject(typeof(SavedSearchNodeViewModel), _dragSource);
-            Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Initiating drag for '{_dragSource.Id}'.");
+            var data = new System.Windows.DataObject(typeof(LitSearchNodeViewModel), _dragSource);
+            Trace.WriteLine($"[LitSearchTreeDragDropBehavior] Initiating drag for '{_dragSource.Id}'.");
             System.Windows.DragDrop.DoDragDrop(AssociatedObject, data, System.Windows.DragDropEffects.Move);
             _dragStart = null;
             _dragSource = null;
@@ -101,8 +74,6 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - no source or tree.");
-
                 return;
             }
 
@@ -110,24 +81,18 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - invalid drop target.");
-
                 return;
             }
 
-            if (source is SavedSearchFolderViewModel folder && IsAncestor(folder, targetFolder))
+            if (source is LitSearchFolderViewModel folder && IsAncestor(folder, targetFolder))
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - ancestor detected.");
-
                 return;
             }
 
             e.Effects = System.Windows.DragDropEffects.Move;
             e.Handled = true;
-            Trace.WriteLine($"SavedSearchTreeDragDropBehavior: DragOver accepted for target folder '{targetFolder.Name}' at index {insertIndex}.");
-
         }
 
         private async void OnDrop(object sender, System.Windows.DragEventArgs e)
@@ -135,37 +100,45 @@ namespace LM.App.Wpf.Views.Behaviors
             if (!TryGetDragSource(e, out var source) || !TryGetTree(out var tree))
             {
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - no source or tree context.");
-
                 return;
             }
 
             if (!TryGetDropInfo(e.OriginalSource as System.Windows.DependencyObject, tree, source, out var targetFolder, out var insertIndex))
             {
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - invalid drop target.");
-
                 return;
             }
 
-            if (source is SavedSearchFolderViewModel folder && IsAncestor(folder, targetFolder))
+            if (source is LitSearchFolderViewModel folder && IsAncestor(folder, targetFolder))
             {
                 e.Handled = true;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - ancestor detected.");
-
                 return;
             }
 
-            if (source.Parent == targetFolder)
+            if (source is LitSearchNodeViewModel && source == targetFolder)
             {
-                var currentIndex = targetFolder.Children.IndexOf(source);
+                e.Handled = true;
+                return;
+            }
+
+            if (source is LitSearchEntryViewModel entry && ReferenceEquals(entry.Parent, targetFolder))
+            {
+                var currentIndex = targetFolder.Children.IndexOf(entry);
+                if (currentIndex < insertIndex)
+                {
+                    insertIndex--;
+                }
+            }
+            else if (source is LitSearchFolderViewModel movingFolder && ReferenceEquals(movingFolder.Parent, targetFolder))
+            {
+                var currentIndex = targetFolder.Children.IndexOf(movingFolder);
                 if (currentIndex < insertIndex)
                 {
                     insertIndex--;
                 }
             }
 
-            var request = new SavedSearchDragDropRequest
+            var request = new LitSearchDragDropRequest
             {
                 Source = source,
                 TargetFolder = targetFolder,
@@ -174,66 +147,59 @@ namespace LM.App.Wpf.Views.Behaviors
 
             if (tree.MoveCommand.CanExecute(request))
             {
-                Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Executing move for '{0}' into folder '{1}' at index {2}.", source.Name, targetFolder.Name, request.InsertIndex);
-
+                Trace.WriteLine($"[LitSearchTreeDragDropBehavior] Executing move for '{source.Id}' into '{targetFolder.Id}' at {request.InsertIndex}.");
                 await tree.MoveCommand.ExecuteAsync(request);
             }
-            else
-            {
-                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Move command rejected for '{0}'.", source.Name);
-            }
-
 
             e.Handled = true;
         }
 
-        private static bool TryGetDragSource(System.Windows.DragEventArgs e, [NotNullWhen(true)] out SavedSearchNodeViewModel? source)
+        private static bool TryGetDragSource(System.Windows.DragEventArgs e, [NotNullWhen(true)] out LitSearchNodeViewModel? source)
         {
-            source = e.Data.GetData(typeof(SavedSearchNodeViewModel)) as SavedSearchNodeViewModel;
-            if (source is null)
-            {
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: No saved search node found in drag data.");
-                return false;
-            }
-
-            Trace.WriteLine($"SavedSearchTreeDragDropBehavior: Drag source resolved to node '{source.Name}'.");
-
+            source = e.Data.GetData(typeof(LitSearchNodeViewModel)) as LitSearchNodeViewModel;
             return source is not null;
         }
 
-        private bool TryGetTree([NotNullWhen(true)] out SavedSearchTreeViewModel? tree)
+        private bool TryGetTree([NotNullWhen(true)] out LitSearchTreeViewModel? tree)
         {
-            tree = AssociatedObject.DataContext as SavedSearchTreeViewModel;
+            tree = AssociatedObject.DataContext as LitSearchTreeViewModel;
             return tree is not null;
         }
 
-        private static bool TryGetDropInfo(System.Windows.DependencyObject? sourceElement,
-                                           SavedSearchTreeViewModel tree,
-                                           SavedSearchNodeViewModel source,
-                                           out SavedSearchFolderViewModel targetFolder,
+        private static bool TryGetDropInfo(System.Windows.DependencyObject? element,
+                                           LitSearchTreeViewModel tree,
+                                           LitSearchNodeViewModel source,
+                                           out LitSearchFolderViewModel targetFolder,
                                            out int insertIndex)
         {
-            ArgumentNullException.ThrowIfNull(source);
-
-            var item = FindTreeViewItem(sourceElement);
+            var item = FindTreeViewItem(element);
             switch (item?.DataContext)
             {
-                case SavedSearchFolderViewModel folder:
+                case LitSearchFolderViewModel folder:
                     targetFolder = folder;
                     insertIndex = folder.Children.Count;
                     return true;
-                case SavedSearchPresetViewModel preset:
-                    targetFolder = preset.Parent ?? tree.Root;
-                    insertIndex = targetFolder.Children.IndexOf(preset);
+                case LitSearchEntryViewModel entry:
+                    targetFolder = entry.Parent ?? tree.Root;
+                    insertIndex = targetFolder.Children.IndexOf(entry);
+                    return true;
+                case LitSearchRunViewModel run:
+                    targetFolder = run.Parent.Parent ?? tree.Root;
+                    insertIndex = targetFolder.Children.IndexOf(run.Parent);
                     return true;
                 default:
-                    targetFolder = source.Parent ?? tree.Root;
+                    targetFolder = source switch
+                    {
+                        LitSearchFolderViewModel folderSource => folderSource.Parent ?? tree.Root,
+                        LitSearchEntryViewModel entrySource => entrySource.Parent ?? tree.Root,
+                        _ => tree.Root
+                    };
                     insertIndex = targetFolder.Children.Count;
                     return true;
             }
         }
 
-        private static bool IsAncestor(SavedSearchFolderViewModel ancestor, SavedSearchFolderViewModel candidate)
+        private static bool IsAncestor(LitSearchFolderViewModel ancestor, LitSearchFolderViewModel candidate)
         {
             var current = candidate;
             while (current is not null)

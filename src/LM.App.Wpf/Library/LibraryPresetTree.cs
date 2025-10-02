@@ -30,11 +30,21 @@ namespace LM.App.Wpf.Library
 
             foreach (var folder in Folders ?? Enumerable.Empty<LibraryPresetFolder>())
             {
+                if (folder is null)
+                {
+                    continue;
+                }
+
                 combined.Add(new LibraryPresetTreeItem(LibraryPresetNodeKind.Folder, folder.SortOrder, folder, null));
             }
 
             foreach (var preset in Presets ?? Enumerable.Empty<LibraryFilterPreset>())
             {
+                if (preset is null)
+                {
+                    continue;
+                }
+
                 combined.Add(new LibraryPresetTreeItem(LibraryPresetNodeKind.Preset, preset.SortOrder, null, preset));
             }
 
@@ -54,11 +64,21 @@ namespace LM.App.Wpf.Library
 
             foreach (var folder in Folders ?? Enumerable.Empty<LibraryPresetFolder>())
             {
+                if (folder is null)
+                {
+                    continue;
+                }
+
                 clone.Folders.Add(folder.Clone());
             }
 
             foreach (var preset in Presets ?? Enumerable.Empty<LibraryFilterPreset>())
             {
+                if (preset is null)
+                {
+                    continue;
+                }
+
                 clone.Presets.Add(preset.Clone());
             }
 
@@ -70,14 +90,17 @@ namespace LM.App.Wpf.Library
             var ordered = EnumerateChildren().ToArray();
             for (var i = 0; i < ordered.Length; i++)
             {
-                switch (ordered[i].Kind)
+                var item = ordered[i];
+
+                if (item.Kind == LibraryPresetNodeKind.Folder && item.Folder is not null)
                 {
-                    case LibraryPresetNodeKind.Folder when ordered[i].Folder is not null:
-                        ordered[i].Folder.SortOrder = i;
-                        break;
-                    case LibraryPresetNodeKind.Preset when ordered[i].Preset is not null:
-                        ordered[i].Preset.SortOrder = i;
-                        break;
+                    item.Folder.SortOrder = i;
+                    continue;
+                }
+
+                if (item.Kind == LibraryPresetNodeKind.Preset && item.Preset is not null)
+                {
+                    item.Preset.SortOrder = i;
                 }
             }
         }

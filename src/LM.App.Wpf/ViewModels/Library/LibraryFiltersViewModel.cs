@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,7 +15,6 @@ using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
-using LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Library
 {
@@ -67,15 +64,6 @@ namespace LM.App.Wpf.ViewModels.Library
 
         [ObservableProperty]
         private string? fullTextQuery;
-
-        [ObservableProperty]
-        private bool fullTextInTitle = true;
-
-        [ObservableProperty]
-        private bool fullTextInAbstract = true;
-
-        [ObservableProperty]
-        private bool fullTextInContent = true;
 
         [ObservableProperty]
         private IReadOnlyList<LibraryPresetSummary> savedPresets = Array.Empty<LibraryPresetSummary>();
@@ -375,9 +363,6 @@ namespace LM.App.Wpf.ViewModels.Library
             UseFullTextSearch = false;
             UnifiedQuery = string.Empty;
             FullTextQuery = string.Empty;
-            FullTextInTitle = true;
-            FullTextInAbstract = true;
-            FullTextInContent = true;
             DateFrom = null;
             DateTo = null;
             SelectedSort = LibrarySortOptions.NewestFirst;
@@ -491,29 +476,10 @@ namespace LM.App.Wpf.ViewModels.Library
                 throw new ArgumentNullException(nameof(normalizedQuery));
             }
 
-            var fields = FullTextSearchField.None;
-            if (FullTextInTitle)
-            {
-                fields |= FullTextSearchField.Title;
-            }
-            if (FullTextInAbstract)
-            {
-                fields |= FullTextSearchField.Abstract;
-            }
-            if (FullTextInContent)
-            {
-                fields |= FullTextSearchField.Content;
-            }
-
-            if (fields == FullTextSearchField.None)
-            {
-                fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content;
-            }
-
             return new FullTextSearchQuery
             {
                 Text = normalizedQuery,
-                Fields = fields
+                Fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content
             };
         }
 
@@ -523,9 +489,6 @@ namespace LM.App.Wpf.ViewModels.Library
                 UseFullTextSearch = UseFullTextSearch,
                 UnifiedQuery = UnifiedQuery,
                 FullTextQuery = FullTextQuery,
-                FullTextInTitle = FullTextInTitle,
-                FullTextInAbstract = FullTextInAbstract,
-                FullTextInContent = FullTextInContent,
                 DateFrom = DateFrom?.Date,
                 DateTo = DateTo?.Date,
                 SortKey = SelectedSort?.Key,
@@ -546,9 +509,6 @@ namespace LM.App.Wpf.ViewModels.Library
             UseFullTextSearch = state.UseFullTextSearch;
             UnifiedQuery = state.UnifiedQuery;
             FullTextQuery = state.FullTextQuery;
-            FullTextInTitle = state.FullTextInTitle;
-            FullTextInAbstract = state.FullTextInAbstract;
-            FullTextInContent = state.FullTextInContent;
             DateFrom = state.DateFrom?.Date;
             DateTo = state.DateTo?.Date;
             SelectedSort = ResolveSortOption(state.SortKey);
@@ -742,12 +702,6 @@ namespace LM.App.Wpf.ViewModels.Library
                     nodes.Add(saved);
                 }
 
-                var litNodes = await BuildLitSearchNodesAsync(ct).ConfigureAwait(false);
-                if (litNodes.Count > 0)
-                {
-                    nodes.AddRange(litNodes);
-                }
-
                 await InvokeOnDispatcherAsync(() =>
                 {
                     NavigationRoots.Clear();
@@ -777,120 +731,6 @@ namespace LM.App.Wpf.ViewModels.Library
             }
 
             return root;
-        }
-
-        private async Task<List<LibraryNavigationNodeViewModel>> BuildLitSearchNodesAsync(CancellationToken ct)
-        {
-            var nodes = new List<LibraryNavigationNodeViewModel>();
-            try
-            {
-                var workspaceRoot = _workspace.GetWorkspaceRoot();
-                await foreach (var entry in _store.EnumerateAsync(ct))
-                {
-                    if (ct.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
-                    {
-                        continue;
-                    }
-
-                    var isLitSearch = entry.Type == EntryType.LitSearch
-                        || string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
-                    if (!isLitSearch)
-                    {
-                        continue;
-                    }
-
-                    var hookPath = FindLitSearchHookPath(workspaceRoot, entry.Id);
-                    if (hookPath is null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        var json = await File.ReadAllTextAsync(hookPath, ct).ConfigureAwait(false);
-                        var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
-                        if (hook is null)
-                        {
-                            continue;
-                        }
-
-                        var title = string.IsNullOrWhiteSpace(hook.Title) ? entry.Title ?? entry.Id : hook.Title;
-                        var entryNode = new LibraryNavigationNodeViewModel(title!, LibraryNavigationNodeKind.LitSearchEntry)
-                        {
-                            Payload = new LibraryLitSearchEntryPayload(entry.Id!, hookPath, title!, hook.Query)
-                        };
-
-                        foreach (var run in hook.Runs.OrderByDescending(r => r.RunUtc))
-                        {
-                            if (string.IsNullOrWhiteSpace(run.RunId))
-                            {
-                                continue;
-                            }
-
-                            var label = $"{run.RunUtc:u} ({run.TotalHits} hits)";
-                            var runNode = new LibraryNavigationNodeViewModel(label, LibraryNavigationNodeKind.LitSearchRun)
-                            {
-                                Payload = new LibraryLitSearchRunPayload(entry.Id!, run.RunId, ResolveCheckedEntriesPath(workspaceRoot, run.CheckedEntryIdsPath), label)
-                            };
-                            entryNode.Children.Add(runNode);
-                        }
-
-                        nodes.Add(entryNode);
-                    }
-                    catch
-                    {
-                        // ignore malformed litsearch entries
-                    }
-                }
-            }
-
-            catch
-            {
-                // workspace not ready or enumeration failed; ignore for now
-            }
-
-            if (nodes.Count == 0)
-            {
-                return nodes;
-            }
-
-            nodes.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
-            var root = new LibraryNavigationNodeViewModel("LitSearch", LibraryNavigationNodeKind.Category);
-            foreach (var node in nodes)
-            {
-                root.Children.Add(node);
-            }
-
-            return new List<LibraryNavigationNodeViewModel> { root };
-        }
-
-        private static string? FindLitSearchHookPath(string workspaceRoot, string entryId)
-        {
-            var candidates = new[]
-            {
-                Path.Combine(workspaceRoot, "entries", entryId, "hooks", "litsearch.json"),
-                Path.Combine(workspaceRoot, "entries", entryId, "spokes", "litsearch", "litsearch.json"),
-                Path.Combine(workspaceRoot, "entries", entryId, "litsearch", "litsearch.json")
-            };
-
-            return candidates.FirstOrDefault(File.Exists);
-        }
-
-        private static string? ResolveCheckedEntriesPath(string workspaceRoot, string? relative)
-        {
-            if (string.IsNullOrWhiteSpace(relative))
-            {
-                return null;
-            }
-
-            var normalized = relative.Replace('/', Path.DirectorySeparatorChar);
-            var combined = Path.Combine(workspaceRoot, normalized);
-            return File.Exists(combined) ? combined : null;
         }
 
         private async Task DeletePresetsAsync(IReadOnlyList<string> ids, CancellationToken ct = default)
@@ -960,7 +800,10 @@ namespace LM.App.Wpf.ViewModels.Library
 
         private void OnSavedSearchTreeChanged(object? sender, SavedSearchTreeChangedEventArgs e)
         {
-            var _ = InvokeOnDispatcherAsync(() => SavedPresets = e.Presets);
+            var _ = InvokeOnDispatcherAsync(() =>
+            {
+                SavedPresets = e.Presets;
+            });
             if (!_suppressNavigationRefresh)
             {
                 Trace.WriteLine($"[LibraryFiltersViewModel] Saved search tree changed; scheduling navigation refresh for {e.Presets.Count} preset(s).");
