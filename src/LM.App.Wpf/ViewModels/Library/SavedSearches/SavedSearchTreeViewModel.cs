@@ -16,11 +16,9 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         private readonly LibraryFilterPresetStore _store;
         private readonly ILibraryPresetPrompt _prompt;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
-        public IAsyncRelayCommand<SavedSearchFolderViewModel> RenameFolderCommand { get; }
-        public IAsyncRelayCommand<SavedSearchPresetViewModel> LoadPresetCommand { get; }
+        public IAsyncRelayCommand<SavedSearchFolderViewModel?> RenameFolderCommand { get; }
+        public IAsyncRelayCommand<SavedSearchPresetViewModel?> LoadPresetCommand { get; }
 
-
-        // Update the constructor to initialize these commands:
         public SavedSearchTreeViewModel(LibraryFilterPresetStore store, ILibraryPresetPrompt prompt)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
@@ -29,22 +27,22 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             Root = new SavedSearchFolderViewModel(this, LibraryPresetFolder.RootId, "Saved Searches", 0);
 
             CreateFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(CreateFolderAsync);
-            RenameFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel>(RenameFolderAsync, CanRenameFolder);
-            DeleteFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
-            DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel>(DeletePresetAsync, static preset => preset is not null);
-            LoadPresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel>(LoadPresetAsync, static preset => preset is not null);
-            MoveCommand = new AsyncRelayCommand<SavedSearchDragDropRequest>(MoveAsync, request => request?.Source is not null);
+            RenameFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(RenameFolderAsync, canExecute: CanRenameFolder);
+            DeleteFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(DeleteFolderAsync, canExecute: CanDeleteFolder);
+            DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(DeletePresetAsync, canExecute: static preset => preset is not null);
+            LoadPresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(LoadPresetAsync, canExecute: static preset => preset is not null);
+            MoveCommand = new AsyncRelayCommand<SavedSearchDragDropRequest?>(MoveAsync, canExecute: request => request?.Source is not null);
         }
 
         public SavedSearchFolderViewModel Root { get; }
 
         public IAsyncRelayCommand<SavedSearchFolderViewModel?> CreateFolderCommand { get; }
 
-        public IAsyncRelayCommand<SavedSearchFolderViewModel> DeleteFolderCommand { get; }
+        public IAsyncRelayCommand<SavedSearchFolderViewModel?> DeleteFolderCommand { get; }
 
-        public IAsyncRelayCommand<SavedSearchPresetViewModel> DeletePresetCommand { get; }
+        public IAsyncRelayCommand<SavedSearchPresetViewModel?> DeletePresetCommand { get; }
 
-        public IAsyncRelayCommand<SavedSearchDragDropRequest> MoveCommand { get; }
+        public IAsyncRelayCommand<SavedSearchDragDropRequest?> MoveCommand { get; }
 
         public event EventHandler<SavedSearchTreeChangedEventArgs>? TreeChanged;
 

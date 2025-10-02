@@ -40,20 +40,20 @@ public sealed partial class LitSearchTreeViewModel : ObservableObject
         Root = new LitSearchFolderViewModel(this, LitSearchOrganizerFolder.RootId, "LitSearch", isRoot: true);
 
         CreateFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel?>(CreateFolderAsync);
-        RenameFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(RenameFolderAsync, CanRenameFolder);
-        DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(DeleteFolderAsync, folder => folder is { CanDelete: true });
-        MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest>(MoveAsync, request => request?.Source is not null && request.TargetFolder is not null);
+        RenameFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel?>(RenameFolderAsync, canExecute: CanRenameFolder);
+        DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel?>(DeleteFolderAsync, canExecute: folder => folder is { CanDelete: true });
+        MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest?>(MoveAsync, canExecute: request => request?.Source is not null && request.TargetFolder is not null);
     }
 
     public LitSearchFolderViewModel Root { get; }
 
     public IAsyncRelayCommand<LitSearchFolderViewModel?> CreateFolderCommand { get; }
 
-    public IAsyncRelayCommand<LitSearchFolderViewModel> RenameFolderCommand { get; }
+    public IAsyncRelayCommand<LitSearchFolderViewModel?> RenameFolderCommand { get; }
 
-    public IAsyncRelayCommand<LitSearchFolderViewModel> DeleteFolderCommand { get; }
+    public IAsyncRelayCommand<LitSearchFolderViewModel?> DeleteFolderCommand { get; }
 
-    public IAsyncRelayCommand<LitSearchDragDropRequest> MoveCommand { get; }
+    public IAsyncRelayCommand<LitSearchDragDropRequest?> MoveCommand { get; }
 
     public async Task RefreshAsync(CancellationToken ct = default)
     {
