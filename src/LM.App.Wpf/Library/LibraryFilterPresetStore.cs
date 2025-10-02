@@ -193,6 +193,42 @@ namespace LM.App.Wpf.Library
             Trace.WriteLine($"[LibraryFilterPresetStore] Deleted folder '{folder.Name}' ({folder.Id}).");
         }
 
+        public async Task RenameFolderAsync(string folderId, string newName, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LibraryPresetFolder.RootId, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Ignoring rename for folder '{folderId}'.");
+                return;
+            }
+
+            var trimmedName = newName?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmedName))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Ignoring rename for folder '{folderId}' due to empty name.");
+                return;
+            }
+
+            var file = await LoadAsync(ct).ConfigureAwait(false);
+            var root = EnsureRoot(file);
+            var (_, folder) = TryFindFolder(root, folderId);
+            if (folder is null)
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Folder '{folderId}' not found for rename.");
+                return;
+            }
+
+            if (string.Equals(folder.Name, trimmedName, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Rename skipped for folder '{folder.Id}'; name unchanged.");
+                return;
+            }
+
+            folder.Name = trimmedName;
+            NormalizeTree(root);
+            await SaveAsync(file, ct).ConfigureAwait(false);
+            Trace.WriteLine($"[LibraryFilterPresetStore] Renamed folder '{folder.Id}' to '{folder.Name}'.");
+        }
+
         public async Task MovePresetAsync(string presetId, string targetFolderId, int insertIndex, CancellationToken ct = default)
         {
             if (string.IsNullOrWhiteSpace(presetId))
