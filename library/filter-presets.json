@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Library filter preset hierarchy",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "Persistent schema version."
+    },
+    "root": {
+      "$ref": "#/definitions/folder"
+    }
+  },
+  "required": ["version", "root"],
+  "definitions": {
+    "folder": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the folder."
+        },
+        "name": {
+          "type": "string",
+          "description": "Folder display name."
+        },
+        "sortOrder": {
+          "type": "integer",
+          "description": "Zero-based order within the parent."
+        },
+        "folders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/folder"
+          },
+          "default": []
+        },
+        "presets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/preset"
+          },
+          "default": []
+        }
+      },
+      "required": ["id", "name", "sortOrder", "folders", "presets"]
+    },
+    "preset": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier for the saved search."
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the saved search."
+        },
+        "sortOrder": {
+          "type": "integer",
+          "description": "Zero-based order within the parent folder."
+        },
+        "savedUtc": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UTC timestamp indicating when the preset was last saved."
+        },
+        "state": {
+          "$ref": "#/definitions/state"
+        }
+      },
+      "required": ["id", "name", "sortOrder", "savedUtc", "state"]
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "useFullTextSearch": { "type": "boolean" },
+        "unifiedQuery": { "type": ["string", "null"] },
+        "fullTextQuery": { "type": ["string", "null"] },
+        "fullTextInTitle": { "type": "boolean" },
+        "fullTextInAbstract": { "type": "boolean" },
+        "fullTextInContent": { "type": "boolean" },
+        "dateFrom": { "type": ["string", "null"], "format": "date" },
+        "dateTo": { "type": ["string", "null"], "format": "date" },
+        "sortKey": { "type": ["string", "null"] },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      },
+      "required": [
+        "useFullTextSearch",
+        "fullTextInTitle",
+        "fullTextInAbstract",
+        "fullTextInContent",
+        "tags"
+      ]
+    }
+  }
+}

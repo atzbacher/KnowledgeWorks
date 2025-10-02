@@ -8,6 +8,7 @@
              xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
+             xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:core="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -121,6 +122,18 @@
                           BorderThickness="0,0,0,1"
                           Padding="6,4">
                                         <DockPanel>
+                                            <StackPanel DockPanel.Dock="Right"
+                                                        Orientation="Horizontal"
+                                                        HorizontalAlignment="Right">
+                                                <Button Content="Save search"
+                                                        Padding="8,4"
+                                                        Command="{Binding SavePresetCommand}"/>
+                                                <Button Content="New folder"
+                                                        Padding="8,4"
+                                                        Margin="4,0,0,0"
+                                                        Command="{Binding SavedSearches.CreateFolderCommand}"
+                                                        CommandParameter="{Binding SavedSearches.Root}"/>
+                                            </StackPanel>
                                             <ToggleButton DockPanel.Dock="Left"
                                     Name="SavedSearchToggle"
                                     IsChecked="True"
@@ -158,37 +171,61 @@
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
-                                    <ItemsControl ItemsSource="{Binding SavedPresets}"
-                                Margin="0"
-                                Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Button Content="{Binding Name}"
-                                Command="{Binding DataContext.Filters.LoadPresetCommand, ElementName=LibraryViewControl}"
-                                CommandParameter="{Binding}"
-                                HorizontalContentAlignment="Left"
-                                HorizontalAlignment="Stretch"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Padding="8,4">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}"
-                                      Padding="{TemplateBinding Padding}">
-                                                                <TextBlock Text="{TemplateBinding Content}" 
-                                           TextTrimming="CharacterEllipsis"/>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="#F3F4F6"/>
-                                                                </Trigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
+                                    <TreeView Margin="0"
+                                              DataContext="{Binding SavedSearches}"
+                                              ItemsSource="{Binding Root.Children}"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              HorizontalContentAlignment="Stretch"
+                                              Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:SavedSearchTreeDragDropBehavior />
+                                        </i:Interaction.Behaviors>
+                                        <TreeView.Resources>
+                                            <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
+                                                                      ItemsSource="{Binding Children}">
+                                                <TextBlock Text="{Binding Name}" Margin="4,2"/>
+                                                <HierarchicalDataTemplate.ItemContainerStyle>
+                                                    <Style TargetType="TreeViewItem">
+                                                        <Setter Property="IsExpanded" Value="True" />
+                                                        <Setter Property="ContextMenu">
+                                                            <Setter.Value>
+                                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                                    <MenuItem Header="New folder"
+                                                                              Command="{Binding Tree.CreateFolderCommand}"
+                                                                              CommandParameter="{Binding}" />
+                                                                    <MenuItem Header="Delete folder"
+                                                                              Command="{Binding Tree.DeleteFolderCommand}"
+                                                                              CommandParameter="{Binding}" />
+                                                                </ContextMenu>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </HierarchicalDataTemplate.ItemContainerStyle>
+                                            </HierarchicalDataTemplate>
+                                            <DataTemplate DataType="{x:Type saved:SavedSearchPresetViewModel}">
+                                                <TextBlock Text="{Binding Name}"
+                                                           Margin="4,2"
+                                                           TextTrimming="CharacterEllipsis">
+                                                    <TextBlock.InputBindings>
+                                                        <MouseBinding MouseAction="LeftDoubleClick"
+                                                                      Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
+                                                                      CommandParameter="{Binding Summary}" />
+                                                    </TextBlock.InputBindings>
+                                                    <TextBlock.ContextMenu>
+                                                        <ContextMenu DataContext="{Binding}">
+                                                            <MenuItem Header="Load"
+                                                                      Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
+                                                                      CommandParameter="{Binding Summary}" />
+                                                            <MenuItem Header="Delete"
+                                                                      Command="{Binding Tree.DeletePresetCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                        </ContextMenu>
+                                                    </TextBlock.ContextMenu>
+                                                </TextBlock>
                                             </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                        </TreeView.Resources>
+                                    </TreeView>
                                 </StackPanel>
                             </Border>
 
