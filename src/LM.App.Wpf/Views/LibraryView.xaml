@@ -6,6 +6,7 @@
              xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
+             xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
              xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:core="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
@@ -98,6 +99,109 @@
                         HorizontalScrollBarVisibility="Disabled"
                         DataContext="{Binding Filters}">
                         <StackPanel Margin="0">
+
+                            <!-- Collections Organizer -->
+                            <Border Background="White"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="0"
+                                    CornerRadius="0"
+                                    Margin="0,0,0,8">
+                                <StackPanel>
+                                    <Border Background="#F3F4F6"
+                                            BorderBrush="#E5E7EB"
+                                            BorderThickness="0,0,0,1"
+                                            Padding="6,4"
+                                            DataContext="{Binding Collections}">
+                                        <DockPanel>
+                                            <StackPanel DockPanel.Dock="Right"
+                                                        Orientation="Horizontal"
+                                                        HorizontalAlignment="Right">
+                                                <Button Content="New collection"
+                                                        Padding="8,4"
+                                                        Command="{Binding CreateFolderCommand}"
+                                                        CommandParameter="{Binding Root}" />
+                                            </StackPanel>
+                                            <ToggleButton DockPanel.Dock="Left"
+                                                          Name="CollectionsToggle"
+                                                          IsChecked="True"
+                                                          Width="16"
+                                                          Height="16"
+                                                          Padding="0"
+                                                          Background="Transparent"
+                                                          BorderThickness="0">
+                                                <ToggleButton.Template>
+                                                    <ControlTemplate TargetType="ToggleButton">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                                       FontSize="10"
+                                                                       VerticalAlignment="Center"
+                                                                       HorizontalAlignment="Center">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Setter Property="Text" Value="&#xE70D;"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
+                                                                                <Setter Property="Text" Value="&#xE76C;"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </ToggleButton.Template>
+                                            </ToggleButton>
+                                            <TextBlock Text="COLLECTIONS"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="#6B7280"
+                                                       Margin="4,0,0,0"/>
+                                        </DockPanel>
+                                    </Border>
+                                    <TreeView Margin="0"
+                                              DataContext="{Binding Collections}"
+                                              ItemsSource="{Binding Root.Children}"
+                                              Background="Transparent"
+                                              BorderThickness="0"
+                                              HorizontalContentAlignment="Stretch"
+                                              Visibility="{Binding IsChecked, ElementName=CollectionsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TreeView.Resources>
+                                            <HierarchicalDataTemplate DataType="{x:Type collections:LibraryCollectionFolderViewModel}"
+                                                                      ItemsSource="{Binding Children}">
+                                                <DockPanel>
+                                                    <TextBlock DockPanel.Dock="Right"
+                                                               Text="{Binding EntryCount}"
+                                                               Margin="6,2,4,2"
+                                                               Foreground="#6B7280"
+                                                               FontSize="11"
+                                                               HorizontalAlignment="Right"/>
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Margin="4,2"
+                                                               FontWeight="SemiBold"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                </DockPanel>
+                                                <HierarchicalDataTemplate.ItemContainerStyle>
+                                                    <Style TargetType="TreeViewItem">
+                                                        <Setter Property="IsExpanded" Value="True" />
+                                                        <Setter Property="ContextMenu">
+                                                            <Setter.Value>
+                                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                                    <MenuItem Header="New collection"
+                                                                              Command="{Binding Tree.CreateFolderCommand}"
+                                                                              CommandParameter="{Binding}" />
+                                                                    <MenuItem Header="Delete collection"
+                                                                              Command="{Binding Tree.DeleteFolderCommand}"
+                                                                              CommandParameter="{Binding}" />
+                                                                </ContextMenu>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </HierarchicalDataTemplate.ItemContainerStyle>
+                                            </HierarchicalDataTemplate>
+                                        </TreeView.Resources>
+                                    </TreeView>
+                                </StackPanel>
+                            </Border>
 
                             <!-- LitSearch Organizer - Collapsible -->
                             <Border Background="White"
@@ -474,6 +578,40 @@
                   Background="White"
                   RowHeight="24"
                   HeadersVisibility="Column">
+                    <DataGrid.ContextMenu>
+                        <ContextMenu DataContext="{Binding DataContext, ElementName=LibraryViewControl}">
+                            <MenuItem Header="Add to collection..."
+                                      ItemsSource="{Binding Collections.Root.Children}">
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Command"
+                                                Value="{Binding DataContext.Collections.AddSelectionToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                        <Setter Property="CommandParameter" Value="{Binding}" />
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                                <MenuItem.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </HierarchicalDataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>
+                            <MenuItem Header="Remove from collection..."
+                                      ItemsSource="{Binding Collections.Root.Children}">
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Command"
+                                                Value="{Binding DataContext.Collections.RemoveSelectionFromFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                        <Setter Property="CommandParameter" Value="{Binding}" />
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                                <MenuItem.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </HierarchicalDataTemplate>
+                                </MenuItem.ItemTemplate>
+                            </MenuItem>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="Background" Value="#F9FAFB"/>
