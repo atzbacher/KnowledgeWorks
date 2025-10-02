@@ -25,13 +25,15 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
         private readonly IEntryStore _entryStore;
         private readonly IWorkSpaceService _workspace;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
+
         public IAsyncRelayCommand<LitSearchFolderViewModel> RenameFolderCommand { get; }
 
 
-        public LitSearchTreeViewModel(
-            LitSearchOrganizerStore store,
-            ILitSearchStore litSearchStore,
-            /* other parameters */)
+        public LitSearchTreeViewModel(LitSearchOrganizerStore store,
+                                      ILibraryPresetPrompt prompt,
+                                      ILitSearchStore litSearchStore,
+                                      IEntryStore entryStore,
+                                      IWorkSpaceService workspace)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _litSearchStore = litSearchStore ?? throw new ArgumentNullException(nameof(litSearchStore));
@@ -76,6 +78,51 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
             }
         }
 
+        private bool CanRenameFolder(LitSearchFolderViewModel? folder)
+        {
+            return folder is not null && !folder.IsRoot;
+        }
+
+        private async Task RenameFolderAsync(LitSearchFolderViewModel? folder)
+        {
+            if (folder is null || !CanRenameFolder(folder))
+            {
+                return;
+            }
+
+            var newName = await InvokeOnDispatcherAsync(() =>
+            {
+                return Microsoft.VisualBasic.Interaction.InputBox(
+                    "Enter new name for folder:",
+                    "Rename Folder",
+                    folder.Name);
+            }).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, folder.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            // Note: You'll need to add RenameFolderAsync to LitSearchOrganizerStore
+            // await _store.RenameFolderAsync(folder.Id, newName.Trim(), CancellationToken.None).ConfigureAwait(false);
+            Trace.WriteLine($"[LitSearchTreeViewModel] Rename folder '{folder.Name}' to '{newName}' (not yet implemented in store).");
+            await RefreshAsync().ConfigureAwait(false);
+        }
+
+        private static Task InvokeOnDispatcherAsync(Func<string> action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
         private async Task CreateFolderAsync(LitSearchFolderViewModel? parent)
         {
             var target = parent ?? Root;
@@ -353,55 +400,7 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
 
             return dispatcher.InvokeAsync(callback).Task;
         }
-
-        private bool CanRenameFolder(LitSearchFolderViewModel? folder)
-        {
-            return folder is not null && !folder.IsRoot;
-        }
-
-        private async Task RenameFolderAsync(LitSearchFolderViewModel? folder)
-        {
-            if (folder is null || !CanRenameFolder(folder))
-            {
-                return;
-            }
-
-            var newName = await InvokeOnDispatcherAsync(() =>
-            {
-                return Microsoft.VisualBasic.Interaction.InputBox(
-                    "Enter new name for folder:",
-                    "Rename Folder",
-                    folder.Name);
-            }).ConfigureAwait(false);
-
-            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, folder.Name, StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            // Note: You'll need to add RenameFolderAsync to LitSearchOrganizerStore
-            // await _store.RenameFolderAsync(folder.Id, newName.Trim(), CancellationToken.None).ConfigureAwait(false);
-            Trace.WriteLine($"[LitSearchTreeViewModel] Rename folder '{folder.Name}' to '{newName}' (not yet implemented in store).");
-            await RefreshAsync().ConfigureAwait(false);
-        }
-
-        private static Task InvokeOnDispatcherAsync(Func<string> action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
-            {
-                action();
-                return Task.CompletedTask;
-            }
-
-            return dispatcher.InvokeAsync(action).Task;
-        }
     }
-
-
 
     public sealed class LitSearchDragDropRequest
     {

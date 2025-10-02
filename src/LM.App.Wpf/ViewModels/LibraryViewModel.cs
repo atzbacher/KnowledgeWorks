@@ -18,6 +18,11 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using LM.App.Wpf.Library.Collections;
 
 namespace LM.App.Wpf.ViewModels
 {
@@ -73,6 +78,11 @@ namespace LM.App.Wpf.ViewModels
         public LitSearchTreeViewModel LitSearchOrganizer => _litSearchOrganizer;
 
         public LibraryCollectionsViewModel Collections => _collections;
+
+
+        // Add this property to store all unique tags
+        private ObservableCollection<string> _allTags = new();
+        public ObservableCollection<string> AllTags => _allTags;
 
         [RelayCommand]
         private async Task SearchAsync()
@@ -220,6 +230,116 @@ namespace LM.App.Wpf.ViewModels
             Results.LoadMetadataResults(entries);
         }
 
+        public async Task LoadCollectionEntriesAsync(string collectionId, CancellationToken ct = default)
+        {
+            try
+            {
+                Trace.WriteLine($"[LibraryViewModel] Loading entries for collection '{collectionId}'.");
+
+                // Get the collection hierarchy to find entry IDs
+                var hierarchy = await _collectionStore.GetHierarchyAsync(ct).ConfigureAwait(false);
+
+                // Find the specific folder
+                if (!hierarchy.TryFindFolder(collectionId, out var folder, out _) || folder is null)
+                {
+                    Trace.WriteLine($"[LibraryViewModel] Collection '{collectionId}' not found.");
+                    return;
+                }
+
+                // Extract entry IDs from the collection
+                var entryIds = folder.Entries.Select(e => e.EntryId).ToHashSet(StringComparer.Ordinal);
+
+                if (entryIds.Count == 0)
+                {
+                    Trace.WriteLine("[LibraryViewModel] Collection is empty.");
+                    await InvokeOnDispatcherAsync(() =>
+                    {
+                        Results.Items.Clear();
+                        Results.TotalCount = 0;
+                    }).ConfigureAwait(false);
+                    return;
+                }
+
+                // Load all entries from the database
+                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
+
+                // Filter to only entries in this collection
+                var collectionEntries = allEntries
+                    .Where(e => entryIds.Contains(e.InternalId))
+                    .ToList();
+
+                Trace.WriteLine($"[LibraryViewModel] Loaded {collectionEntries.Count} entries from collection.");
+
+                // Update the results
+                await InvokeOnDispatcherAsync(() =>
+                {
+                    Results.LoadMetadataResults(collectionEntries);
+                    Results.TotalCount = collectionEntries.Count;
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[LibraryViewModel] Failed to load collection entries: {ex.Message}");
+
+            }
+        }
+
+// Method to refresh all tags from the database
+        public async Task RefreshTagsAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
+
+                var uniqueTags = allEntries
+                    .Where(e => e.Tags != null && e.Tags.Count > 0)
+                    .SelectMany(e => e.Tags)
+                    .Where(tag => !string.IsNullOrWhiteSpace(tag))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(tag => tag, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                await InvokeOnDispatcherAsync(() =>
+                {
+                    _allTags.Clear();
+                    foreach (var tag in uniqueTags)
+                    {
+                        _allTags.Add(tag);
+                    }
+                }).ConfigureAwait(false);
+
+                Trace.WriteLine($"[LibraryViewModel] Refreshed {uniqueTags.Count} unique tags.");
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[LibraryViewModel] Failed to refresh tags: {ex.Message}");
+            }
+        }
+
+        // Initialize method that should be called when the view loads
+        public async Task InitializeAsync(CancellationToken ct = default)
+        {
+            await Filters.InitializeAsync(ct).ConfigureAwait(false);
+            await Collections.RefreshAsync(ct).ConfigureAwait(false);
+            await LitSearchOrganizer.RefreshAsync(ct).ConfigureAwait(false);
+            await RefreshTagsAsync(ct).ConfigureAwait(false);
+        }
+
+        private static Task InvokeOnDispatcherAsync(Action action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+
         private async Task<List<Entry>> ReadCheckedEntriesAsync(LibraryLitSearchRunPayload payload)
         {
             var results = new List<Entry>();
@@ -329,129 +449,5 @@ namespace LM.App.Wpf.ViewModels
             [JsonPropertyName("entryIds")]
             public List<string> EntryIds { get; init; } = new();
         }
-
-        // Add this property if not already present
-        public LibraryCollectionsViewModel Collections { get; private set; }
-
-        // Add this property to store all unique tags
-        private ObservableCollection<string> _allTags = new();
-        public ObservableCollection<string> AllTags => _allTags;
-
-        // Method to load entries from a specific collection
-        public async Task LoadCollectionEntriesAsync(string collectionId, CancellationToken ct = default)
-        {
-            try
-            {
-                Trace.WriteLine($"[LibraryViewModel] Loading entries for collection '{collectionId}'.");
-
-                // Get the collection hierarchy to find entry IDs
-                var hierarchy = await _collectionStore.GetHierarchyAsync(ct).ConfigureAwait(false);
-
-                // Find the specific folder
-                if (!hierarchy.TryFindFolder(collectionId, out var folder, out _) || folder is null)
-                {
-                    Trace.WriteLine($"[LibraryViewModel] Collection '{collectionId}' not found.");
-                    return;
-                }
-
-                // Extract entry IDs from the collection
-                var entryIds = folder.Entries.Select(e => e.EntryId).ToHashSet(StringComparer.Ordinal);
-
-                if (entryIds.Count == 0)
-                {
-                    Trace.WriteLine("[LibraryViewModel] Collection is empty.");
-                    await InvokeOnDispatcherAsync(() =>
-                    {
-                        Results.Items.Clear();
-                        Results.TotalCount = 0;
-                    }).ConfigureAwait(false);
-                    return;
-                }
-
-                // Load all entries from the database
-                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
-
-                // Filter to only entries in this collection
-                var collectionEntries = allEntries
-                    .Where(e => entryIds.Contains(e.InternalId))
-                    .ToList();
-
-                Trace.WriteLine($"[LibraryViewModel] Loaded {collectionEntries.Count} entries from collection.");
-
-                // Update the results
-                await InvokeOnDispatcherAsync(() =>
-                {
-                    Results.LoadMetadataResults(collectionEntries);
-                    Results.TotalCount = collectionEntries.Count;
-                }).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"[LibraryViewModel] Failed to load collection entries: {ex.Message}");
-            }
-        }
-
-        // Method to refresh all tags from the database
-        public async Task RefreshTagsAsync(CancellationToken ct = default)
-        {
-            try
-            {
-                var allEntries = await _store.ListAllAsync(ct).ConfigureAwait(false);
-
-                var uniqueTags = allEntries
-                    .Where(e => e.Tags != null && e.Tags.Count > 0)
-                    .SelectMany(e => e.Tags)
-                    .Where(tag => !string.IsNullOrWhiteSpace(tag))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(tag => tag, StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-                await InvokeOnDispatcherAsync(() =>
-                {
-                    _allTags.Clear();
-                    foreach (var tag in uniqueTags)
-                    {
-                        _allTags.Add(tag);
-                    }
-                }).ConfigureAwait(false);
-
-                Trace.WriteLine($"[LibraryViewModel] Refreshed {uniqueTags.Count} unique tags.");
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"[LibraryViewModel] Failed to refresh tags: {ex.Message}");
-            }
-        }
-
-        // Initialize method that should be called when the view loads
-        public async Task InitializeAsync(CancellationToken ct = default)
-        {
-            await Filters.InitializeAsync(ct).ConfigureAwait(false);
-            await Collections.RefreshAsync(ct).ConfigureAwait(false);
-            await LitSearchOrganizer.RefreshAsync(ct).ConfigureAwait(false);
-            await RefreshTagsAsync(ct).ConfigureAwait(false);
-        }
-
-        private static Task InvokeOnDispatcherAsync(Action action)
-        {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
-
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is null || dispatcher.CheckAccess())
-            {
-                action();
-                return Task.CompletedTask;
-            }
-
-            return dispatcher.InvokeAsync(action).Task;
-        }
-
-        // Add these private fields if not present:
-        private readonly LibraryCollectionStore _collectionStore;
-        private readonly IEntryStore _store;
-
-
-
     }
 }
