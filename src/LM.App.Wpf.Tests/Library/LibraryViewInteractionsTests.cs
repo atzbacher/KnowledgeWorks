@@ -42,7 +42,7 @@ namespace LM.App.Wpf.Tests.Library
                 binding.Command!.Execute(null);
 
                 Assert.Equal(1, vm.SearchInvocationCount);
-            }).ConfigureAwait(false);
+            });
         }
 
         private static void InitializeView(LibraryView view)
