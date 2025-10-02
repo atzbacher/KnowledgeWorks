@@ -206,6 +206,9 @@ namespace LM.App.Wpf.Views.Behaviors
             return tree is not null;
         }
 
+        // Replace the TryGetDropInfo method in SavedSearchTreeDragDropBehavior.cs
+        // This implementation uses actual mouse position to determine drop behavior
+
         private static bool TryGetDropInfo(System.Windows.DependencyObject? sourceElement,
                                            SavedSearchTreeViewModel tree,
                                            SavedSearchNodeViewModel source,
@@ -215,20 +218,109 @@ namespace LM.App.Wpf.Views.Behaviors
             ArgumentNullException.ThrowIfNull(source);
 
             var item = FindTreeViewItem(sourceElement);
-            switch (item?.DataContext)
+
+            if (item?.DataContext is SavedSearchFolderViewModel folder)
             {
-                case SavedSearchFolderViewModel folder:
+                // Only apply position-based logic for folder-on-folder drops
+                if (source is SavedSearchFolderViewModel)
+                {
+                    var dropPosition = GetDropPosition(item);
+
+                    if (dropPosition == DropPosition.Before)
+                    {
+                        // Drop BEFORE this folder - insert as sibling before it
+                        targetFolder = folder.Parent ?? tree.Root;
+                        insertIndex = targetFolder.Children.IndexOf(folder);
+                        return true;
+                    }
+                    else if (dropPosition == DropPosition.After)
+                    {
+                        // Drop AFTER this folder - insert as sibling after it
+                        targetFolder = folder.Parent ?? tree.Root;
+                        insertIndex = targetFolder.Children.IndexOf(folder) + 1;
+                        return true;
+                    }
+                    else // DropPosition.Into
+                    {
+                        // Drop INTO this folder - make it a child
+                        targetFolder = folder;
+                        insertIndex = folder.Children.Count;
+                        return true;
+                    }
+                }
+                else
+                {
+                    // Preset dropped on folder - always make it a child
                     targetFolder = folder;
                     insertIndex = folder.Children.Count;
                     return true;
-                case SavedSearchPresetViewModel preset:
-                    targetFolder = preset.Parent ?? tree.Root;
-                    insertIndex = targetFolder.Children.IndexOf(preset);
-                    return true;
-                default:
-                    targetFolder = source.Parent ?? tree.Root;
-                    insertIndex = targetFolder.Children.Count;
-                    return true;
+                }
+            }
+
+            if (item?.DataContext is SavedSearchPresetViewModel preset)
+            {
+                // Drop near preset - insert at same level
+                targetFolder = preset.Parent ?? tree.Root;
+                insertIndex = targetFolder.Children.IndexOf(preset);
+                return true;
+            }
+
+            // Default - drop at root
+            targetFolder = source.Parent ?? tree.Root;
+            insertIndex = targetFolder.Children.Count;
+            return true;
+        }
+
+        private enum DropPosition
+        {
+            Before,
+            Into,
+            After
+        }
+
+        private static DropPosition GetDropPosition(System.Windows.Controls.TreeViewItem item)
+        {
+            if (item == null)
+                return DropPosition.Into;
+
+            try
+            {
+                // Get mouse position relative to the TreeViewItem
+                var mousePosition = System.Windows.Input.Mouse.GetPosition(item);
+
+                // Get the actual rendered height of the item
+                var actualHeight = item.ActualHeight;
+
+                if (actualHeight <= 0)
+                    return DropPosition.Into;
+
+                // Define drop zones based on percentage of height:
+                // Top 30% = Before (sibling above)
+                // Middle 40% = Into (child)
+                // Bottom 30% = After (sibling below)
+                var topThreshold = actualHeight * 0.30;
+                var bottomThreshold = actualHeight * 0.70;
+
+                if (mousePosition.Y < topThreshold)
+                {
+                    System.Diagnostics.Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Drop position: BEFORE (Y={mousePosition.Y:F2}, threshold={topThreshold:F2})");
+                    return DropPosition.Before;
+                }
+                else if (mousePosition.Y > bottomThreshold)
+                {
+                    System.Diagnostics.Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Drop position: AFTER (Y={mousePosition.Y:F2}, threshold={bottomThreshold:F2})");
+                    return DropPosition.After;
+                }
+                else
+                {
+                    System.Diagnostics.Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Drop position: INTO (Y={mousePosition.Y:F2})");
+                    return DropPosition.Into;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Error determining drop position: {ex.Message}");
+                return DropPosition.Into;
             }
         }
 
