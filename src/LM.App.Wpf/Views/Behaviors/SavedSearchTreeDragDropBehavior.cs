@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+=======
 using System.Diagnostics.CodeAnalysis;
+
 using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using Microsoft.Xaml.Behaviors;
 
@@ -15,20 +17,39 @@ namespace LM.App.Wpf.Views.Behaviors
         {
             base.OnAttached();
 
+            if (AssociatedObject is null)
+            {
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Attached with null AssociatedObject.");
+                return;
+            }
+
+
             AssociatedObject.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove += OnPreviewMouseMove;
             AssociatedObject.DragOver += OnDragOver;
             AssociatedObject.Drop += OnDrop;
+
+            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Attached to tree '{0}'.", AssociatedObject.Name);
+
         }
 
         protected override void OnDetaching()
         {
             base.OnDetaching();
 
+            if (AssociatedObject is null)
+            {
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Detaching with null AssociatedObject.");
+                return;
+            }
+
             AssociatedObject.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove -= OnPreviewMouseMove;
             AssociatedObject.DragOver -= OnDragOver;
             AssociatedObject.Drop -= OnDrop;
+
+            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Detached from tree '{0}'.", AssociatedObject.Name);
+
         }
 
         private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -38,12 +59,15 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 _dragStart = e.GetPosition(AssociatedObject);
                 _dragSource = node;
-                Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Drag start captured for node '{node.Id}' at {_dragStart.Value}.");
+                Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Potential drag start from node '{0}'.", node.Name);
+
             }
             else
             {
                 _dragStart = null;
                 _dragSource = null;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Mouse down outside draggable node.");
+
             }
         }
 
@@ -61,6 +85,9 @@ namespace LM.App.Wpf.Views.Behaviors
                 return;
             }
 
+            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Initiating drag for node '{0}'.", _dragSource.Name);
+
+
             var data = new System.Windows.DataObject(typeof(SavedSearchNodeViewModel), _dragSource);
             Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Initiating drag for '{_dragSource.Id}'.");
             System.Windows.DragDrop.DoDragDrop(AssociatedObject, data, System.Windows.DragDropEffects.Move);
@@ -74,6 +101,8 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - no source or tree.");
+
                 return;
             }
 
@@ -81,6 +110,8 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - invalid drop target.");
+
                 return;
             }
 
@@ -88,11 +119,15 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 e.Effects = System.Windows.DragDropEffects.None;
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: DragOver rejected - ancestor detected.");
+
                 return;
             }
 
             e.Effects = System.Windows.DragDropEffects.Move;
             e.Handled = true;
+            Trace.WriteLine($"SavedSearchTreeDragDropBehavior: DragOver accepted for target folder '{targetFolder.Name}' at index {insertIndex}.");
+
         }
 
         private async void OnDrop(object sender, System.Windows.DragEventArgs e)
@@ -100,18 +135,24 @@ namespace LM.App.Wpf.Views.Behaviors
             if (!TryGetDragSource(e, out var source) || !TryGetTree(out var tree))
             {
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - no source or tree context.");
+
                 return;
             }
 
             if (!TryGetDropInfo(e.OriginalSource as System.Windows.DependencyObject, tree, source, out var targetFolder, out var insertIndex))
             {
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - invalid drop target.");
+
                 return;
             }
 
             if (source is SavedSearchFolderViewModel folder && IsAncestor(folder, targetFolder))
             {
                 e.Handled = true;
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Drop ignored - ancestor detected.");
+
                 return;
             }
 
@@ -133,9 +174,15 @@ namespace LM.App.Wpf.Views.Behaviors
 
             if (tree.MoveCommand.CanExecute(request))
             {
-                Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Executing move for '{source.Id}' into '{targetFolder.Id}' at index {request.InsertIndex}.");
+                Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Executing move for '{0}' into folder '{1}' at index {2}.", source.Name, targetFolder.Name, request.InsertIndex);
+
                 await tree.MoveCommand.ExecuteAsync(request);
             }
+            else
+            {
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Move command rejected for '{0}'.", source.Name);
+            }
+
 
             e.Handled = true;
         }
@@ -143,6 +190,14 @@ namespace LM.App.Wpf.Views.Behaviors
         private static bool TryGetDragSource(System.Windows.DragEventArgs e, [NotNullWhen(true)] out SavedSearchNodeViewModel? source)
         {
             source = e.Data.GetData(typeof(SavedSearchNodeViewModel)) as SavedSearchNodeViewModel;
+            if (source is null)
+            {
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: No saved search node found in drag data.");
+                return false;
+            }
+
+            Trace.WriteLine($"SavedSearchTreeDragDropBehavior: Drag source resolved to node '{source.Name}'.");
+
             return source is not null;
         }
 

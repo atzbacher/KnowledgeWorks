@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
              xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
+             xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
              xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
              xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
              xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
@@ -13,6 +14,7 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
              xmlns:lit="clr-namespace:LM.App.Wpf.ViewModels.Library.LitSearch"
+
 
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
@@ -79,11 +81,8 @@
                         <StackPanel Grid.Column="1"
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
-                            <TextBlock Text="Use FULLTEXT: keyword for document search"
-                                       Margin="0,0,8,0"
-                                       VerticalAlignment="Center"
-                                       Foreground="#4B5563"
-                                       FontSize="12"/>
+
+       
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -375,16 +374,16 @@
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
-                                    <TreeView Margin="0"
+                                    <TreeView x:Name="SavedSearchTree"
+                                              Margin="0"
+
                                               DataContext="{Binding SavedSearches}"
                                               ItemsSource="{Binding Root.Children}"
                                               Background="Transparent"
                                               BorderThickness="0"
                                               HorizontalContentAlignment="Stretch"
                                               Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <i:Interaction.Behaviors>
-                                            <behaviors:SavedSearchTreeDragDropBehavior />
-                                        </i:Interaction.Behaviors>
+
                                         <TreeView.Resources>
                                             <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
                                                                       ItemsSource="{Binding Children}">

@@ -2,6 +2,7 @@ using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LM.App.Wpf.Library;
 
+
 namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 {
     public abstract partial class SavedSearchNodeViewModel : ObservableObject
