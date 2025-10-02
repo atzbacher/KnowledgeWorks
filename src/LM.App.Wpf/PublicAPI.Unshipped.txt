@@ -276,6 +276,53 @@ LM.App.Wpf.Library.LibraryFilterPresetStore.ListPresetsAsync(System.Threading.Ca
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.SavePresetAsync(LM.App.Wpf.Library.LibraryFilterPreset! preset, string? targetFolderId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetByIdAsync(string! presetId, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
+const LM.App.Wpf.Library.Collections.LibraryCollectionFolder.RootId = "collections-root" -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.AddedBy.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.AddedBy.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.AddedUtc.get -> System.DateTime
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.AddedUtc.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.Clone() -> LM.App.Wpf.Library.Collections.LibraryCollectionEntry!
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.EntryId.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.EntryId.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFile
+LM.App.Wpf.Library.Collections.LibraryCollectionFile.LibraryCollectionFile() -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFile.Root.get -> LM.App.Wpf.Library.Collections.LibraryCollectionFolder?
+LM.App.Wpf.Library.Collections.LibraryCollectionFile.Root.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFile.Version.get -> int
+LM.App.Wpf.Library.Collections.LibraryCollectionFile.Version.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Clone() -> LM.App.Wpf.Library.Collections.LibraryCollectionFolder!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.EnumerateDescendants() -> System.Collections.Generic.IEnumerable<LM.App.Wpf.Library.Collections.LibraryCollectionFolder!>!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Entries.get -> System.Collections.Generic.List<LM.App.Wpf.Library.Collections.LibraryCollectionEntry!>!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Entries.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.Collections.LibraryCollectionFolder!>!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Folders.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Id.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Id.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.LibraryCollectionFolder() -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Metadata.get -> LM.App.Wpf.Library.Collections.LibraryCollectionMetadata!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Metadata.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Name.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionFolder.Name.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.Clone() -> LM.App.Wpf.Library.Collections.LibraryCollectionMetadata!
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.CreatedBy.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.CreatedBy.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.CreatedUtc.get -> System.DateTime
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.CreatedUtc.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.LibraryCollectionMetadata() -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.ModifiedBy.get -> string!
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.ModifiedBy.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.ModifiedUtc.get -> System.DateTime
+LM.App.Wpf.Library.Collections.LibraryCollectionMetadata.ModifiedUtc.set -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionStore
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.AddEntriesAsync(string! folderId, System.Collections.Generic.IEnumerable<string!>! entryIds, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.CreateFolderAsync(string? parentFolderId, string! name, string! createdBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string!>!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.DeleteFolderAsync(string! folderId, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.GetHierarchyAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.Collections.LibraryCollectionFolder!>!
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.LibraryCollectionStore(LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionStore.RemoveEntriesAsync(string! folderId, System.Collections.Generic.IEnumerable<string!>! entryIds, string! performedBy, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryPresetFolder
 LM.App.Wpf.Library.LibraryPresetFolder.Clone() -> LM.App.Wpf.Library.LibraryPresetFolder!
 LM.App.Wpf.Library.LibraryPresetFolder.Folders.get -> System.Collections.Generic.List<LM.App.Wpf.Library.LibraryPresetFolder!>!
@@ -748,6 +795,24 @@ LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectionChanged -> System
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.HasSelectedAbstract.get -> bool
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.get -> string?
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.SelectedAbstract.set -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Children.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.EntryCount.get -> int
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.EntryCount.set -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Id.get -> string!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.LibraryCollectionFolderViewModel(LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel! tree, string! id, string! name, LM.App.Wpf.Library.Collections.LibraryCollectionMetadata! metadata) -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Metadata.get -> LM.App.Wpf.Library.Collections.LibraryCollectionMetadata!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Name.get -> string!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Name.set -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Tree.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.CreateFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.LibraryCollectionsViewModel(LM.App.Wpf.Library.Collections.LibraryCollectionStore! store, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator) -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RefreshAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.Root.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!
 LM.App.Wpf.ViewModels.LibrarySearchResult.HasPrimaryAttachment.get -> bool
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.LibrarySearchQueryBox() -> void
@@ -755,8 +820,9 @@ LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.get -> string!
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox.Text.set -> void
 LM.App.Wpf.ViewModels.LibraryViewModel
 LM.App.Wpf.ViewModels.LibraryViewModel.Filters.get -> LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel!
-LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService) -> void
+LM.App.Wpf.ViewModels.LibraryViewModel.LibraryViewModel(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFullTextSearchService! fullTextSearch, LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel! filters, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.Configuration.IUserPreferencesStore! preferencesStore, LM.App.Wpf.Common.IClipboardService! clipboard, LM.App.Wpf.Common.IFileExplorerService! fileExplorer, LM.App.Wpf.Library.ILibraryDocumentService! documentService, LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! litSearchOrganizer, LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel! collections) -> void
 LM.App.Wpf.ViewModels.LibraryViewModel.Results.get -> LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel!
+LM.App.Wpf.ViewModels.LibraryViewModel.Collections.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnOptions.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibraryColumnOption!>!
 LM.App.Wpf.ViewModels.LibraryViewModel.ColumnVisibility.get -> LM.App.Wpf.ViewModels.Library.LibraryColumnVisibility!
 LM.App.Wpf.ViewModels.SearchItemViewModel

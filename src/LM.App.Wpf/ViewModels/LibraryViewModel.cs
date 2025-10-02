@@ -11,6 +11,7 @@ using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels.Library;
 using LM.App.Wpf.ViewModels.Library.LitSearch;
+using LM.App.Wpf.ViewModels.Library.Collections;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
@@ -30,6 +31,7 @@ namespace LM.App.Wpf.ViewModels
         private readonly LibrarySearchParser _metadataParser = new();
         private readonly LibrarySearchEvaluator _metadataEvaluator = new();
         private readonly LitSearchTreeViewModel _litSearchOrganizer;
+        private readonly LibraryCollectionsViewModel _collections;
 
         public LibraryViewModel(IEntryStore store,
                                 IFullTextSearchService fullTextSearch,
@@ -40,7 +42,8 @@ namespace LM.App.Wpf.ViewModels
                                 IClipboardService clipboard,
                                 IFileExplorerService fileExplorer,
                                 ILibraryDocumentService documentService,
-                                LitSearchTreeViewModel litSearchOrganizer)
+                                LitSearchTreeViewModel litSearchOrganizer,
+                                LibraryCollectionsViewModel collections)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
@@ -53,6 +56,7 @@ namespace LM.App.Wpf.ViewModels
             _fileExplorer = fileExplorer ?? throw new ArgumentNullException(nameof(fileExplorer));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
             _litSearchOrganizer = litSearchOrganizer ?? throw new ArgumentNullException(nameof(litSearchOrganizer));
+            _collections = collections ?? throw new ArgumentNullException(nameof(collections));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
 
@@ -60,12 +64,15 @@ namespace LM.App.Wpf.ViewModels
             InitializeColumns();
             _ = LoadPreferencesAsync();
             _ = _litSearchOrganizer.RefreshAsync();
+            _ = _collections.RefreshAsync();
         }
 
         public LibraryFiltersViewModel Filters { get; }
         public LibraryResultsViewModel Results { get; }
 
         public LitSearchTreeViewModel LitSearchOrganizer => _litSearchOrganizer;
+
+        public LibraryCollectionsViewModel Collections => _collections;
 
         [RelayCommand]
         private async Task SearchAsync()
