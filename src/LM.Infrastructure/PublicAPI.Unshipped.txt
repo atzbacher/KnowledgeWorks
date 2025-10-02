@@ -73,7 +73,7 @@ LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.PdfAnnotationPreviewStorage(LM
 LM.Infrastructure.Pdf.PdfAnnotationPreviewStorage.SaveAsync(string! pdfHash, string! annotationId, byte[]! pngBytes, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<string!>!
 LM.Infrastructure.Pdf.PdfAnnotationOverlayReader
 LM.Infrastructure.Pdf.PdfAnnotationOverlayReader.PdfAnnotationOverlayReader(LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IEntryStore! entryStore) -> void
-LM.Infrastructure.Pdf.PdfAnnotationOverlayReader.GetOverlayJsonAsync(string! pdfHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
+LM.Infrastructure.Pdf.PdfAnnotationOverlayReader.GetOverlayJsonAsync(string! entryId, string! pdfHash, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<string?>!
 LM.Infrastructure.Search.PubMedSearchProvider
 LM.Infrastructure.Search.PubMedSearchProvider.PubMedSearchProvider() -> void
 LM.Infrastructure.Search.PubMedSearchProvider.Database.get -> LM.Core.Models.SearchDatabase

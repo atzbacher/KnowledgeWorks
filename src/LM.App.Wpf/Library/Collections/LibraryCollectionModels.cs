@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -120,7 +121,7 @@ namespace LM.App.Wpf.Library.Collections
             return root.Clone();
         }
 
-        public static bool TryFindFolder(this LibraryCollectionFolder root, string folderId, [NotNullWhen(true)] out LibraryCollectionFolder? folder, [NotNullWhen(true)] out LibraryCollectionFolder? parent)
+        public static bool TryFindFolder(this LibraryCollectionFolder root, string folderId, [NotNullWhen(true)] out LibraryCollectionFolder? folder, out LibraryCollectionFolder? parent)
         {
             folder = null;
             parent = null;
@@ -133,6 +134,7 @@ namespace LM.App.Wpf.Library.Collections
             if (string.Equals(root.Id, folderId, StringComparison.Ordinal))
             {
                 folder = root;
+                Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located root folder '{root.Id}'.");
                 return true;
             }
 
@@ -142,12 +144,14 @@ namespace LM.App.Wpf.Library.Collections
                 {
                     folder = child;
                     parent = root;
+                    Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located folder '{child.Id}' under '{root.Id}'.");
                     return true;
                 }
 
                 if (child.TryFindFolder(folderId, out folder, out parent))
                 {
                     parent ??= child;
+                    Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located nested folder '{folder?.Id}' under '{parent.Id}'.");
                     return true;
                 }
             }
