@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
@@ -30,10 +31,18 @@ namespace LM.Infrastructure.Pdf
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));
             }
 
+            Trace.WriteLine($"[PdfAnnotationOverlayReader] Resolving overlay for entry '{entryId}' and hash '{pdfHash}'.");
+
             var entry = await _entryStore.FindByHashAsync(pdfHash, cancellationToken).ConfigureAwait(false);
             if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
             {
+                Trace.WriteLine($"[PdfAnnotationOverlayReader] No entry found for hash '{pdfHash}'.");
                 return null;
+            }
+
+            if (!string.Equals(entry.Id, entryId, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[PdfAnnotationOverlayReader] Provided entry id '{entryId}' differs from resolved '{entry.Id}'. Using resolved id.");
             }
 
             var hookRelativePath = Path.Combine("entries", entry.Id, "hooks", "pdf_annotations.json");
@@ -41,6 +50,7 @@ namespace LM.Infrastructure.Pdf
 
             if (string.IsNullOrWhiteSpace(hookAbsolutePath) || !File.Exists(hookAbsolutePath))
             {
+                Trace.WriteLine($"[PdfAnnotationOverlayReader] Hook file missing for entry '{entry.Id}'.");
                 return null;
             }
 
@@ -61,6 +71,7 @@ namespace LM.Infrastructure.Pdf
 
                 if (hook is null || string.IsNullOrWhiteSpace(hook.OverlayPath))
                 {
+                    Trace.WriteLine($"[PdfAnnotationOverlayReader] Hook payload missing overlay path for entry '{entry.Id}'.");
                     return null;
                 }
 
@@ -68,9 +79,11 @@ namespace LM.Infrastructure.Pdf
                 var overlayAbsolute = _workspace.GetAbsolutePath(overlayRelative);
                 if (string.IsNullOrWhiteSpace(overlayAbsolute) || !File.Exists(overlayAbsolute))
                 {
+                    Trace.WriteLine($"[PdfAnnotationOverlayReader] Overlay file '{overlayRelative}' missing for entry '{entry.Id}'.");
                     return null;
                 }
 
+                Trace.WriteLine($"[PdfAnnotationOverlayReader] Overlay resolved for entry '{entry.Id}'.");
                 return await File.ReadAllTextAsync(overlayAbsolute, cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -79,6 +92,7 @@ namespace LM.Infrastructure.Pdf
             }
             catch
             {
+                Trace.WriteLine($"[PdfAnnotationOverlayReader] Failed to deserialize overlay hook for entry '{entry.Id}'.");
                 return null;
             }
         }
