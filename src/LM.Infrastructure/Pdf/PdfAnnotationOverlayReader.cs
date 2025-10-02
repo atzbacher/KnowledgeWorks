@@ -19,8 +19,12 @@ namespace LM.Infrastructure.Pdf
             _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
         }
 
-        public async Task<string?> GetOverlayJsonAsync(string pdfHash, CancellationToken cancellationToken = default)
+        public async Task<string?> GetOverlayJsonAsync(string entryId, string pdfHash, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(entryId))
+            {
+                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+            }
             if (string.IsNullOrWhiteSpace(pdfHash))
             {
                 throw new ArgumentException("PDF hash must be provided.", nameof(pdfHash));

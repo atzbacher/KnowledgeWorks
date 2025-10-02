@@ -54,6 +54,10 @@ namespace LM.Infrastructure.Pdf
             if (overlayJson is null)
                 throw new ArgumentNullException(nameof(overlayJson));
 
+            var normalizedEntryId = entryId.Trim();
+            if (normalizedEntryId.Length == 0)
+                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+
             var safePreviewImages = previewImages ?? new Dictionary<string, byte[]>(capacity: 0);
             var annotationSnapshot = annotations ?? Array.Empty<PdfAnnotationBridgeMetadata>();
 
@@ -122,7 +126,14 @@ namespace LM.Infrastructure.Pdf
 
             if (string.IsNullOrWhiteSpace(hookAbsolute) || !File.Exists(hookAbsolute))
             {
-                return result;
+                var legacyRelative = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+                var legacyAbsolute = _workspace.GetAbsolutePath(legacyRelative);
+                if (string.IsNullOrWhiteSpace(legacyAbsolute) || !File.Exists(legacyAbsolute))
+                {
+                    return result;
+                }
+
+                hookAbsolute = legacyAbsolute;
             }
 
             try

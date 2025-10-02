@@ -252,13 +252,19 @@ namespace LM.HubSpoke.Entries
                 return previousHooks?.PdfAnnotations;
             }
 
-            var normalizedHash = NormalizeHash(entry.MainFileHashSha256);
-            if (normalizedHash is null)
+            var previous = previousHooks?.PdfAnnotations;
+            if (!string.IsNullOrWhiteSpace(previous))
             {
-                return previousHooks?.PdfAnnotations;
+                var trimmed = previous.Trim();
+                if (trimmed.StartsWith("entries/", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "hooks/pdf_annotations.json";
+                }
+
+                return trimmed;
             }
 
-            return $"entries/{normalizedHash}/hooks/pdf_annotations.json";
+            return "hooks/pdf_annotations.json";
         }
 
         private static bool IsPdfMainFile(string? path)
@@ -270,17 +276,6 @@ namespace LM.HubSpoke.Entries
 
             var extension = Path.GetExtension(path);
             return !string.IsNullOrWhiteSpace(extension) && extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static string? NormalizeHash(string? hash)
-        {
-            if (string.IsNullOrWhiteSpace(hash))
-            {
-                return null;
-            }
-
-            var trimmed = hash.Trim();
-            return trimmed.Length == 64 ? trimmed.ToLowerInvariant() : null;
         }
 
         private static EntryNotesSummary? BuildNotesSummary(Entry entry, object? hook)

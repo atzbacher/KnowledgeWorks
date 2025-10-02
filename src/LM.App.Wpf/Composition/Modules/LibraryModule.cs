@@ -5,6 +5,10 @@ using LM.App.Wpf.Views.Library;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Dialogs;
 using LM.App.Wpf.ViewModels.Library;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
+using LM.App.Wpf.ViewModels.Library.Collections;
+using LM.App.Wpf.Library.Collections;
+using LM.App.Wpf.Library.LitSearch;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Infrastructure.Hooks;
@@ -25,6 +29,8 @@ namespace LM.App.Wpf.Composition.Modules
             services.AddSingleton<IClipboardService, ClipboardService>();
             services.AddSingleton<IFileExplorerService, FileExplorerService>();
             services.AddSingleton<LibraryFilterPresetStore>();
+            services.AddSingleton<LibraryCollectionStore>();
+            services.AddSingleton<LitSearchOrganizerStore>();
             services.AddSingleton<ILibraryPresetPrompt, LibraryPresetPrompt>();
             services.AddTransient<LibraryPresetSaveDialogViewModel>();
             services.AddTransient<LibraryPresetSaveDialog>();
@@ -42,6 +48,12 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IWorkSpaceService>()));
 
+            services.AddSingleton(sp => new LitSearchTreeViewModel(
+                sp.GetRequiredService<LitSearchOrganizerStore>(),
+                sp.GetRequiredService<ILibraryPresetPrompt>(),
+                sp.GetRequiredService<IEntryStore>(),
+                sp.GetRequiredService<IWorkSpaceService>()));
+
             services.AddSingleton(sp => new LibraryResultsViewModel(
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFileStorageRepository>(),
@@ -53,6 +65,11 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IHasher>(),
                 sp.GetRequiredService<Services.Pdf.IPdfViewerLauncher>()));
 
+            services.AddSingleton(sp => new LibraryCollectionsViewModel(
+                sp.GetRequiredService<LibraryCollectionStore>(),
+                sp.GetRequiredService<LibraryResultsViewModel>(),
+                sp.GetRequiredService<HookOrchestrator>()));
+
             services.AddSingleton(sp => new LibraryViewModel(
                 sp.GetRequiredService<IEntryStore>(),
                 sp.GetRequiredService<IFullTextSearchService>(),
@@ -62,7 +79,9 @@ namespace LM.App.Wpf.Composition.Modules
                 sp.GetRequiredService<IUserPreferencesStore>(),
                 sp.GetRequiredService<IClipboardService>(),
                 sp.GetRequiredService<IFileExplorerService>(),
-                sp.GetRequiredService<ILibraryDocumentService>()));
+                sp.GetRequiredService<ILibraryDocumentService>(),
+                sp.GetRequiredService<LitSearchTreeViewModel>(),
+                sp.GetRequiredService<LibraryCollectionsViewModel>()));
         }
     }
 }

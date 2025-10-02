@@ -50,9 +50,10 @@ namespace LM.Infrastructure.Tests.Pdf
             var hookPath = Path.Combine(hookDirectory, "pdf_annotations.json");
             await File.WriteAllTextAsync(hookPath, JsonSerializer.Serialize(hook, JsonStd.Options));
 
-            var result = await reader.GetOverlayJsonAsync(hash, CancellationToken.None);
+            var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
 
             Assert.Equal(overlayPayload, result);
+            Assert.False(Directory.Exists(Path.Combine(temp.Path, "entries", hash)), "Legacy hash directory should not be created.");
         }
 
         [Fact]
@@ -67,7 +68,7 @@ namespace LM.Infrastructure.Tests.Pdf
             var reader = new PdfAnnotationOverlayReader(workspace, entryStore);
             const string hash = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
-            var result = await reader.GetOverlayJsonAsync(hash, CancellationToken.None);
+            var result = await reader.GetOverlayJsonAsync(entryId, hash, CancellationToken.None);
 
             Assert.Null(result);
         }

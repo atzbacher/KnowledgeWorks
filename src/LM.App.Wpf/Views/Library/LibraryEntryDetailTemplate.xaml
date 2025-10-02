@@ -5,11 +5,6 @@
     <ResourceDictionary Source="LibraryCommonResources.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <Style x:Key="SectionHeaderTextStyle" TargetType="TextBlock">
-    <Setter Property="FontWeight" Value="SemiBold" />
-    <Setter Property="Margin" Value="0,16,0,4" />
-  </Style>
-
   <Style x:Key="SectionTextStyle" TargetType="TextBlock">
     <Setter Property="TextWrapping" Value="Wrap" />
   </Style>
@@ -36,22 +31,105 @@
     <Setter Property="Margin" Value="0,4,0,0" />
   </Style>
 
-  <Style x:Key="OptionalInlineTextStyle" TargetType="TextBlock">
-    <Setter Property="Visibility" Value="Visible" />
-    <Style.Triggers>
-      <Trigger Property="Text" Value="">
-        <Setter Property="Visibility" Value="Collapsed" />
-      </Trigger>
-      <Trigger Property="Text" Value="{x:Null}">
-        <Setter Property="Visibility" Value="Collapsed" />
-      </Trigger>
-    </Style.Triggers>
-  </Style>
-
   <Style x:Key="SectionPlaceholderTextStyle" TargetType="TextBlock">
     <Setter Property="FontStyle" Value="Italic" />
     <Setter Property="Foreground" Value="Gray" />
     <Setter Property="Visibility" Value="Collapsed" />
+  </Style>
+
+  <Style x:Key="LibraryDetailExpanderToggleStyle" TargetType="ToggleButton">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="#6B7280" />
+    <Setter Property="Padding" Value="12,8" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="11" />
+
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border x:Name="HeaderBorder"
+                  Background="#F3F4F6"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="0,0,0,1"
+                  CornerRadius="4,4,0,0"
+                  Padding="{TemplateBinding Padding}">
+            <DockPanel LastChildFill="True">
+              <TextBlock x:Name="Chevron"
+                         Width="16"
+                         Height="16"
+                         FontFamily="Segoe MDL2 Assets"
+                         FontSize="10"
+                         Foreground="#6B7280"
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Center"
+                         Text="&#xE70D;" />
+              <ContentPresenter Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True"
+                                TextElement.Foreground="{TemplateBinding Foreground}"
+                                TextElement.FontWeight="{TemplateBinding FontWeight}"
+                                TextElement.FontSize="{TemplateBinding FontSize}" />
+            </DockPanel>
+
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="False">
+              <Setter TargetName="Chevron" Property="Text" Value="&#xE76C;" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="HeaderBorder" Property="BorderBrush" Value="#2563EB" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="HeaderBorder" Property="Background" Value="#E5E7EB" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="HeaderBorder" Property="Background" Value="#D1D5DB" />
+            </Trigger>
+
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="LibraryDetailExpanderStyle" TargetType="Expander">
+
+    <Setter Property="IsExpanded" Value="True" />
+    <Setter Property="Margin" Value="0,12,0,0" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Expander">
+          <Border Background="Transparent" Padding="0">
+            <Border Background="White" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="4">
+              <DockPanel>
+                <ToggleButton x:Name="HeaderToggle"
+                              DockPanel.Dock="Top"
+                              Focusable="True"
+                              IsTabStop="True"
+                              Style="{StaticResource LibraryDetailExpanderToggleStyle}"
+                              Content="{TemplateBinding Header}"
+                              IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" />
+                <Border x:Name="ContentHost"
+                        Background="White"
+                        CornerRadius="0,0,4,4">
+                  <ContentPresenter x:Name="ExpandSite"
+                                    Margin="12"
+                                    Visibility="Collapsed"
+                                    ContentSource="Content" />
+                </Border>
+              </DockPanel>
+            </Border>
+
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsExpanded" Value="True">
+              <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
 
   <Style x:Key="AttachmentNotesTextStyle"
@@ -98,227 +176,295 @@
                      TextWrapping="Wrap" />
           <TextBlock Text="{Binding Entry.DisplayName}"
                      Style="{StaticResource DisplayNameTextStyle}" />
-          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-            <TextBlock Text="{Binding Entry.Type}" />
-            <TextBlock Text="{Binding Entry.Year}"
-                       Margin="12,0,0,0"
-                       Style="{StaticResource OptionalInlineTextStyle}" />
-            <TextBlock Text="Internal"
-                       Margin="12,0,0,0"
-                       Visibility="{Binding Entry.IsInternal, Converter={StaticResource BoolToVisibilityConverter}}" />
-          </StackPanel>
         </StackPanel>
 
         <Button Grid.Column="1"
                 Content="Edit"
-                Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                Command="{Binding DataContext.EditEntryCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
                 Margin="12,0,0,0"
                 Padding="12,4"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Top" />
       </Grid>
 
-      <TextBlock Text="Source" Style="{StaticResource SectionHeaderTextStyle}" />
-      <TextBlock Text="{Binding Entry.Source}"
-                 Style="{StaticResource SectionTextStyle}"
-                 Visibility="{Binding HasSource, Converter={StaticResource BoolToVisibilityConverter}}" />
-      <TextBlock Text="No source recorded.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasSource}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+      <Expander x:Name="MetadataSection"
+                Header="METADATA"
 
-      <TextBlock Text="Abstract" Style="{StaticResource SectionHeaderTextStyle}" />
-      <TextBlock Text="{Binding DataContext.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                 Style="{StaticResource SectionTextStyle}"
-                 Visibility="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}" />
-      <TextBlock Text="No abstract available.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+                Style="{StaticResource LibraryDetailExpanderStyle}"
+                Margin="0,16,0,0">
+        <StackPanel>
+          <TextBlock Margin="0,0,0,4">
+            <Run Text="Type: " FontWeight="SemiBold" />
+            <Run Text="{Binding Entry.Type}" />
+          </TextBlock>
+          <TextBlock Margin="0,0,0,4"
+                     Text="{Binding Entry.Year, StringFormat=Year: {0}}"
+                     Style="{StaticResource OptionalSectionTextStyle}" />
+          <TextBlock Margin="0,0,0,4"
+                     Text="Internal entry"
+                     Visibility="{Binding Entry.IsInternal, Converter={StaticResource BoolToVisibilityConverter}}" />
+          <TextBlock Margin="0,12,0,4" FontWeight="SemiBold" Text="Source" />
+          <TextBlock Text="{Binding Entry.Source}"
+                     Style="{StaticResource SectionTextStyle}" />
+          <TextBlock x:Name="SourcePlaceholder"
+                     Text="No source recorded."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasSource}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
 
-      <TextBlock Text="Notes" Style="{StaticResource SectionHeaderTextStyle}" />
-      <TextBlock Text="{Binding Entry.Notes}" Style="{StaticResource OptionalSectionTextStyle}" />
-      <TextBlock Text="No notes recorded.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasNotes}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+      <Expander x:Name="AbstractSection"
+                Header="ABSTRACT"
 
-      <TextBlock Text="User notes" Style="{StaticResource SectionHeaderTextStyle}" />
-      <TextBlock Text="{Binding Entry.UserNotes}" Style="{StaticResource OptionalSectionTextStyle}" />
-      <TextBlock Text="No user notes provided.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasUserNotes}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <TextBlock Text="{Binding DataContext.Results.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                     Style="{StaticResource SectionTextStyle}" />
+          <TextBlock x:Name="AbstractPlaceholder"
+                     Text="No abstract available."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding DataContext.Results.HasSelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
 
-      <TextBlock Text="Identifiers" Style="{StaticResource SectionHeaderTextStyle}" />
-      <StackPanel>
-        <TextBlock Visibility="{Binding HasInternalId, Converter={StaticResource BoolToVisibilityConverter}}">
-          <Run Text="Internal ID: " />
-          <Run Text="{Binding Entry.InternalId}" />
-        </TextBlock>
-        <TextBlock Visibility="{Binding HasDoi, Converter={StaticResource BoolToVisibilityConverter}}">
-          <Run Text="DOI: " />
-          <Run Text="{Binding Entry.Doi}" />
-        </TextBlock>
-        <TextBlock Visibility="{Binding HasPmid, Converter={StaticResource BoolToVisibilityConverter}}">
-          <Run Text="PMID: " />
-          <Run Text="{Binding Entry.Pmid}" />
-        </TextBlock>
-        <TextBlock Visibility="{Binding HasNct, Converter={StaticResource BoolToVisibilityConverter}}">
-          <Run Text="NCT: " />
-          <Run Text="{Binding Entry.Nct}" />
-        </TextBlock>
-      </StackPanel>
-      <TextBlock Text="No identifiers recorded.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasIdentifiers}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+      <Expander x:Name="NotesSection"
+                Header="NOTES"
 
-      <TextBlock Text="Links" Style="{StaticResource SectionHeaderTextStyle}" />
-      <ItemsControl ItemsSource="{Binding DataContext.LinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                    Visibility="{Binding DataContext.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Style="{StaticResource SectionTextStyle}" TextWrapping="Wrap">
-              <Hyperlink Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                        CommandParameter="{Binding}"
-                        ToolTip="{Binding Target}">
-                <Run Text="{Binding DisplayText}" />
-              </Hyperlink>
-            </TextBlock>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <TextBlock Text="No links added.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding DataContext.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <TextBlock Text="{Binding Entry.Notes}"
+                     Style="{StaticResource OptionalSectionTextStyle}" />
+          <TextBlock x:Name="NotesPlaceholder"
+                     Text="No notes recorded."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasNotes}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
 
-      <TextBlock Text="Attachments" Style="{StaticResource SectionHeaderTextStyle}" />
-      <ItemsControl ItemsSource="{Binding Entry.Attachments}"
-                    Visibility="{Binding HasAttachments, Converter={StaticResource BoolToVisibilityConverter}}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <Border BorderBrush="#FFE0E0E0"
-                    BorderThickness="1"
-                    Padding="8"
-                    Margin="0,0,0,8">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+      <Expander x:Name="UserNotesSection"
+                Header="USER NOTES"
 
-                <StackPanel Grid.Column="0">
-                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding RelativePath}" Style="{StaticResource OptionalSectionTextStyle}" />
-                  <TextBlock Margin="0,4,0,0">
-                    <Run Text="Type: " />
-                    <Run Text="{Binding Kind}" />
-                  </TextBlock>
-                  <TextBlock Text="{Binding AddedBy, StringFormat=Added by {0}}"
-                             Margin="0,2,0,0"
-                             Style="{StaticResource OptionalSectionTextStyle}" />
-                  <TextBlock Text="{Binding AddedUtc, StringFormat=Added on {0:yyyy-MM-dd HH:mm}}"
-                             Margin="0,2,0,0" />
-                  <TextBlock Text="{Binding Notes}" Style="{StaticResource AttachmentNotesTextStyle}" />
-                  <TextBlock Style="{StaticResource AttachmentTagsTextStyle}">
-                    <Run Text="Tags: " />
-                    <Run Text="{Binding Tags, Converter={StaticResource StringJoinConverter}}" />
-                  </TextBlock>
-                </StackPanel>
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <TextBlock Text="{Binding Entry.UserNotes}"
+                     Style="{StaticResource OptionalSectionTextStyle}" />
+          <TextBlock x:Name="UserNotesPlaceholder"
+                     Text="No user notes provided."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasUserNotes}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
 
-                <Button Grid.Column="1"
-                        Content="Open"
-                        Command="{Binding DataContext.OpenAttachmentCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
-                        CommandParameter="{Binding}"
-                        Padding="12,4"
-                        Margin="12,0,0,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Top" />
-              </Grid>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <TextBlock Text="No attachments found.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasAttachments}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+      <Expander x:Name="IdentifiersSection"
+                Header="IDENTIFIERS"
 
-      <TextBlock Text="Relations" Style="{StaticResource SectionHeaderTextStyle}" />
-      <ItemsControl ItemsSource="{Binding Entry.Relations}"
-                    Visibility="{Binding HasRelations, Converter={StaticResource BoolToVisibilityConverter}}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <TextBlock>
-              <Run Text="{Binding Type}" FontWeight="SemiBold" />
-              <Run Text=" → " />
-              <Run Text="{Binding TargetEntryId}" />
-            </TextBlock>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <TextBlock Text="No relations associated.">
-        <TextBlock.Style>
-          <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
-            <Style.Triggers>
-              <DataTrigger Binding="{Binding HasRelations}" Value="False">
-                <Setter Property="Visibility" Value="Visible" />
-              </DataTrigger>
-            </Style.Triggers>
-          </Style>
-        </TextBlock.Style>
-      </TextBlock>
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <TextBlock Visibility="{Binding HasInternalId, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="Internal ID: " FontWeight="SemiBold" />
+            <Run Text="{Binding Entry.InternalId}" />
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasDoi, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="DOI: " FontWeight="SemiBold" />
+            <Run Text="{Binding Entry.Doi}" />
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasPmid, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="PMID: " FontWeight="SemiBold" />
+            <Run Text="{Binding Entry.Pmid}" />
+          </TextBlock>
+          <TextBlock Visibility="{Binding HasNct, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Run Text="NCT: " FontWeight="SemiBold" />
+            <Run Text="{Binding Entry.Nct}" />
+          </TextBlock>
+          <TextBlock x:Name="IdentifiersPlaceholder"
+                     Text="No identifiers recorded."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasIdentifiers}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
+
+      <Expander x:Name="LinksSection"
+                Header="LINKS"
+
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <ItemsControl x:Name="LinksItemsControl"
+                        ItemsSource="{Binding DataContext.Results.LinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                        Visibility="{Binding DataContext.Results.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Style="{StaticResource SectionTextStyle}" TextWrapping="Wrap">
+                  <Hyperlink Command="{Binding DataContext.OpenLinkCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                            CommandParameter="{Binding}"
+                            ToolTip="{Binding Target}">
+                    <Run Text="{Binding DisplayText}" />
+                  </Hyperlink>
+                </TextBlock>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock x:Name="LinksPlaceholder"
+                     Text="No links added."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding DataContext.Results.HasLinkItems, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
+
+      <Expander x:Name="AttachmentsSection"
+                Header="ATTACHMENTS"
+
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <ItemsControl x:Name="AttachmentsItemsControl"
+                        ItemsSource="{Binding Entry.Attachments}"
+                        Visibility="{Binding HasAttachments, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border BorderBrush="#FFE0E0E0"
+                        BorderThickness="1"
+                        Padding="8"
+                        Margin="0,0,0,8">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                      <TextBlock Text="{Binding RelativePath}" Style="{StaticResource OptionalSectionTextStyle}" />
+                      <TextBlock Margin="0,4,0,0">
+                        <Run Text="Type: " />
+                        <Run Text="{Binding Kind}" />
+                      </TextBlock>
+                      <TextBlock Text="{Binding AddedBy, StringFormat=Added by {0}}"
+                                 Margin="0,2,0,0"
+                                 Style="{StaticResource OptionalSectionTextStyle}" />
+                      <TextBlock Text="{Binding AddedUtc, StringFormat=Added on {0:yyyy-MM-dd HH:mm}}"
+                                 Margin="0,2,0,0" />
+                      <TextBlock Text="{Binding Notes}" Style="{StaticResource AttachmentNotesTextStyle}" />
+                      <TextBlock Style="{StaticResource AttachmentTagsTextStyle}">
+                        <Run Text="Tags: " />
+                        <Run Text="{Binding Tags, Converter={StaticResource StringJoinConverter}}" />
+                      </TextBlock>
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="Open"
+                            Command="{Binding DataContext.OpenAttachmentCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
+                            CommandParameter="{Binding}"
+                            Padding="12,4"
+                            Margin="12,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock x:Name="AttachmentsPlaceholder"
+                     Text="No attachments found."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasAttachments}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
+
+      <Expander x:Name="RelationsSection"
+                Header="RELATIONS"
+
+                Style="{StaticResource LibraryDetailExpanderStyle}">
+        <StackPanel>
+          <ItemsControl x:Name="RelationsItemsControl"
+                        ItemsSource="{Binding Entry.Relations}"
+                        Visibility="{Binding HasRelations, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock>
+                  <Run Text="{Binding Type}" FontWeight="SemiBold" />
+                  <Run Text=" → " />
+                  <Run Text="{Binding TargetEntryId}" />
+                </TextBlock>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock x:Name="RelationsPlaceholder"
+                     Text="No relations associated."
+                     Margin="0,4,0,0">
+            <TextBlock.Style>
+              <Style TargetType="TextBlock" BasedOn="{StaticResource SectionPlaceholderTextStyle}">
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasRelations}" Value="False">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </TextBlock.Style>
+          </TextBlock>
+        </StackPanel>
+      </Expander>
     </StackPanel>
   </DataTemplate>
 </ResourceDictionary>

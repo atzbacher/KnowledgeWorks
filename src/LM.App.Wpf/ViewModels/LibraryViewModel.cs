@@ -10,6 +10,8 @@ using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.ViewModels.Library;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
+using LM.App.Wpf.ViewModels.Library.Collections;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
@@ -28,6 +30,8 @@ namespace LM.App.Wpf.ViewModels
         private readonly IFullTextSearchService _fullTextSearch;
         private readonly LibrarySearchParser _metadataParser = new();
         private readonly LibrarySearchEvaluator _metadataEvaluator = new();
+        private readonly LitSearchTreeViewModel _litSearchOrganizer;
+        private readonly LibraryCollectionsViewModel _collections;
 
         public LibraryViewModel(IEntryStore store,
                                 IFullTextSearchService fullTextSearch,
@@ -37,7 +41,9 @@ namespace LM.App.Wpf.ViewModels
                                 IUserPreferencesStore preferencesStore,
                                 IClipboardService clipboard,
                                 IFileExplorerService fileExplorer,
-                                ILibraryDocumentService documentService)
+                                ILibraryDocumentService documentService,
+                                LitSearchTreeViewModel litSearchOrganizer,
+                                LibraryCollectionsViewModel collections)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
@@ -49,29 +55,43 @@ namespace LM.App.Wpf.ViewModels
             _clipboard = clipboard ?? throw new ArgumentNullException(nameof(clipboard));
             _fileExplorer = fileExplorer ?? throw new ArgumentNullException(nameof(fileExplorer));
             _documentService = documentService ?? throw new ArgumentNullException(nameof(documentService));
+            _litSearchOrganizer = litSearchOrganizer ?? throw new ArgumentNullException(nameof(litSearchOrganizer));
+            _collections = collections ?? throw new ArgumentNullException(nameof(collections));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
 
             _ = Filters.InitializeAsync();
             InitializeColumns();
             _ = LoadPreferencesAsync();
+            _ = _litSearchOrganizer.RefreshAsync();
+            _ = _collections.RefreshAsync();
         }
 
         public LibraryFiltersViewModel Filters { get; }
         public LibraryResultsViewModel Results { get; }
+
+        public LitSearchTreeViewModel LitSearchOrganizer => _litSearchOrganizer;
+
+        public LibraryCollectionsViewModel Collections => _collections;
 
         [RelayCommand]
         private async Task SearchAsync()
         {
             try
             {
+                var directives = Filters.ApplyInlineSearchDirectives();
                 Results.Clear();
                 if (Filters.UseFullTextSearch)
+                {
                     await RunFullTextSearchAsync().ConfigureAwait(false);
+                }
                 else
-                    await RunMetadataSearchAsync().ConfigureAwait(false);
+                {
+                    await RunMetadataSearchAsync(directives.MetadataQuery).ConfigureAwait(false);
+                }
 
                 await Filters.RefreshNavigationAsync().ConfigureAwait(false);
+                await _litSearchOrganizer.RefreshAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -80,10 +100,12 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        private async Task RunMetadataSearchAsync()
+        private async Task RunMetadataSearchAsync(string metadataQuery)
         {
-            var expression = _metadataParser.Parse(Filters.UnifiedQuery);
+            Trace.WriteLine($"[LibraryViewModel] Executing metadata search with query '{metadataQuery}'.");
+            var expression = _metadataParser.Parse(metadataQuery);
             var matches = new List<Entry>();
+            var filteredOut = 0;
 
             await foreach (var entry in _store.EnumerateAsync())
             {
@@ -92,11 +114,21 @@ namespace LM.App.Wpf.ViewModels
                     continue;
                 }
 
-                if (_metadataEvaluator.Matches(entry, expression))
+                if (!_metadataEvaluator.Matches(entry, expression))
                 {
-                    matches.Add(entry);
+                    continue;
                 }
+
+                if (!MatchesFilters(entry))
+                {
+                    filteredOut++;
+                    continue;
+                }
+
+                matches.Add(entry);
             }
+
+            Trace.WriteLine($"[LibraryViewModel] Metadata filters excluded {filteredOut} entries before sorting.");
 
             var ordered = SortEntries(matches);
 
@@ -122,7 +154,19 @@ namespace LM.App.Wpf.ViewModels
 
             Debug.WriteLine($"[LibraryViewModel] Full-text search → {hits.Count} hits");
 
-            await Results.LoadFullTextResultsAsync(hits).ConfigureAwait(false);
+            var filteredOut = 0;
+            await Results.LoadFullTextResultsAsync(hits, entry =>
+            {
+                var matchesFilters = MatchesFilters(entry);
+                if (!matchesFilters)
+                {
+                    filteredOut++;
+                }
+
+                return matchesFilters;
+            }).ConfigureAwait(false);
+
+            Trace.WriteLine($"[LibraryViewModel] Full-text filters excluded {filteredOut} hits before rendering results.");
 
             if (hits.Count == 0)
                 Debug.WriteLine("[LibraryViewModel] Full-text search returned no matches");
@@ -212,18 +256,102 @@ namespace LM.App.Wpf.ViewModels
             return results;
         }
 
-        private static IReadOnlyList<Entry> SortEntries(IEnumerable<Entry> entries)
+        private IReadOnlyList<Entry> SortEntries(IEnumerable<Entry> entries)
         {
-            return entries
+            var validEntries = entries
                 .Where(static entry => entry is not null)
-                .OrderByDescending(static entry => entry.Year.HasValue)
-                .ThenByDescending(static entry => entry.Year ?? int.MinValue)
-                .ThenBy(static entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(static entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(static entry => entry.AddedOnUtc)
-                .ThenBy(static entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase)
-                .Take(1000)
                 .ToList();
+
+            var sort = Filters.SelectedSort ?? LibrarySortOptions.NewestFirst;
+            Trace.WriteLine($"[LibraryViewModel] Sorting {validEntries.Count} entries using option '{sort.Key}'.");
+
+            var ordered = sort.Key switch
+            {
+                var key when string.Equals(key, LibrarySortOptions.OldestFirst.Key, StringComparison.OrdinalIgnoreCase)
+                    => validEntries
+                        .OrderBy(entry => entry.Year.HasValue ? 0 : 1)
+                        .ThenBy(entry => entry.Year ?? int.MaxValue)
+                        .ThenBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.AddedOnUtc)
+                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+                var key when string.Equals(key, LibrarySortOptions.TitleAscending.Key, StringComparison.OrdinalIgnoreCase)
+                    => validEntries
+                        .OrderBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenByDescending(entry => entry.Year.HasValue)
+                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
+                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.AddedOnUtc)
+                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+                var key when string.Equals(key, LibrarySortOptions.TitleDescending.Key, StringComparison.OrdinalIgnoreCase)
+                    => validEntries
+                        .OrderByDescending(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenByDescending(entry => entry.Year.HasValue)
+                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
+                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.AddedOnUtc)
+                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase),
+                _ => validEntries
+                        .OrderByDescending(entry => entry.Year.HasValue)
+                        .ThenByDescending(entry => entry.Year ?? int.MinValue)
+                        .ThenBy(entry => entry.Title ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.Source ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+                        .ThenBy(entry => entry.AddedOnUtc)
+                        .ThenBy(entry => entry.Id ?? string.Empty, StringComparer.OrdinalIgnoreCase)
+            };
+
+            return ordered.Take(1000).ToList();
+        }
+
+        private bool MatchesFilters(Entry entry)
+        {
+            if (entry is null)
+            {
+                return false;
+            }
+
+            if (Filters.DateFrom is System.DateTime from && entry.AddedOnUtc.Date < from.Date)
+            {
+                Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out before {from:yyyy-MM-dd}.");
+                return false;
+            }
+
+            if (Filters.DateTo is System.DateTime to && entry.AddedOnUtc.Date > to.Date)
+            {
+                Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out after {to:yyyy-MM-dd}.");
+                return false;
+            }
+
+            if (Filters.SelectedTags.Count > 0)
+            {
+                if (entry.Tags is null || entry.Tags.Count == 0)
+                {
+                    Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out due to missing tags.");
+                    return false;
+                }
+
+                var entryTags = entry.Tags
+                    .Where(static tag => !string.IsNullOrWhiteSpace(tag))
+                    .Select(static tag => tag.Trim())
+                    .ToList();
+
+                foreach (var tag in Filters.SelectedTags)
+                {
+                    if (string.IsNullOrWhiteSpace(tag))
+                    {
+                        continue;
+                    }
+
+                    var normalized = tag.Trim();
+                    if (!entryTags.Any(entryTag => string.Equals(entryTag, normalized, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out due to missing tag '{normalized}'.");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         private sealed record CheckedEntryIdsSidecar

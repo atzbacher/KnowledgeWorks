@@ -316,9 +316,10 @@ namespace LM.App.Wpf.ViewModels.Pdf
                 DocumentSource = absoluteUri;
 
                 var currentHash = PdfHash;
-                if (!string.IsNullOrWhiteSpace(currentHash))
+                var entryId = EntryId;
+                if (!string.IsNullOrWhiteSpace(currentHash) && !string.IsNullOrWhiteSpace(entryId))
                 {
-                    await LoadOverlaySnapshotAsync(currentHash!, CancellationToken.None).ConfigureAwait(false);
+                    await LoadOverlaySnapshotAsync(entryId!, currentHash!, CancellationToken.None).ConfigureAwait(false);
                 }
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -346,11 +347,11 @@ namespace LM.App.Wpf.ViewModels.Pdf
         private bool CanRecordAnnotationChange()
             => !IsBusy && !string.IsNullOrWhiteSpace(EntryId) && SelectedAnnotation is not null;
 
-        private async Task LoadOverlaySnapshotAsync(string pdfHash, CancellationToken cancellationToken)
+        private async Task LoadOverlaySnapshotAsync(string entryId, string pdfHash, CancellationToken cancellationToken)
         {
             try
             {
-                var overlayJson = await _overlayReader.GetOverlayJsonAsync(pdfHash, cancellationToken).ConfigureAwait(false);
+                var overlayJson = await _overlayReader.GetOverlayJsonAsync(entryId, pdfHash, cancellationToken).ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(overlayJson))
                 {
                     QueueOverlayForViewer(overlayJson);

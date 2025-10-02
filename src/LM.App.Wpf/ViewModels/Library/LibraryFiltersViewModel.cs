@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,10 +11,10 @@ using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
 using LM.App.Wpf.Library.Search;
+using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using LM.Core.Abstractions;
 using LM.Core.Models;
 using LM.Core.Models.Search;
-using LM.HubSpoke.Models;
 
 namespace LM.App.Wpf.ViewModels.Library
 {
@@ -33,12 +32,17 @@ namespace LM.App.Wpf.ViewModels.Library
         private bool _initialized;
         private bool _suppressLeftPanelSync;
         private bool _suppressRightPanelSync;
+        private bool _suppressNavigationRefresh;
         private double _lastLeftPanelWidth = DefaultLeftPanelWidth;
         private double _lastRightPanelWidth = DefaultRightPanelWidth;
+        private static readonly System.StringComparer TagComparer = System.StringComparer.OrdinalIgnoreCase;
+        private static readonly LibraryInlineDirectiveParser InlineDirectiveParser = new();
 
         private const double DefaultLeftPanelWidth = 310;
         private const double DefaultRightPanelWidth = 360;
         private const double CollapsedPanelWidth = 0;
+        private bool _fromDirectiveActive;
+        private bool _toDirectiveActive;
 
         [ObservableProperty]
         private bool useFullTextSearch;
@@ -62,26 +66,34 @@ namespace LM.App.Wpf.ViewModels.Library
         private string? fullTextQuery;
 
         [ObservableProperty]
-        private bool fullTextInTitle = true;
-
-        [ObservableProperty]
-        private bool fullTextInAbstract = true;
-
-        [ObservableProperty]
-        private bool fullTextInContent = true;
-
-        [ObservableProperty]
         private IReadOnlyList<LibraryPresetSummary> savedPresets = Array.Empty<LibraryPresetSummary>();
+
+        [ObservableProperty]
+        private System.DateTime? dateFrom;
+
+        [ObservableProperty]
+        private System.DateTime? dateTo;
+
+        [ObservableProperty]
+        private LibrarySortOption selectedSort = LibrarySortOptions.NewestFirst;
 
         public ObservableCollection<LibraryNavigationNodeViewModel> NavigationRoots { get; } = new();
 
+        public ObservableCollection<string> SelectedTags { get; } = new();
+
+        public IReadOnlyList<LibrarySortOption> SortOptions => LibrarySortOptions.All;
+
         public bool HasSavedPresets => SavedPresets.Count > 0;
+
+        public SavedSearchTreeViewModel SavedSearches { get; }
 
         public IReadOnlyList<string> KeywordTokens { get; } = LibrarySearchFieldMap.GetDisplayTokens();
 
         public string KeywordTooltip { get; } = BuildKeywordTooltip();
 
         public IRelayCommand ClearCommand { get; }
+
+        public IRelayCommand<string?> RemoveTagCommand { get; }
 
         public LibraryFiltersViewModel(LibraryFilterPresetStore presetStore,
                                        ILibraryPresetPrompt presetPrompt,
@@ -93,7 +105,13 @@ namespace LM.App.Wpf.ViewModels.Library
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
 
-           ClearCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Clear);
+            SavedSearches = new SavedSearchTreeViewModel(_presetStore, _presetPrompt);
+            SavedSearches.TreeChanged += OnSavedSearchTreeChanged;
+
+            RemoveTagCommand = new RelayCommand<string?>(RemoveTag, CanRemoveTag);
+            SelectedTags.CollectionChanged += OnSelectedTagsCollectionChanged;
+
+            ClearCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(Clear);
         }
 
         private static string BuildKeywordTooltip()
@@ -106,6 +124,105 @@ namespace LM.App.Wpf.ViewModels.Library
 
             var formatted = tokens.Select(static token => string.Concat(token, ":"));
             return "Supported keywords: " + string.Join(", ", formatted);
+        }
+
+        private void OnSelectedTagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RemoveTagCommand.NotifyCanExecuteChanged();
+            Trace.WriteLine($"[LibraryFiltersViewModel] Selected tags updated via {e.Action}; total tags: {SelectedTags.Count}");
+        }
+
+        private bool CanRemoveTag(string? tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return false;
+            }
+
+            var normalized = tag.Trim();
+            return SelectedTags.Any(existing => string.Equals(existing, normalized, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private void RemoveTag(string? tag)
+        {
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                return;
+            }
+
+            var normalized = tag.Trim();
+            var removed = false;
+            for (var i = SelectedTags.Count - 1; i >= 0; i--)
+            {
+                if (!string.Equals(SelectedTags[i], normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                SelectedTags.RemoveAt(i);
+                removed = true;
+            }
+
+            if (removed)
+            {
+                Trace.WriteLine($"[LibraryFiltersViewModel] Removed tag '{normalized}'.");
+            }
+        }
+
+        private void ReplaceTags(IEnumerable<string> tags)
+        {
+            SelectedTags.Clear();
+
+            if (tags is null)
+            {
+                return;
+            }
+
+            var unique = new HashSet<string>(TagComparer);
+            foreach (var tag in tags)
+            {
+                if (string.IsNullOrWhiteSpace(tag))
+                {
+                    continue;
+                }
+
+                var normalized = tag.Trim();
+                if (unique.Add(normalized))
+                {
+                    SelectedTags.Add(normalized);
+                }
+            }
+
+            Trace.WriteLine($"[LibraryFiltersViewModel] Loaded {SelectedTags.Count} tag filter(s).");
+        }
+
+        private static LibrarySortOption ResolveSortOption(string? key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return LibrarySortOptions.NewestFirst;
+            }
+
+            var resolved = LibrarySortOptions.All.FirstOrDefault(option => string.Equals(option.Key, key, StringComparison.OrdinalIgnoreCase));
+            return resolved ?? LibrarySortOptions.NewestFirst;
+        }
+
+        partial void OnDateFromChanged(System.DateTime? value)
+        {
+            if (value.HasValue && DateTo.HasValue && value.Value > DateTo.Value)
+            {
+                Trace.WriteLine("[LibraryFiltersViewModel] Adjusting DateTo to match new DateFrom value.");
+                DateTo = value;
+            }
+        }
+
+        partial void OnDateToChanged(System.DateTime? value)
+        {
+            if (value.HasValue && DateFrom.HasValue && value.Value < DateFrom.Value)
+            {
+                Trace.WriteLine("[LibraryFiltersViewModel] Adjusting DateFrom to match new DateTo value.");
+                DateFrom = value;
+            }
         }
 
         partial void OnLeftPanelWidthChanged(System.Windows.GridLength value)
@@ -232,7 +349,6 @@ namespace LM.App.Wpf.ViewModels.Library
             try
             {
                 await RefreshSavedPresetsAsync(ct).ConfigureAwait(false);
-                await RefreshNavigationAsync(ct).ConfigureAwait(false);
                 _initialized = true;
             }
             catch (Exception ex) when (!ct.IsCancellationRequested)
@@ -243,12 +359,16 @@ namespace LM.App.Wpf.ViewModels.Library
 
         public void Clear()
         {
+            Trace.WriteLine("[LibraryFiltersViewModel] Clearing all filter values.");
             UseFullTextSearch = false;
             UnifiedQuery = string.Empty;
             FullTextQuery = string.Empty;
-            FullTextInTitle = true;
-            FullTextInAbstract = true;
-            FullTextInContent = true;
+            DateFrom = null;
+            DateTo = null;
+            SelectedSort = LibrarySortOptions.NewestFirst;
+            SelectedTags.Clear();
+            _fromDirectiveActive = false;
+            _toDirectiveActive = false;
         }
 
         [RelayCommand]
@@ -263,6 +383,87 @@ namespace LM.App.Wpf.ViewModels.Library
             IsRightPanelCollapsed = !IsRightPanelCollapsed;
         }
 
+        internal LibraryInlineDirectiveResult ApplyInlineSearchDirectives()
+        {
+            var query = UnifiedQuery ?? string.Empty;
+            var directives = InlineDirectiveParser.Parse(query);
+
+            var normalizedFullText = directives.FullTextQuery ?? string.Empty;
+            var hasFullText = directives.HasFullTextDirective && !string.IsNullOrWhiteSpace(normalizedFullText);
+
+            if (!string.Equals(FullTextQuery ?? string.Empty, normalizedFullText, StringComparison.Ordinal))
+            {
+                FullTextQuery = normalizedFullText;
+                Trace.WriteLine($"[LibraryFiltersViewModel] Inline FULLTEXT query set to '{normalizedFullText}'.");
+            }
+
+            if (UseFullTextSearch != hasFullText)
+            {
+                Trace.WriteLine(hasFullText
+                    ? "[LibraryFiltersViewModel] Inline FULLTEXT directive detected; switching to full-text search."
+                    : "[LibraryFiltersViewModel] Inline FULLTEXT directive missing; using metadata search.");
+                UseFullTextSearch = hasFullText;
+            }
+
+            if (directives.HasFromDirective)
+            {
+                _fromDirectiveActive = true;
+                if (directives.FromDate.HasValue)
+                {
+                    if (DateFrom != directives.FromDate)
+                    {
+                        DateFrom = directives.FromDate;
+                        Trace.WriteLine($"[LibraryFiltersViewModel] Applied inline FROM directive: {DateFrom:yyyy-MM-dd}.");
+                    }
+                }
+                else if (DateFrom is not null)
+                {
+                    DateFrom = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] FROM directive present but invalid; cleared date filter.");
+                }
+            }
+            else if (_fromDirectiveActive)
+            {
+                if (DateFrom is not null)
+                {
+                    DateFrom = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] Removed inline FROM directive; cleared date filter.");
+                }
+
+                _fromDirectiveActive = false;
+            }
+
+            if (directives.HasToDirective)
+            {
+                _toDirectiveActive = true;
+                if (directives.ToDate.HasValue)
+                {
+                    if (DateTo != directives.ToDate)
+                    {
+                        DateTo = directives.ToDate;
+                        Trace.WriteLine($"[LibraryFiltersViewModel] Applied inline TO directive: {DateTo:yyyy-MM-dd}.");
+                    }
+                }
+                else if (DateTo is not null)
+                {
+                    DateTo = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] TO directive present but invalid; cleared date filter.");
+                }
+            }
+            else if (_toDirectiveActive)
+            {
+                if (DateTo is not null)
+                {
+                    DateTo = null;
+                    Trace.WriteLine("[LibraryFiltersViewModel] Removed inline TO directive; cleared date filter.");
+                }
+
+                _toDirectiveActive = false;
+            }
+
+            return directives;
+        }
+
         public string GetNormalizedFullTextQuery()
         {
             return (FullTextQuery ?? string.Empty).Trim();
@@ -275,29 +476,10 @@ namespace LM.App.Wpf.ViewModels.Library
                 throw new ArgumentNullException(nameof(normalizedQuery));
             }
 
-            var fields = FullTextSearchField.None;
-            if (FullTextInTitle)
-            {
-                fields |= FullTextSearchField.Title;
-            }
-            if (FullTextInAbstract)
-            {
-                fields |= FullTextSearchField.Abstract;
-            }
-            if (FullTextInContent)
-            {
-                fields |= FullTextSearchField.Content;
-            }
-
-            if (fields == FullTextSearchField.None)
-            {
-                fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content;
-            }
-
             return new FullTextSearchQuery
             {
                 Text = normalizedQuery,
-                Fields = fields
+                Fields = FullTextSearchField.Title | FullTextSearchField.Abstract | FullTextSearchField.Content
             };
         }
 
@@ -307,9 +489,14 @@ namespace LM.App.Wpf.ViewModels.Library
                 UseFullTextSearch = UseFullTextSearch,
                 UnifiedQuery = UnifiedQuery,
                 FullTextQuery = FullTextQuery,
-                FullTextInTitle = FullTextInTitle,
-                FullTextInAbstract = FullTextInAbstract,
-                FullTextInContent = FullTextInContent
+                DateFrom = DateFrom?.Date,
+                DateTo = DateTo?.Date,
+                SortKey = SelectedSort?.Key,
+                Tags = SelectedTags
+                    .Where(static tag => !string.IsNullOrWhiteSpace(tag))
+                    .Select(static tag => tag.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray()
             };
 
         public void ApplyState(LibraryFilterState state)
@@ -322,9 +509,11 @@ namespace LM.App.Wpf.ViewModels.Library
             UseFullTextSearch = state.UseFullTextSearch;
             UnifiedQuery = state.UnifiedQuery;
             FullTextQuery = state.FullTextQuery;
-            FullTextInTitle = state.FullTextInTitle;
-            FullTextInAbstract = state.FullTextInAbstract;
-            FullTextInContent = state.FullTextInContent;
+            DateFrom = state.DateFrom?.Date;
+            DateTo = state.DateTo?.Date;
+            SelectedSort = ResolveSortOption(state.SortKey);
+            ReplaceTags(state.Tags ?? Array.Empty<string>());
+            Trace.WriteLine("[LibraryFiltersViewModel] Applied preset state to filters.");
         }
 
         [RelayCommand]
@@ -366,9 +555,8 @@ namespace LM.App.Wpf.ViewModels.Library
                     State = CaptureState()
                 };
 
-                await _presetStore.SavePresetAsync(preset).ConfigureAwait(false);
+                await _presetStore.SavePresetAsync(preset, LibraryPresetFolder.RootId).ConfigureAwait(false);
                 await RefreshSavedPresetsAsync().ConfigureAwait(false);
-                await RefreshNavigationAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -396,7 +584,7 @@ namespace LM.App.Wpf.ViewModels.Library
                     return;
                 }
 
-                var summaries = presets.Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc)).ToArray();
+                var summaries = presets.Select(p => new LibraryPresetSummary(p.Id, p.Name, p.SavedUtc)).ToArray();
                 var result = await _presetPrompt.RequestSelectionAsync(
                     new LibraryPresetSelectionContext(summaries, AllowLoad: true, "Load Saved Search")).ConfigureAwait(false);
                 if (result is null)
@@ -404,14 +592,17 @@ namespace LM.App.Wpf.ViewModels.Library
                     return;
                 }
 
-                await DeletePresetsAsync(result.DeletedPresetNames).ConfigureAwait(false);
-                if (string.IsNullOrWhiteSpace(result.SelectedPresetName))
+                await DeletePresetsAsync(result.DeletedPresetIds).ConfigureAwait(false);
+                if (string.IsNullOrWhiteSpace(result.SelectedPresetId))
                 {
                     return;
                 }
 
-                var summary = new LibraryPresetSummary(result.SelectedPresetName!, DateTime.UtcNow);
-                await ApplyPresetAsync(summary).ConfigureAwait(false);
+                var summary = summaries.FirstOrDefault(s => string.Equals(s.Id, result.SelectedPresetId, StringComparison.Ordinal));
+                if (summary is not null)
+                {
+                    await ApplyPresetAsync(summary).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
@@ -439,7 +630,7 @@ namespace LM.App.Wpf.ViewModels.Library
                     return;
                 }
 
-                var summaries = presets.Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc)).ToArray();
+                var summaries = presets.Select(p => new LibraryPresetSummary(p.Id, p.Name, p.SavedUtc)).ToArray();
                 var result = await _presetPrompt.RequestSelectionAsync(
                     new LibraryPresetSelectionContext(summaries, AllowLoad: false, "Manage Saved Searches")).ConfigureAwait(false);
                 if (result is null)
@@ -447,7 +638,7 @@ namespace LM.App.Wpf.ViewModels.Library
                     return;
                 }
 
-                await DeletePresetsAsync(result.DeletedPresetNames).ConfigureAwait(false);
+                await DeletePresetsAsync(result.DeletedPresetIds).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -472,7 +663,8 @@ namespace LM.App.Wpf.ViewModels.Library
 
             try
             {
-                var preset = await _presetStore.TryGetPresetAsync(summary.Name, ct).ConfigureAwait(false);
+                var preset = await _presetStore.TryGetPresetByIdAsync(summary.Id, ct).ConfigureAwait(false)
+                             ?? await _presetStore.TryGetPresetAsync(summary.Name, ct).ConfigureAwait(false);
                 if (preset is null)
                 {
                     await RefreshSavedPresetsAsync(ct).ConfigureAwait(false);
@@ -510,12 +702,6 @@ namespace LM.App.Wpf.ViewModels.Library
                     nodes.Add(saved);
                 }
 
-                var litNodes = await BuildLitSearchNodesAsync(ct).ConfigureAwait(false);
-                if (litNodes.Count > 0)
-                {
-                    nodes.AddRange(litNodes);
-                }
-
                 await InvokeOnDispatcherAsync(() =>
                 {
                     NavigationRoots.Clear();
@@ -547,139 +733,24 @@ namespace LM.App.Wpf.ViewModels.Library
             return root;
         }
 
-        private async Task<List<LibraryNavigationNodeViewModel>> BuildLitSearchNodesAsync(CancellationToken ct)
+        private async Task DeletePresetsAsync(IReadOnlyList<string> ids, CancellationToken ct = default)
         {
-            var nodes = new List<LibraryNavigationNodeViewModel>();
-            try
-            {
-                var workspaceRoot = _workspace.GetWorkspaceRoot();
-                await foreach (var entry in _store.EnumerateAsync(ct))
-                {
-                    if (ct.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
-                    {
-                        continue;
-                    }
-
-                    var isLitSearch = entry.Type == EntryType.LitSearch
-                        || string.Equals(entry.Source, "LitSearch", StringComparison.OrdinalIgnoreCase);
-                    if (!isLitSearch)
-                    {
-                        continue;
-                    }
-
-                    var hookPath = FindLitSearchHookPath(workspaceRoot, entry.Id);
-                    if (hookPath is null)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        var json = await File.ReadAllTextAsync(hookPath, ct).ConfigureAwait(false);
-                        var hook = JsonSerializer.Deserialize<LitSearchHook>(json, JsonStd.Options);
-                        if (hook is null)
-                        {
-                            continue;
-                        }
-
-                        var title = string.IsNullOrWhiteSpace(hook.Title) ? entry.Title ?? entry.Id : hook.Title;
-                        var entryNode = new LibraryNavigationNodeViewModel(title!, LibraryNavigationNodeKind.LitSearchEntry)
-                        {
-                            Payload = new LibraryLitSearchEntryPayload(entry.Id!, hookPath, title!, hook.Query)
-                        };
-
-                        foreach (var run in hook.Runs.OrderByDescending(r => r.RunUtc))
-                        {
-                            if (string.IsNullOrWhiteSpace(run.RunId))
-                            {
-                                continue;
-                            }
-
-                            var label = $"{run.RunUtc:u} ({run.TotalHits} hits)";
-                            var runNode = new LibraryNavigationNodeViewModel(label, LibraryNavigationNodeKind.LitSearchRun)
-                            {
-                                Payload = new LibraryLitSearchRunPayload(entry.Id!, run.RunId, ResolveCheckedEntriesPath(workspaceRoot, run.CheckedEntryIdsPath), label)
-                            };
-                            entryNode.Children.Add(runNode);
-                        }
-
-                        nodes.Add(entryNode);
-                    }
-                    catch
-                    {
-                        // ignore malformed litsearch entries
-                    }
-                }
-            }
-
-            catch
-            {
-                // workspace not ready or enumeration failed; ignore for now
-            }
-
-            if (nodes.Count == 0)
-            {
-                return nodes;
-            }
-
-            nodes.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
-            var root = new LibraryNavigationNodeViewModel("LitSearch", LibraryNavigationNodeKind.Category);
-            foreach (var node in nodes)
-            {
-                root.Children.Add(node);
-            }
-
-            return new List<LibraryNavigationNodeViewModel> { root };
-        }
-
-        private static string? FindLitSearchHookPath(string workspaceRoot, string entryId)
-        {
-            var candidates = new[]
-            {
-                Path.Combine(workspaceRoot, "entries", entryId, "hooks", "litsearch.json"),
-                Path.Combine(workspaceRoot, "entries", entryId, "spokes", "litsearch", "litsearch.json"),
-                Path.Combine(workspaceRoot, "entries", entryId, "litsearch", "litsearch.json")
-            };
-
-            return candidates.FirstOrDefault(File.Exists);
-        }
-
-        private static string? ResolveCheckedEntriesPath(string workspaceRoot, string? relative)
-        {
-            if (string.IsNullOrWhiteSpace(relative))
-            {
-                return null;
-            }
-
-            var normalized = relative.Replace('/', Path.DirectorySeparatorChar);
-            var combined = Path.Combine(workspaceRoot, normalized);
-            return File.Exists(combined) ? combined : null;
-        }
-
-        private async Task DeletePresetsAsync(IReadOnlyList<string> names, CancellationToken ct = default)
-        {
-            if (names is null || names.Count == 0)
+            if (ids is null || ids.Count == 0)
             {
                 return;
             }
 
-            foreach (var name in names)
+            foreach (var id in ids)
             {
-                if (string.IsNullOrWhiteSpace(name))
+                if (string.IsNullOrWhiteSpace(id))
                 {
                     continue;
                 }
 
-                await _presetStore.DeletePresetAsync(name, ct).ConfigureAwait(false);
+                await _presetStore.DeletePresetAsync(id, ct).ConfigureAwait(false);
             }
 
             await RefreshSavedPresetsAsync(ct).ConfigureAwait(false);
-            await RefreshNavigationAsync(ct).ConfigureAwait(false);
         }
 
         private string BuildDefaultPresetName(IReadOnlyList<LibraryFilterPreset> existing)
@@ -712,17 +783,31 @@ namespace LM.App.Wpf.ViewModels.Library
             await _presetLock.WaitAsync(ct).ConfigureAwait(false);
             try
             {
-                var presets = await _presetStore.ListPresetsAsync(ct).ConfigureAwait(false);
-                var summaries = presets
-                    .Select(p => new LibraryPresetSummary(p.Name, p.SavedUtc))
-                    .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-                    .ToArray();
-
-                await InvokeOnDispatcherAsync(() => SavedPresets = summaries).ConfigureAwait(false);
+                _suppressNavigationRefresh = true;
+                await SavedSearches.RefreshAsync(ct).ConfigureAwait(false);
             }
             finally
             {
+                _suppressNavigationRefresh = false;
                 _presetLock.Release();
+            }
+
+            if (!ct.IsCancellationRequested)
+            {
+                await RefreshNavigationAsync(ct).ConfigureAwait(false);
+            }
+        }
+
+        private void OnSavedSearchTreeChanged(object? sender, SavedSearchTreeChangedEventArgs e)
+        {
+            var _ = InvokeOnDispatcherAsync(() =>
+            {
+                SavedPresets = e.Presets;
+            });
+            if (!_suppressNavigationRefresh)
+            {
+                Trace.WriteLine($"[LibraryFiltersViewModel] Saved search tree changed; scheduling navigation refresh for {e.Presets.Count} preset(s).");
+                _ = RefreshNavigationAsync();
             }
         }
 

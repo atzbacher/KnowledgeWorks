@@ -10,8 +10,8 @@ validate overlay synchronization.
 3. KnowledgeWorks resolves the workspace-relative PDF path, normalizes the
    SHA-256 hash, and launches the in-app viewer.
 4. The viewer is pre-configured with the entry identifier and PDF hash so that
-   annotation changes write to both the entry changelog and the shared PDF hook
-   (under `entries/<hash>/hooks/`).
+   annotation changes write directly to the entry changelog and shared PDF hook
+   (under `entries/<entryId>/hooks/`).
 
 If the viewer cannot locate the PDF file or compute the hash, the UI surfaces a
 warning dialog and skips launch so testers can correct the workspace data.

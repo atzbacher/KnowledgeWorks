@@ -125,6 +125,24 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+        public async Task SearchCommand_WhenFullTextEnabled_InvokesFullTextService()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            var search = new FakeFullTextSearchService();
+
+            var vm = CreateViewModel(store, search, temp);
+            vm.Filters.UseFullTextSearch = true;
+            vm.Filters.FullTextQuery = "markers";
+
+            await InvokeSearchAsync(vm);
+
+            Assert.Equal(1, search.SearchCallCount);
+            Assert.Equal("markers", search.LastQuery?.Text);
+            Assert.True(vm.Results.ResultsAreFullText);
+        }
+
+        [Fact]
         public void EditCommand_CanExecuteReflectsSelection()
         {
             using var temp = new TempWorkspace();
@@ -675,7 +693,15 @@ namespace LM.App.Wpf.Tests
             public IReadOnlyList<FullTextSearchHit> Hits { get; set; } = Array.Empty<FullTextSearchHit>();
 
             public Task<IReadOnlyList<FullTextSearchHit>> SearchAsync(FullTextSearchQuery query, CancellationToken ct = default)
-                => Task.FromResult(Hits);
+            {
+                SearchCallCount++;
+                LastQuery = query;
+                return Task.FromResult(Hits);
+            }
+
+            public int SearchCallCount { get; private set; }
+
+            public FullTextSearchQuery? LastQuery { get; private set; }
         }
 
         private sealed class StubPresetPrompt : ILibraryPresetPrompt
