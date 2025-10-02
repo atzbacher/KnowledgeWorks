@@ -678,6 +678,7 @@ LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.GetNormalizedFullTextQuery
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.NavigationRoots.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel!>!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RefreshNavigationAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedPresets.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Common.LibraryPresetSummary!>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.SavedSearches.get -> LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel!
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.get -> System.Windows.GridLength
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.RightPanelWidth.set -> void
 LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.IsLeftPanelCollapsed.get -> bool

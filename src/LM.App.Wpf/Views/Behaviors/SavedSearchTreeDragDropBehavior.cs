@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using Microsoft.Xaml.Behaviors;
 
@@ -36,6 +37,7 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 _dragStart = e.GetPosition(AssociatedObject);
                 _dragSource = node;
+                Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Drag start captured for node '{node.Id}' at {_dragStart.Value}.");
             }
             else
             {
@@ -59,6 +61,7 @@ namespace LM.App.Wpf.Views.Behaviors
             }
 
             var data = new System.Windows.DataObject(typeof(SavedSearchNodeViewModel), _dragSource);
+            Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Initiating drag for '{_dragSource.Id}'.");
             System.Windows.DragDrop.DoDragDrop(AssociatedObject, data, System.Windows.DragDropEffects.Move);
             _dragStart = null;
             _dragSource = null;
@@ -129,6 +132,7 @@ namespace LM.App.Wpf.Views.Behaviors
 
             if (tree.MoveCommand.CanExecute(request))
             {
+                Trace.WriteLine($"[SavedSearchTreeDragDropBehavior] Executing move for '{source.Id}' into '{targetFolder.Id}' at index {request.InsertIndex}.");
                 await tree.MoveCommand.ExecuteAsync(request);
             }
 
@@ -149,6 +153,7 @@ namespace LM.App.Wpf.Views.Behaviors
 
         private static bool TryGetDropInfo(System.Windows.DependencyObject? sourceElement,
                                            SavedSearchTreeViewModel tree,
+                                           SavedSearchNodeViewModel source,
                                            out SavedSearchFolderViewModel targetFolder,
                                            out int insertIndex)
         {
@@ -164,8 +169,8 @@ namespace LM.App.Wpf.Views.Behaviors
                     insertIndex = targetFolder.Children.IndexOf(preset);
                     return true;
                 default:
-                    targetFolder = tree.Root;
-                    insertIndex = tree.Root.Children.Count;
+                    targetFolder = source.Parent ?? tree.Root;
+                    insertIndex = targetFolder.Children.Count;
                     return true;
             }
         }

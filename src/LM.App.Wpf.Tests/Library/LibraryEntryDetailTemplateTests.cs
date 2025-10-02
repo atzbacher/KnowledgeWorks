@@ -35,7 +35,7 @@ namespace LM.App.Wpf.Tests.Library
 
 
                 metadata.ApplyTemplate();
-                var headerToggle = metadata.Template.FindName("HeaderToggle", metadata) as System.Windows.Controls.ToggleButton;
+                var headerToggle = metadata.Template.FindName("HeaderToggle", metadata) as System.Windows.Controls.Primitives.ToggleButton;
                 Trace.WriteLine($"Header toggle located: {headerToggle is not null}; Focusable={headerToggle?.Focusable}; IsTabStop={headerToggle?.IsTabStop}.");
                 Assert.NotNull(headerToggle);
                 Assert.True(headerToggle!.IsTabStop);
@@ -76,7 +76,7 @@ namespace LM.App.Wpf.Tests.Library
                 var notesPlaceholder = FindDescendant<System.Windows.Controls.TextBlock>(root, static text => string.Equals(text.Name, "NotesPlaceholder", StringComparison.Ordinal));
                 Assert.NotNull(notesPlaceholder);
                 Assert.Equal(System.Windows.Visibility.Collapsed, notesPlaceholder!.Visibility);
-            }).ConfigureAwait(false);
+            });
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace LM.App.Wpf.Tests.Library
                 AssertVisibility(root, "LinksPlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "AttachmentsPlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "RelationsPlaceholder", System.Windows.Visibility.Visible);
-            }).ConfigureAwait(false);
+            });
         }
 
         private static void AssertVisibility(System.Windows.DependencyObject root, string elementName, System.Windows.Visibility expected)

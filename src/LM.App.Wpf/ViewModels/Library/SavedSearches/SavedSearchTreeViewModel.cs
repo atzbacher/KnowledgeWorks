@@ -26,7 +26,7 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 
             CreateFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(CreateFolderAsync);
             DeleteFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
-            DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel>(DeletePresetAsync, preset => preset is not null);
+            DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel>(DeletePresetAsync, static preset => preset is not null);
             MoveCommand = new AsyncRelayCommand<SavedSearchDragDropRequest>(MoveAsync, request => request?.Source is not null);
         }
 
@@ -98,8 +98,13 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             return folder is not null && !string.Equals(folder.Id, LibraryPresetFolder.RootId, StringComparison.Ordinal);
         }
 
-        private async Task DeleteFolderAsync(SavedSearchFolderViewModel folder)
+        private async Task DeleteFolderAsync(SavedSearchFolderViewModel? folder)
         {
+            if (folder is null)
+            {
+                return;
+            }
+
             if (!CanDeleteFolder(folder))
             {
                 return;
@@ -121,7 +126,7 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             await RefreshAsync().ConfigureAwait(false);
         }
 
-        private async Task DeletePresetAsync(SavedSearchPresetViewModel preset)
+        private async Task DeletePresetAsync(SavedSearchPresetViewModel? preset)
         {
             if (preset is null)
             {
