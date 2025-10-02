@@ -8,15 +8,16 @@
                           x:Shared="False"
                           Header="📎"
                           Width="40"
+                          SortMemberPath="PrimaryAttachmentSortKey"
                           behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AttachmentIndicator">
     <DataGridTemplateColumn.CellTemplate>
       <DataTemplate>
         <TextBlock FontFamily="Segoe MDL2 Assets"
                    FontSize="14"
-                   Text="&#xE16C;"
+                   Text="{Binding PrimaryAttachmentGlyphKind, Converter={StaticResource AttachmentGlyphToIconConverter}}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
-                   ToolTip="Entry has attachments">
+                   ToolTip="{Binding PrimaryAttachmentGlyphKind, Converter={StaticResource AttachmentGlyphToDescriptionConverter}}">
           <TextBlock.Style>
             <Style TargetType="TextBlock">
               <Setter Property="Visibility" Value="Collapsed" />
@@ -34,72 +35,84 @@
   <DataGridTextColumn x:Key="LibraryResultsColumn.Title"
                       x:Shared="False"
                       Header="Title"
+                      SortMemberPath="TitleSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Title"
                       Binding="{Binding Entry.Title}"
                       Width="3*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Score"
                       x:Shared="False"
                       Header="Score"
+                      SortMemberPath="ScoreSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Score"
                       Binding="{Binding ScoreDisplay}"
                       Width="0.8*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Source"
                       x:Shared="False"
                       Header="Source"
+                      SortMemberPath="SourceSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Source"
                       Binding="{Binding Entry.Source}"
                       Width="2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Type"
                       x:Shared="False"
                       Header="Type"
+                      SortMemberPath="TypeSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Type"
                       Binding="{Binding Entry.Type}"
                       Width="1*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Year"
                       x:Shared="False"
                       Header="Year"
+                      SortMemberPath="YearDescendingSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Year"
                       Binding="{Binding Entry.Year}"
                       Width="0.8*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.AddedOn"
                       x:Shared="False"
                       Header="Added on"
+                      SortMemberPath="AddedOnSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AddedOn"
                       Binding="{Binding Entry.AddedOnUtc, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}"
                       Width="1.2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.AddedBy"
                       x:Shared="False"
                       Header="Added by"
+                      SortMemberPath="AddedBySortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="AddedBy"
                       Binding="{Binding Entry.AddedBy}"
                       Width="1.2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.InternalId"
                       x:Shared="False"
                       Header="Internal ID"
+                      SortMemberPath="InternalIdSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="InternalId"
                       Binding="{Binding Entry.InternalId}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Doi"
                       x:Shared="False"
                       Header="DOI"
+                      SortMemberPath="DoiSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Doi"
                       Binding="{Binding Entry.Doi}"
                       Width="2*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Pmid"
                       x:Shared="False"
                       Header="PMID"
+                      SortMemberPath="PmidSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Pmid"
                       Binding="{Binding Entry.Pmid}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Nct"
                       x:Shared="False"
                       Header="NCT"
+                      SortMemberPath="NctSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Nct"
                       Binding="{Binding Entry.Nct}"
                       Width="1.5*" />
   <DataGridTextColumn x:Key="LibraryResultsColumn.Authors"
                       x:Shared="False"
                       Header="Authors"
+                      SortMemberPath="AuthorsSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Authors"
                       Width="2*">
     <DataGridTextColumn.Binding>
@@ -109,6 +122,7 @@
   <DataGridTextColumn x:Key="LibraryResultsColumn.Tags"
                       x:Shared="False"
                       Header="Tags"
+                      SortMemberPath="TagsSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Tags"
                       Width="2*">
     <DataGridTextColumn.Binding>
@@ -118,12 +132,14 @@
   <DataGridTextColumn x:Key="LibraryResultsColumn.IsInternal"
                       x:Shared="False"
                       Header="Internal"
+                      SortMemberPath="IsInternalSortKey"
                       behaviors:DataGridColumnVisibilityBehavior.ColumnKey="IsInternal"
                       Binding="{Binding Entry.IsInternal}"
                       Width="0.8*" />
   <DataGridTemplateColumn x:Key="LibraryResultsColumn.Snippet"
                           x:Shared="False"
                           Header="Snippet"
+                          SortMemberPath="SnippetSortKey"
                           behaviors:DataGridColumnVisibilityBehavior.ColumnKey="Snippet"
                           Width="3*">
     <DataGridTemplateColumn.CellTemplate>

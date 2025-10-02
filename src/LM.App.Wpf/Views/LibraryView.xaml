@@ -565,17 +565,31 @@
                 <DataGrid Grid.Row="1"
                   Grid.Column="2"
                   x:Name="ResultsList"
-                  ItemsSource="{Binding Results.Items}"
+                  ItemsSource="{Binding Results.ItemsView}"
                   SelectedItem="{Binding Results.Selected}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
                   GridLinesVisibility="Horizontal"
                   HorizontalGridLinesBrush="#E5E7EB"
                   BorderThickness="0"
                   Background="White"
                   RowHeight="24"
                   HeadersVisibility="Column">
+                    <i:Interaction.Behaviors>
+                        <behaviors:DataGridColumnVisibilityBehavior VisibilityMap="{Binding ColumnVisibility}" />
+                    </i:Interaction.Behaviors>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Sorting">
+                            <core:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridSorting" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Loaded">
+                            <core:CallMethodAction TargetObject="{Binding Results}" MethodName="HandleGridLoaded" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <DataGrid.ContextMenu>
                         <ContextMenu DataContext="{Binding DataContext, ElementName=LibraryViewControl}">
                             <MenuItem Header="Add to collection..."
@@ -608,6 +622,32 @@
                                     </HierarchicalDataTemplate>
                                 </MenuItem.ItemTemplate>
                             </MenuItem>
+                            <Separator />
+                            <MenuItem Header="Open in PDF viewer"
+                                      Command="{Binding OpenPdfAnnotationsCommand}"
+                                      CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            <MenuItem Header="Open externally"
+                                      Command="{Binding OpenEntryCommand}"
+                                      CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            <MenuItem Header="Edit entry"
+                                      Command="{Binding EditEntryCommand}"
+                                      CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            <MenuItem Header="Copy citation"
+                                      Command="{Binding CopyMetadataCommand}"
+                                      CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            <MenuItem Command="{Binding ToggleBlacklistCommand}"
+                                      CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+                                <MenuItem.Style>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Header" Value="Hide entry" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding PlacementTarget.SelectedItem.Entry.IsBlacklisted, RelativeSource={RelativeSource AncestorType=ContextMenu}}" Value="True">
+                                                <Setter Property="Header" Value="Unhide entry" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </MenuItem.Style>
+                            </MenuItem>
                         </ContextMenu>
                     </DataGrid.ContextMenu>
                     <DataGrid.ColumnHeaderStyle>
@@ -634,45 +674,25 @@
                                     <Setter Property="BorderBrush" Value="#BFDBFE"/>
                                 </Trigger>
                             </Style.Triggers>
-                        </Style>
+                            </Style>
                     </DataGrid.CellStyle>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Title" 
-                                Binding="{Binding Entry.Title}" 
-                                Width="2*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Authors" 
-                                Binding="{Binding Entry.Authors}" 
-                                Width="*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Year" 
-                                Binding="{Binding Entry.Year}" 
-                                Width="50"/>
-                        <DataGridTextColumn Header="Journal" 
-                                Binding="{Binding Entry.Journal}" 
-                                Width="*">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Added" 
-                                Binding="{Binding Entry.DateAdded, StringFormat='{}{0:yyyy-MM-dd}'}" 
-                                Width="80"/>
+                        <StaticResource ResourceKey="LibraryResultsColumn.AttachmentIndicator" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Title" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Score" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Source" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Type" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Year" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.AddedOn" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.AddedBy" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.InternalId" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Doi" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Pmid" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Nct" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Authors" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Tags" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.IsInternal" />
+                        <StaticResource ResourceKey="LibraryResultsColumn.Snippet" />
                     </DataGrid.Columns>
                 </DataGrid>
 

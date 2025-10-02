@@ -50,6 +50,22 @@ namespace LM.App.Wpf.Tests
         }
 
         [Fact]
+        public async Task MetadataSearch_SkipsBlacklistedEntries()
+        {
+            using var temp = new TempWorkspace();
+            var store = new FakeEntryStore();
+            store.EntriesById["hidden"] = new Entry { Id = "hidden", Title = "Hidden", IsBlacklisted = true };
+            store.EntriesById["visible"] = new Entry { Id = "visible", Title = "Shown" };
+
+            var vm = CreateViewModel(store, new FakeFullTextSearchService(), temp);
+
+            await InvokeSearchAsync(vm);
+
+            Assert.Single(vm.Results.Items);
+            Assert.Equal("visible", vm.Results.Items[0].Entry.Id);
+        }
+
+        [Fact]
         public async Task MetadataSearch_KeepsUnifiedQuery()
         {
             using var temp = new TempWorkspace();

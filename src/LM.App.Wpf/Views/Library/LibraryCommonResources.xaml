@@ -1,6 +1,9 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:common="clr-namespace:LM.App.Wpf.Common">
+                    xmlns:common="clr-namespace:LM.App.Wpf.Common"
+                    xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters">
   <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
   <common:StringJoinConverter x:Key="StringJoinConverter" />
+  <converters:AttachmentGlyphToIconConverter x:Key="AttachmentGlyphToIconConverter" />
+  <converters:AttachmentGlyphToDescriptionConverter x:Key="AttachmentGlyphToDescriptionConverter" />
 </ResourceDictionary>
