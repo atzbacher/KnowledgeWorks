@@ -273,9 +273,9 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         public SavedSearchFolderViewModel? TargetFolder { get; init; }
 
         public int InsertIndex { get; init; }
-    }
 
-            private bool CanRenameFolder(SavedSearchFolderViewModel? folder)
+
+        private bool CanRenameFolder(SavedSearchFolderViewModel? folder)
         {
             return folder is not null && !string.Equals(folder.Id, LibraryPresetFolder.RootId, StringComparison.Ordinal);
         }
@@ -325,3 +325,4 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             // For now, we'll just log it. The actual loading is done in LibraryView.xaml.cs OnSavedSearchSelected
         }
     }
+}

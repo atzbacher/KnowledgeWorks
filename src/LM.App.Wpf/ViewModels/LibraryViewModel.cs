@@ -89,6 +89,7 @@ namespace LM.App.Wpf.ViewModels
 
         public ObservableCollection<string> AllTags => _allTags;
 
+
         [RelayCommand]
         private async Task SearchAsync()
         {
@@ -294,7 +295,9 @@ namespace LM.App.Wpf.ViewModels
                 return false;
             }
 
+
             if (Filters.DateFrom is DateTime from && entry.AddedOnUtc.Date < from.Date)
+
             {
                 Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out before {from:yyyy-MM-dd}.");
                 return false;
