@@ -123,17 +123,18 @@ namespace LM.App.Wpf.Library.Collections
 
         public static bool TryFindFolder(this LibraryCollectionFolder root, string folderId, [NotNullWhen(true)] out LibraryCollectionFolder? folder, out LibraryCollectionFolder? parent)
         {
-            folder = null;
-            parent = null;
-
             if (root is null)
             {
+                folder = null;
+                parent = null;
+                Trace.WriteLine($"[LibraryCollectionFolderExtensions] Root folder was null while searching for '{folderId}'.");
                 return false;
             }
 
             if (string.Equals(root.Id, folderId, StringComparison.Ordinal))
             {
                 folder = root;
+                parent = null;
                 Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located root folder '{root.Id}'.");
                 return true;
             }
@@ -148,14 +149,18 @@ namespace LM.App.Wpf.Library.Collections
                     return true;
                 }
 
-                if (child.TryFindFolder(folderId, out folder, out parent))
+                if (child.TryFindFolder(folderId, out var nestedFolder, out var nestedParent))
                 {
-                    parent ??= child;
-                    Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located nested folder '{folder?.Id}' under '{parent.Id}'.");
+                    folder = nestedFolder ?? child;
+                    parent = nestedParent ?? child;
+                    Trace.WriteLine($"[LibraryCollectionFolderExtensions] Located nested folder '{folder.Id}' under '{parent.Id}'.");
                     return true;
                 }
             }
 
+            folder = null;
+            parent = null;
+            Trace.WriteLine($"[LibraryCollectionFolderExtensions] Unable to locate folder '{folderId}' starting from '{root.Id}'.");
             return false;
         }
     }
