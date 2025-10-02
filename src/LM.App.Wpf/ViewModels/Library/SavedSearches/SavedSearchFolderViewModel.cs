@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using LM.App.Wpf.Library;
 
 namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 {
