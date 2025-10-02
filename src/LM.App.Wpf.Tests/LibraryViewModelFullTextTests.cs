@@ -9,9 +9,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using LM.App.Wpf.Common;
 using LM.App.Wpf.Library;
+using LM.App.Wpf.Library.Collections;
+using LM.App.Wpf.Library.LitSearch;
 using LM.App.Wpf.Services.Pdf;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Library;
+using LM.App.Wpf.ViewModels.Library.Collections;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
 using LM.Core.Abstractions;
 using LM.Core.Abstractions.Configuration;
 using LM.Core.Models;
@@ -522,16 +526,16 @@ namespace LM.App.Wpf.Tests
         private static LibraryViewModel CreateViewModel(IEntryStore store,
                                                         IFullTextSearchService search,
                                                         TempWorkspace workspace,
-                                                       ILibraryEntryEditor? editor = null,
-                                                       IFileStorageRepository? storage = null,
-                                                       IAttachmentMetadataPrompt? attachmentPrompt = null,
-                                                       HookOrchestrator? orchestrator = null,
-                                                       IHasher? hasher = null,
-                                                       IPdfViewerLauncher? pdfViewerLauncher = null,
-                                                       ILibraryDocumentService? documentService = null,
-                                                       IClipboardService? clipboard = null,
-                                                       IFileExplorerService? fileExplorer = null,
-                                                       IUserPreferencesStore? preferencesStore = null)
+                                                        ILibraryEntryEditor? editor = null,
+                                                        IFileStorageRepository? storage = null,
+                                                        IAttachmentMetadataPrompt? attachmentPrompt = null,
+                                                        HookOrchestrator? orchestrator = null,
+                                                        IHasher? hasher = null,
+                                                        IPdfViewerLauncher? pdfViewerLauncher = null,
+                                                        ILibraryDocumentService? documentService = null,
+                                                        IClipboardService? clipboard = null,
+                                                        IFileExplorerService? fileExplorer = null,
+                                                        IUserPreferencesStore? preferencesStore = null)
         {
             var ws = new TestWorkspaceService(workspace.RootPath);
             var presetStore = new LibraryFilterPresetStore(ws);
@@ -548,7 +552,12 @@ namespace LM.App.Wpf.Tests
             clipboard ??= new RecordingClipboardService();
             fileExplorer ??= new RecordingFileExplorerService();
             preferencesStore ??= new InMemoryPreferencesStore();
-            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService);
+            var litSearchStore = new LitSearchOrganizerStore(ws);
+            var litSearch = new LitSearchTreeViewModel(litSearchStore, prompt, store, ws);
+            var collectionStore = new LibraryCollectionStore(ws);
+            var collections = new LibraryCollectionsViewModel(collectionStore, results, orchestrator);
+
+            return new LibraryViewModel(store, search, filters, results, ws, preferencesStore, clipboard, fileExplorer, documentService, litSearch, collections);
         }
 
         private sealed class NoopEntryEditor : ILibraryEntryEditor
