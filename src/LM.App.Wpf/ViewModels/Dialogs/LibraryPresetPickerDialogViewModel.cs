@@ -24,9 +24,9 @@ namespace LM.App.Wpf.ViewModels.Dialogs
         [ObservableProperty]
         private bool allowLoad;
 
-        public IReadOnlyList<string> DeletedPresetNames => _deleted;
+        public IReadOnlyList<string> DeletedPresetIds => _deleted;
 
-        public string? SelectedPresetName { get; private set; }
+        public string? SelectedPresetId { get; private set; }
 
         public void Initialize(LibraryPresetSelectionContext context)
         {
@@ -36,7 +36,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             Title = context.Title;
             AllowLoad = context.AllowLoad;
             _deleted.Clear();
-            SelectedPresetName = null;
+            SelectedPresetId = null;
 
             Presets.Clear();
             foreach (var preset in context.Presets.OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
@@ -65,7 +65,10 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             if (confirm != System.Windows.MessageBoxResult.Yes)
                 return;
 
-            _deleted.Add(SelectedPreset.Name);
+            if (!string.IsNullOrWhiteSpace(SelectedPreset.Id))
+            {
+                _deleted.Add(SelectedPreset.Id);
+            }
             var index = Presets.IndexOf(SelectedPreset);
             Presets.Remove(SelectedPreset);
 
@@ -80,7 +83,7 @@ namespace LM.App.Wpf.ViewModels.Dialogs
             if (!AllowLoad || SelectedPreset is null)
                 return;
 
-            SelectedPresetName = SelectedPreset.Name;
+            SelectedPresetId = SelectedPreset.Id;
             RequestClose(true);
         }
 

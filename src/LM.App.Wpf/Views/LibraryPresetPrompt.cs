@@ -53,12 +53,12 @@ namespace LM.App.Wpf.Views
 
                 dialog.ShowDialog();
 
-                if (viewModel.DeletedPresetNames.Count == 0 && string.IsNullOrEmpty(viewModel.SelectedPresetName))
+                if (viewModel.DeletedPresetIds.Count == 0 && string.IsNullOrEmpty(viewModel.SelectedPresetId))
                     return null;
 
                 return new LibraryPresetSelectionResult(
-                    viewModel.SelectedPresetName,
-                    viewModel.DeletedPresetNames.ToList());
+                    viewModel.SelectedPresetId,
+                    viewModel.DeletedPresetIds.ToList());
             });
         }
 

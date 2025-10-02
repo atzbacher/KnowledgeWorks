@@ -33,6 +33,7 @@ namespace LM.App.Wpf.Tests.Library
                 Trace.WriteLine($"Metadata header content: {metadata.Header}");
                 Assert.Equal("METADATA", metadata.Header);
 
+
                 metadata.ApplyTemplate();
                 var headerToggle = metadata.Template.FindName("HeaderToggle", metadata) as System.Windows.Controls.ToggleButton;
                 Trace.WriteLine($"Header toggle located: {headerToggle is not null}; Focusable={headerToggle?.Focusable}; IsTabStop={headerToggle?.IsTabStop}.");
@@ -52,11 +53,13 @@ namespace LM.App.Wpf.Tests.Library
                 Assert.NotNull(headerForeground);
                 Assert.Equal(System.Windows.Media.Color.FromRgb(0x6B, 0x72, 0x80), headerForeground!.Color);
 
+
                 metadata.IsExpanded = false;
                 metadata.UpdateLayout();
                 System.Windows.Input.Keyboard.Focus(headerToggle);
                 Trace.WriteLine($"Header toggle keyboard focus state after collapse: {headerToggle.IsKeyboardFocused}");
                 Assert.True(headerToggle.IsKeyboardFocused);
+
 
                 var links = FindDescendant<System.Windows.Controls.ItemsControl>(root, static control => string.Equals(control.Name, "LinksItemsControl", StringComparison.Ordinal));
                 Assert.NotNull(links);
@@ -92,6 +95,7 @@ namespace LM.App.Wpf.Tests.Library
                 var root = CreateTemplateHost(result, host);
 
                 Trace.WriteLine("Validating placeholder visibility for empty entry detail template.");
+
                 AssertVisibility(root, "SourcePlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "AbstractPlaceholder", System.Windows.Visibility.Visible);
                 AssertVisibility(root, "NotesPlaceholder", System.Windows.Visibility.Visible);

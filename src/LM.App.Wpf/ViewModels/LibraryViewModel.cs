@@ -65,11 +65,16 @@ namespace LM.App.Wpf.ViewModels
         {
             try
             {
+                var directives = Filters.ApplyInlineSearchDirectives();
                 Results.Clear();
                 if (Filters.UseFullTextSearch)
+                {
                     await RunFullTextSearchAsync().ConfigureAwait(false);
+                }
                 else
-                    await RunMetadataSearchAsync().ConfigureAwait(false);
+                {
+                    await RunMetadataSearchAsync(directives.MetadataQuery).ConfigureAwait(false);
+                }
 
                 await Filters.RefreshNavigationAsync().ConfigureAwait(false);
             }
@@ -80,9 +85,10 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
-        private async Task RunMetadataSearchAsync()
+        private async Task RunMetadataSearchAsync(string metadataQuery)
         {
-            var expression = _metadataParser.Parse(Filters.UnifiedQuery);
+            Trace.WriteLine($"[LibraryViewModel] Executing metadata search with query '{metadataQuery}'.");
+            var expression = _metadataParser.Parse(metadataQuery);
             var matches = new List<Entry>();
             var filteredOut = 0;
 

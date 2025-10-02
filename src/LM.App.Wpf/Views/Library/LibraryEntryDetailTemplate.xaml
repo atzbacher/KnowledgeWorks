@@ -44,6 +44,7 @@
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="FontSize" Value="11" />
+
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToggleButton">
@@ -70,6 +71,7 @@
                                 TextElement.FontWeight="{TemplateBinding FontWeight}"
                                 TextElement.FontSize="{TemplateBinding FontSize}" />
             </DockPanel>
+
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsChecked" Value="False">
@@ -84,6 +86,7 @@
             <Trigger Property="IsPressed" Value="True">
               <Setter TargetName="HeaderBorder" Property="Background" Value="#D1D5DB" />
             </Trigger>
+
           </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
@@ -91,6 +94,7 @@
   </Style>
 
   <Style x:Key="LibraryDetailExpanderStyle" TargetType="Expander">
+
     <Setter Property="IsExpanded" Value="True" />
     <Setter Property="Margin" Value="0,12,0,0" />
     <Setter Property="Template">
@@ -116,6 +120,7 @@
                 </Border>
               </DockPanel>
             </Border>
+
           </Border>
           <ControlTemplate.Triggers>
             <Trigger Property="IsExpanded" Value="True">
@@ -184,6 +189,7 @@
 
       <Expander x:Name="MetadataSection"
                 Header="METADATA"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}"
                 Margin="0,16,0,0">
         <StackPanel>
@@ -218,6 +224,7 @@
 
       <Expander x:Name="AbstractSection"
                 Header="ABSTRACT"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding DataContext.Results.SelectedAbstract, RelativeSource={RelativeSource AncestorType=ScrollViewer}}"
@@ -240,6 +247,7 @@
 
       <Expander x:Name="NotesSection"
                 Header="NOTES"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding Entry.Notes}"
@@ -262,6 +270,7 @@
 
       <Expander x:Name="UserNotesSection"
                 Header="USER NOTES"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Text="{Binding Entry.UserNotes}"
@@ -284,6 +293,7 @@
 
       <Expander x:Name="IdentifiersSection"
                 Header="IDENTIFIERS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <TextBlock Visibility="{Binding HasInternalId, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -320,6 +330,7 @@
 
       <Expander x:Name="LinksSection"
                 Header="LINKS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="LinksItemsControl"
@@ -355,6 +366,7 @@
 
       <Expander x:Name="AttachmentsSection"
                 Header="ATTACHMENTS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="AttachmentsItemsControl"
@@ -422,6 +434,7 @@
 
       <Expander x:Name="RelationsSection"
                 Header="RELATIONS"
+
                 Style="{StaticResource LibraryDetailExpanderStyle}">
         <StackPanel>
           <ItemsControl x:Name="RelationsItemsControl"
