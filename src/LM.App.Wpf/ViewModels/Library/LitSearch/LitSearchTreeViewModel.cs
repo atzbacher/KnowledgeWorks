@@ -194,20 +194,22 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
                 Parent = parent
             };
 
-            entryVm.NavigationNode = new LibraryNavigationNodeViewModel(snapshot.Title, LibraryNavigationNodeKind.LitSearchEntry)
+            var entryNode = new LibraryNavigationNodeViewModel(snapshot.Title, LibraryNavigationNodeKind.LitSearchEntry)
             {
                 Payload = new LibraryLitSearchEntryPayload(snapshot.EntryId, snapshot.HookPath, snapshot.Title, snapshot.Query)
             };
 
+            entryVm.SetNavigationNode(entryNode);
+
             foreach (var run in snapshot.Runs)
             {
-                var runVm = new LitSearchRunViewModel(this, run.RunId, run.Label, entryVm)
+                var runVm = new LitSearchRunViewModel(this, run.RunId, run.Label, entryVm);
+                var runNode = new LibraryNavigationNodeViewModel(run.Label, LibraryNavigationNodeKind.LitSearchRun)
                 {
-                    NavigationNode = new LibraryNavigationNodeViewModel(run.Label, LibraryNavigationNodeKind.LitSearchRun)
-                    {
-                        Payload = new LibraryLitSearchRunPayload(snapshot.EntryId, run.RunId, run.CheckedEntriesPath, run.Label)
-                    }
+                    Payload = new LibraryLitSearchRunPayload(snapshot.EntryId, run.RunId, run.CheckedEntriesPath, run.Label)
                 };
+
+                runVm.SetNavigationNode(runNode);
 
                 entryVm.Runs.Add(runVm);
             }

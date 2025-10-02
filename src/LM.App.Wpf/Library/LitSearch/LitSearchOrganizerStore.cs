@@ -11,12 +11,16 @@ using LM.Core.Abstractions;
 
 namespace LM.App.Wpf.Library.LitSearch
 {
+    internal static class LitSearchOrganizerSchema
+    {
+        internal const int CurrentVersion = 1;
+    }
+
     /// <summary>
     /// Persists user-defined organization for litsearch entries.
     /// </summary>
     public sealed class LitSearchOrganizerStore
     {
-        private const int CurrentVersion = 1;
         private readonly IWorkSpaceService _workspace;
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -48,7 +52,7 @@ namespace LM.App.Wpf.Library.LitSearch
             if (changed)
             {
                 NormalizeTree(root);
-                file.Version = CurrentVersion;
+                file.Version = LitSearchOrganizerSchema.CurrentVersion;
                 await SaveAsync(file, ct).ConfigureAwait(false);
                 Trace.WriteLine($"[LitSearchOrganizerStore] Synced litsearch entries. Total tracked: {EnumerateEntries(root).Count()}.");
             }
@@ -210,7 +214,7 @@ namespace LM.App.Wpf.Library.LitSearch
                 Directory.CreateDirectory(directory);
             }
 
-            file.Version = CurrentVersion;
+            file.Version = LitSearchOrganizerSchema.CurrentVersion;
             var json = JsonSerializer.Serialize(file, JsonOptions);
             await File.WriteAllTextAsync(path, json, ct).ConfigureAwait(false);
         }
@@ -225,7 +229,7 @@ namespace LM.App.Wpf.Library.LitSearch
         {
             return new LitSearchOrganizerFile
             {
-                Version = CurrentVersion,
+                Version = LitSearchOrganizerSchema.CurrentVersion,
                 Root = new LitSearchOrganizerFolder
                 {
                     Id = LitSearchOrganizerFolder.RootId,
@@ -439,14 +443,17 @@ namespace LM.App.Wpf.Library.LitSearch
         {
             for (var i = 0; i < ordered.Count; i++)
             {
-                switch (ordered[i].Kind)
+                var item = ordered[i];
+
+                if (item.Kind == LitSearchOrganizerNodeKind.Folder && item.Folder is not null)
                 {
-                    case LitSearchOrganizerNodeKind.Folder when ordered[i].Folder is not null:
-                        ordered[i].Folder.SortOrder = i;
-                        break;
-                    case LitSearchOrganizerNodeKind.Entry when ordered[i].Entry is not null:
-                        ordered[i].Entry.SortOrder = i;
-                        break;
+                    item.Folder.SortOrder = i;
+                    continue;
+                }
+
+                if (item.Kind == LitSearchOrganizerNodeKind.Entry && item.Entry is not null)
+                {
+                    item.Entry.SortOrder = i;
                 }
             }
 
@@ -566,7 +573,7 @@ namespace LM.App.Wpf.Library.LitSearch
     internal sealed class LitSearchOrganizerFile
     {
         [JsonPropertyName("version")]
-        public int Version { get; set; } = CurrentVersion;
+        public int Version { get; set; } = LitSearchOrganizerSchema.CurrentVersion;
 
         [JsonPropertyName("root")]
         public LitSearchOrganizerFolder? Root { get; set; }

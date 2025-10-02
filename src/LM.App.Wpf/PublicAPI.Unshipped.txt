@@ -1026,6 +1026,8 @@ LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.LitSearchOrganizerStore(LM.
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.MoveEntryAsync(string! entryId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.MoveFolderAsync(string! folderId, string! targetFolderId, int insertIndex, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore.SyncEntriesAsync(System.Collections.Generic.IEnumerable<string!>! entryIds, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder!>!
+LM.App.Wpf.Library.LitSearch.LitSearchOrganizerSchema
+LM.App.Wpf.Library.LitSearch.LitSearchOrganizerSchema.CurrentVersion -> int
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.LitSearchEntryViewModel(LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! tree, string! id, string! title, string? query) -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.Parent.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?
@@ -1049,6 +1051,7 @@ LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.LitSearchNodeView
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Name.get -> string!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.NavigationNode.get -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel?
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.NavigationNode.set -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.SetNavigationNode(LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel? navigationNode) -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Tree.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Label.get -> string!
