@@ -259,14 +259,15 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             await RefreshAsync().ConfigureAwait(false);
         }
 
-        private async Task LoadPresetAsync(SavedSearchPresetViewModel? preset)
+        private Task LoadPresetAsync(SavedSearchPresetViewModel? preset)
         {
             if (preset is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             Trace.WriteLine($"[SavedSearchTreeViewModel] Load preset '{preset.Name}' requested.");
+            return Task.CompletedTask;
         }
 
         private static Task InvokeOnDispatcherAsync(Action action)
