@@ -180,6 +180,7 @@
                                 <ItemsControl ItemsSource="{Binding Filters.SavedPresets}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type common:LibraryPresetSummary}">
+
                                             <Button Content="{Binding Name}"
                                                     Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
                                                     CommandParameter="{Binding}"
