@@ -1,5 +1,9 @@
 #nullable enable
+abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Id.get -> string!
+abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.IsDraggable.get -> bool
+abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Name.get -> string!
 const LM.App.Wpf.Library.LibraryPresetFolder.RootId = "root" -> string!
+const LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.RootId = "root" -> string!
 const LM.App.Wpf.ViewModels.StagingItem.DuplicateThreshold = 0.999 -> double
 const LM.App.Wpf.ViewModels.StagingItem.NearThreshold = 0.75 -> double
 LM.App.Wpf.App
@@ -25,6 +29,7 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
 LM.App.Wpf.Common.Converters.ProjectEditorConverters
 LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get -> System.Windows.Data.IMultiValueConverter!
 LM.App.Wpf.Common.LibraryPresetSaveContext.LibraryPresetSaveContext(string! DefaultName, System.Collections.Generic.IReadOnlyCollection<string!>! ExistingNames, string! Title = "Save Library Preset", string! Prompt = "Name this filter preset.") -> void
+LM.App.Wpf.Library.Collections.LibraryCollectionEntry.LibraryCollectionEntry() -> void
 LM.App.Wpf.Library.LibraryFilterPresetStore.DeletePresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.Library.LibraryFilterPresetStore.TryGetPresetAsync(string! key, System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<LM.App.Wpf.Library.LibraryFilterPreset?>!
 LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
@@ -32,6 +37,8 @@ LM.App.Wpf.Library.LibraryPresetFolder.EnumerateChildren() -> System.Collections
 LM.App.Wpf.Library.LibraryPresetNodeKind.Folder = 0 -> LM.App.Wpf.Library.LibraryPresetNodeKind
 LM.App.Wpf.Library.LibraryPresetNodeKind.Preset = 1 -> LM.App.Wpf.Library.LibraryPresetNodeKind
 LM.App.Wpf.Library.LibraryPresetTreeItem.LibraryPresetTreeItem() -> void
+LM.App.Wpf.Library.LitSearch.LitSearchOrganizerEntry.LitSearchOrganizerEntry() -> void
+LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.LitSearchOrganizerFolder() -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, LM.Review.Core.Models.ReviewTemplateKind template, string! metadataNotes, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CheckedEntryIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
@@ -59,23 +66,53 @@ LM.App.Wpf.Services.Review.Design.StageBlueprint.StageType.get -> LM.Review.Core
 LM.App.Wpf.Services.Review.Design.StageBlueprint.DisplayProfile.get -> LM.Review.Core.Models.StageDisplayProfile!
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher
 LM.App.Wpf.Services.Pdf.IPdfViewerLauncher.Show(string! entryId, string! pdfAbsolutePath, string! pdfHash) -> void
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.init -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.LitSearchDragDropRequest() -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.init -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.TargetFolder.init -> void
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel!>!
+LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest!>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.SavedSearchDragDropRequest() -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SavedSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder) -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel!>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel!>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest!>!
+LM.App.Wpf.ViewModels.LibraryViewModel.LitSearchOrganizer.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel!
 LM.App.Wpf.ViewModels.LibraryViewModel.OpenPdfAnnotationsCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.LibrarySearchResult?>!
 LM.App.Wpf.ViewModels.LibraryViewModel.ToggleBlacklistCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.LibrarySearchResult?>!
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.AnnotationType.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.AnnotationType.set -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.AnnotationTypeDisplay.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorHex.get -> string?
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorHex.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Dispose() -> void
+LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.HighlightBrush.get -> System.Windows.Media.Brush!
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.PdfAnnotationColorCommandParameter() -> void
+LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior
+LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior.LitSearchTreeDragDropBehavior() -> void
 LM.App.Wpf.Views.Converters.EnumEqualsConverter
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
 LM.App.Wpf.Views.Converters.EnumEqualsConverter.EnumEqualsConverter() -> void
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.Convert(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.ConvertBack(object! value, System.Type! targetType, object! parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Converters.InverseBooleanToVisibilityConverter.InverseBooleanToVisibilityConverter() -> void
 LM.App.Wpf.Views.Pdf.AnnotationColorParameterConverter
 LM.App.Wpf.Views.Pdf.AnnotationColorParameterConverter.AnnotationColorParameterConverter() -> void
 LM.App.Wpf.Views.Pdf.AnnotationColorParameterConverter.Convert(object?[]! values, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object?
 LM.App.Wpf.Views.Pdf.AnnotationColorParameterConverter.ConvertBack(object? value, System.Type![]! targetTypes, object? parameter, System.Globalization.CultureInfo! culture) -> object?[]!
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.Convert(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object!
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.EmptyState.get -> System.Windows.Visibility
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.EmptyState.set -> void
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.NonEmptyState.get -> System.Windows.Visibility
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.NonEmptyState.set -> void
+LM.App.Wpf.Views.Pdf.NullOrEmptyToVisibilityConverter.NullOrEmptyToVisibilityConverter() -> void
 LM.App.Wpf.Views.Pdf.PdfAnnotationList
 LM.App.Wpf.Views.Pdf.PdfAnnotationList.PdfAnnotationList() -> void
 LM.App.Wpf.Views.Pdf.PdfAnnotationList.InitializeComponent() -> void
@@ -846,12 +883,9 @@ LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Name.
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Name.set -> void
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel.Tree.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.AddSelectionToFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.CreateFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.LibraryCollectionsViewModel(LM.App.Wpf.Library.Collections.LibraryCollectionStore! store, LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel! results, LM.Infrastructure.Hooks.HookOrchestrator! hookOrchestrator) -> void
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RefreshAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.Root.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel!
 LM.App.Wpf.ViewModels.LibrarySearchResult.HasPrimaryAttachment.get -> bool
 LM.App.Wpf.Views.Library.Controls.LibrarySearchQueryBox
@@ -1086,6 +1120,15 @@ LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
 override LM.App.Wpf.ViewModels.Library.LibrarySortOption.ToString() -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.Id.get -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.IsDraggable.get -> bool
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.Name.get -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Id.get -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.IsDraggable.get -> bool
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Name.get -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Id.get -> string!
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.IsDraggable.get -> bool
+override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Name.get -> string!
 override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
@@ -1121,7 +1164,6 @@ LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.Id.get -> string!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.Id.set -> void
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.Name.get -> string!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.Name.set -> void
-LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.RootId -> string!
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.SortOrder.get -> int
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.SortOrder.set -> void
 LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore
@@ -1144,20 +1186,14 @@ LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchEntryViewModel.Title.get -> str
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.CanDelete.get -> bool
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Children.get -> System.Collections.ObjectModel.ObservableCollection<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel!>!
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.IsDraggable.get -> bool
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.IsRoot.get -> bool
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.LitSearchFolderViewModel(LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! tree, string! id, string! name, bool isRoot) -> void
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Name.get -> string!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Parent.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Parent.set -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Id.get -> string!
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.IsDraggable.get -> bool
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.LitSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel! tree) -> void
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Name.get -> string!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.NavigationNode.get -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel?
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.NavigationNode.set -> void
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.SetNavigationNode(LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeViewModel? navigationNode) -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Tree.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Label.get -> string!
@@ -1166,15 +1202,10 @@ LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Parent.get -> LM.A
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.RunId.get -> string!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.CreateFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?>!
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel>!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.LitSearchTreeViewModel(LM.App.Wpf.Library.LitSearch.LitSearchOrganizerStore! store, LM.App.Wpf.Common.ILibraryPresetPrompt! prompt, LM.Core.Abstractions.IEntryStore! entryStore, LM.Core.Abstractions.IWorkSpaceService! workspace) -> void
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest>!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.RefreshAsync(System.Threading.CancellationToken ct = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.Root.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.get -> int
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.set -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel?
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.Source.set -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.TargetFolder.get -> LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?
-LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.TargetFolder.set -> void

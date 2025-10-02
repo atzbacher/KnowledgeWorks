@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -54,9 +55,7 @@ namespace LM.Infrastructure.Pdf
             if (overlayJson is null)
                 throw new ArgumentNullException(nameof(overlayJson));
 
-            var normalizedEntryId = entryId.Trim();
-            if (normalizedEntryId.Length == 0)
-                throw new ArgumentException("Entry identifier must be provided.", nameof(entryId));
+            Trace.WriteLine($"[PdfAnnotationPersistenceService] Persisting overlay for entry '{normalizedEntryId}' with hash '{normalizedHash}'.");
 
             var safePreviewImages = previewImages ?? new Dictionary<string, byte[]>(capacity: 0);
             var annotationSnapshot = annotations ?? Array.Empty<PdfAnnotationBridgeMetadata>();
@@ -69,12 +68,13 @@ namespace LM.Infrastructure.Pdf
 
             var overlayBytes = Encoding.UTF8.GetBytes(overlayJson);
             await File.WriteAllBytesAsync(overlayAbsolutePath, overlayBytes, cancellationToken).ConfigureAwait(false);
+            Trace.WriteLine($"[PdfAnnotationPersistenceService] Overlay persisted to '{overlayRelativePath}'.");
 
             var previewRootRelative = Path.Combine("extraction", normalizedHash);
             var previewRootAbsolute = _workspace.GetAbsolutePath(previewRootRelative);
             Directory.CreateDirectory(previewRootAbsolute);
 
-            var previewMap = await LoadExistingPreviewsAsync(normalizedEntryId, cancellationToken).ConfigureAwait(false);
+            var previewMap = await LoadExistingPreviewsAsync(normalizedEntryId, normalizedHash, cancellationToken).ConfigureAwait(false);
 
             foreach (var kvp in safePreviewImages)
             {
@@ -92,6 +92,7 @@ namespace LM.Infrastructure.Pdf
                 await File.WriteAllBytesAsync(previewAbsolutePath, kvp.Value, cancellationToken).ConfigureAwait(false);
 
                 previewMap[annotationId] = previewRelativePath;
+                Trace.WriteLine($"[PdfAnnotationPersistenceService] Preview stored for annotation '{annotationId}'.");
             }
 
             var previews = new List<PdfAnnotationPreview>(previewMap.Count);
@@ -113,11 +114,12 @@ namespace LM.Infrastructure.Pdf
             };
 
             await _hookWriter.SavePdfAnnotationsAsync(normalizedEntryId, normalizedHash, hook, cancellationToken).ConfigureAwait(false);
+            Trace.WriteLine($"[PdfAnnotationPersistenceService] Hook written for entry '{normalizedEntryId}'.");
 
             await WriteDebugOverlaySnapshotAsync(normalizedHash, overlayJson, cancellationToken).ConfigureAwait(false);
         }
 
-        private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string entryId, CancellationToken cancellationToken)
+        private async Task<Dictionary<string, string>> LoadExistingPreviewsAsync(string entryId, string pdfHash, CancellationToken cancellationToken)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -126,7 +128,7 @@ namespace LM.Infrastructure.Pdf
 
             if (string.IsNullOrWhiteSpace(hookAbsolute) || !File.Exists(hookAbsolute))
             {
-                var legacyRelative = Path.Combine("entries", normalizedHash, "hooks", "pdf_annotations.json");
+                var legacyRelative = Path.Combine("entries", pdfHash, "hooks", "pdf_annotations.json");
                 var legacyAbsolute = _workspace.GetAbsolutePath(legacyRelative);
                 if (string.IsNullOrWhiteSpace(legacyAbsolute) || !File.Exists(legacyAbsolute))
                 {
@@ -184,6 +186,8 @@ namespace LM.Infrastructure.Pdf
                 // Ignore malformed hooks and fall back to regenerated previews.
             }
 
+            Trace.WriteLine($"[PdfAnnotationPersistenceService] Loaded {result.Count} existing preview mapping(s) for entry '{entryId}'.");
+
             return result;
         }
 
@@ -201,6 +205,7 @@ namespace LM.Infrastructure.Pdf
                 EnsureDirectoryForFile(debugAbsolute);
 
                 await File.WriteAllTextAsync(debugAbsolute, overlayJson, cancellationToken).ConfigureAwait(false);
+                Trace.WriteLine($"[PdfAnnotationPersistenceService] Debug overlay snapshot written to '{debugRelative}'.");
             }
             catch (OperationCanceledException)
             {
