@@ -1,12 +1,16 @@
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using LM.App.Wpf.ViewModels;
 using LM.App.Wpf.ViewModels.Library;
+using LM.App.Wpf.ViewModels.Library.Collections;
+using LM.App.Wpf.ViewModels.Library.LitSearch;
+using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using LM.App.Wpf.Views.Behaviors;
 using Microsoft.Xaml.Behaviors;
-
-using LM.App.Wpf.ViewModels.Library.LitSearch;
-
 
 namespace LM.App.Wpf.Views
 {
@@ -16,22 +20,10 @@ namespace LM.App.Wpf.Views
         {
             InitializeComponent();
             SavedSearchTree.Loaded += OnSavedSearchTreeLoaded;
+            CollectionsTree.Loaded += OnCollectionsTreeLoaded;
         }
 
-        private async void OnNavigationSelected(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
-        {
-            if (DataContext is not LibraryViewModel vm)
-            {
-                return;
-            }
-
-            if (e.NewValue is LibraryNavigationNodeViewModel node)
-            {
-                await vm.HandleNavigationSelectionAsync(node).ConfigureAwait(false);
-            }
-        }
-
-        private void OnSavedSearchTreeLoaded(object sender, System.Windows.RoutedEventArgs e)
+        private void OnSavedSearchTreeLoaded(object sender, RoutedEventArgs e)
         {
             if (sender is not System.Windows.Controls.TreeView treeView)
             {
@@ -42,13 +34,10 @@ namespace LM.App.Wpf.Views
             treeView.Loaded -= OnSavedSearchTreeLoaded;
 
             BehaviorCollection behaviors = Interaction.GetBehaviors(treeView);
-            foreach (Behavior behavior in behaviors)
+            if (behaviors.OfType<SavedSearchTreeDragDropBehavior>().Any())
             {
-                if (behavior is SavedSearchTreeDragDropBehavior)
-                {
-                    Trace.TraceInformation("LibraryView: Saved search drag/drop behavior already attached.");
-                    return;
-                }
+                Trace.TraceInformation("LibraryView: Saved search drag/drop behavior already attached.");
+                return;
             }
 
             var dragDropBehavior = new SavedSearchTreeDragDropBehavior();
@@ -56,26 +45,57 @@ namespace LM.App.Wpf.Views
             Trace.TraceInformation("LibraryView: Attached saved search drag/drop behavior to tree view.");
         }
 
-        private void OnFullTextToggleChanged(object sender, System.Windows.RoutedEventArgs e)
+        private void OnCollectionsTreeLoaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is not LibraryViewModel vm)
+            if (sender is not System.Windows.Controls.TreeView treeView)
             {
-                Trace.TraceWarning("LibraryView: Full-text toggle changed without LibraryViewModel data context.");
+                Trace.TraceWarning("LibraryView: Collections tree loaded with unexpected sender instance.");
                 return;
             }
 
-            if (vm.SearchCommand.CanExecute(null))
+            treeView.Loaded -= OnCollectionsTreeLoaded;
+
+            BehaviorCollection behaviors = Interaction.GetBehaviors(treeView);
+            if (behaviors.OfType<CollectionTreeDragDropBehavior>().Any())
             {
-                Trace.TraceInformation("LibraryView: Executing search after full-text toggle change.");
-                vm.SearchCommand.Execute(null);
+                Trace.TraceInformation("LibraryView: Collection drag/drop behavior already attached.");
+                return;
             }
-            else
+
+            var dragDropBehavior = new CollectionTreeDragDropBehavior();
+            behaviors.Add(dragDropBehavior);
+            Trace.TraceInformation("LibraryView: Attached collection drag/drop behavior to tree view.");
+        }
+
+        private async void OnCollectionSelected(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (DataContext is not LibraryViewModel vm)
             {
-                Trace.TraceInformation("LibraryView: Search command unavailable after full-text toggle change.");
+                return;
+            }
+
+            if (e.NewValue is LibraryCollectionFolderViewModel collection)
+            {
+                // Load entries in this collection
+                await vm.LoadCollectionEntriesAsync(collection.Id).ConfigureAwait(false);
             }
         }
 
-        private async void OnLitSearchSelected(object sender, System.Windows.RoutedPropertyChangedEventArgs<object> e)
+        private async void OnSavedSearchSelected(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (DataContext is not LibraryViewModel vm)
+            {
+                return;
+            }
+
+            if (e.NewValue is SavedSearchPresetViewModel preset)
+            {
+                // Apply the saved search
+                await vm.Filters.ApplyPresetAsync(preset.Summary).ConfigureAwait(false);
+            }
+        }
+
+        private async void OnLitSearchSelected(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (DataContext is not LibraryViewModel vm)
             {
@@ -91,18 +111,62 @@ namespace LM.App.Wpf.Views
             }
         }
 
-        private async void OnLitSearchTreeViewDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void OnLitSearchTreeViewDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is not LibraryViewModel vm)
             {
                 return;
             }
 
-            if (sender is System.Windows.Controls.TreeView treeView && treeView.SelectedItem is LitSearchNodeViewModel node && node.NavigationNode is LibraryNavigationNodeViewModel navigation && navigation.Kind == LibraryNavigationNodeKind.LitSearchRun)
+            if (sender is System.Windows.Controls.TreeView treeView && treeView.SelectedItem is LitSearchNodeViewModel node &&
+                node.NavigationNode is LibraryNavigationNodeViewModel navigation &&
+                navigation.Kind == LibraryNavigationNodeKind.LitSearchRun)
             {
                 await vm.HandleNavigationSelectionAsync(navigation).ConfigureAwait(false);
                 e.Handled = true;
+            }
+        }
 
+        private async void OnTagClick(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not LibraryViewModel vm)
+            {
+                return;
+            }
+
+            if (sender is not FrameworkElement element || element.DataContext is not string tag)
+            {
+                return;
+            }
+
+            // Add the tag to filters and search
+            vm.Filters.SelectedTags.Clear();
+            vm.Filters.SelectedTags.Add(tag);
+
+            if (vm.SearchCommand.CanExecute(null))
+            {
+                await Task.Run(() => vm.SearchCommand.Execute(null)).ConfigureAwait(false);
+            }
+
+            e.Handled = true;
+        }
+
+        private void OnFullTextToggleChanged(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not LibraryViewModel vm)
+            {
+                Trace.TraceWarning("LibraryView: Full-text toggle changed without LibraryViewModel data context.");
+                return;
+            }
+
+            if (vm.SearchCommand.CanExecute(null))
+            {
+                Trace.TraceInformation("LibraryView: Executing search after full-text toggle change.");
+                vm.SearchCommand.Execute(null);
+            }
+            else
+            {
+                Trace.TraceInformation("LibraryView: Search command unavailable after full-text toggle change.");
             }
         }
     }

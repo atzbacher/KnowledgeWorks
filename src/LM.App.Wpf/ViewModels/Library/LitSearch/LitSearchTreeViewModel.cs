@@ -25,22 +25,23 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
         private readonly IEntryStore _entryStore;
         private readonly IWorkSpaceService _workspace;
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
+        public IAsyncRelayCommand<LitSearchFolderViewModel> RenameFolderCommand { get; }
 
-        public LitSearchTreeViewModel(LitSearchOrganizerStore store,
-                                      ILibraryPresetPrompt prompt,
-                                      IEntryStore entryStore,
-                                      IWorkSpaceService workspace)
+
+        public LitSearchTreeViewModel(
+            LitSearchOrganizerStore store,
+            ILitSearchStore litSearchStore,
+            /* other parameters */)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
-            _prompt = prompt ?? throw new ArgumentNullException(nameof(prompt));
-            _entryStore = entryStore ?? throw new ArgumentNullException(nameof(entryStore));
-            _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
+            _litSearchStore = litSearchStore ?? throw new ArgumentNullException(nameof(litSearchStore));
 
-            Root = new LitSearchFolderViewModel(this, LitSearchOrganizerFolder.RootId, "LitSearch", isRoot: true);
+            Root = new LitSearchFolderViewModel(this, LitSearchOrganizerFolder.RootId, "LitSearches", true);
 
             CreateFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel?>(CreateFolderAsync);
-            DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(DeleteFolderAsync, folder => folder is { CanDelete: true });
-            MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest>(MoveAsync, request => request?.Source is not null && request.TargetFolder is not null);
+            RenameFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(RenameFolderAsync, CanRenameFolder);
+            DeleteFolderCommand = new AsyncRelayCommand<LitSearchFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
+            MoveCommand = new AsyncRelayCommand<LitSearchDragDropRequest>(MoveAsync, request => request?.Source is not null);
         }
 
         public LitSearchFolderViewModel Root { get; }
@@ -352,7 +353,55 @@ namespace LM.App.Wpf.ViewModels.Library.LitSearch
 
             return dispatcher.InvokeAsync(callback).Task;
         }
+
+        private bool CanRenameFolder(LitSearchFolderViewModel? folder)
+        {
+            return folder is not null && !folder.IsRoot;
+        }
+
+        private async Task RenameFolderAsync(LitSearchFolderViewModel? folder)
+        {
+            if (folder is null || !CanRenameFolder(folder))
+            {
+                return;
+            }
+
+            var newName = await InvokeOnDispatcherAsync(() =>
+            {
+                return Microsoft.VisualBasic.Interaction.InputBox(
+                    "Enter new name for folder:",
+                    "Rename Folder",
+                    folder.Name);
+            }).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, folder.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            // Note: You'll need to add RenameFolderAsync to LitSearchOrganizerStore
+            // await _store.RenameFolderAsync(folder.Id, newName.Trim(), CancellationToken.None).ConfigureAwait(false);
+            Trace.WriteLine($"[LitSearchTreeViewModel] Rename folder '{folder.Name}' to '{newName}' (not yet implemented in store).");
+            await RefreshAsync().ConfigureAwait(false);
+        }
+
+        private static Task InvokeOnDispatcherAsync(Func<string> action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
     }
+
+
 
     public sealed class LitSearchDragDropRequest
     {

@@ -31,5 +31,8 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
 
         [ObservableProperty]
         private int _entryCount;
+
+        [ObservableProperty]
+        private LibraryCollectionFolderViewModel? _parent;
     }
 }

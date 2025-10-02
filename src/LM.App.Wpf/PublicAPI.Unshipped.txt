@@ -92,6 +92,16 @@ LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.ColorHex.set -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.Dispose() -> void
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotation.HighlightBrush.get -> System.Windows.Media.Brush!
 LM.App.Wpf.ViewModels.Pdf.PdfAnnotationColorCommandParameter.PdfAnnotationColorCommandParameter() -> void
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.CollectionDragDropRequest() -> void
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.InsertIndex.get -> int
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.InsertIndex.init -> void
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.Source.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.Source.init -> void
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.TargetFolder.get -> LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?
+LM.App.Wpf.Views.Behaviors.CollectionDragDropRequest.TargetFolder.init -> void
+LM.App.Wpf.Views.Behaviors.CollectionTreeDragDropBehavior
+LM.App.Wpf.Views.Behaviors.CollectionTreeDragDropBehavior.CollectionTreeDragDropBehavior() -> void
 LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior
 LM.App.Wpf.Views.Behaviors.LitSearchTreeDragDropBehavior.LitSearchTreeDragDropBehavior() -> void
 LM.App.Wpf.Views.Converters.AttachmentGlyphToDescriptionConverter.ConvertBack(object? value, System.Type! targetType, object? parameter, System.Globalization.CultureInfo! culture) -> object!

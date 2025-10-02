@@ -1,567 +1,487 @@
-<UserControl x:Class="LM.App.Wpf.Views.LibraryView"
-             x:Name="LibraryViewControl"
+﻿<UserControl x:Class="LM.App.Wpf.Views.LibraryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
-             xmlns:converters="clr-namespace:LM.App.Wpf.Views.Converters"
-             xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
-             xmlns:viewModels="clr-namespace:LM.App.Wpf.ViewModels.Library"
-             xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
-             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:core="clr-namespace:Microsoft.Xaml.Behaviors.Core;assembly=Microsoft.Xaml.Behaviors"
-             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
-             xmlns:lit="clr-namespace:LM.App.Wpf.ViewModels.Library.LitSearch"
-
-
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:controls="clr-namespace:LM.App.Wpf.Views.Library.Controls"
+             xmlns:behaviors="clr-namespace:LM.App.Wpf.Views.Behaviors"
+             xmlns:collections="clr-namespace:LM.App.Wpf.ViewModels.Library.Collections"
+             xmlns:lit="clr-namespace:LM.App.Wpf.ViewModels.Library.LitSearch"
+             xmlns:saved="clr-namespace:LM.App.Wpf.ViewModels.Library.SavedSearches"
+             x:Name="LibraryViewControl"
              mc:Ignorable="d"
-             d:DesignHeight="600" d:DesignWidth="900">
+             d:DesignHeight="600" d:DesignWidth="1000">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Library/LibraryCommonResources.xaml" />
-                <ResourceDictionary Source="Library/LibraryThemeResources.xaml" />
-                <ResourceDictionary Source="Library/LibraryEntryDetailTemplate.xaml" />
-                <ResourceDictionary Source="Templates/LibraryResultsColumns.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-
-            <!-- Add BooleanToVisibilityConverter if not already in resources -->
-            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-
-            <!-- Inverse Boolean Converter -->
-            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
-        </ResourceDictionary>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </UserControl.Resources>
 
-    <Grid Background="#F6F6F6">
-        <Border Margin="0"
-            Background="#FFFFFF"
-            BorderBrush="#D1D5DB"
-            BorderThickness="1">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260" MinWidth="200"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="300"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="300" MinWidth="0" Name="RightColumn"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Compact Search header -->
+        <Border Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="5"
+                Background="#FAFAFA"
+                BorderBrush="#E5E7EB"
+                BorderThickness="0,0,0,1"
+                Padding="8,6">
+            <Grid DataContext="{Binding Filters}">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="240" MinWidth="0" Name="LeftColumn"/>
-                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="300" MinWidth="0" Name="RightColumn"/>
                 </Grid.ColumnDefinitions>
+                <controls:LibrarySearchQueryBox x:Name="UnifiedQueryBox"
+                                                Grid.Column="0"
+                                                Margin="0,0,12,0"
+                                                MaxWidth="600"
+                                                VerticalAlignment="Center"
+                                                Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}">
+                    <controls:LibrarySearchQueryBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
+                    </controls:LibrarySearchQueryBox.InputBindings>
+                </controls:LibrarySearchQueryBox>
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <!-- Save Search Button -->
+                    <Button Content="💾 Save Search"
+                            Padding="10,4"
+                            Margin="0,0,8,0"
+                            Command="{Binding SavePresetCommand}"
+                            ToolTip="Save current search filters"/>
+                </StackPanel>
+            </Grid>
+        </Border>
 
-                <!-- Compact Search header -->
-                <Border Grid.Row="0"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="5"
-                        Background="#FAFAFA"
-                        BorderBrush="#E5E7EB"
-                        BorderThickness="0,0,0,1"
-                        Padding="8,6">
-                    <Grid DataContext="{Binding Filters}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <controls:LibrarySearchQueryBox x:Name="UnifiedQueryBox"
-                                                        Grid.Column="0"
-                                                        Margin="0,0,12,0"
-                                                        MaxWidth="600"
-                                                        VerticalAlignment="Center"
-                                                        Text="{Binding UnifiedQuery, UpdateSourceTrigger=PropertyChanged}">
-                            <controls:LibrarySearchQueryBox.InputBindings>
-                                <KeyBinding Key="Enter"
-                                            Command="{Binding DataContext.SearchCommand, ElementName=LibraryViewControl}"/>
-                            </controls:LibrarySearchQueryBox.InputBindings>
-                        </controls:LibrarySearchQueryBox>
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-
-       
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- Left Panel - Collections/Tags (Zotero-style) -->
-                <Border Grid.Row="1"
+        <!-- Left Panel - Collections/Tags/Searches/LitSearch Organizer -->
+        <Border Grid.Row="1"
                 Grid.Column="0"
                 Background="#F8F9FA"
                 BorderBrush="#E5E7EB"
                 BorderThickness="0,1,0,0"
                 Name="LeftPanelBorder">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Disabled"
-                        DataContext="{Binding Filters}">
-                        <StackPanel Margin="0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          DataContext="{Binding Filters}">
+                <StackPanel Margin="0">
 
-                            <!-- Collections Organizer -->
-                            <Border Background="White"
+                    <!-- Collections -->
+                    <Border Background="White"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="0"
+                            Margin="0,0,0,8">
+                        <StackPanel>
+                            <Border Background="#F3F4F6"
                                     BorderBrush="#E5E7EB"
-                                    BorderThickness="0"
-                                    CornerRadius="0"
-                                    Margin="0,0,0,8">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                                            BorderBrush="#E5E7EB"
-                                            BorderThickness="0,0,0,1"
-                                            Padding="6,4"
-                                            DataContext="{Binding Collections}">
+                                    BorderThickness="0,0,0,1"
+                                    Padding="8,6">
+                                <DockPanel>
+                                    <ToggleButton x:Name="CollectionsToggle"
+                                                  IsChecked="True"
+                                                  Width="16"
+                                                  Height="16"
+                                                  DockPanel.Dock="Left"
+                                                  VerticalAlignment="Center">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Text="&#xE70D;"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
+                                                                        <Setter Property="Text" Value="&#xE76C;"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <TextBlock Text="COLLECTIONS"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#6B7280"
+                                               Margin="4,0,0,0"/>
+                                </DockPanel>
+                            </Border>
+                            <TreeView Margin="0"
+                                      x:Name="CollectionsTree"
+                                      DataContext="{Binding DataContext.Collections, ElementName=LibraryViewControl}"
+                                      ItemsSource="{Binding Root.Children}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      HorizontalContentAlignment="Stretch"
+                                      Visibility="{Binding IsChecked, ElementName=CollectionsToggle, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      SelectedItemChanged="OnCollectionSelected">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:CollectionTreeDragDropBehavior />
+                                </i:Interaction.Behaviors>
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type collections:LibraryCollectionFolderViewModel}"
+                                                              ItemsSource="{Binding Children}">
                                         <DockPanel>
-                                            <StackPanel DockPanel.Dock="Right"
-                                                        Orientation="Horizontal"
-                                                        HorizontalAlignment="Right">
-                                                <Button Content="New collection"
-                                                        Padding="8,4"
-                                                        Command="{Binding CreateFolderCommand}"
-                                                        CommandParameter="{Binding Root}" />
-                                            </StackPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                                          Name="CollectionsToggle"
-                                                          IsChecked="True"
-                                                          Width="16"
-                                                          Height="16"
-                                                          Padding="0"
-                                                          Background="Transparent"
-                                                          BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                                                       FontSize="10"
-                                                                       VerticalAlignment="Center"
-                                                                       HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="COLLECTIONS"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold"
+                                            <TextBlock DockPanel.Dock="Right"
+                                                       Text="{Binding EntryCount}"
+                                                       Margin="6,2,4,2"
                                                        Foreground="#6B7280"
-                                                       Margin="4,0,0,0"/>
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Name}"
+                                                       Margin="4,2"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"/>
                                         </DockPanel>
-                                    </Border>
-                                    <TreeView Margin="0"
-                                              DataContext="{Binding Collections}"
-                                              ItemsSource="{Binding Root.Children}"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              HorizontalContentAlignment="Stretch"
-                                              Visibility="{Binding IsChecked, ElementName=CollectionsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <TreeView.Resources>
-                                            <HierarchicalDataTemplate DataType="{x:Type collections:LibraryCollectionFolderViewModel}"
-                                                                      ItemsSource="{Binding Children}">
-                                                <DockPanel>
-                                                    <TextBlock DockPanel.Dock="Right"
-                                                               Text="{Binding EntryCount}"
-                                                               Margin="6,2,4,2"
-                                                               Foreground="#6B7280"
-                                                               FontSize="11"
-                                                               HorizontalAlignment="Right"/>
-                                                    <TextBlock Text="{Binding Name}"
-                                                               Margin="4,2"
-                                                               FontWeight="SemiBold"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                </DockPanel>
-                                                <HierarchicalDataTemplate.ItemContainerStyle>
-                                                    <Style TargetType="TreeViewItem">
-                                                        <Setter Property="IsExpanded" Value="True" />
-                                                        <Setter Property="ContextMenu">
-                                                            <Setter.Value>
-                                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                                                    <MenuItem Header="New collection"
-                                                                              Command="{Binding Tree.CreateFolderCommand}"
-                                                                              CommandParameter="{Binding}" />
-                                                                    <MenuItem Header="Delete collection"
-                                                                              Command="{Binding Tree.DeleteFolderCommand}"
-                                                                              CommandParameter="{Binding}" />
-                                                                </ContextMenu>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                    </Style>
-                                                </HierarchicalDataTemplate.ItemContainerStyle>
-                                            </HierarchicalDataTemplate>
-                                        </TreeView.Resources>
-                                    </TreeView>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- LitSearch Organizer - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="0"
-                      CornerRadius="0"
-                      Margin="0,0,0,0">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4"
-                          DataContext="{Binding LitSearchOrganizer}">
-                                        <DockPanel>
-                                            <StackPanel DockPanel.Dock="Right"
-                                                        Orientation="Horizontal"
-                                                        HorizontalAlignment="Right">
-                                                <Button Content="New folder"
-                                                        Padding="8,4"
-                                                        Command="{Binding CreateFolderCommand}"
-                                                        CommandParameter="{Binding Root}"/>
-                                            </StackPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="LitSearchToggle"
-                                    IsChecked="True"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="LITSEARCH ORGANIZER"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <TreeView Margin="0"
-                                              DataContext="{Binding LitSearchOrganizer}"
-                                              ItemsSource="{Binding Root.Children}"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              HorizontalContentAlignment="Stretch"
-                                              Visibility="{Binding IsChecked, ElementName=LitSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
-                                              SelectedItemChanged="OnLitSearchSelected"
-                                              PreviewMouseDoubleClick="OnLitSearchTreeViewDoubleClick">
-                                        <i:Interaction.Behaviors>
-                                            <behaviors:LitSearchTreeDragDropBehavior />
-                                        </i:Interaction.Behaviors>
-                                        <TreeView.Resources>
-                                            <HierarchicalDataTemplate DataType="{x:Type lit:LitSearchFolderViewModel}"
-                                                                      ItemsSource="{Binding Children}">
-                                                <TextBlock Text="{Binding Name}" Margin="4,2"/>
-                                                <HierarchicalDataTemplate.ItemContainerStyle>
-                                                    <Style TargetType="TreeViewItem">
-                                                        <Setter Property="IsExpanded" Value="True" />
-                                                        <Setter Property="ContextMenu">
-                                                            <Setter.Value>
-                                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                                                    <MenuItem Header="New folder"
-                                                                              Command="{Binding Tree.CreateFolderCommand}"
-                                                                              CommandParameter="{Binding}" />
-                                                                    <MenuItem Header="Delete folder"
-                                                                              Command="{Binding Tree.DeleteFolderCommand}"
-                                                                              CommandParameter="{Binding}"
-                                                                              IsEnabled="{Binding CanDelete}" />
-                                                                </ContextMenu>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                    </Style>
-                                                </HierarchicalDataTemplate.ItemContainerStyle>
-                                            </HierarchicalDataTemplate>
-                                            <HierarchicalDataTemplate DataType="{x:Type lit:LitSearchEntryViewModel}"
-                                                                      ItemsSource="{Binding Runs}">
-                                                <StackPanel Margin="4,2">
-                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                                                    <TextBlock Text="{Binding Query}"
-                                                               FontSize="11"
-                                                               Foreground="#6B7280"
-                                                               TextTrimming="CharacterEllipsis"/>
-                                                </StackPanel>
-                                            </HierarchicalDataTemplate>
-                                            <DataTemplate DataType="{x:Type lit:LitSearchRunViewModel}">
-                                                <TextBlock Text="{Binding Label}" Margin="4,2" TextTrimming="CharacterEllipsis"/>
-                                            </DataTemplate>
-                                        </TreeView.Resources>
-                                    </TreeView>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Saved Searches - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="0"
-                      CornerRadius="0"
-                      Margin="0,0,0,0">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <StackPanel DockPanel.Dock="Right"
-                                                        Orientation="Horizontal"
-                                                        HorizontalAlignment="Right">
-                                                <Button Content="Save search"
-                                                        Padding="8,4"
-                                                        Command="{Binding SavePresetCommand}"/>
-                                                <Button Content="New folder"
-                                                        Padding="8,4"
-                                                        Margin="4,0,0,0"
-                                                        Command="{Binding SavedSearches.CreateFolderCommand}"
-                                                        CommandParameter="{Binding SavedSearches.Root}"/>
-                                            </StackPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="SavedSearchToggle"
-                                    IsChecked="True"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="SAVED SEARCHES"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <TreeView x:Name="SavedSearchTree"
-                                              Margin="0"
-
-                                              DataContext="{Binding SavedSearches}"
-                                              ItemsSource="{Binding Root.Children}"
-                                              Background="Transparent"
-                                              BorderThickness="0"
-                                              HorizontalContentAlignment="Stretch"
-                                              Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-
-                                        <TreeView.Resources>
-                                            <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
-                                                                      ItemsSource="{Binding Children}">
-                                                <TextBlock Text="{Binding Name}" Margin="4,2"/>
-                                                <HierarchicalDataTemplate.ItemContainerStyle>
-                                                    <Style TargetType="TreeViewItem">
-                                                        <Setter Property="IsExpanded" Value="True" />
-                                                        <Setter Property="ContextMenu">
-                                                            <Setter.Value>
-                                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                                                    <MenuItem Header="New folder"
-                                                                              Command="{Binding Tree.CreateFolderCommand}"
-                                                                              CommandParameter="{Binding}" />
-                                                                    <MenuItem Header="Delete folder"
-                                                                              Command="{Binding Tree.DeleteFolderCommand}"
-                                                                              CommandParameter="{Binding}" />
-                                                                </ContextMenu>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                    </Style>
-                                                </HierarchicalDataTemplate.ItemContainerStyle>
-                                            </HierarchicalDataTemplate>
-                                            <DataTemplate DataType="{x:Type saved:SavedSearchPresetViewModel}">
-                                                <TextBlock Text="{Binding Name}"
-                                                           Margin="4,2"
-                                                           TextTrimming="CharacterEllipsis">
-                                                    <TextBlock.InputBindings>
-                                                        <MouseBinding MouseAction="LeftDoubleClick"
-                                                                      Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
-                                                                      CommandParameter="{Binding Summary}" />
-                                                    </TextBlock.InputBindings>
-                                                    <TextBlock.ContextMenu>
-                                                        <ContextMenu DataContext="{Binding}">
-                                                            <MenuItem Header="Load"
-                                                                      Command="{Binding DataContext.Filters.ApplyPresetCommand, ElementName=LibraryViewControl}"
-                                                                      CommandParameter="{Binding Summary}" />
-                                                            <MenuItem Header="Delete"
-                                                                      Command="{Binding Tree.DeletePresetCommand}"
+                                        <HierarchicalDataTemplate.ItemContainerStyle>
+                                            <Style TargetType="TreeViewItem">
+                                                <Setter Property="IsExpanded" Value="True" />
+                                                <Setter Property="ContextMenu">
+                                                    <Setter.Value>
+                                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                            <MenuItem Header="New Folder"
+                                                                      Command="{Binding Tree.CreateFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Rename"
+                                                                      Command="{Binding Tree.RenameFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <Separator/>
+                                                            <MenuItem Header="Add Selection"
+                                                                      Command="{Binding Tree.AddSelectionToFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Remove Selection"
+                                                                      Command="{Binding Tree.RemoveSelectionFromFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <Separator/>
+                                                            <MenuItem Header="Delete Folder"
+                                                                      Command="{Binding Tree.DeleteFolderCommand}"
                                                                       CommandParameter="{Binding}" />
                                                         </ContextMenu>
-                                                    </TextBlock.ContextMenu>
-                                                </TextBlock>
-                                            </DataTemplate>
-                                        </TreeView.Resources>
-                                    </TreeView>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Tags Filter - Collapsible -->
-                            <Border Background="White"
-                      BorderBrush="#E5E7EB"
-                      BorderThickness="0"
-                      CornerRadius="0"
-                      Margin="0,0,0,0">
-                                <StackPanel>
-                                    <Border Background="#F3F4F6"
-                          BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,0"
-                          Padding="6,4">
-                                        <DockPanel>
-                                            <ToggleButton DockPanel.Dock="Left"
-                                    Name="TagsToggle"
-                                    IsChecked="True"
-                                    Width="16"
-                                    Height="16"
-                                    Padding="0"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-                                                <ToggleButton.Template>
-                                                    <ControlTemplate TargetType="ToggleButton">
-                                                        <Border Background="{TemplateBinding Background}">
-                                                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                         FontSize="10"
-                                         VerticalAlignment="Center"
-                                         HorizontalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="&#xE70D;"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
-                                                                                <Setter Property="Text" Value="&#xE76C;"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </ToggleButton.Template>
-                                            </ToggleButton>
-                                            <TextBlock Text="TAGS"
-                                 FontSize="11"
-                                 FontWeight="SemiBold"
-                                 Foreground="#6B7280"
-                                 Margin="4,0,0,0"/>
-                                        </DockPanel>
-                                    </Border>
-                                    <ListBox ItemsSource="{Binding SelectedTags}"
-                           Margin="4"
-                           MinHeight="60"
-                           MaxHeight="150"
-                           BorderThickness="1"
-                           BorderBrush="#E5E7EB"
-                           Visibility="{Binding IsChecked, ElementName=TagsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <ListBox.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ListBox.ItemsPanel>
-                                        <ListBox.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#E0E7FF"
-                                BorderBrush="#6366F1"
-                                BorderThickness="1"
-                                CornerRadius="2"
-                                Padding="4,2"
-                                Margin="2">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding}"
-                                       FontSize="11"
-                                       Foreground="#4338CA"
-                                       Margin="0,0,4,0"/>
-                                                        <Button Content="X"
-                                    Command="{Binding DataContext.Filters.RemoveTagCommand, ElementName=LibraryViewControl}"
-                                    CommandParameter="{Binding}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Padding="0"
-                                    Width="12"
-                                    Height="12"
-                                    FontSize="12"
-                                    Foreground="#4338CA"/>
-                                                    </StackPanel>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ListBox.ItemTemplate>
-                                    </ListBox>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Spacer to provide breathing room after the final filter -->
-                            <Border Background="Transparent" Margin="0,8,0,0" Height="1" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </HierarchicalDataTemplate.ItemContainerStyle>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.Resources>
+                            </TreeView>
                         </StackPanel>
-                    </ScrollViewer>
-                </Border>
+                    </Border>
 
-                <!-- Toggle Left Panel Button -->
-                <ToggleButton Grid.Row="1"
+                    <!-- LitSearch Organizer -->
+                    <Border Background="White"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="0"
+                            Margin="0,0,0,8">
+                        <StackPanel>
+                            <Border Background="#F3F4F6"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="8,6">
+                                <DockPanel>
+                                    <ToggleButton x:Name="LitSearchToggle"
+                                                  IsChecked="True"
+                                                  Width="16"
+                                                  Height="16"
+                                                  DockPanel.Dock="Left"
+                                                  VerticalAlignment="Center">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Text="&#xE70D;"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
+                                                                        <Setter Property="Text" Value="&#xE76C;"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <TextBlock Text="LITSEARCH ORGANIZER"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#6B7280"
+                                               Margin="4,0,0,0"/>
+                                </DockPanel>
+                            </Border>
+                            <TreeView Margin="0"
+                                      DataContext="{Binding DataContext.LitSearchOrganizer, ElementName=LibraryViewControl}"
+                                      ItemsSource="{Binding Root.Children}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      HorizontalContentAlignment="Stretch"
+                                      Visibility="{Binding IsChecked, ElementName=LitSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      SelectedItemChanged="OnLitSearchSelected"
+                                      PreviewMouseDoubleClick="OnLitSearchTreeViewDoubleClick">
+                                <i:Interaction.Behaviors>
+                                    <behaviors:LitSearchTreeDragDropBehavior />
+                                </i:Interaction.Behaviors>
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type lit:LitSearchFolderViewModel}"
+                                                              ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}" Margin="4,2"/>
+                                        <HierarchicalDataTemplate.ItemContainerStyle>
+                                            <Style TargetType="TreeViewItem">
+                                                <Setter Property="IsExpanded" Value="True" />
+                                                <Setter Property="ContextMenu">
+                                                    <Setter.Value>
+                                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                            <MenuItem Header="New Folder"
+                                                                      Command="{Binding Tree.CreateFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Rename"
+                                                                      Command="{Binding Tree.RenameFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <Separator/>
+                                                            <MenuItem Header="Delete Folder"
+                                                                      Command="{Binding Tree.DeleteFolderCommand}"
+                                                                      CommandParameter="{Binding}"
+                                                                      IsEnabled="{Binding CanDelete}" />
+                                                        </ContextMenu>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </HierarchicalDataTemplate.ItemContainerStyle>
+                                    </HierarchicalDataTemplate>
+                                    <HierarchicalDataTemplate DataType="{x:Type lit:LitSearchEntryViewModel}"
+                                                              ItemsSource="{Binding Runs}">
+                                        <StackPanel Margin="4,2">
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Text="{Binding Query}"
+                                                       FontSize="11"
+                                                       Foreground="#6B7280"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                        </StackPanel>
+                                    </HierarchicalDataTemplate>
+                                    <DataTemplate DataType="{x:Type lit:LitSearchRunViewModel}">
+                                        <TextBlock Text="{Binding Label}" Margin="4,2" TextTrimming="CharacterEllipsis"/>
+                                    </DataTemplate>
+                                </TreeView.Resources>
+                            </TreeView>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Saved Searches -->
+                    <Border Background="White"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="0"
+                            Margin="0,0,0,8">
+                        <StackPanel>
+                            <Border Background="#F3F4F6"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="8,6">
+                                <DockPanel>
+                                    <ToggleButton x:Name="SavedSearchToggle"
+                                                  IsChecked="True"
+                                                  Width="16"
+                                                  Height="16"
+                                                  DockPanel.Dock="Left"
+                                                  VerticalAlignment="Center">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Text="&#xE70D;"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
+                                                                        <Setter Property="Text" Value="&#xE76C;"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <TextBlock Text="SAVED SEARCHES"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#6B7280"
+                                               Margin="4,0,0,0"/>
+                                </DockPanel>
+                            </Border>
+                            <TreeView x:Name="SavedSearchTree"
+                                      Margin="0"
+                                      DataContext="{Binding SavedSearches}"
+                                      ItemsSource="{Binding Root.Children}"
+                                      Background="Transparent"
+                                      BorderThickness="0"
+                                      HorizontalContentAlignment="Stretch"
+                                      Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      SelectedItemChanged="OnSavedSearchSelected">
+                                <TreeView.Resources>
+                                    <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
+                                                              ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Name}" Margin="4,2"/>
+                                        <HierarchicalDataTemplate.ItemContainerStyle>
+                                            <Style TargetType="TreeViewItem">
+                                                <Setter Property="IsExpanded" Value="True" />
+                                                <Setter Property="ContextMenu">
+                                                    <Setter.Value>
+                                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                            <MenuItem Header="New Folder"
+                                                                      Command="{Binding Tree.CreateFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <MenuItem Header="Rename"
+                                                                      Command="{Binding Tree.RenameFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                            <Separator/>
+                                                            <MenuItem Header="Delete Folder"
+                                                                      Command="{Binding Tree.DeleteFolderCommand}"
+                                                                      CommandParameter="{Binding}" />
+                                                        </ContextMenu>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </HierarchicalDataTemplate.ItemContainerStyle>
+                                    </HierarchicalDataTemplate>
+                                    <DataTemplate DataType="{x:Type saved:SavedSearchPresetViewModel}">
+                                        <TextBlock Text="{Binding Name}" Margin="4,2">
+                                            <TextBlock.ContextMenu>
+                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                    <MenuItem Header="Load"
+                                                              Command="{Binding Tree.LoadPresetCommand}"
+                                                              CommandParameter="{Binding}" />
+                                                    <Separator/>
+                                                    <MenuItem Header="Delete"
+                                                              Command="{Binding Tree.DeletePresetCommand}"
+                                                              CommandParameter="{Binding}" />
+                                                </ContextMenu>
+                                            </TextBlock.ContextMenu>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </TreeView.Resources>
+                            </TreeView>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Tags -->
+                    <Border Background="White"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="0"
+                            Margin="0,0,0,8">
+                        <StackPanel>
+                            <Border Background="#F3F4F6"
+                                    BorderBrush="#E5E7EB"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="8,6">
+                                <DockPanel>
+                                    <ToggleButton x:Name="TagsToggle"
+                                                  IsChecked="True"
+                                                  Width="16"
+                                                  Height="16"
+                                                  DockPanel.Dock="Left"
+                                                  VerticalAlignment="Center">
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               FontSize="12"
+                                                               Text="&#xE70D;"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="#6B7280"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource TemplatedParent}}" Value="False">
+                                                                        <Setter Property="Text" Value="&#xE76C;"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                    </ToggleButton>
+                                    <TextBlock Text="TAGS"
+                                               FontSize="11"
+                                               FontWeight="SemiBold"
+                                               Foreground="#6B7280"
+                                               Margin="4,0,0,0"/>
+                                </DockPanel>
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding DataContext.AllTags, ElementName=LibraryViewControl}"
+                                          Margin="0"
+                                          Background="Transparent"
+                                          Visibility="{Binding IsChecked, ElementName=TagsToggle, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   Margin="8,4"
+                                                   Cursor="Hand"
+                                                   MouseLeftButtonUp="OnTagClick">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#374151"/>
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Foreground" Value="#2563EB"/>
+                                                            <Setter Property="TextDecorations" Value="Underline"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Splitter -->
+        <GridSplitter Grid.Row="1"
                       Grid.Column="1"
-                      Name="LeftPanelToggle"
-                      IsChecked="True"
-                      HorizontalAlignment="Left"
-                      VerticalAlignment="Top"
-                      Width="20"
-                      Height="32"
-                      Padding="0"
-                      Margin="2,8,2,0"
-                      FontFamily="Segoe MDL2 Assets"
-                      FontSize="12"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      ToolTip="Toggle left panel">
-                    <ToggleButton.Style>
-                        <Style TargetType="ToggleButton">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Content" Value="&#xE0E2;"/>
-                            <Style.Triggers>
-                                <Trigger Property="IsChecked" Value="False">
-                                    <Setter Property="Content" Value="&#xE0E3;"/>
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#F3F4F6"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ToggleButton.Style>
-                </ToggleButton>
+                      Width="1"
+                      Background="#E5E7EB"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Stretch"/>
 
-                <!-- Center - Results List (Compact Zotero-style) -->
+
+<!-- Center - Results List (Compact Zotero-style) -->
                 <DataGrid Grid.Row="1"
                   Grid.Column="2"
                   x:Name="ResultsList"

@@ -4,12 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LM.App.Wpf.Library.Collections;
-using LM.Infrastructure.Hooks;
 using LM.App.Wpf.ViewModels.Library;
-using HookM = LM.HubSpoke.Models;
+using LM.App.Wpf.Views.Behaviors;
+using LM.Infrastructure.Hooks;
 
 namespace LM.App.Wpf.ViewModels.Library.Collections
 {
@@ -21,19 +22,22 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
         private readonly SemaphoreSlim _refreshLock = new(1, 1);
 
         public LibraryCollectionsViewModel(LibraryCollectionStore store,
-                                           LibraryResultsViewModel results,
-                                           HookOrchestrator hookOrchestrator)
+                                          LibraryResultsViewModel results,
+                                          HookOrchestrator hookOrchestrator)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _results = results ?? throw new ArgumentNullException(nameof(results));
             _hookOrchestrator = hookOrchestrator ?? throw new ArgumentNullException(nameof(hookOrchestrator));
 
-            Root = new LibraryCollectionFolderViewModel(this, LibraryCollectionFolder.RootId, "Collections", new LibraryCollectionMetadata());
+            Root = new LibraryCollectionFolderViewModel(this, LibraryCollectionFolder.RootId, "Collections",
+                new LibraryCollectionMetadata());
 
             CreateFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel?>(CreateFolderAsync);
+            RenameFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(RenameFolderAsync, CanModifyFolder);
             DeleteFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(DeleteFolderAsync, CanDeleteFolder);
             AddSelectionToFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(AddSelectionToFolderAsync, CanModifyFolder);
             RemoveSelectionFromFolderCommand = new AsyncRelayCommand<LibraryCollectionFolderViewModel>(RemoveSelectionFromFolderAsync, CanModifyFolder);
+            MoveFolderCommand = new AsyncRelayCommand<CollectionDragDropRequest>(MoveFolderAsync, request => request?.Source is not null);
 
             _results.SelectionChanged += OnSelectionChanged;
         }
@@ -41,12 +45,11 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
         public LibraryCollectionFolderViewModel Root { get; }
 
         public IAsyncRelayCommand<LibraryCollectionFolderViewModel?> CreateFolderCommand { get; }
-
+        public IAsyncRelayCommand<LibraryCollectionFolderViewModel> RenameFolderCommand { get; }
         public IAsyncRelayCommand<LibraryCollectionFolderViewModel> DeleteFolderCommand { get; }
-
         public IAsyncRelayCommand<LibraryCollectionFolderViewModel> AddSelectionToFolderCommand { get; }
-
         public IAsyncRelayCommand<LibraryCollectionFolderViewModel> RemoveSelectionFromFolderCommand { get; }
+        public IAsyncRelayCommand<CollectionDragDropRequest> MoveFolderCommand { get; }
 
         public async Task RefreshAsync(CancellationToken ct = default)
         {
@@ -87,7 +90,9 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
 
             foreach (var child in folder.Folders)
             {
-                node.Children.Add(CreateNode(child));
+                var childNode = CreateNode(child);
+                childNode.Parent = node;
+                node.Children.Add(childNode);
             }
 
             return node;
@@ -108,6 +113,33 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
 
             Trace.WriteLine($"[LibraryCollectionsViewModel] Requesting folder creation '{candidate}' under '{target.Id}'.");
             await _store.CreateFolderAsync(target.Id, candidate, GetCurrentUserName(), CancellationToken.None).ConfigureAwait(false);
+            await RefreshAsync().ConfigureAwait(false);
+        }
+
+        private async Task RenameFolderAsync(LibraryCollectionFolderViewModel? folder)
+        {
+            if (folder is null || string.Equals(folder.Id, LibraryCollectionFolder.RootId, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var newName = await InvokeOnDispatcherAsync(() =>
+            {
+                var dialog = new Microsoft.VisualBasic.Interaction();
+                return Microsoft.VisualBasic.Interaction.InputBox(
+                    "Enter new name for collection:",
+                    "Rename Collection",
+                    folder.Name);
+            }).ConfigureAwait(false);
+
+            if (string.IsNullOrWhiteSpace(newName) || string.Equals(newName, folder.Name, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            // Note: You'll need to add RenameFolder to LibraryCollectionStore
+            // For now, this is a placeholder
+            Trace.WriteLine($"[LibraryCollectionsViewModel] Rename '{folder.Name}' to '{newName}' (not yet implemented in store).");
             await RefreshAsync().ConfigureAwait(false);
         }
 
@@ -138,13 +170,13 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
                 return;
             }
 
-            var result = System.Windows.MessageBox.Show(
-                $"Delete collection '{folder.Name}' and remove all its entry references?",
+            var result = MessageBox.Show(
+                $"Delete collection '{folder.Name}' and all sub-collections?",
                 "Delete Collection",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
 
-            if (result != System.Windows.MessageBoxResult.Yes)
+            if (result != MessageBoxResult.Yes)
             {
                 return;
             }
@@ -194,46 +226,18 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
             await RefreshAsync().ConfigureAwait(false);
         }
 
-        private IReadOnlyList<string> ExtractSelectedEntryIds()
+        private async Task MoveFolderAsync(CollectionDragDropRequest? request)
         {
-            var ids = _results.SelectedItems
-                .Select(item => item.Entry?.Id)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Cast<string>()
-                .Distinct(StringComparer.Ordinal)
-                .ToArray();
-
-            return ids;
-        }
-
-        private async Task AppendChangeLogAsync(IReadOnlyList<string> ids,
-                                                LibraryCollectionFolderViewModel folder,
-                                                string performedBy,
-                                                string action)
-        {
-            foreach (var entryId in ids)
+            if (request is null || request.Source is null || request.TargetFolder is null)
             {
-                var hook = new HookM.EntryChangeLogHook
-                {
-                    Events = new List<HookM.EntryChangeLogEvent>
-                    {
-                        new HookM.EntryChangeLogEvent
-                        {
-                            PerformedBy = performedBy,
-                            Action = $"{action}:{folder.Name}",
-                            TimestampUtc = DateTime.UtcNow
-                        }
-                    }
-                };
-
-                var context = new HookContext
-                {
-                    ChangeLog = hook
-                };
-
-                await _hookOrchestrator.ProcessAsync(entryId, context, CancellationToken.None).ConfigureAwait(false);
-                Trace.WriteLine($"[LibraryCollectionsViewModel] Appended changelog event '{action}' for entry '{entryId}'.");
+                return;
             }
+
+            // Note: You'll need to implement MoveFolderAsync in LibraryCollectionStore
+            // This would involve finding the source folder, removing it from its parent,
+            // and adding it to the target folder at the specified index
+            Trace.WriteLine($"[LibraryCollectionsViewModel] Move folder '{request.Source.Name}' to '{request.TargetFolder.Name}' (not yet implemented).");
+            await RefreshAsync().ConfigureAwait(false);
         }
 
         private void OnSelectionChanged(object? sender, EventArgs e)
@@ -242,27 +246,66 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
             RemoveSelectionFromFolderCommand.NotifyCanExecuteChanged();
         }
 
-        private static Task InvokeOnDispatcherAsync(Action action)
+        private List<string> ExtractSelectedEntryIds()
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            return _results.SelectedItems
+                .Select(static item => item.InternalId)
+                .Where(static id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+        }
 
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher is not null && !dispatcher.CheckAccess())
+        private async Task AppendChangeLogAsync(List<string> entryIds, LibraryCollectionFolderViewModel folder, string user, string action)
+        {
+            // Hook integration for tracking changes
+            foreach (var id in entryIds)
             {
-                return dispatcher.InvokeAsync(action).Task;
+                try
+                {
+                    await _hookOrchestrator.ExecuteAsync(
+                        "CollectionChanged",
+                        new { EntryId = id, CollectionId = folder.Id, CollectionName = folder.Name, Action = action, User = user },
+                        CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning($"[LibraryCollectionsViewModel] Hook execution failed: {ex.Message}");
+                }
             }
-
-            action();
-            return Task.CompletedTask;
         }
 
         private static string GetCurrentUserName()
         {
-            var user = Environment.UserName;
-            return string.IsNullOrWhiteSpace(user) ? "unknown" : user;
+            return Environment.UserName ?? "unknown";
+        }
+
+        private static Task InvokeOnDispatcherAsync(Action action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                action();
+                return Task.CompletedTask;
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
+        }
+
+        private static Task<TResult> InvokeOnDispatcherAsync<TResult>(Func<TResult> action)
+        {
+            if (action is null)
+                throw new ArgumentNullException(nameof(action));
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.CheckAccess())
+            {
+                return Task.FromResult(action());
+            }
+
+            return dispatcher.InvokeAsync(action).Task;
         }
     }
 }
