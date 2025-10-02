@@ -322,7 +322,7 @@ namespace LM.App.Wpf.ViewModels
                     }
 
                     var normalized = tag.Trim();
-                    if (!entryTags.Any(entryTag => string.Equals(entryTag, normalized, StringComparer.OrdinalIgnoreCase)))
+                    if (!entryTags.Any(entryTag => string.Equals(entryTag, normalized, StringComparison.OrdinalIgnoreCase)))
                     {
                         Trace.WriteLine($"[LibraryViewModel] Entry {entry.Id} filtered out due to missing tag '{normalized}'.");
                         return false;

@@ -23,6 +23,7 @@ LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.get -> double
 LM.App.Wpf.Common.BooleanToOpacityConverter.TrueOpacity.set -> void
 LM.App.Wpf.Common.Converters.ProjectEditorConverters
 LM.App.Wpf.Common.Converters.ProjectEditorConverters.StageSelectionEquality.get -> System.Windows.Data.IMultiValueConverter!
+LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string![]!
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.ProjectBlueprint(string! projectId, string! name, System.DateTimeOffset createdAtUtc, string! createdBy, string! litSearchEntryId, string! litSearchRunId, System.Collections.Generic.IReadOnlyList<string!>! checkedEntryIds, string? hookRelativePath, LM.Review.Core.Models.ReviewTemplateKind template, string! metadataNotes, System.Collections.Generic.IReadOnlyList<LM.App.Wpf.Services.Review.Design.StageBlueprint!>! stages) -> void
 LM.App.Wpf.Services.Review.Design.ProjectBlueprint.CheckedEntryIds.get -> System.Collections.Generic.IReadOnlyList<string!>!
@@ -270,7 +271,6 @@ LM.App.Wpf.Library.LibraryFilterState.DateTo.get -> System.DateTime?
 LM.App.Wpf.Library.LibraryFilterState.DateTo.set -> void
 LM.App.Wpf.Library.LibraryFilterState.SortKey.get -> string?
 LM.App.Wpf.Library.LibraryFilterState.SortKey.set -> void
-LM.App.Wpf.Library.LibraryFilterState.Tags.get -> string[]!
 LM.App.Wpf.Library.LibraryFilterState.Tags.set -> void
 LM.App.Wpf.ViewModels.AddPipeline
 LM.App.Wpf.ViewModels.AddPipeline.AddPipeline(LM.Core.Abstractions.IEntryStore! store, LM.Core.Abstractions.IFileStorageRepository! storage, LM.Core.Abstractions.IHasher! hasher, LM.Core.Abstractions.ISimilarityService! similarity, LM.Core.Abstractions.IWorkSpaceService! workspace, LM.Core.Abstractions.IMetadataExtractor! metadata, IPublicationLookup! publicationLookup, LM.Core.Abstractions.IDoiNormalizer! doiNormalizer, LM.Infrastructure.Hooks.HookOrchestrator! orchestrator, LM.Core.Abstractions.IPmidNormalizer! pmidNormalizer, LM.HubSpoke.Abstractions.ISimilarityLog? simLog = null) -> void
@@ -625,13 +625,7 @@ LM.App.Wpf.ViewModels.Library.LibrarySortOption
 LM.App.Wpf.ViewModels.Library.LibrarySortOption.LibrarySortOption(string! key, string! displayName) -> void
 LM.App.Wpf.ViewModels.Library.LibrarySortOption.DisplayName.get -> string!
 LM.App.Wpf.ViewModels.Library.LibrarySortOption.Key.get -> string!
-LM.App.Wpf.ViewModels.Library.LibrarySortOption.ToString() -> string!
 LM.App.Wpf.ViewModels.Library.LibrarySortOptions
-LM.App.Wpf.ViewModels.Library.LibrarySortOptions.NewestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
-LM.App.Wpf.ViewModels.Library.LibrarySortOptions.OldestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
-LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleAscending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
-LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleDescending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
-LM.App.Wpf.ViewModels.Library.LibrarySortOptions.All.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.Category = 0 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
 LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind.SavedSearch = 1 -> LM.App.Wpf.ViewModels.Library.LibraryNavigationNodeKind
@@ -910,6 +904,7 @@ LM.App.Wpf.Views.ShellWindow.ShellWindow() -> void
 LM.App.Wpf.Views.StagingEditorWindow
 LM.App.Wpf.Views.StagingEditorWindow.InitializeComponent() -> void
 LM.App.Wpf.Views.StagingEditorWindow.StagingEditorWindow(LM.App.Wpf.ViewModels.Dialogs.StagingEditorViewModel! viewModel) -> void
+override LM.App.Wpf.ViewModels.Library.LibrarySortOption.ToString() -> string!
 override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void
@@ -925,3 +920,8 @@ override LM.App.Wpf.Views.WorkspaceChooser.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.Review.ProjectEditorWindow.OnClosed(System.EventArgs! e) -> void
 override LM.App.Wpf.Views.Review.LitSearchRunPickerWindow.OnClosed(System.EventArgs! e) -> void
 static LM.App.Wpf.App.Main() -> void
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.All.get -> System.Collections.Generic.IReadOnlyList<LM.App.Wpf.ViewModels.Library.LibrarySortOption!>!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.NewestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.OldestFirst.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleAscending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!
+static LM.App.Wpf.ViewModels.Library.LibrarySortOptions.TitleDescending.get -> LM.App.Wpf.ViewModels.Library.LibrarySortOption!

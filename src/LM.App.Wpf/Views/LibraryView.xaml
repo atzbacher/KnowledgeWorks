@@ -102,19 +102,19 @@
                 Grid.Column="0"
                 Background="#F8F9FA"
                 BorderBrush="#E5E7EB"
-                BorderThickness="0,0,1,0"
+                BorderThickness="0,1,0,0"
                 Name="LeftPanelBorder">
                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled"
                         DataContext="{Binding Filters}">
-                        <StackPanel Margin="8">
+                        <StackPanel Margin="0">
 
                             <!-- Saved Searches - Collapsible -->
                             <Border Background="White"
                       BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
+                      BorderThickness="0"
+                      CornerRadius="0"
+                      Margin="0,0,0,0">
                                 <StackPanel>
                                     <Border Background="#F3F4F6"
                           BorderBrush="#E5E7EB"
@@ -195,13 +195,13 @@
                             <!-- Tags Filter - Collapsible -->
                             <Border Background="White"
                       BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
+                      BorderThickness="0"
+                      CornerRadius="0"
+                      Margin="0,0,0,0">
                                 <StackPanel>
                                     <Border Background="#F3F4F6"
                           BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
+                          BorderThickness="0,0,0,0"
                           Padding="6,4">
                                         <DockPanel>
                                             <ToggleButton DockPanel.Dock="Left"
@@ -287,13 +287,13 @@
                             <!-- Date Filter - Collapsible -->
                             <Border Background="White"
                       BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3"
-                      Margin="0,0,0,8">
+                      BorderThickness="0"
+                      CornerRadius="0"
+                      Margin="0,0,0,0">
                                 <StackPanel>
                                     <Border Background="#F3F4F6"
                           BorderBrush="#E5E7EB"
-                          BorderThickness="0,0,0,1"
+                          BorderThickness="0,0,0,0"
                           Padding="6,4">
                                         <DockPanel>
                                             <ToggleButton DockPanel.Dock="Left"
@@ -348,8 +348,8 @@
                             <!-- Full Text Options - Collapsible -->
                             <Border Background="White"
                       BorderBrush="#E5E7EB"
-                      BorderThickness="1"
-                      CornerRadius="3">
+                      BorderThickness="0"
+                      CornerRadius="0">
                                 <StackPanel>
                                     <Border Background="#F3F4F6"
                           BorderBrush="#E5E7EB"
@@ -389,7 +389,7 @@
                                             <TextBlock Text="FULL TEXT SEARCH"
                                  FontSize="11"
                                  FontWeight="SemiBold"
-                                 Foreground="#6B7280"
+                                 Foreground="#6B280"
                                  Margin="4,0,0,0"/>
                                         </DockPanel>
                                     </Border>
