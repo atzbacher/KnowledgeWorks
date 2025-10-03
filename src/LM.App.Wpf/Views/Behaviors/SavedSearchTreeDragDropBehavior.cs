@@ -216,9 +216,11 @@ namespace LM.App.Wpf.Views.Behaviors
                 return false;
             }
 
+
             var dataContext = associatedObject.DataContext;
 
             if (dataContext is SavedSearchTreeViewModel directTree)
+
             {
                 tree = directTree;
                 Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Resolved tree from direct DataContext binding.");
