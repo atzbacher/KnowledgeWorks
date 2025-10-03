@@ -216,14 +216,18 @@ namespace LM.App.Wpf.Views.Behaviors
                 return false;
             }
 
-            if (associatedObject.DataContext is SavedSearchTreeViewModel directTree)
+
+            var dataContext = associatedObject.DataContext;
+
+            if (dataContext is SavedSearchTreeViewModel directTree)
+
             {
                 tree = directTree;
                 Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Resolved tree from direct DataContext binding.");
                 return true;
             }
 
-            if (associatedObject.DataContext is LibraryFiltersViewModel filters)
+            if (dataContext is LibraryFiltersViewModel filters)
             {
                 tree = filters.SavedSearches;
                 if (tree is not null)
@@ -231,9 +235,12 @@ namespace LM.App.Wpf.Views.Behaviors
                     Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Resolved tree from LibraryFiltersViewModel.");
                     return true;
                 }
+
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: LibraryFiltersViewModel provided null SavedSearches tree.");
+                return false;
             }
 
-            var contextTypeName = associatedObject.DataContext?.GetType().FullName ?? "<null>";
+            var contextTypeName = dataContext?.GetType().FullName ?? "<null>";
             Trace.TraceWarning(
                 "SavedSearchTreeDragDropBehavior: Unable to resolve SavedSearchTreeViewModel. DataContext type: '{0}'.",
                 contextTypeName);
