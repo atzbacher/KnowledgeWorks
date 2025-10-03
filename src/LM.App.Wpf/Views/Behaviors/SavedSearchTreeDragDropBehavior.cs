@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
+using LM.App.Wpf.ViewModels.Library;
 using LM.App.Wpf.ViewModels.Library.SavedSearches;
 using Microsoft.Xaml.Behaviors;
 
@@ -206,8 +207,43 @@ namespace LM.App.Wpf.Views.Behaviors
 
         private bool TryGetTree([NotNullWhen(true)] out SavedSearchTreeViewModel? tree)
         {
-            tree = AssociatedObject.DataContext as SavedSearchTreeViewModel;
-            return tree is not null;
+            tree = null;
+
+            var associatedObject = AssociatedObject;
+            if (associatedObject is null)
+            {
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: TryGetTree invoked with null AssociatedObject.");
+                return false;
+            }
+
+            var dataContext = associatedObject.DataContext;
+
+            if (dataContext is SavedSearchTreeViewModel directTree)
+            {
+                tree = directTree;
+                Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Resolved tree from direct DataContext binding.");
+                return true;
+            }
+
+            if (dataContext is LibraryFiltersViewModel filters)
+            {
+                tree = filters.SavedSearches;
+                if (tree is not null)
+                {
+                    Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Resolved tree from LibraryFiltersViewModel.");
+                    return true;
+                }
+
+                Trace.TraceWarning("SavedSearchTreeDragDropBehavior: LibraryFiltersViewModel provided null SavedSearches tree.");
+                return false;
+            }
+
+            var contextTypeName = dataContext?.GetType().FullName ?? "<null>";
+            Trace.TraceWarning(
+                "SavedSearchTreeDragDropBehavior: Unable to resolve SavedSearchTreeViewModel. DataContext type: '{0}'.",
+                contextTypeName);
+
+            return false;
         }
 
 
