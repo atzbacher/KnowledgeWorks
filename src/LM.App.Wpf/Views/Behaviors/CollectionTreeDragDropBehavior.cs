@@ -19,28 +19,38 @@ namespace LM.App.Wpf.Views.Behaviors
         protected override void OnAttached()
         {
             base.OnAttached();
-            if (AssociatedObject is not null)
+
+            var treeView = AssociatedObject;
+            if (treeView is null)
             {
-                AssociatedObject.AllowDrop = true;
-                Trace.TraceInformation("CollectionTreeDragDropBehavior: Enabled AllowDrop on associated tree view '{0}'.", AssociatedObject.Name);
+                Trace.TraceWarning("CollectionTreeDragDropBehavior: OnAttached invoked without an associated tree view.");
+                return;
             }
-            AssociatedObject.PreviewMouseLeftButtonDown += OnPreviewMouseDown;
-            AssociatedObject.PreviewMouseMove += OnPreviewMouseMove;
-            AssociatedObject.DragOver += OnDragOver;
-            AssociatedObject.Drop += OnDrop;
+
+            treeView.AllowDrop = true;
+            Trace.TraceInformation("CollectionTreeDragDropBehavior: Enabled AllowDrop on associated tree view '{0}'.", treeView.Name);
+            treeView.PreviewMouseLeftButtonDown += OnPreviewMouseDown;
+            treeView.PreviewMouseMove += OnPreviewMouseMove;
+            treeView.DragOver += OnDragOver;
+            treeView.Drop += OnDrop;
         }
 
         protected override void OnDetaching()
         {
-            if (AssociatedObject is not null)
+            var treeView = AssociatedObject;
+            if (treeView is null)
             {
-                AssociatedObject.AllowDrop = false;
-                Trace.TraceInformation("CollectionTreeDragDropBehavior: Disabled AllowDrop on associated tree view '{0}'.", AssociatedObject.Name);
+                Trace.TraceWarning("CollectionTreeDragDropBehavior: OnDetaching invoked without an associated tree view.");
+                base.OnDetaching();
+                return;
             }
-            AssociatedObject.PreviewMouseLeftButtonDown -= OnPreviewMouseDown;
-            AssociatedObject.PreviewMouseMove -= OnPreviewMouseMove;
-            AssociatedObject.DragOver -= OnDragOver;
-            AssociatedObject.Drop -= OnDrop;
+
+            treeView.AllowDrop = false;
+            Trace.TraceInformation("CollectionTreeDragDropBehavior: Disabled AllowDrop on associated tree view '{0}'.", treeView.Name);
+            treeView.PreviewMouseLeftButtonDown -= OnPreviewMouseDown;
+            treeView.PreviewMouseMove -= OnPreviewMouseMove;
+            treeView.DragOver -= OnDragOver;
+            treeView.Drop -= OnDrop;
             base.OnDetaching();
         }
 
