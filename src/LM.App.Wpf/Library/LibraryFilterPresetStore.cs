@@ -173,6 +173,14 @@ namespace LM.App.Wpf.Library
 
         public async Task DeleteFolderAsync(string folderId, CancellationToken ct = default)
         {
+
+            if (string.IsNullOrWhiteSpace(folderId) ||
+                string.Equals(folderId, LibraryPresetFolder.RootId, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Blocked deletion of root folder.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LibraryPresetFolder.RootId, StringComparison.Ordinal))
             {
                 return;
@@ -195,6 +203,15 @@ namespace LM.App.Wpf.Library
 
         public async Task RenameFolderAsync(string folderId, string newName, CancellationToken ct = default)
         {
+
+            // Prevent renaming of root at data layer
+            if (string.IsNullOrWhiteSpace(folderId) ||
+                string.Equals(folderId, LibraryPresetFolder.RootId, StringComparison.Ordinal))
+            {
+                Trace.WriteLine($"[LibraryFilterPresetStore] Blocked rename of root folder.");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(folderId) || string.Equals(folderId, LibraryPresetFolder.RootId, StringComparison.Ordinal))
             {
                 Trace.WriteLine($"[LibraryFilterPresetStore] Ignoring rename for folder '{folderId}'.");

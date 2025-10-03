@@ -348,92 +348,98 @@
                                                Margin="4,0,0,0"/>
                                 </DockPanel>
                             </Border>
+                            <!-- Saved Searches TreeView Section with Fixed Context Menus -->
                             <TreeView x:Name="SavedSearchTree"
-                                      Margin="0"
-                                      DataContext="{Binding SavedSearches}"
-                                      ItemsSource="{Binding Root.Children}"
-                                      Background="Transparent"
-                                      BorderThickness="0"
-                                       AllowDrop="True"
-                                      HorizontalContentAlignment="Stretch"
-                                      Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
-                                      SelectedItemChanged="OnSavedSearchSelected">
+          ItemsSource="{Binding SavedSearches.Root.Children}"
+          Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
+          BorderThickness="0"
+          Background="Transparent"
+          Padding="4"
+          SelectedItemChanged="OnSavedSearchSelected">
+
+                                <!-- TreeView-level Context Menu (for empty space or background) -->
                                 <TreeView.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="New Folder"
-                                           Command="{Binding PlacementTarget.DataContext.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                           CommandParameter="{Binding PlacementTarget.DataContext.Root, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                      Command="{Binding PlacementTarget.DataContext.SavedSearches.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding PlacementTarget.DataContext.SavedSearches.Root, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                     </ContextMenu>
                                 </TreeView.ContextMenu>
-                                
+
                                 <TreeView.Resources>
+                                    <!-- Folder Template -->
                                     <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
-                                                               ItemsSource="{Binding Children}">
+                                  ItemsSource="{Binding Children}">
                                         <StackPanel Orientation="Horizontal" Margin="4,2">
-                                            <!-- Folder Icon (&#xE8B7;) -->
                                             <TextBlock FontFamily="Segoe MDL2 Assets"
-                                               Text="&#xE8B7;"
-                                               FontSize="14"
-                                               Foreground="#6B7280"
-                                               VerticalAlignment="Center"
-                                               Margin="0,0,6,0"/>
+                          Text="&#xE8B7;"
+                          FontSize="14"
+                          Foreground="#6B7280"
+                          VerticalAlignment="Center"
+                          Margin="0,0,6,0"/>
                                             <TextBlock Text="{Binding Name}" 
-                                                VerticalAlignment="Center"/>
+                          VerticalAlignment="Center"/>
                                         </StackPanel>
+
                                         <HierarchicalDataTemplate.ItemContainerStyle>
                                             <Style TargetType="TreeViewItem">
                                                 <Setter Property="IsExpanded" Value="True" />
                                                 <EventSetter Event="PreviewMouseRightButtonDown" Handler="OnTreeViewItemRightClick"/>
+
+                                                <!-- Folder Context Menu -->
                                                 <Setter Property="ContextMenu">
                                                     <Setter.Value>
                                                         <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                            <!-- New Folder - Creates child folder -->
                                                             <MenuItem Header="New Folder"
-                                                                Command="{Binding Tree.CreateFolderCommand}"
-                                                                CommandParameter="{Binding}" />
-                                                            <MenuItem Header="Rename"
-                                                                Command="{Binding Tree.RenameFolderCommand}"
-                                                                CommandParameter="{Binding}" />
+                                         Command="{Binding Tree.CreateFolderCommand}"
+                                         CommandParameter="{Binding}" />
                                                             <Separator/>
+                                                            <!-- Rename - Disabled for root folder -->
+                                                            <MenuItem Header="Rename"
+                                         Command="{Binding Tree.RenameFolderCommand}"
+                                         CommandParameter="{Binding}" />
+                                                            <!-- Delete - Disabled for root folder -->
                                                             <MenuItem Header="Delete Folder"
-                                                                Command="{Binding Tree.DeleteFolderCommand}"
-                                                                CommandParameter="{Binding}" />   
+                                         Command="{Binding Tree.DeleteFolderCommand}"
+                                         CommandParameter="{Binding}" />
                                                         </ContextMenu>
                                                     </Setter.Value>
                                                 </Setter>
                                             </Style>
                                         </HierarchicalDataTemplate.ItemContainerStyle>
                                     </HierarchicalDataTemplate>
+
+                                    <!-- Preset/Search Template -->
                                     <DataTemplate DataType="{x:Type saved:SavedSearchPresetViewModel}">
                                         <StackPanel Orientation="Horizontal" Margin="4,2">
-                                            <!-- Magnifying Glass Icon (&#xE721;) -->
                                             <TextBlock FontFamily="Segoe MDL2 Assets"
-                   Text="&#xE721;"
-                   FontSize="14"
-                   Foreground="#6B7280"
-                   VerticalAlignment="Center"
-                   Margin="0,0,6,0"/>
+                          Text="&#xE721;"
+                          FontSize="14"
+                          Foreground="#6B7280"
+                          VerticalAlignment="Center"
+                          Margin="0,0,6,0"/>
                                             <TextBlock Text="{Binding Name}" 
-                                                VerticalAlignment="Center"/>
+                          VerticalAlignment="Center"/>
+
                                             <StackPanel.InputBindings>
-                                                <!-- Add double-click to load and execute search -->
                                                 <MouseBinding MouseAction="LeftDoubleClick"
-                          Command="{Binding DataContext.Filters.ApplyPresetCommandAsync, 
-                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
-                          CommandParameter="{Binding Summary}" />
+                                 Command="{Binding DataContext.Filters.ApplyPresetCommandAsyncCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 CommandParameter="{Binding Summary}" />
                                             </StackPanel.InputBindings>
-                                            <!-- ContextMenu moved to StackPanel to work with icon layout -->
+
+                                            <!-- Preset Context Menu -->
                                             <StackPanel.ContextMenu>
                                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                                    <MenuItem Header="Load"
-                          Command="{Binding Tree.LoadPresetCommand}"
-                          CommandParameter="{Binding}" />
+                                                    <MenuItem Header="Load Search"
+                                 Command="{Binding Tree.LoadPresetCommand}"
+                                 CommandParameter="{Binding}" />
                                                     <MenuItem Header="Rename"
-                          Command="{Binding Tree.RenamePresetCommand}"
-                          CommandParameter="{Binding}" />
-                                                    <Separator/>
+                                 Command="{Binding Tree.RenamePresetCommand}"
+                                 CommandParameter="{Binding}" />
                                                     <MenuItem Header="Delete"
-                          Command="{Binding Tree.DeletePresetCommand}"
-                          CommandParameter="{Binding}" />
+                                 Command="{Binding Tree.DeletePresetCommand}"
+                                 CommandParameter="{Binding}" />
                                                 </ContextMenu>
                                             </StackPanel.ContextMenu>
                                         </StackPanel>

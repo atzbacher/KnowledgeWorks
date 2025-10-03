@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -28,8 +28,8 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             Root = new SavedSearchFolderViewModel(this, LibraryPresetFolder.RootId, "Saved Searches", 0);
 
             CreateFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(CreateFolderAsync);
-            RenameFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(RenameFolderAsync, canExecute: CanRenameFolder);
-            DeleteFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(DeleteFolderAsync, canExecute: CanDeleteFolder);
+            RenameFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>( RenameFolderAsync, canExecute: folder => folder is not null); // ✅ Simple null check
+            DeleteFolderCommand = new AsyncRelayCommand<SavedSearchFolderViewModel?>(DeleteFolderAsync, canExecute: folder => folder is not null);
             DeletePresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(DeletePresetAsync, canExecute: static preset => preset is not null);
             LoadPresetCommand = new AsyncRelayCommand<SavedSearchPresetViewModel?>(LoadPresetAsync, canExecute: static preset => preset is not null);
             MoveCommand = new AsyncRelayCommand<SavedSearchDragDropRequest?>(MoveAsync, canExecute: request => request?.Source is not null);
@@ -106,6 +106,9 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         private async Task CreateFolderAsync(SavedSearchFolderViewModel? parent)
         {
             var target = parent ?? Root;
+            Trace.WriteLine($"[SavedSearchTreeViewModel] CreateFolder under '{target.Name}' (ID: {target.Id}, IsRoot: {target.IsRoot})");
+
+
             var existing = await InvokeOnDispatcherAsync(() => target.Children
                 .OfType<SavedSearchFolderViewModel>()
                 .Select(folder => folder.Name)
@@ -130,7 +133,7 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 
         private bool CanDeleteFolder(SavedSearchFolderViewModel? folder)
         {
-            return folder is not null && !string.Equals(folder.Id, LibraryPresetFolder.RootId, StringComparison.Ordinal);
+            return folder is not null;
         }
 
         private async Task DeleteFolderAsync(SavedSearchFolderViewModel? folder)
@@ -257,13 +260,20 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 
         private bool CanRenameFolder(SavedSearchFolderViewModel? folder)
         {
-            return folder is not null && !string.Equals(folder.Id, LibraryPresetFolder.RootId, StringComparison.Ordinal);
+            return folder is not null ;  // ❌ Blocks root
         }
 
         private async Task RenameFolderAsync(SavedSearchFolderViewModel? folder)
         {
             if (folder is null || !CanRenameFolder(folder))
             {
+                return;
+            }
+
+            // Safety check: This should never happen since root is invisible
+            if (folder.IsRoot)
+            {
+                Trace.WriteLine("[SavedSearchTreeViewModel] WARNING: Attempted to rename root - this should not happen!");
                 return;
             }
 
