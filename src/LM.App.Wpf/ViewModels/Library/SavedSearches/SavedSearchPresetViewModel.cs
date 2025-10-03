@@ -22,5 +22,11 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         public LibraryPresetSummary ToSummary() => new(Preset.Id, Preset.Name, Preset.SavedUtc);
 
         public LibraryPresetSummary Summary => ToSummary();
+
+        /// <summary>
+        /// Presets can always be dragged.
+        /// </summary>
+        public override bool IsDraggable => true;
+
     }
 }

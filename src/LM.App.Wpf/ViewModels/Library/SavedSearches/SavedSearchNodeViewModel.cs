@@ -28,6 +28,8 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
 
         public SavedSearchFolderViewModel? Parent { get; internal set; }
 
+        public abstract bool IsDraggable { get; }
+
         [ObservableProperty]
         private string name = string.Empty;
 

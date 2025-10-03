@@ -2,6 +2,7 @@
 abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Id.get -> string!
 abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.IsDraggable.get -> bool
 abstract LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchNodeViewModel.Name.get -> string!
+abstract LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.IsDraggable.get -> bool
 const LM.App.Wpf.Library.LibraryPresetFolder.RootId = "root" -> string!
 const LM.App.Wpf.Library.LitSearch.LitSearchOrganizerFolder.RootId = "root" -> string!
 const LM.App.Wpf.ViewModels.StagingItem.DuplicateThreshold = 0.999 -> double
@@ -90,6 +91,7 @@ LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.DeleteFolderComma
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.MoveCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest?>!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchTreeViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel?>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchDragDropRequest.SavedSearchDragDropRequest() -> void
+LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel.IsRoot.get -> bool
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchNodeViewModel.SavedSearchNodeViewModel(LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel! tree, string! id, string! name, LM.App.Wpf.Library.LibraryPresetNodeKind kind, int sortOrder) -> void
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeleteFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel?>!
 LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchTreeViewModel.DeletePresetCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel?>!
@@ -1160,6 +1162,8 @@ override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchFolderViewModel.Name.g
 override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Id.get -> string!
 override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.IsDraggable.get -> bool
 override LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchRunViewModel.Name.get -> string!
+override LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchFolderViewModel.IsDraggable.get -> bool
+override LM.App.Wpf.ViewModels.Library.SavedSearches.SavedSearchPresetViewModel.IsDraggable.get -> bool
 override LM.App.Wpf.Views.Library.AttachmentMetadataDialog.OnClosed(System.EventArgs! e) -> void
 LM.App.Wpf.Views.WorkspaceChooser
 LM.App.Wpf.Views.WorkspaceChooser.InitializeComponent() -> void

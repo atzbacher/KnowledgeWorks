@@ -54,19 +54,17 @@ namespace LM.App.Wpf.Views.Behaviors
         private void OnPreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var item = FindTreeViewItem(e.OriginalSource as System.Windows.DependencyObject);
-            if (item?.DataContext is SavedSearchNodeViewModel node)
+            if (item?.DataContext is SavedSearchNodeViewModel node && node.IsDraggable)
             {
                 _dragStart = e.GetPosition(AssociatedObject);
                 _dragSource = node;
                 Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Potential drag start from node '{0}'.", node.Name);
-
             }
             else
             {
                 _dragStart = null;
                 _dragSource = null;
-                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Mouse down outside draggable node.");
-
+                Trace.WriteLine("SavedSearchTreeDragDropBehavior: Mouse down on non-draggable node or outside draggable area.");
             }
         }
 

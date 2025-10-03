@@ -14,5 +14,16 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
         }
 
         public ObservableCollection<SavedSearchNodeViewModel> Children { get; } = new();
+
+        /// <summary>
+        /// Returns true if this folder is the invisible root container.
+        /// The root folder should not be displayed as a visible tree item and cannot be dragged.
+        /// </summary>
+        public bool IsRoot => string.Equals(Id, LibraryPresetFolder.RootId, System.StringComparison.Ordinal);
+
+        /// <summary>
+        /// Only non-root folders can be dragged.
+        /// </summary>
+        public override bool IsDraggable => !IsRoot;
     }
 }
