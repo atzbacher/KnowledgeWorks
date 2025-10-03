@@ -651,8 +651,17 @@ namespace LM.App.Wpf.ViewModels.Library
         }
 
         [RelayCommand]
-        private Task ApplyPresetCommandAsync(LibraryPresetSummary summary)
-            => ApplyPresetAsync(summary);
+        private async Task ApplyPresetCommandAsync(LibraryPresetSummary summary)
+        {
+            if (await ApplyPresetAsync(summary).ConfigureAwait(false))
+            {
+                // Notify that a search should be executed
+                PresetApplied?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        // Add this event
+        public event EventHandler? PresetApplied;
 
         public async Task<bool> ApplyPresetAsync(LibraryPresetSummary summary, CancellationToken ct = default)
         {

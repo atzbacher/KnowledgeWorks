@@ -91,7 +91,14 @@ namespace LM.App.Wpf.Views
             if (e.NewValue is SavedSearchPresetViewModel preset)
             {
                 // Apply the saved search
-                await vm.Filters.ApplyPresetAsync(preset.Summary).ConfigureAwait(false);
+                if (await vm.Filters.ApplyPresetAsync(preset.Summary).ConfigureAwait(false))
+                {
+                    // Execute the search after applying the preset
+                    if (vm.SearchCommand.CanExecute(null))
+                    {
+                        await vm.SearchCommand.ExecuteAsync(null).ConfigureAwait(false);
+                    }
+                }
             }
         }
 
@@ -151,6 +158,14 @@ namespace LM.App.Wpf.Views
             e.Handled = true;
         }
 
+        private void OnTreeViewItemRightClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TreeViewItem item)
+            {
+                item.IsSelected = true;
+                e.Handled = true;
+            }
+        }
         private void OnFullTextToggleChanged(object sender, RoutedEventArgs e)
         {
             if (DataContext is not LibraryViewModel vm)

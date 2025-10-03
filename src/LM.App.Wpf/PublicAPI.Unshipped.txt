@@ -82,6 +82,7 @@ LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.DeleteFold
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.MoveFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.CollectionDragDropRequest?>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RemoveSelectionFromFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
 LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionsViewModel.RenameFolderCommand.get -> CommunityToolkit.Mvvm.Input.IAsyncRelayCommand<LM.App.Wpf.ViewModels.Library.Collections.LibraryCollectionFolderViewModel?>!
+LM.App.Wpf.ViewModels.Library.LibraryFiltersViewModel.PresetApplied -> System.EventHandler?
 LM.App.Wpf.ViewModels.Library.LibraryResultsViewModel.ItemsView.get -> System.ComponentModel.ICollectionView!
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.InsertIndex.init -> void
 LM.App.Wpf.ViewModels.Library.LitSearch.LitSearchDragDropRequest.LitSearchDragDropRequest() -> void

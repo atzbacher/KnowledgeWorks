@@ -298,6 +298,9 @@ namespace LM.App.Wpf.ViewModels.Library.SavedSearches
             }
 
             Trace.WriteLine($"[SavedSearchTreeViewModel] Load preset '{preset.Name}' requested.");
+
+            // Raise event to notify that preset should be loaded
+
             return Task.CompletedTask;
         }
 

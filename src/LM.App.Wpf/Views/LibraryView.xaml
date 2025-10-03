@@ -368,7 +368,7 @@
                                 
                                 <TreeView.Resources>
                                     <HierarchicalDataTemplate DataType="{x:Type saved:SavedSearchFolderViewModel}"
-                                                              ItemsSource="{Binding Children}">
+                                                               ItemsSource="{Binding Children}">
                                         <StackPanel Orientation="Horizontal" Margin="4,2">
                                             <!-- Folder Icon (&#xE8B7;) -->
                                             <TextBlock FontFamily="Segoe MDL2 Assets"
@@ -383,19 +383,20 @@
                                         <HierarchicalDataTemplate.ItemContainerStyle>
                                             <Style TargetType="TreeViewItem">
                                                 <Setter Property="IsExpanded" Value="True" />
+                                                <EventSetter Event="PreviewMouseRightButtonDown" Handler="OnTreeViewItemRightClick"/>
                                                 <Setter Property="ContextMenu">
                                                     <Setter.Value>
                                                         <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
                                                             <MenuItem Header="New Folder"
-                                  Command="{Binding Tree.CreateFolderCommand}"
-                                  CommandParameter="{Binding}" />
+                                                                Command="{Binding Tree.CreateFolderCommand}"
+                                                                CommandParameter="{Binding}" />
                                                             <MenuItem Header="Rename"
-                                  Command="{Binding Tree.RenameFolderCommand}"
-                                  CommandParameter="{Binding}" />
+                                                                Command="{Binding Tree.RenameFolderCommand}"
+                                                                CommandParameter="{Binding}" />
                                                             <Separator/>
                                                             <MenuItem Header="Delete Folder"
-                                  Command="{Binding Tree.DeleteFolderCommand}"
-                                  CommandParameter="{Binding}" />
+                                                                Command="{Binding Tree.DeleteFolderCommand}"
+                                                                CommandParameter="{Binding}" />   
                                                         </ContextMenu>
                                                     </Setter.Value>
                                                 </Setter>
@@ -412,7 +413,14 @@
                    VerticalAlignment="Center"
                    Margin="0,0,6,0"/>
                                             <TextBlock Text="{Binding Name}" 
-                   VerticalAlignment="Center"/>
+                                                VerticalAlignment="Center"/>
+                                            <StackPanel.InputBindings>
+                                                <!-- Add double-click to load and execute search -->
+                                                <MouseBinding MouseAction="LeftDoubleClick"
+                          Command="{Binding DataContext.Filters.ApplyPresetCommandAsync, 
+                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                          CommandParameter="{Binding Summary}" />
+                                            </StackPanel.InputBindings>
                                             <!-- ContextMenu moved to StackPanel to work with icon layout -->
                                             <StackPanel.ContextMenu>
                                                 <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">

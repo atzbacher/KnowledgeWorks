@@ -54,6 +54,7 @@ namespace LM.App.Wpf.ViewModels
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _fullTextSearch = fullTextSearch ?? throw new ArgumentNullException(nameof(fullTextSearch));
             Filters = filters ?? throw new ArgumentNullException(nameof(filters));
+
             Results = results ?? throw new ArgumentNullException(nameof(results));
 
             _workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
@@ -66,6 +67,8 @@ namespace LM.App.Wpf.ViewModels
             _collectionStore = collectionStore ?? throw new ArgumentNullException(nameof(collectionStore));
 
             Results.SelectionChanged += OnResultsSelectionChanged;
+
+            Filters.PresetApplied += OnPresetApplied;
 
             _ = Filters.InitializeAsync();
             InitializeColumns();
@@ -111,6 +114,13 @@ namespace LM.App.Wpf.ViewModels
             }
         }
 
+        private async void OnPresetApplied(object? sender, EventArgs e)
+        {
+            if (SearchCommand.CanExecute(null))
+            {
+                await SearchCommand.ExecuteAsync(null).ConfigureAwait(false);
+            }
+        }
         private async Task RunMetadataSearchAsync(string metadataQuery)
         {
             Trace.WriteLine($"[LibraryViewModel] Executing metadata search with query '{metadataQuery}'.");
