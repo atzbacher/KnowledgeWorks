@@ -22,6 +22,9 @@ namespace LM.App.Wpf.Views.Behaviors
                 return;
             }
 
+            AssociatedObject.AllowDrop = true;
+            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Enabled AllowDrop on tree '{0}'.", AssociatedObject.Name);
+
 
             AssociatedObject.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove += OnPreviewMouseMove;
@@ -41,6 +44,9 @@ namespace LM.App.Wpf.Views.Behaviors
                 Trace.TraceWarning("SavedSearchTreeDragDropBehavior: Detaching with null AssociatedObject.");
                 return;
             }
+
+            AssociatedObject.AllowDrop = false;
+            Trace.TraceInformation("SavedSearchTreeDragDropBehavior: Disabled AllowDrop on tree '{0}'.", AssociatedObject.Name);
 
             AssociatedObject.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
             AssociatedObject.PreviewMouseMove -= OnPreviewMouseMove;

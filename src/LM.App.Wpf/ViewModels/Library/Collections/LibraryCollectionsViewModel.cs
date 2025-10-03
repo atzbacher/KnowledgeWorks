@@ -72,7 +72,9 @@ namespace LM.App.Wpf.ViewModels.Library.Collections
 
                     foreach (var child in hierarchy.Folders)
                     {
-                        Root.Children.Add(CreateNode(child));
+                        var childNode = CreateNode(child);
+                        childNode.Parent = Root;
+                        Root.Children.Add(childNode);
                     }
                 }).ConfigureAwait(false);
 

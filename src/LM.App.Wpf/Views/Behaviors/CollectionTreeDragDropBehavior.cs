@@ -19,6 +19,11 @@ namespace LM.App.Wpf.Views.Behaviors
         protected override void OnAttached()
         {
             base.OnAttached();
+            if (AssociatedObject is not null)
+            {
+                AssociatedObject.AllowDrop = true;
+                Trace.TraceInformation("CollectionTreeDragDropBehavior: Enabled AllowDrop on associated tree view '{0}'.", AssociatedObject.Name);
+            }
             AssociatedObject.PreviewMouseLeftButtonDown += OnPreviewMouseDown;
             AssociatedObject.PreviewMouseMove += OnPreviewMouseMove;
             AssociatedObject.DragOver += OnDragOver;
@@ -27,6 +32,11 @@ namespace LM.App.Wpf.Views.Behaviors
 
         protected override void OnDetaching()
         {
+            if (AssociatedObject is not null)
+            {
+                AssociatedObject.AllowDrop = false;
+                Trace.TraceInformation("CollectionTreeDragDropBehavior: Disabled AllowDrop on associated tree view '{0}'.", AssociatedObject.Name);
+            }
             AssociatedObject.PreviewMouseLeftButtonDown -= OnPreviewMouseDown;
             AssociatedObject.PreviewMouseMove -= OnPreviewMouseMove;
             AssociatedObject.DragOver -= OnDragOver;
@@ -134,6 +144,16 @@ namespace LM.App.Wpf.Views.Behaviors
                 return;
             }
 
+            if (ReferenceEquals(source.Parent ?? tree.Root, targetFolder))
+            {
+                var currentIndex = targetFolder.Children.IndexOf(source);
+                if (currentIndex >= 0 && currentIndex < insertIndex)
+                {
+                    insertIndex--;
+                    Trace.WriteLine($"CollectionTreeDragDropBehavior: Adjusted insert index to {insertIndex} for intra-folder move of '{source.Name}'.");
+                }
+            }
+
             var request = new CollectionDragDropRequest
             {
                 Source = source,
@@ -186,8 +206,24 @@ namespace LM.App.Wpf.Views.Behaviors
             var item = FindTreeViewItem(sourceElement);
             if (item?.DataContext is LibraryCollectionFolderViewModel folder)
             {
-                targetFolder = folder;
-                insertIndex = folder.Children.Count;
+                var position = GetDropPosition(item);
+                if (position == DropPosition.Center)
+                {
+                    targetFolder = folder;
+                    insertIndex = folder.Children.Count;
+                    Trace.WriteLine($"CollectionTreeDragDropBehavior: Calculated drop INTO folder '{folder.Name}' at index {insertIndex}.");
+                    return true;
+                }
+
+                targetFolder = folder.Parent ?? tree.Root;
+                var siblingIndex = targetFolder.Children.IndexOf(folder);
+                if (siblingIndex < 0)
+                {
+                    siblingIndex = targetFolder.Children.Count;
+                }
+
+                insertIndex = position == DropPosition.Before ? siblingIndex : siblingIndex + 1;
+                Trace.WriteLine($"CollectionTreeDragDropBehavior: Calculated drop {(position == DropPosition.Before ? "before" : "after")} folder '{folder.Name}' at index {insertIndex} in '{targetFolder.Name}'.");
                 return true;
             }
 
@@ -203,15 +239,40 @@ namespace LM.App.Wpf.Views.Behaviors
             {
                 if (ReferenceEquals(current, ancestor))
                 {
+                    Trace.WriteLine($"CollectionTreeDragDropBehavior: Preventing drop because '{ancestor.Name}' is an ancestor of '{candidate.Name}'.");
                     return true;
                 }
 
-                // Navigate to parent - we'll need to add Parent property to LibraryCollectionFolderViewModel
-                // For now, return false to prevent circular references
-                break;
+                current = current.Parent;
             }
 
             return false;
+        }
+
+        private enum DropPosition
+        {
+            Before,
+            Center,
+            After
+        }
+
+        private static DropPosition GetDropPosition(System.Windows.Controls.TreeViewItem item)
+        {
+            var position = System.Windows.Input.Mouse.GetPosition(item);
+            var height = item.ActualHeight;
+
+            const double threshold = 0.25;
+            if (position.Y < height * threshold)
+            {
+                return DropPosition.Before;
+            }
+
+            if (position.Y > height * (1 - threshold))
+            {
+                return DropPosition.After;
+            }
+
+            return DropPosition.Center;
         }
 
         private static TreeViewItem? FindTreeViewItem(DependencyObject? current)

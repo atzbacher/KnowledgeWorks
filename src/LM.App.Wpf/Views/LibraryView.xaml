@@ -143,6 +143,7 @@
                                       Background="Transparent"
                                       BorderThickness="0"
                                       HorizontalContentAlignment="Stretch"
+                                      AllowDrop="True"
                                       Visibility="{Binding IsChecked, ElementName=CollectionsToggle, Converter={StaticResource BoolToVisibilityConverter}}"
                                       SelectedItemChanged="OnCollectionSelected">
                                 <i:Interaction.Behaviors>
@@ -166,26 +167,27 @@
                                         <HierarchicalDataTemplate.ItemContainerStyle>
                                             <Style TargetType="TreeViewItem">
                                                 <Setter Property="IsExpanded" Value="True" />
+                                                <EventSetter Event="PreviewMouseRightButtonDown" Handler="OnTreeViewItemRightClick"/>
                                                 <Setter Property="ContextMenu">
                                                     <Setter.Value>
-                                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                        <ContextMenu>
                                                             <MenuItem Header="New Folder"
-                                                                      Command="{Binding Tree.CreateFolderCommand}"
-                                                                      CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <MenuItem Header="Rename"
-                                                                      Command="{Binding Tree.RenameFolderCommand}"
-                                                                      CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.RenameFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <Separator/>
                                                             <MenuItem Header="Add Selection"
-                                                                      Command="{Binding Tree.AddSelectionToFolderCommand}"
-                                                                      CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.AddSelectionToFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <MenuItem Header="Remove Selection"
-                                                                      Command="{Binding Tree.RemoveSelectionFromFolderCommand}"
-                                                                      CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.RemoveSelectionFromFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <Separator/>
                                                             <MenuItem Header="Delete Folder"
-                                                                      Command="{Binding Tree.DeleteFolderCommand}"
-                                                                      CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.DeleteFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                         </ContextMenu>
                                                     </Setter.Value>
                                                 </Setter>
@@ -350,19 +352,20 @@
                             </Border>
                             <!-- Saved Searches TreeView Section with Fixed Context Menus -->
                             <TreeView x:Name="SavedSearchTree"
-          ItemsSource="{Binding SavedSearches.Root.Children}"
-          Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
-          BorderThickness="0"
-          Background="Transparent"
-          Padding="4"
-          SelectedItemChanged="OnSavedSearchSelected">
+                                      ItemsSource="{Binding SavedSearches.Root.Children}"
+                                      Visibility="{Binding IsChecked, ElementName=SavedSearchToggle, Converter={StaticResource BoolToVisibilityConverter}}"
+                                      BorderThickness="0"
+                                      Background="Transparent"
+                                      Padding="4"
+                                      AllowDrop="True"
+                                      SelectedItemChanged="OnSavedSearchSelected">
 
                                 <!-- TreeView-level Context Menu (for empty space or background) -->
                                 <TreeView.ContextMenu>
                                     <ContextMenu>
                                         <MenuItem Header="New Folder"
-                      Command="{Binding PlacementTarget.DataContext.SavedSearches.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                      CommandParameter="{Binding PlacementTarget.DataContext.SavedSearches.Root, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                  Command="{Binding PlacementTarget.DataContext.SavedSearches.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                  CommandParameter="{Binding PlacementTarget.DataContext.SavedSearches.Root, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                     </ContextMenu>
                                 </TreeView.ContextMenu>
 
@@ -389,20 +392,20 @@
                                                 <!-- Folder Context Menu -->
                                                 <Setter Property="ContextMenu">
                                                     <Setter.Value>
-                                                        <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                        <ContextMenu>
                                                             <!-- New Folder - Creates child folder -->
                                                             <MenuItem Header="New Folder"
-                                         Command="{Binding Tree.CreateFolderCommand}"
-                                         CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <Separator/>
                                                             <!-- Rename - Disabled for root folder -->
                                                             <MenuItem Header="Rename"
-                                         Command="{Binding Tree.RenameFolderCommand}"
-                                         CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.RenameFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                             <!-- Delete - Disabled for root folder -->
                                                             <MenuItem Header="Delete Folder"
-                                         Command="{Binding Tree.DeleteFolderCommand}"
-                                         CommandParameter="{Binding}" />
+                                                                      Command="{Binding PlacementTarget.DataContext.Tree.DeleteFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                         </ContextMenu>
                                                     </Setter.Value>
                                                 </Setter>
@@ -430,16 +433,20 @@
 
                                             <!-- Preset Context Menu -->
                                             <StackPanel.ContextMenu>
-                                                <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                                <ContextMenu>
                                                     <MenuItem Header="Load Search"
-                                 Command="{Binding Tree.LoadPresetCommand}"
-                                 CommandParameter="{Binding}" />
+                                                              Command="{Binding PlacementTarget.DataContext.Tree.LoadPresetCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                                                    <Separator/>
+                                                    <MenuItem Header="New Folder"
+                                                              Command="{Binding PlacementTarget.DataContext.Tree.CreateFolderCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext.Parent, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                     <MenuItem Header="Rename"
-                                 Command="{Binding Tree.RenamePresetCommand}"
-                                 CommandParameter="{Binding}" />
+                                                              Command="{Binding PlacementTarget.DataContext.Tree.RenamePresetCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                     <MenuItem Header="Delete"
-                                 Command="{Binding Tree.DeletePresetCommand}"
-                                 CommandParameter="{Binding}" />
+                                                              Command="{Binding PlacementTarget.DataContext.Tree.DeletePresetCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
                                                 </ContextMenu>
                                             </StackPanel.ContextMenu>
                                         </StackPanel>
